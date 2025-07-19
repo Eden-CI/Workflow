@@ -34,11 +34,14 @@ pacman -Syu --noconfirm \
 		inetutils \
 		jq \
 		libva \
+		libvdpau \
 		libvpx \
 		nasm \
 		ninja \
 		nlohmann-json \
 		patchelf \
+		pulseaudio \
+		pulseaudio-alsa \
 		python-pip \
 		qt6-tools \
 		qt6-wayland \
