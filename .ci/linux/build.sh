@@ -1,108 +1,85 @@
-#!/bin/bash -e
+#!/bin/sh
 
-# SPDX-FileCopyrightText: 2025 eden Emulator Project
-# SPDX-License-Identifier: GPL-3.0-or-later
+set -eux
 
-cd eden
+sed -i 's/DownloadUser/#DownloadUser/g' /etc/pacman.conf
 
-export ARCH="$(uname -m)"
-
-case "$1" in
-    amd64|"")
-        echo "Making amd64-v3 optimized build of Eden"
-        ARCH="amd64_v3"
-        ARCH_FLAGS="-march=x86-64-v3"
-        ;;
-    steamdeck)
-        echo "Making Steam Deck (Zen 2) optimized build of Eden"
-        ARCH="steamdeck"
-        ARCH_FLAGS="-march=znver2 -mtune=znver2"
-        ;;
-    rog-ally|allyx)
-        echo "Making ROG Ally X (Zen 4) optimized build of Eden"
-        ARCH="rog-ally-x"
-        ARCH_FLAGS="-march=znver3 -mtune=znver4" # GH actions runner is a Zen 3 CPU, so a small workaround
-        ;;
-    legacy)
-        echo "Making amd64 generic build of Eden"
-        ARCH=amd64
-        ARCH_FLAGS="-march=x86-64 -mtune=generic"
-        ;;
-    aarch64)
-        echo "Making armv8-a build of Eden"
-        ARCH=aarch64
-        ARCH_FLAGS="-march=armv8-a -mtune=generic -w"
-        ;;
-    armv9)
-        echo "Making armv9-a build of Eden"
-        ARCH=armv9
-        ARCH_FLAGS="-march=armv9-a -mtune=generic -w"
-        ;;
-    *)
-        echo "Invalid target $1 specified, must be one of amd64, steamdeck, allyx, rog-ally, legacy, aarch64, armv9"
-        exit 1
-        ;;
-esac
-
-export ARCH_FLAGS="$ARCH_FLAGS -O3"
-
-if [ -z "$NPROC" ]; then
-    NPROC="$(nproc)"
-fi
-
-if [ "$1" != "" ]; then shift; fi
-
-if [ "$TARGET" = "appimage" ]; then
-    export EXTRA_CMAKE_FLAGS=(-DCMAKE_INSTALL_PREFIX=/usr -DYUZU_ROOM=ON -DYUZU_ROOM_STANDALONE=OFF -DYUZU_CMD=OFF)
+if [ "$(uname -m)" = 'x86_64' ]; then
+		PKG_TYPE='x86_64.pkg.tar.zst'
 else
-    # For the linux-fresh verification target, verify compilation without PCH as well.
-    export EXTRA_CMAKE_FLAGS=(-DYUZU_USE_PRECOMPILED_HEADERS=OFF)
+		PKG_TYPE='aarch64.pkg.tar.xz'
 fi
 
-if [ "$DEVEL" != "true" ]; then
-    export EXTRA_CMAKE_FLAGS=("${EXTRA_CMAKE_FLAGS[@]}" -DENABLE_QT_UPDATE_CHECKER=ON)
-fi
+LLVM_URL="https://github.com/pkgforge-dev/llvm-libs-debloated/releases/download/continuous/llvm-libs-nano-$PKG_TYPE"
+FFMPEG_URL="https://github.com/pkgforge-dev/llvm-libs-debloated/releases/download/continuous/ffmpeg-mini-$PKG_TYPE"
+QT6_URL="https://github.com/pkgforge-dev/llvm-libs-debloated/releases/download/continuous/qt6-base-iculess-$PKG_TYPE"
+LIBXML_URL="https://github.com/pkgforge-dev/llvm-libs-debloated/releases/download/continuous/libxml2-iculess-$PKG_TYPE"
+OPUS_URL="https://github.com/pkgforge-dev/llvm-libs-debloated/releases/download/continuous/opus-nano-$PKG_TYPE"
+MESA_URL="https://github.com/pkgforge-dev/llvm-libs-debloated/releases/download/continuous/mesa-mini-$PKG_TYPE"
+INTEL_MEDIA_URL="https://github.com/pkgforge-dev/llvm-libs-debloated/releases/download/continuous/intel-media-mini-$PKG_TYPE" 
 
-if [ "$USE_WEBENGINE" = "true" ]; then
-    WEBENGINE=ON
+echo "Installing build dependencies..."
+echo "---------------------------------------------------------------"
+pacman -Syu --noconfirm \
+		base-devel \
+		boost \
+		boost-libs \
+		cmake \
+		curl \
+		enet \
+		fmt \
+		gamemode \
+		git \
+		glslang \
+		inetutils \
+		jq \
+		libva \
+		libvdpau \
+		libvpx \
+		nasm \
+		ninja \
+		nlohmann-json \
+		patchelf \
+		pulseaudio \
+		pulseaudio-alsa \
+		python-pip \
+		qt6-tools \
+		qt6-wayland \
+		sdl2 \
+		spirv-headers \
+		strace \
+		unzip \
+		vulkan-headers \
+		vulkan-mesa-layers \
+		vulkan-nouveau \
+		vulkan-radeon \
+		wget \
+		wireless_tools \
+		xcb-util-cursor \
+		xcb-util-image \
+		xcb-util-renderutil \
+		xcb-util-wm \
+		xorg-server-xvfb \
+		zip \
+		zsync
+
+if [ "$(uname -m)" = 'x86_64' ]; then
+		pacman -Syu --noconfirm vulkan-intel haskell-gnutls svt-av1
+		wget -q --retry-connrefused --tries=30 "$INTEL_MEDIA_URL" -O ./intel-media.pkg.tar.zst
 else
-    WEBENGINE=OFF
+		pacman -Syu --noconfirm vulkan-freedreno vulkan-panfrost
 fi
 
-if [ "$USE_MULTIMEDIA" = "false" ]; then
-    MULTIMEDIA=OFF
-else
-    MULTIMEDIA=ON
-fi
 
-if [ -z "$BUILD_TYPE" ]; then
-    export BUILD_TYPE="Release"
-fi
+echo "Installing debloated pckages..."
+echo "---------------------------------------------------------------"
+wget --retry-connrefused --tries=30 "$LLVM_URL"   -O  ./llvm-libs.pkg.tar.zst
+wget --retry-connrefused --tries=30 "$QT6_URL"    -O  ./qt6-base-iculess.pkg.tar.zst
+wget --retry-connrefused --tries=30 "$LIBXML_URL" -O  ./libxml2-iculess.pkg.tar.zst
+wget --retry-connrefused --tries=30 "$OPUS_URL"   -O  ./opus-nano.pkg.tar.zst
 
-export EXTRA_CMAKE_FLAGS=("${EXTRA_CMAKE_FLAGS[@]}" $@)
+pacman -U --noconfirm ./*.pkg.tar.zst
+rm -f ./*.pkg.tar.zst
 
-mkdir -p build && cd build
-cmake .. -G Ninja \
-    -DCMAKE_BUILD_TYPE="$BUILD_TYPE" \
-	-DENABLE_QT_TRANSLATION=ON \
-    -DUSE_DISCORD_PRESENCE=ON \
-    -DCMAKE_CXX_FLAGS="$ARCH_FLAGS" \
-    -DCMAKE_C_FLAGS="$ARCH_FLAGS" \
-    -DYUZU_USE_BUNDLED_VCPKG=OFF \
-    -DYUZU_USE_BUNDLED_QT=OFF \
-    -DYUZU_USE_BUNDLED_SDL2=OFF \
-    -DYUZU_USE_EXTERNAL_SDL2=ON \
-    -DYUZU_TESTS=OFF \
-    -DYUZU_USE_QT_MULTIMEDIA=$MULTIMEDIA \
-    -DYUZU_USE_QT_WEB_ENGINE=$WEBENGINE \
-    -DYUZU_USE_FASTER_LD=ON \
-    -DYUZU_ENABLE_LTO=ON \
-	"${EXTRA_CMAKE_FLAGS[@]}"
-
-ninja -j${NPROC}
-
-if [ -d "bin/Release" ]; then
-  strip -s bin/Release/*
-else
-  strip -s bin/*
-fi
+echo "All done!"
+echo "---------------------------------------------------------------"
