@@ -92,7 +92,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          ./ci/deps/linux.sh
+          ./.ci/deps/linux.sh
 
       - name: Set build variables
         shell: bash
@@ -224,7 +224,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          ./ci/deps/android.sh
+          ./.ci/deps/android.sh
 
       - name: Parse Forgejo payload
         shell: bash
