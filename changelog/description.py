@@ -7,6 +7,7 @@ import json
 PR_API_URL = "https://git.eden-emu.dev/api/v1/repos/eden-emu/eden/pulls"
 FORGEJO_NUMBER = os.getenv("FORGEJO_NUMBER")
 FORGEJO_TOKEN = os.getenv("FORGEJO_TOKEN")
+DEFAULT_MSG = "No changelog provided."
 
 def get_pr_json():
     headers = {"Authorization": f"token {FORGEJO_TOKEN}"}
@@ -16,8 +17,9 @@ def get_pr_json():
 def get_pr_description():
     try:
         pr_json = get_pr_json()
-        return pr_json.get("body", "No changelog provided.")
+        return pr_json.get("body", DEFAULT_MSG)
     except:
-        return "No changelog provided."
+        return DEFAULT_MSG
 
-print(get_pr_description())
+description = get_pr_description()
+print(description if description != "" else DEFAULT_MSG)

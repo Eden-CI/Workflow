@@ -110,20 +110,18 @@ jobs:
       - name: Build
         shell: bash
         run: |
-          cd eden
           TARGET=appimage ./.ci/linux/build.sh ${{ matrix.arch }} $(nproc)
 
       - name: Package
         shell: bash
         run: |
-          cd eden
           ./.ci/linux/package.sh ${{ matrix.arch }}
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4.6.2
         with:
           name: linux-${{ matrix.arch }}
-          path: eden/*.AppImage*
+          path: artifacts/*
 
   windows:
     name: "Windows (${{ matrix.arch }})"
@@ -189,13 +187,11 @@ jobs:
       - name: Install Vulkan SDK
         shell: powershell
         run: |
-          cd eden
           ./.ci/windows/install-vulkan-sdk.ps1
 
       - name: Build
         shell: bash
         run: |
-          cd eden
           export PATH="${PATH}:${{ runner.workspace }}/Qt/${{ matrix.qt_version }}/${{ matrix.qt_arch }}/bin"
           export WINDEPLOYQT=windeployqt
 
@@ -204,7 +200,6 @@ jobs:
       - name: Package
         shell: bash
         run: |
-          cd eden
           export ARCH=${{ matrix.arch }}
           ./.ci/windows/package.sh
 
@@ -212,7 +207,7 @@ jobs:
         uses: actions/upload-artifact@v4.6.2
         with:
           name: windows-${{ matrix.arch }}
-          path: eden/artifacts/*
+          path: artifacts/*
 
   android:
     runs-on: ubuntu-latest
@@ -235,7 +230,6 @@ jobs:
 
       - name: Build
         run: |
-          cd eden
           JAVA_HOME=$JAVA_HOME_17_X64 DEVEL=true ./.ci/android/build.sh
         env:
           ANDROID_KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
@@ -244,11 +238,10 @@ jobs:
 
       - name: Package
         run: |
-          cd eden
           ./.ci/android/package.sh
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4.6.2
         with:
           name: android
-          path: eden/artifacts/*
+          path: artifacts/*.apk
