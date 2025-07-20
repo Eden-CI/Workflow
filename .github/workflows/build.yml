@@ -35,12 +35,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Get Variables and Clone
-        uses: ./.github/workflows/clone
-        with:
-          build-id: ${{ inputs.build-id }}
-          submodules: false
+      - name: Parse Forgejo payload
+        shell: bash
+        run: ./.ci/parse.sh ${{ inputs.build-id }}
 
+      - name: Clone
+        shell: bash
+        run: ./.ci/clone.sh false
+        
       - name: Pack
         run: |
           zip -r source.zip eden
@@ -90,8 +92,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          chmod +x ./deps/linux.sh
-          ./deps/linux.sh
+          ./ci/deps/linux.sh
 
       - name: Set build variables
         shell: bash
@@ -101,11 +102,13 @@ jobs:
           echo "USE_WEBENGINE=${{ inputs.webengine }}" >> $GITHUB_ENV
           echo "USE_MULTIMEDIA=${{ inputs.multimedia }}" >> $GITHUB_ENV
 
-      - name: Get Variables and Clone
-        uses: ./.github/workflows/clone
-        with:
-          build-id: ${{ inputs.build-id }}
-          submodules: true
+      - name: Parse Forgejo payload
+        shell: bash
+        run: ./.ci/parse.sh ${{ inputs.build-id }}
+
+      - name: Clone
+        shell: bash
+        run: ./.ci/clone.sh true
 
       - name: Build
         shell: bash
@@ -162,11 +165,13 @@ jobs:
           echo "USE_WEBENGINE=${{ inputs.webengine }}" >> $GITHUB_ENV
           echo "USE_MULTIMEDIA=${{ inputs.multimedia }}" >> $GITHUB_ENV
 
-      - name: Get Variables and Clone
-        uses: ./.github/workflows/clone
-        with:
-          build-id: ${{ inputs.build-id }}
-          submodules: true
+      - name: Parse Forgejo payload
+        shell: bash
+        run: ./.ci/parse.sh ${{ inputs.build-id }}
+
+      - name: Clone
+        shell: bash
+        run: ./.ci/clone.sh true
 
       - name: Set up vcpkg cache
         uses: actions/cache@v4
@@ -219,14 +224,15 @@ jobs:
 
       - name: Install dependencies
         run: |
-          chmod +x ./deps/android.sh
-          ./deps/android.sh
+          ./ci/deps/android.sh
 
-      - name: Get Variables and Clone
-        uses: ./.github/workflows/clone
-        with:
-          build-id: ${{ inputs.build-id }}
-          submodules: true
+      - name: Parse Forgejo payload
+        shell: bash
+        run: ./.ci/parse.sh ${{ inputs.build-id }}
+
+      - name: Clone
+        shell: bash
+        run: ./.ci/clone.sh true
 
       - name: Build
         run: |

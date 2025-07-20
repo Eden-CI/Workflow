@@ -33,7 +33,7 @@ win() {
 changelog() {
   echo "## Changelog"
   echo
-  python3 changelog/description.py
+  python3 .ci/changelog/description.py
   echo
 }
 

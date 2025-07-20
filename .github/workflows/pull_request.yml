@@ -30,9 +30,7 @@ jobs:
         uses: actions/download-artifact@v4
 
       - name: Parse Forgejo payload
-        uses: ./.github/workflows/parse
-        with:
-          build-id: pull_request
+        run: ./.ci/parse.sh pull_request
 
       - name: Set environment variables
         run: |
@@ -42,14 +40,13 @@ jobs:
       - name: Package artifacts nicely
         run: |
           export ID=${FORGEJO_NUMBER}-${FORGEJO_REF}
-          chmod a+x pack.sh
           ./pack.sh
 
       - name: Generate changelog
         run: |
           sudo apt install -y python3-requests
           export FORGEJO_TOKEN=${{ secrets.FORGEJO_TOKEN }}
-          ./changelog/pr.sh > changelog.md
+          ./.ci/changelog/pr.sh > changelog.md
 
       - name: Delete Previous Release
         run: |

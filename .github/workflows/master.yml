@@ -28,9 +28,7 @@ jobs:
         uses: actions/download-artifact@v4
 
       - name: Parse Forgejo payload
-        uses: ./.github/workflows/parse
-        with:
-          build-id: master
+        run: ./.ci/parse.sh master
 
       - name: Set environment variables
         run: |
@@ -40,14 +38,13 @@ jobs:
       - name: Package artifacts nicely
         run: |
           export ID=${FORGEJO_REF}
-          chmod a+x pack.sh
           ./pack.sh
 
       - name: Generate changelog
         run: |
           export FORGEJO_TOKEN=${{ secrets.FORGEJO_TOKEN }}
           export ID=${FORGEJO_REF}
-          ./changelog/master.sh > changelog.md
+          ./.ci/changelog/master.sh > changelog.md
 
       - name: Delete Previous Release
         run: |
