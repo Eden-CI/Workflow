@@ -116,9 +116,6 @@ if [ "$ARCH" = 'aarch64' ]; then
 	echo 'SHARUN_ALLOW_SYS_VKICD=1' > ./.env
 fi
 
-# Fix broken hardware accel, credit @xlc-dev and samueru-sama
-echo 'LIBVA_DRIVERS_PATH=${SHARUN_DIR}/shared/lib:${SHARUN_DIR}/shared/lib/dri' >> ./.env
-
 # Workaround for Gentoo
 if [ -d "shared/libproxy" ]; then
 	cp shared/libproxy/* lib/
