@@ -9,7 +9,7 @@ linux() {
   DESCRIPTION="$3"
 
   echo -n "| "
-  echo -n "[$PRETTY_ARCH](${BASE_DOWNLOAD_URL}/${TAG}/Eden-Linux-${FORGEJO_REF}-${ARCH}.AppImage) | "
+  echo -n "[$PRETTY_ARCH](${BASE_DOWNLOAD_URL}/${TAG}/Eden-Linux-${TAG}-${ARCH}.AppImage) | "
   echo -n "$DESCRIPTION |"
   echo
 }
@@ -20,7 +20,7 @@ win() {
   DESCRIPTION="$3"
 
   echo -n "| "
-  echo -n "[$PRETTY_ARCH](${BASE_DOWNLOAD_URL}/${TAG}/Eden-Windows-${FORGEJO_REF}-${ARCH}.zip) | "
+  echo -n "[$PRETTY_ARCH](${BASE_DOWNLOAD_URL}/${TAG}/Eden-Windows-${TAG}-${ARCH}.zip) | "
   echo -n "$DESCRIPTION |"
   echo
 }
@@ -86,7 +86,13 @@ echo "### Android"
 echo
 echo "Android comes in a single APK."
 echo
-echo "[Android APK](${BASE_DOWNLOAD_URL}/${TAG}/Eden-Android-${FORGEJO_REF}.apk)"
+echo "[Android APK](${BASE_DOWNLOAD_URL}/${TAG}/Eden-Android-${TAG}.apk)"
+echo
+echo "### macOS"
+echo
+echo "macOS comes in a zipped-up app. Currently, only Apple Silicon builds are available."
+echo
+echo "[macOS Silicon](${BASE_DOWNLOAD_URL}/${TAG}/Eden-macOS-${TAG}.zip)"
 echo
 echo "### Source"
 echo

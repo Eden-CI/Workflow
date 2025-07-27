@@ -80,6 +80,12 @@ echo "Android comes in a single APK."
 echo
 echo "[Android APK](${BASE_DOWNLOAD_URL}/${TAG}/Eden-Android-${TAG}.apk)"
 echo
+echo "### macOS"
+echo
+echo "macOS comes in a zipped-up app. Currently, only Apple Silicon builds are available."
+echo
+echo "[macOS Silicon](${BASE_DOWNLOAD_URL}/${TAG}/Eden-macOS-${TAG}.zip)"
+echo
 echo "### Source"
 echo
 echo "Contains all source code, submodules, and CPM cache at the time of release."
@@ -91,6 +97,6 @@ src "tar.zst" "Source as a zstd-compressed tarball (Windows requires 7zip)"
 echo
 echo "### Other Platforms"
 echo
-echo "Other platforms, including FreeBSD, Solaris (OpenIndiana), and macOS are "
+echo "Other platforms, including FreeBSD and Solaris (OpenIndiana) are "
 echo "able to be built from source, but are not available for download at this time. "
 echo "Stay tuned!"
