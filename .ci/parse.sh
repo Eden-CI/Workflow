@@ -1,7 +1,6 @@
 #!/bin/sh -x
 
 echo $PAYLOAD_JSON
-declare FORGEJO_REF=""
 
 case "$1" in
   master)
@@ -31,5 +30,7 @@ if [ "$FORGEJO_REF" = "null" ] || [ "$FORGEJO_REF" = "" ]
 then
   FORGEJO_REF="master"
 fi
+
+export FORGEJO_REF
 
 echo "FORGEJO_REF=$FORGEJO_REF" >> $GITHUB_ENV
