@@ -1,5 +1,7 @@
 #!/bin/sh
 
+cd eden
+
 export LIBVULKAN_PATH="/opt/homebrew/lib/libvulkan.1.dylib"
 
 if [ -z "$BUILD_TYPE" ]; then
@@ -10,7 +12,9 @@ if [ "$DEVEL" != "true" ]; then
     export EXTRA_CMAKE_FLAGS=("${EXTRA_CMAKE_FLAGS[@]}" -DENABLE_QT_UPDATE_CHECKER=ON)
 fi
 
-mkdir -p build && cd build
+mkdir -p build
+cd build
+
 cmake .. -GNinja \
     -DYUZU_TESTS=OFF \
     -DYUZU_USE_BUNDLED_QT=OFF \

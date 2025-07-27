@@ -2,7 +2,7 @@
 
 # credit: escary and hauntek
 
-cd build
+cd eden/build
 APP=./bin/eden.app
 
 macdeployqt "$APP"
