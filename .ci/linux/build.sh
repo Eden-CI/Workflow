@@ -79,6 +79,8 @@ else
     WEBENGINE=OFF
 fi
 
+echo "USE MULTIMEDIA: $USE_MULTIMEDIA"
+
 if [ "$USE_MULTIMEDIA" = "false" ]; then
     MULTIMEDIA=OFF
 else
