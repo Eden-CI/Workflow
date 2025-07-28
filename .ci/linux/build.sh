@@ -9,43 +9,36 @@ case "$1" in
 amd64 | "")
     echo "Making amd64-v3 optimized build of Eden"
     ARCH="amd64_v3"
-    ARCH_FLAGS="-march=x86-64-v3"
     export EXTRA_CMAKE_FLAGS=(-DYUZU_BUILD_PRESET=v3)
     ;;
 steamdeck | zen2)
     echo "Making Steam Deck (Zen 2) optimized build of Eden"
     ARCH="steamdeck"
-    ARCH_FLAGS="-march=znver2 -mtune=znver2"
     export EXTRA_CMAKE_FLAGS=(-DYUZU_BUILD_PRESET=zen2 -DYUZU_SYSTEM_PROFILE=steamdeck)
     ;;
 rog-ally | allyx | zen4)
     echo "Making ROG Ally X (Zen 4) optimized build of Eden"
     ARCH="rog-ally-x"
-    ARCH_FLAGS="-march=znver4 -mtune=znver4"
     export EXTRA_CMAKE_FLAGS=(-DYUZU_BUILD_PRESET=zen2 -DYUZU_SYSTEM_PROFILE=steamdeck)
     ;;
 legacy)
     echo "Making amd64 generic build of Eden"
     ARCH=amd64
-    ARCH_FLAGS="-march=x86-64 -mtune=generic"
     export EXTRA_CMAKE_FLAGS=(-DYUZU_BUILD_PRESET=generic)
     ;;
 aarch64)
     echo "Making armv8-a build of Eden"
     ARCH=aarch64
-    ARCH_FLAGS="-march=armv8-a -mtune=generic -w"
     export EXTRA_CMAKE_FLAGS=(-DYUZU_BUILD_PRESET=generic)
     ;;
 armv9)
     echo "Making armv9-a build of Eden"
     ARCH=armv9
-    ARCH_FLAGS="-march=armv9-a -mtune=generic -w"
     export EXTRA_CMAKE_FLAGS=(-DYUZU_BUILD_PRESET=armv9)
     ;;
 native)
     echo "Making native build of Eden"
     ARCH="$(uname -m)"
-    ARCH_FLAGS="-march=native -mtune=native"
     export EXTRA_CMAKE_FLAGS=(-DYUZU_BUILD_PRESET=native)
     ;;
 *)
