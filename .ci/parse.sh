@@ -24,12 +24,12 @@ case "$1" in
     ;;
   push)
     echo "FORGEJO_CLONE_URL=https://git.eden-emu.dev/eden-emu/eden.git" >> $GITHUB_ENV
-    FORGEJO_REF=fix/macos
+    FORGEJO_REF=origin/fix/macos
 esac
 
 if [ "$FORGEJO_REF" = "null" ] || [ "$FORGEJO_REF" = "" ]
 then
-  FORGEJO_REF="fix/macos"
+  FORGEJO_REF="origin/fix/macos"
 fi
 
 echo "FORGEJO_REF=$FORGEJO_REF" >> $GITHUB_ENV
