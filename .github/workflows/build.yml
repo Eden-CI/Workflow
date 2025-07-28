@@ -184,7 +184,6 @@ jobs:
             arch: amd64
             qt_arch: win64_msvc2022_64
             qt_version: 6.9.1
-            qt_modules: qtmultimedia qt5compat
 
           # - runs-on: windows-11-arm
           #   arch: arm64
@@ -200,7 +199,6 @@ jobs:
           host: 'windows'
           target: 'desktop'
           arch: ${{ matrix.qt_arch }}
-          modules: ${{ matrix.qt_modules }}
           cache: 'true'
 
       - name: Set build variables
@@ -329,12 +327,17 @@ jobs:
       - name: Install dependencies
         run: ./.ci/deps/macos.sh
 
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: 6.7.3
+          cache: 'true'
+
       - name: Set build variables
         shell: bash
         run: |
           echo "BUILD_TYPE=${{ inputs.build-type }}" >> $GITHUB_ENV
           echo "DEVEL=${{ inputs.devel }}" >> $GITHUB_ENV
-          echo "BUNDLE_QT=true" >> $GITHUB_ENV
           echo "USE_WEBENGINE=${{ inputs.webengine }}" >> $GITHUB_ENV
           echo "USE_MULTIMEDIA=${{ inputs.multimedia }}" >> $GITHUB_ENV
 
