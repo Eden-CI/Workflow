@@ -1,7 +1,6 @@
 #!/bin/sh -x
 
 echo $PAYLOAD_JSON
-declare FORGEJO_REF=""
 
 case "$1" in
   master)
@@ -29,7 +28,10 @@ esac
 
 if [ "$FORGEJO_REF" = "null" ] || [ "$FORGEJO_REF" = "" ]
 then
-  FORGEJO_REF="master"
+    echo "FORGEJO_CLONE_URL=https://git.eden-emu.dev/eden-emu/eden.git" >> $GITHUB_ENV
+    FORGEJO_REF="master"
 fi
+
+export FORGEJO_REF
 
 echo "FORGEJO_REF=$FORGEJO_REF" >> $GITHUB_ENV
