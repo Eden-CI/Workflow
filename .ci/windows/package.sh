@@ -13,5 +13,6 @@ mkdir -p pack
 cp -r build/pkg/* pack
 
 cp LICENSE* README* pack/
+cd pack
 
-7z a -tzip ../artifacts/$ZIP_NAME pack/*
+7z a -tzip ../../artifacts/$ZIP_NAME *

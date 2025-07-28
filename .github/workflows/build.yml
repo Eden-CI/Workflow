@@ -358,4 +358,4 @@ jobs:
         uses: actions/upload-artifact@v4.6.2
         with:
           name: macos
-          path: artifacts/*.app
+          path: artifacts/*

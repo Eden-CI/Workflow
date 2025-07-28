@@ -30,11 +30,13 @@ aarch64)
     echo "Making armv8-a build of Eden"
     ARCH=aarch64
     export EXTRA_CMAKE_FLAGS=(-DYUZU_BUILD_PRESET=generic)
+    ARCH_FLAGS="-w"
     ;;
 armv9)
     echo "Making armv9-a build of Eden"
     ARCH=armv9
     export EXTRA_CMAKE_FLAGS=(-DYUZU_BUILD_PRESET=armv9)
+    ARCH_FLAGS="-w"
     ;;
 native)
     echo "Making native build of Eden"
