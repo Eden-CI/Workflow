@@ -12,6 +12,10 @@ if [ "$DEVEL" != "true" ]; then
     export EXTRA_CMAKE_FLAGS=("${EXTRA_CMAKE_FLAGS[@]}" -DENABLE_QT_UPDATE_CHECKER=ON)
 fi
 
+if [ "$BUNDLE_QT" = "true" ]; then
+    export EXTRA_CMAKE_FLAGS=("${EXTRA_CMAKE_FLAGS[@]}" -DYUZU_USE_BUNDLED_QT=ON)
+fi
+
 mkdir -p build
 cd build
 

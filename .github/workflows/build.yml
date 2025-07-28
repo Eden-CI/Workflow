@@ -334,6 +334,7 @@ jobs:
         run: |
           echo "BUILD_TYPE=${{ inputs.build-type }}" >> $GITHUB_ENV
           echo "DEVEL=${{ inputs.devel }}" >> $GITHUB_ENV
+          echo "BUNDLE_QT=true" >> $GITHUB_ENV
           echo "USE_WEBENGINE=${{ inputs.webengine }}" >> $GITHUB_ENV
           echo "USE_MULTIMEDIA=${{ inputs.multimedia }}" >> $GITHUB_ENV
 
@@ -345,6 +346,15 @@ jobs:
       - name: Clone
         shell: bash
         run: ./.ci/clone.sh true
+
+      - name: Set up CPM cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ${{ github.workspace }}/eden/.cache
+          key: ${{ runner.os }}-cpm-${{ github.run_id }}
+          restore-keys: |
+            ${{ runner.os }}-cpm-
 
       - name: Build
         run: |
