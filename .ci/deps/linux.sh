@@ -43,6 +43,7 @@ pacman -Syu --noconfirm \
 		pulseaudio \
 		pulseaudio-alsa \
 		python-pip \
+		qt6ct \
 		qt6-tools \
 		qt6-wayland \
 		spirv-headers \
