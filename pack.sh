@@ -28,3 +28,5 @@ if [ -d "source" ]; then
     cp source/source.$ext artifacts/Eden-Source-${ID}.$ext
   done
 fi
+
+cp -r macos/*.tar.zst artifacts/Eden-macOS-${ID}.tar.zst
