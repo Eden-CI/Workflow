@@ -5,8 +5,8 @@
 cd eden/build
 APP=./bin/eden.app
 
-macdeployqt "$APP"
-macdeployqt "$APP" -always-overwrite
+macdeployqt "$APP" -verbose=2
+macdeployqt "$APP" -always-overwrite -verbose=2
 
 # FixMachOLibraryPaths
 find "$APP/Contents/Frameworks" ""$APP/Contents/MacOS"" -type f \( -name "*.dylib" -o -perm +111 \) | while read file; do
@@ -24,12 +24,9 @@ find "$APP/Contents/Frameworks" ""$APP/Contents/MacOS"" -type f \( -name "*.dyli
         fi
     fi
 done
-codesign --deep --force --verify --verbose --sign - "$APP"
 
-ZIP_NAME="eden-macos.zip"
+codesign --deep --force --verbose --sign - "$APP"
+
 mkdir -p artifacts
-
-mv $APP .
-7z a -tzip "$ZIP_NAME" eden.app
-mv "$ZIP_NAME" artifacts/
+tar czf artifacts/eden.tar.zst "$APP"
 mv artifacts ../../

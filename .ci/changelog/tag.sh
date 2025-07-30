@@ -82,9 +82,9 @@ echo "[Android APK](${BASE_DOWNLOAD_URL}/${TAG}/Eden-Android-${TAG}.apk)"
 echo
 echo "### macOS"
 echo
-echo "macOS comes in a zipped-up app. Currently, only Apple Silicon builds are available."
+echo "macOS comes in a tarballed app. Currently, only Apple Silicon builds are available."
 echo
-echo "[macOS Silicon](${BASE_DOWNLOAD_URL}/${TAG}/Eden-macOS-${TAG}.zip)"
+echo "[macOS Silicon](${BASE_DOWNLOAD_URL}/${TAG}/Eden-macOS-${TAG}.tar.zst)"
 echo
 echo "### Source"
 echo

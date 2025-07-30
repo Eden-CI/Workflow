@@ -29,4 +29,4 @@ if [ -d "source" ]; then
   done
 fi
 
-cp -r macos/*.zip artifacts/Eden-macOS-${ID}.zip
+cp -r macos/*.tar.zst artifacts/Eden-macOS-${ID}.tar.zst

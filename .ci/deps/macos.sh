@@ -1,1 +1,1 @@
-brew install --formula --quiet autoconf automake boost ccache cmake fmt glslang hidapi libiconv libtool nasm nlohmann-json speexdsp zlib Catch2 vulkan-loader
+brew install --formula --quiet autoconf automake boost ccache cmake fmt glslang hidapi libiconv libtool nasm nlohmann-json speexdsp zlib Catch2 vulkan-loader molten-vk
