@@ -29,10 +29,15 @@ jobs:
   source:
     name: "Source Pack"
     runs-on: ubuntu-latest
+    container: ghcr.io/pkgforge-dev/archlinux:latest
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          ./.ci/deps/linux.sh
 
       - name: Parse Forgejo payload
         uses: ./.github/workflows/parse
@@ -44,13 +49,41 @@ jobs:
 
       - name: Clone
         shell: bash
-        run: ./.ci/clone.sh false
-        
+        run: ./.ci/clone.sh true
+
+      - name: Configure
+        run: |
+          cd eden
+          cmake -S . -B build \
+            -DUSE_DISCORD_PRESENCE=ON \
+            -DYUZU_USE_BUNDLED_VCPKG=OFF \
+            -DYUZU_USE_BUNDLED_QT=OFF \
+            -DYUZU_USE_BUNDLED_SDL2=OFF \
+            -DYUZU_USE_EXTERNAL_SDL2=ON \
+            -DYUZU_USE_BUNDLED_FFMPEG=ON \
+            -DYUZU_TESTS=OFF \
+            -DYUZU_USE_QT_MULTIMEDIA=OFF \
+            -DYUZU_USE_QT_WEB_ENGINE=OFF
+
       - name: Pack
         run: |
-          zip -r source.zip eden
-          tar czf source.tar.zst eden
+          export ARCHIVE="git-archive-all-1.23.1"
+          wget https://github.com/Kentzo/git-archive-all/releases/download/1.23.1/$ARCHIVE.tar.gz
+          tar xf $ARCHIVE.tar.gz
 
+          cd eden
+          rm -rf build
+          git describe --abbrev=0 --always HEAD > GIT-COMMIT
+          git describe --tags HEAD > GIT-TAG || echo 'unknown' > GIT-TAG
+          python ../$ARCHIVE/git_archive_all.py --include .cache --include GIT-COMMIT --include GIT-TAG --force-submodules ../source.tar
+
+          cd ..
+          zstd -10 source.tar
+          rm source.tar
+          tar xf source.tar.zst
+          zip -r source.zip source
+          rm -rf source
+          
       - name: Upload source
         uses: actions/upload-artifact@v4.6.2
         with:
