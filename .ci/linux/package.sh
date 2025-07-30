@@ -117,6 +117,7 @@ fi
 
 # Wayland is mankind's worst invention, perhaps only behind war
 echo 'QT_QPA_PLATFORM=xcb' >> ./.env
+echo 'QT_FONT_DPI=76' >> ./.env
 
 # Workaround for Gentoo
 if [ -d "shared/libproxy" ]; then
