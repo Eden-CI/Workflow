@@ -104,7 +104,6 @@ xvfb-run -a ./sharun-aio l -p -v -e -s -k \
 	$LIBDIR/qt6/plugins/xcbglintegrations/* \
 	$LIBDIR/qt6/plugins/wayland-*/* \
 	$LIBDIR/pulseaudio/* \
-	$LIBDIR/spa-0.2/*/* \
 	$LIBDIR/alsa-lib/*
 
 rm -f ./sharun-aio
