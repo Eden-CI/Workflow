@@ -61,7 +61,7 @@ cp ../dist/org.eden_emu.eden.svg .
 
 ln -sf ./org.eden_emu.eden.svg ./.DirIcon
 
-UPINFO='gh-releases-zsync|eden-emulator|Releases|latest|*.AppImage.zsync'
+UPINFO="gh-releases-zsync|eden-emulator|Releases|latest|*-$ARCH.AppImage.zsync"
 
 if [ "$DEVEL" = 'true' ]; then
 	sed -i 's|Name=Eden|Name=Eden Nightly|' ./org.eden_emu.eden.desktop
