@@ -173,7 +173,6 @@ jobs:
             arch: amd64
             qt_arch: win64_msvc2022_64
             qt_version: 6.9.1
-            qt_modules: qtmultimedia qt5compat
 
           # - runs-on: windows-11-arm
           #   arch: arm64
@@ -189,7 +188,6 @@ jobs:
           host: 'windows'
           target: 'desktop'
           arch: ${{ matrix.qt_arch }}
-          modules: ${{ matrix.qt_modules }}
           cache: 'true'
 
       - name: Set build variables
@@ -311,3 +309,60 @@ jobs:
         with:
           name: android
           path: artifacts/*.apk
+
+  macos:
+    runs-on: macos-latest
+    name: "macOS"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: ./.ci/deps/macos.sh
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: 6.7.3
+          cache: 'true'
+
+      - name: Set build variables
+        shell: bash
+        run: |
+          echo "BUILD_TYPE=${{ inputs.build-type }}" >> $GITHUB_ENV
+          echo "DEVEL=${{ inputs.devel }}" >> $GITHUB_ENV
+          echo "USE_WEBENGINE=${{ inputs.webengine }}" >> $GITHUB_ENV
+          echo "USE_MULTIMEDIA=${{ inputs.multimedia }}" >> $GITHUB_ENV
+
+      - name: Parse Forgejo payload
+        uses: ./.github/workflows/parse
+        with:
+          build-id: ${{ inputs.build-id }}
+
+      - name: Clone
+        shell: bash
+        run: ./.ci/clone.sh true
+
+      - name: Set up CPM cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ${{ github.workspace }}/eden/.cache
+          key: ${{ runner.os }}-cpm-${{ github.run_id }}
+          restore-keys: |
+            ${{ runner.os }}-cpm-
+
+      - name: Build
+        run: |
+          ./.ci/macos/build.sh
+
+      - name: Package
+        run: |
+          ./.ci/macos/package.sh
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4.6.2
+        with:
+          name: macos
+          path: artifacts/*
