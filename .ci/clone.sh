@@ -16,6 +16,7 @@ while ! git clone $FORGEJO_CLONE_URL eden; do
 done
 
 cd eden
+git fetch --all
 git reset --hard $FORGEJO_REF
 
 # if [ "$1" = "true" ]; then
