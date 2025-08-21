@@ -29,6 +29,8 @@ echo "Installing build dependencies..."
 echo "---------------------------------------------------------------"
 pacman -Syu --noconfirm \
 		base-devel \
+		boost-libs \
+		boost \
 		catch2 \
 		cmake \
 		curl \
@@ -39,6 +41,7 @@ pacman -Syu --noconfirm \
 		jq \
 		libva \
 		libvpx \
+		mbedtls \
 		nasm \
 		ninja \
 		patchelf \
