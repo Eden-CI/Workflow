@@ -4,10 +4,6 @@
 # thus caching every potential CPM call.
 cd eden
 
-if [ "$STEAMDECK" = "true" ]; then
-  export EXTRA_CMAKE_FLAGS=("${EXTRA_CMAKE_FLAGS[@]}" -DYUZU_SYSTEM_PROFILE=steamdeck)
-fi
-
 if [ -f "tools/cpm-fetch-all.sh" ]
 then
   tools/cpm-fetch-all.sh
