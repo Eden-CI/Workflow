@@ -29,15 +29,10 @@ jobs:
   source:
     name: "Source Pack"
     runs-on: ubuntu-latest
-    container: ghcr.io/pkgforge-dev/archlinux:latest
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Install dependencies
-        run: |
-          ./.ci/deps/linux.sh
 
       - name: Parse Forgejo payload
         shell: bash
@@ -56,18 +51,7 @@ jobs:
         run: ./.ci/clone.sh true
 
       - name: Configure
-        run: |
-          ./.ci/source/configure.sh
-          STEAMDECK=true ./.ci/source/configure.sh
-          rm -rf eden/build
-
-      # TODO
-      # - name: Configure (Solaris)
-      #   uses: vmactions/solaris-vm@
-      #   with:
-      #     run: |
-      #       cd eden
-      #       ./.ci/source/configure.sh
+        run: ./.ci/source/configure.sh
 
       - name: Pack
         run: ./.ci/source/pack.sh
