@@ -34,6 +34,8 @@ pacman -Syu --noconfirm \
 		catch2 \
 		cmake \
 		curl \
+		enet \
+		fmt \
 		gamemode \
 		git \
 		glslang \
