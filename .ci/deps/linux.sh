@@ -46,6 +46,7 @@ pacman -Syu --noconfirm \
 		mbedtls \
 		nasm \
 		ninja \
+		nlohmann-json \
 		patchelf \
 		pulseaudio \
 		pulseaudio-alsa \
