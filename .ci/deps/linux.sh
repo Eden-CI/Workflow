@@ -55,11 +55,13 @@ pacman -Syu --noconfirm \
 		qt6-tools \
 		qt6-wayland \
 		spirv-headers \
+		spirv-tools \
 		strace \
 		unzip \
 		ffnvcodec-headers \
 		vulkan-headers \
 		vulkan-mesa-layers \
+		vulkan-utility-libraries \
 		wget \
 		wireless_tools \
 		xcb-util-cursor \
