@@ -179,10 +179,9 @@ jobs:
           cache: 'true'
 
       - name: Setup Ninja
-        uses: ashutoshvarma/setup-ninja@master
+        uses: seanmiddleditch/gha-setup-ninja@master
         with:
           version: 1.12.1
-          platform: 'win'
 
       - name: Set build variables
         shell: bash
