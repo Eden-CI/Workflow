@@ -178,16 +178,6 @@ jobs:
           modules: ${{ matrix.qt_modules }}
           cache: 'true'
 
-      - name: Setup Ninja
-        shell: powershell
-        run: |
-          choco install ninja --version 1.12.1 --allow-downgrade
-
-      - name: Verify Ninja Install
-        shell: powershell
-        run: |
-          ninja --version
-
       - name: Set build variables
         shell: bash
         run: |
@@ -228,10 +218,20 @@ jobs:
         run: |
           ./.ci/windows/install-vulkan-sdk.ps1
 
+      - name: Downgrade Ninja
+        shell: powershell
+        run: |
+          choco install ninja --version 1.12.1 --allow-downgrade
+
+      - name: Verify Ninja Install
+        shell: powershell
+        run: |
+          ninja --version
+
       - name: Build
         shell: bash
         run: |
-          export PATH="${PATH}:${{ runner.workspace }}/Qt/${{ matrix.qt_version }}/${{ matrix.qt_arch }}/bin"
+          export PATH="${PATH}:$(cygpath -u ${ChocolateyInstall}):${{ runner.workspace }}/Qt/${{ matrix.qt_version }}/${{ matrix.qt_arch }}/bin"
           export WINDEPLOYQT=windeployqt
 
           ./.ci/windows/build.sh
