@@ -178,6 +178,11 @@ jobs:
           modules: ${{ matrix.qt_modules }}
           cache: 'true'
 
+      - name: Setup Ninja
+        uses: ashutoshvarma/setup-ninja@master
+        with:
+          version: 1.13.1
+
       - name: Set build variables
         shell: bash
         run: |
