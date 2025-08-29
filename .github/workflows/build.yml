@@ -179,9 +179,14 @@ jobs:
           cache: 'true'
 
       - name: Setup Ninja
-        uses: seanmiddleditch/gha-setup-ninja@master
-        with:
-          version: 1.12.1
+        shell: powershell
+        run: |
+          choco install -y ninja
+
+      - name: Verify Ninja Install
+        shell: powershell
+        run: |
+          ninja --version
 
       - name: Set build variables
         shell: bash
