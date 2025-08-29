@@ -181,7 +181,7 @@ jobs:
       - name: Setup Ninja
         uses: ashutoshvarma/setup-ninja@master
         with:
-          version: 1.13.1
+          version: 1.12.1
 
       - name: Set build variables
         shell: bash
