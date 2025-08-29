@@ -181,7 +181,7 @@ jobs:
       - name: Setup Ninja
         shell: powershell
         run: |
-          choco install -y ninja
+          choco install ninja --version 1.12.1 --allow-downgrade
 
       - name: Verify Ninja Install
         shell: powershell
