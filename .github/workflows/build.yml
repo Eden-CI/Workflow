@@ -150,6 +150,8 @@ jobs:
   windows:
     name: "Windows (${{ matrix.arch }})"
     runs-on: ${{ matrix.runs-on }}
+    env:
+      QT_VERSION: 6.9.1
 
     strategy:
       fail-fast: false
@@ -158,11 +160,12 @@ jobs:
           - runs-on: windows-latest
             arch: amd64
             qt_arch: win64_msvc2022_64
-            qt_version: 6.9.1
-            qt_modules: qtmultimedia qt5compat
+            compiler: [clang, msvc]
 
-          # - runs-on: windows-11-arm
-          #   arch: arm64
+          - runs-on: windows-11-arm
+            arch: arm64
+            qt_arch: win64_msvc2022_arm64
+            compiler: [clang, msvc]
 
     steps:
       - name: Checkout
@@ -171,11 +174,10 @@ jobs:
       - name: Install Qt
         uses: jurplel/install-qt-action@v4
         with:
-          version: ${{ matrix.qt_version }}
+          version: ${{ env.QT_VERSION }}
           host: 'windows'
           target: 'desktop'
           arch: ${{ matrix.qt_arch }}
-          modules: ${{ matrix.qt_modules }}
           cache: 'true'
 
       - name: Set build variables
@@ -185,6 +187,7 @@ jobs:
           echo "DEVEL=${{ inputs.devel }}" >> $GITHUB_ENV
           echo "USE_WEBENGINE=${{ inputs.webengine }}" >> $GITHUB_ENV
           echo "USE_MULTIMEDIA=${{ inputs.multimedia }}" >> $GITHUB_ENV
+          echo "COMPILER=${{ matrix.compiler }}" >> $GITHUB_ENV
 
       - name: Parse Forgejo payload
         shell: bash
