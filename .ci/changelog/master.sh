@@ -101,6 +101,5 @@ echo "Contains all source code, submodules, and CPM cache at the time of release
 echo
 echo "| File | Description |"
 echo "| ---- | ----------- |"
-src "zip" "Source as a zip archive (all platforms)"
 src "tar.zst" "Source as a zstd-compressed tarball (Windows requires 7zip)"
 echo
