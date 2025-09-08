@@ -72,9 +72,16 @@ echo "Windows packages are in-place zip files."
 echo
 echo "| Build | Description |"
 echo "| ----- | ----------- |"
-win amd64 amd64 "For any Windows machine running an AMD or Intel CPU"
-echo "| arm64 (WIP) | For any Windows machine running a Qualcomm or other ARM-based SoC. Currently a work-in-progress."
-# win arm64 aarch64 "For any Windows machine running a Qualcomm or other ARM-based SoC"
+win amd64-msvc amd64 "For any Windows machine running an AMD or Intel CPU"
+win arm64-msvc aarch64 "For any Windows machine running a Qualcomm or other ARM-based SoC"
+echo
+echo "We are additionally providing experimental packages built with clang, rather than MSVC. These builds should be identical, if not faster,"
+echo "but how it affects the overall experience is currently unknown."
+echo
+echo "| Build | Description |"
+echo "| ----- | ----------- |"
+win amd64-clang "amd64 (clang)" "For any Windows machine running an AMD or Intel CPU (clang-cl build)"
+win arm64-clang "aarch64 (clang)" "For any Windows machine running a Qualcomm or other ARM-based SoC (clang-cl build)"
 echo
 echo "### Android"
 echo
