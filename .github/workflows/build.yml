@@ -40,7 +40,7 @@ jobs:
           export PAYLOAD_JSON='${{ toJSON(github.event.client_payload) }}'
           export FORGEJO_TOKEN=${{ secrets.FORGEJO_TOKEN }}
           ./.ci/parse.sh ${{ inputs.build-id }}
-      
+
       - name: Create job summary
         run: |
           export FORGEJO_TOKEN=${{ secrets.FORGEJO_TOKEN }}
@@ -71,7 +71,7 @@ jobs:
       - id: set
         run: |
           BASE='[{"runs-on": "ubuntu-latest", "arch": "amd64"},{"runs-on": "ubuntu-latest", "arch": "steamdeck"}' # ',{"runs-on": "ubuntu-24.04-arm", "arch": "aarch64"}'
-          
+
           EXTRA=',{"runs-on": "ubuntu-latest", "arch": "legacy"},{"runs-on": "ubuntu-latest", "arch": "rog-ally"}' # ',{"runs-on": "ubuntu-24.04-arm", "arch": "armv9"}'
 
           if [ "${{ inputs.build-id }}" = "tag" ]; then
@@ -201,9 +201,9 @@ jobs:
           path: |
             ${{ github.workspace }}/eden/.cache
             ${{ github.workspace }}/eden/build/_deps/*-build
-          key: ${{ runner.os }}-${{ matrix.os.arch }}-cpm-${{ github.run_id }}
+          key: ${{ runner.os }}-${{ matrix.os.arch }}-unix-cpm-${{ github.run_id }}
           restore-keys: |
-            ${{ runner.os }}-${{ matrix.os.arch }}-cpm-
+            ${{ runner.os }}-${{ matrix.os.arch }}-cpm-unix-
 
       - name: Set up MSVC
         uses: ilammy/msvc-dev-cmd@v1
