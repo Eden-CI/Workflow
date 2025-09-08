@@ -18,9 +18,11 @@ done
 
 cp android/*.apk artifacts/Eden-Android-${ID}.apk
 
-for arch in amd64 # arm64
+for arch in amd64 arm64
 do
-  cp windows-$arch/*.zip artifacts/Eden-Windows-${ID}-${arch}.zip
+  for compiler in clang msvc; do
+    cp windows-$arch-${compiler}/*.zip artifacts/Eden-Windows-${ID}-${arch}-${compiler}.zip
+  done
 done
 
 if [ -d "source" ]; then

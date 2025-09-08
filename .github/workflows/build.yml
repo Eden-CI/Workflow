@@ -160,13 +160,19 @@ jobs:
           - runs-on: windows-latest
             arch: amd64
             qt_arch: win64_msvc2022_64
-            compiler: [clang, msvc]
-
+            compiler: clang
+          - runs-on: windows-latest
+            arch: amd64
+            qt_arch: win64_msvc2022_64
+            compiler: msvc
           - runs-on: windows-11-arm
             arch: arm64
             qt_arch: win64_msvc2022_arm64
-            compiler: [clang, msvc]
-
+            compiler: clang
+          - runs-on: windows-11-arm
+            arch: arm64
+            qt_arch: win64_msvc2022_arm64
+            compiler: msvc
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -232,13 +238,13 @@ jobs:
       - name: Package
         shell: bash
         run: |
-          export ARCH=${{ matrix.arch }}
+          export ARCH=${{ matrix.arch }}-${{ matrix.compiler }}
           ./.ci/windows/package.sh
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4.6.2
         with:
-          name: windows-${{ matrix.arch }}
+          name: windows-${{ matrix.arch }}-${{ matrix.compiler }}
           path: artifacts/*
 
   android:
