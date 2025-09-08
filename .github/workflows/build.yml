@@ -219,6 +219,8 @@ jobs:
         shell: bash
         run: |
           export WINDEPLOYQT=windeployqt
+          git config --global core.autocrlf off
+          dos2unix eden/.patch/boost/*
 
           ./.ci/windows/build.sh
 
