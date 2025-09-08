@@ -210,6 +210,11 @@ jobs:
         with:
           arch: ${{ matrix.os.arch }}
 
+      - name: Install Vulkan SDK
+        shell: powershell
+        run: |
+          ./.ci/windows/install-vulkan-sdk.ps1
+
       - name: Build
         shell: bash
         run: |
