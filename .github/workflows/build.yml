@@ -148,7 +148,7 @@ jobs:
           path: artifacts/*
 
   windows:
-    name: "Windows ${{ matrix.arch }} (${{ matrix.compiler }})"
+    name: "Windows ${{ matrix.os.arch }} (${{ matrix.compiler }})"
     runs-on: ${{ matrix.runs-on }}
     env:
       QT_VERSION: 6.9.1
@@ -156,34 +156,23 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        include:
+        os:
           - runs-on: windows-latest
             arch: amd64
-            qt_arch: win64_msvc2022_64
-            compiler: clang
-          - runs-on: windows-latest
-            arch: amd64
-            qt_arch: win64_msvc2022_64
-            compiler: msvc
           - runs-on: windows-11-arm
             arch: arm64
-            qt_arch: win64_msvc2022_arm64
-            compiler: clang
-          - runs-on: windows-11-arm
-            arch: arm64
-            qt_arch: win64_msvc2022_arm64
-            compiler: msvc
+        compiler: [clang, msvc]
+
+    runs-on: ${{ matrix.os.runs-on }}
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
       - name: Install Qt
-        uses: jurplel/install-qt-action@v4
+        uses: jurplel/install-qt-action@v4.3.0
         with:
           version: ${{ env.QT_VERSION }}
-          host: 'windows'
-          target: 'desktop'
-          arch: ${{ matrix.qt_arch }}
           cache: 'true'
 
       - name: Set build variables
@@ -213,14 +202,14 @@ jobs:
           path: |
             ${{ github.workspace }}/eden/.cache
             ${{ github.workspace }}/eden/build/_deps/*-build
-          key: ${{ runner.os }}-${{ matrix.arch }}-cpm-${{ github.run_id }}
+          key: ${{ runner.os }}-${{ matrix.os.arch }}-cpm-${{ github.run_id }}
           restore-keys: |
-            ${{ runner.os }}-${{ matrix.arch }}-cpm-
+            ${{ runner.os }}-${{ matrix.os.arch }}-cpm-
 
       - name: Set up MSVC
         uses: ilammy/msvc-dev-cmd@v1
         with:
-          arch: ${{ matrix.arch }}
+          arch: ${{ matrix.os.arch }}
 
       - name: Install Vulkan SDK
         shell: powershell
@@ -230,7 +219,6 @@ jobs:
       - name: Build
         shell: bash
         run: |
-          export PATH="${PATH}:${{ runner.workspace }}/Qt/${{ matrix.qt_version }}/${{ matrix.qt_arch }}/bin"
           export WINDEPLOYQT=windeployqt
 
           ./.ci/windows/build.sh
@@ -238,13 +226,13 @@ jobs:
       - name: Package
         shell: bash
         run: |
-          export ARCH=${{ matrix.arch }}-${{ matrix.compiler }}
+          export ARCH=${{ matrix.os.arch }}-${{ matrix.compiler }}
           ./.ci/windows/package.sh
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4.6.2
         with:
-          name: windows-${{ matrix.arch }}-${{ matrix.compiler }}
+          name: windows-${{ matrix.os.arch }}-${{ matrix.compiler }}
           path: artifacts/*
 
   android:
