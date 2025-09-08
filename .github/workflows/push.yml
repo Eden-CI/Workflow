@@ -47,13 +47,13 @@ jobs:
 
       - name: Package artifacts nicely
         run: |
-          export ID=${FORGEJO_REF}
+          export ID=test
           ./pack.sh
 
       - name: Generate changelog
         run: |
           export FORGEJO_TOKEN=${{ secrets.FORGEJO_TOKEN }}
-          export ID=${FORGEJO_REF}
+          export ID=test
           ./.ci/changelog/master.sh > changelog.md
 
       - name: Release

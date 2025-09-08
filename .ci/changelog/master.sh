@@ -1,7 +1,7 @@
 #!/bin/sh -ex
 
 BASE_DOWNLOAD_URL="https://github.com/Eden-CI/Master/releases/download"
-TAG=${FORGEJO_REF}
+TAG=${ID}
 
 linux() {
   ARCH="$1"
@@ -9,7 +9,7 @@ linux() {
   DESCRIPTION="$3"
 
   echo -n "| "
-  echo -n "[$PRETTY_ARCH](${BASE_DOWNLOAD_URL}/${TAG}/Eden-Linux-${FORGEJO_REF}-${ARCH}.AppImage) | "
+  echo -n "[$PRETTY_ARCH](${BASE_DOWNLOAD_URL}/${TAG}/Eden-Linux-${TAG}-${ARCH}.AppImage) | "
   echo -n "$DESCRIPTION |"
   echo
 }
@@ -20,7 +20,7 @@ win() {
   DESCRIPTION="$3"
 
   echo -n "| "
-  echo -n "[$PRETTY_ARCH](${BASE_DOWNLOAD_URL}/${TAG}/Eden-Windows-${FORGEJO_REF}-${ARCH}.zip) | "
+  echo -n "[$PRETTY_ARCH](${BASE_DOWNLOAD_URL}/${TAG}/Eden-Windows-${TAG}-${ARCH}.zip) | "
   echo -n "$DESCRIPTION |"
   echo
 }
@@ -40,7 +40,7 @@ changelog() {
   echo
 }
 
-echo "This is ref [\`$FORGEJO_REF\`](https://git.eden-emu.dev/eden-emu/eden/commit/$FORGEJO_REF) of Eden's master branch."
+echo "This is ref [\`$TAG\`](https://git.eden-emu.dev/eden-emu/eden/commit/$TAG) of Eden's master branch."
 echo
 changelog
 echo "## Packages"
@@ -93,7 +93,7 @@ echo "### Android"
 echo
 echo "Android comes in a single APK."
 echo
-echo "[Android APK](${BASE_DOWNLOAD_URL}/${TAG}/Eden-Android-${FORGEJO_REF}.apk)"
+echo "[Android APK](${BASE_DOWNLOAD_URL}/${TAG}/Eden-Android-${TAG}.apk)"
 echo
 echo "### Source"
 echo
