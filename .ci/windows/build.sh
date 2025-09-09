@@ -5,10 +5,19 @@
 
 cd eden
 
-[ "$COMPILER" == "clang" ] && EXTRA_CMAKE_FLAGS+=(-DCMAKE_CXX_COMPILER=clang-cl -DCMAKE_C_COMPILER=clang-cl)
-[ -z "$WINDEPLOYQT" ] && { echo "WINDEPLOYQT environment variable required."; exit 1; }
+if [ "$COMPILER" == "clang" ]
+then
+    EXTRA_CMAKE_FLAGS+=(
+        -DCMAKE_CXX_COMPILER=clang-cl
+        -DCMAKE_C_COMPILER=clang-cl
+        -DCMAKE_CXX_FLAGS="-O3"
+        -DCMAKE_C_FLAGS="-O3"
+    )
 
-EXTRA_CMAKE_FLAGS+=($@)
+    BUILD_TYPE="RelWithDebInfo"
+fi
+
+[ -z "$WINDEPLOYQT" ] && { echo "WINDEPLOYQT environment variable required."; exit 1; }
 
 echo $EXTRA_CMAKE_FLAGS
 
@@ -31,7 +40,8 @@ cmake .. -G Ninja \
     -DYUZU_USE_BUNDLED_QT=${BUNDLE_QT:-false} \
     -DUSE_CCACHE=${CCACHE:-false} \
     -DENABLE_QT_UPDATE_CHECKER=${DEVEL:-true} \
-    "${EXTRA_CMAKE_FLAGS[@]}"
+    "${EXTRA_CMAKE_FLAGS[@]}" \
+    "$@"
 
 ninja
 
