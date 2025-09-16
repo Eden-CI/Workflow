@@ -9,7 +9,7 @@ linux() {
   DESCRIPTION="$3"
 
   echo -n "| "
-  echo -n "[$PRETTY_ARCH](${BASE_DOWNLOAD_URL}/${FORGEJO_REF}/Eden-Linux-${TAG}-${ARCH}.AppImage) | "
+  echo -n "[$PRETTY_ARCH](${BASE_DOWNLOAD_URL}/${TAG}/Eden-Linux-${TAG}-${ARCH}.AppImage) | "
   echo -n "$DESCRIPTION |"
   echo
 }
@@ -20,7 +20,7 @@ win() {
   DESCRIPTION="$3"
 
   echo -n "| "
-  echo -n "[$PRETTY_ARCH](${BASE_DOWNLOAD_URL}/${FORGEJO_REF}/Eden-Windows-${TAG}-${ARCH}.zip) | "
+  echo -n "[$PRETTY_ARCH](${BASE_DOWNLOAD_URL}/${TAG}/Eden-Windows-${TAG}-${ARCH}.zip) | "
   echo -n "$DESCRIPTION |"
   echo
 }
@@ -30,7 +30,7 @@ src() {
   DESCRIPTION="$2"
 
   echo -n "| "
-  echo -n "[$EXT](${BASE_DOWNLOAD_URL}/${FORGEJO_REF}/Eden-Source-${TAG}.${EXT}) | "
+  echo -n "[$EXT](${BASE_DOWNLOAD_URL}/${TAG}/Eden-Source-${TAG}.${EXT}) | "
   echo -n "$DESCRIPTION |"
   echo
 }
@@ -40,7 +40,7 @@ changelog() {
   echo
 }
 
-echo "This is ref [\`$FORGEJO_REF\`](https://git.eden-emu.dev/eden-emu/eden/commit/$FORGEJO_REF) of Eden's master branch."
+echo "This is ref [\`$TAG\`](https://git.eden-emu.dev/eden-emu/eden/commit/$TAG) of Eden's master branch."
 echo
 changelog
 echo "## Packages"

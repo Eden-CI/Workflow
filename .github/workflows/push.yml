@@ -60,7 +60,7 @@ jobs:
         uses: softprops/action-gh-release@v2.2.2
         with:
           name: "Eden Test Build - ${{ env.FORGEJO_REF }}"
-          tag_name: ${{ env.FORGEJO_REF }}
+          tag_name: test
           repository: ${{ env.REPO }}
           body_path: ./changelog.md
           prerelease: false
