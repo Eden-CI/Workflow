@@ -203,7 +203,7 @@ jobs:
             ${{ github.workspace }}/eden/build/_deps/*-build
           key: ${{ runner.os }}-${{ matrix.os.arch }}-unix-cpm-${{ github.run_id }}
           restore-keys: |
-            ${{ runner.os }}-${{ matrix.os.arch }}-cpm-unix-
+            ${{ runner.os }}-${{ matrix.os.arch }}-unix-cpm-
 
       - name: Set up MSVC
         uses: ilammy/msvc-dev-cmd@v1
