@@ -45,6 +45,7 @@ pacman -Syu --noconfirm \
 		libvdpau \
 		libvpx \
 		mbedtls \
+        mold \
 		nasm \
 		ninja \
 		nlohmann-json \
