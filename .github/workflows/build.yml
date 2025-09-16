@@ -134,7 +134,7 @@ jobs:
       - name: Build
         shell: bash
         run: |
-          TARGET=appimage ./.ci/linux/build.sh ${{ matrix.arch }} $(nproc)
+          TARGET=appimage ./.ci/linux/build.sh ${{ matrix.arch }}
 
       - name: Package
         shell: bash

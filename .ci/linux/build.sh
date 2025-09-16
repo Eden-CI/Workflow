@@ -56,12 +56,6 @@ esac
 
 export ARCH_FLAGS="$ARCH_FLAGS -O3"
 
-if [ -z "$NPROC" ]; then
-    NPROC="$(nproc)"
-fi
-
-if [ "$1" != "" ]; then shift; fi
-
 if [ "$TARGET" = "appimage" ]; then
     EXTRA_CMAKE_FLAGS+=(-DCMAKE_INSTALL_PREFIX=/usr -DYUZU_ROOM=ON -DYUZU_ROOM_STANDALONE=OFF -DYUZU_CMD=OFF)
 else
@@ -94,7 +88,7 @@ cmake .. -G Ninja \
     -DDYNARMIC_ENABLE_LTO=ON \
     "${EXTRA_CMAKE_FLAGS[@]}"
 
-ninja -j${NPROC}
+ninja -j$(nproc)
 
 if [ -d "bin/Release" ]; then
     strip -s bin/Release/*
