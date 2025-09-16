@@ -32,6 +32,7 @@ pacman -Syu --noconfirm \
 		boost-libs \
 		boost \
 		catch2 \
+		clang \
 		cmake \
 		curl \
 		enet \
@@ -45,7 +46,7 @@ pacman -Syu --noconfirm \
 		libvdpau \
 		libvpx \
 		mbedtls \
-        mold \
+		mold \
 		nasm \
 		ninja \
 		nlohmann-json \
