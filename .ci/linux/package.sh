@@ -1,17 +1,18 @@
 #!/bin/sh -e
 
-# SPDX-FileCopyrightText: 2025 eden Emulator Project
+# SPDX-FileCopyrightText: 2025 Eden Emulator Project
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 # This script assumes you're in the source directory
 
-cd eden
+URUNTIME="https://raw.githubusercontent.com/pkgforge-dev/Anylinux-AppImages/refs/heads/main/useful-tools/uruntime2appimage.sh"
+SHARUN="https://raw.githubusercontent.com/pkgforge-dev/Anylinux-AppImages/refs/heads/main/useful-tools/quick-sharun.sh"
 
-export APPIMAGE_EXTRACT_AND_RUN=1
-export BASE_ARCH="$(uname -m)"
-
-SHARUN="https://github.com/VHSgunzo/sharun/releases/latest/download/sharun-${BASE_ARCH}-aio"
-URUNTIME="https://github.com/VHSgunzo/uruntime/releases/latest/download/uruntime-appimage-dwarfs-${BASE_ARCH}"
+export ICON="$PWD"/dist/dev.eden_emu.eden.svg
+export DESKTOP="$PWD"/dist/dev.eden_emu.eden.desktop
+export OPTIMIZE_LAUNCH=1
+export DEPLOY_OPENGL=1
+export DEPLOY_VULKAN=1
 
 case "$1" in
     amd64|"")
@@ -40,112 +41,38 @@ case "$1" in
         ;;
 esac
 
-export BUILDDIR="$2"
+BUILDDIR=${BUILDDIR:-build}
 
-if [ "$BUILDDIR" = '' ]
-then
-	BUILDDIR=build
-fi
-
-EDEN_TAG=$(git describe --tags --abbrev=0)
+EDEN_TAG=$(cat GIT-TAG)
 echo "Making \"$EDEN_TAG\" build"
 # git checkout "$EDEN_TAG"
 VERSION="$(echo "$EDEN_TAG")"
 
-# NOW MAKE APPIMAGE
-mkdir -p ./AppDir
-cd ./AppDir
-
-cp ../dist/*.eden_emu.eden.desktop .
-cp ../dist/*.eden_emu.eden.svg .
-
-ln -sf ./*.eden_emu.eden.svg ./.DirIcon
-
-UPINFO="gh-releases-zsync|eden-emulator|Releases|latest|*-$ARCH.AppImage.zsync"
+export OUTNAME="Eden-$VERSION-$ARCH.AppImage"
+export UPINFO="gh-releases-zsync|eden-emulator|Releases|latest|*-$ARCH.AppImage.zsync"
 
 if [ "$DEVEL" = 'true' ]; then
-	sed -i 's|Name=Eden|Name=Eden Nightly|' ./*.eden_emu.eden.desktop
+	sed -i 's|Name=Eden|Name=Eden Nightly|' $DESKTOP
  	UPINFO="$(echo "$UPINFO" | sed 's|Releases|nightly|')"
 fi
 
-LIBDIR="/usr/lib"
-
-# Workaround for Gentoo
-if [ ! -d "$LIBDIR/qt6" ]
-then
-	LIBDIR="/usr/lib64"
-fi
-
-# Workaround for Debian
-if [ ! -d "$LIBDIR/qt6" ]
-then
-    LIBDIR="/usr/lib/${BASE_ARCH}-linux-gnu"
-fi
-
-# Bundle all libs
-
-wget --retry-connrefused --tries=30 "$SHARUN" -O ./sharun-aio
-chmod +x ./sharun-aio
-xvfb-run -a ./sharun-aio l -p -v -e -s -k \
-	../$BUILDDIR/bin/eden* \
-	$LIBDIR/lib*GL*.so* \
-	$LIBDIR/dri/* \
-	$LIBDIR/vdpau/* \
-	$LIBDIR/libvulkan* \
-	$LIBDIR/libXss.so* \
-	$LIBDIR/libdecor-0.so* \
-	$LIBDIR/libgamemode.so* \
-	$LIBDIR/qt6/plugins/imageformats/* \
-	$LIBDIR/qt6/plugins/iconengines/* \
-	$LIBDIR/qt6/plugins/platforms/* \
-	$LIBDIR/qt6/plugins/platformthemes/* \
-	$LIBDIR/qt6/plugins/platforminputcontexts/* \
-	$LIBDIR/qt6/plugins/styles/* \
-	$LIBDIR/qt6/plugins/xcbglintegrations/* \
-	$LIBDIR/qt6/plugins/wayland-*/* \
-	$LIBDIR/pulseaudio/* \
-	$LIBDIR/alsa-lib/*
-
-rm -f ./sharun-aio
-
-# Prepare sharun
-if [ "$ARCH" = 'aarch64' ]; then
-	# allow the host vulkan to be used for aarch64 given the sad situation
-	echo 'SHARUN_ALLOW_SYS_VKICD=1' > ./.env
-fi
+# deploy
+wget --retry-connrefused --tries=30 "$SHARUN" -O ./quick-sharun
+chmod +x ./quick-sharun
+./quick-sharun $BUILDDIR/bin/eden
 
 # Wayland is mankind's worst invention, perhaps only behind war
-echo 'QT_QPA_PLATFORM=xcb' >> ./.env
+echo 'QT_QPA_PLATFORM=xcb' >> AppDir/.env
 
-# Workaround for Gentoo
-if [ -d "shared/libproxy" ]; then
-	cp shared/libproxy/* lib/
+# MAKE APPIMAGE WITH URUNTIME
+echo "Generating AppImage..."
+
+wget --retry-connrefused --tries=30 "$URUNTIME" -O ./uruntime2appimage
+chmod +x ./uruntime2appimage
+./uruntime2appimage
+
+if [ "$DEVEL" = 'true' ]; then
+    rm -f ./*.AppImage.zsync
 fi
 
-ln -f ./sharun ./AppRun
-./sharun -g
-
-# turn appdir into appimage
-cd ..
-wget -q "$URUNTIME" -O ./uruntime
-chmod +x ./uruntime
-
-#Add udpate info to runtime
-echo "Adding update information \"$UPINFO\" to runtime..."
-./uruntime --appimage-addupdinfo "$UPINFO"
-
-echo "Generating AppImage..."
-./uruntime --appimage-mkdwarfs -f \
-	--set-owner 0 --set-group 0 \
-	--no-history --no-create-timestamp \
-	--compression zstd:level=22 -S26 -B6 \
-	--header uruntime \
-  -N 4 \
-	-i ./AppDir -o Eden-"$VERSION"-"$ARCH".AppImage
-
-echo "Generating zsync file..."
-zsyncmake *.AppImage -u *.AppImage
 echo "All Done!"
-
-mkdir -p ../artifacts
-cp -r *.AppImage* ../artifacts
