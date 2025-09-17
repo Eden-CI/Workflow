@@ -17,9 +17,9 @@ done
 
 cd eden
 git fetch --all
-git checkout $FORGEJO_REF
+git checkout $FORGEJO_rEF
 
-git rev-parse --abbrev-ref HEAD > GIT-REFSPEC
+echo $FORGEJO_BRANCH > GIT-REFSPEC
 git rev-parse --short=10 HEAD > GIT-COMMIT
 git describe --tags HEAD --abbrev=0 > GIT-TAG || echo 'v0.0.3' > GIT-TAG
 

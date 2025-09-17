@@ -263,9 +263,9 @@ jobs:
           path: |
             ${{ github.workspace }}/.cache
             ${{ github.workspace }}/build/_deps/*-build
-          key: ${{ runner.os }}-${{ matrix.os.arch }}-unix-cpm-${{ github.run_id }}
+          key: ${{ runner.os }}-${{ matrix.os.arch }}-${{ matrix.compiler }}-unix-cpm-${{ github.run_id }}
           restore-keys: |
-            ${{ runner.os }}-${{ matrix.os.arch }}-unix-cpm-
+            ${{ runner.os }}-${{ matrix.os.arch }}-${{ matrix.compiler }}-unix-cpm-
 
       - name: Set up MSVC
         uses: ilammy/msvc-dev-cmd@v1

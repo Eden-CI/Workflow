@@ -6,11 +6,13 @@ case "$1" in
   master)
     FORGEJO_REF=$(echo "$PAYLOAD_JSON" | jq -r '.ref')
     FORGEJO_BEFORE=$(echo "$PAYLOAD_JSON" | jq -r '.before')
+    FORGEJO_BRANCH=master
 
     echo "FORGEJO_CLONE_URL=https://git.eden-emu.dev/eden-emu/eden.git" >> $GITHUB_ENV
     ;;
   pull_request)
     FORGEJO_REF=$(echo "$PAYLOAD_JSON" | jq -r '.ref')
+    FORGEJO_BRANCH=$(echo "$PAYLOAD_JSON" | jq -r '.ref')
     FORGEJO_NUMBER=$(echo "$PAYLOAD_JSON" | jq -r '.number')
 
     echo "FORGEJO_CLONE_URL=$(echo "$PAYLOAD_JSON" | jq -r '.clone_url')" >> $GITHUB_ENV
@@ -23,17 +25,21 @@ case "$1" in
     ;;
   tag)
     FORGEJO_REF=$(echo "$PAYLOAD_JSON" | jq -r '.tag')
+    FORGEJO_BRANCH=stable
 
     echo "FORGEJO_CLONE_URL=https://git.eden-emu.dev/eden-emu/eden.git" >> $GITHUB_ENV
     ;;
   push)
     echo "FORGEJO_CLONE_URL=https://git.eden-emu.dev/eden-emu/eden.git" >> $GITHUB_ENV
     FORGEJO_REF=origin/cmake/git-rev
+    FORGEJO_BRANCH=cmake/git-rev
 esac
 
 if [ "$FORGEJO_REF" = "null" ] || [ "$FORGEJO_REF" = "" ]
 then
   FORGEJO_REF=origin/cmake/git-rev
+  FORGEJO_BRANCH=cmake/git-rev
 fi
 
 echo "FORGEJO_REF=$FORGEJO_REF" >> $GITHUB_ENV
+echo "FORGEJO_BRANCH=$FORGEJO_BRANCH" >> $GITHUB_ENV
