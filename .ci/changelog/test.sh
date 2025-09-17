@@ -4,7 +4,7 @@ TAG=continuous
 REF=continuous
 
 brief() {
-  echo "This is a continuous test build of QDash."
+  echo "This is a continuous test build of Eden."
 }
 
 changelog() {
