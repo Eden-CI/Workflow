@@ -1,9 +1,7 @@
 #!/bin/bash -e
 
-# SPDX-FileCopyrightText: 2025 eden Emulator Project
+# SPDX-FileCopyrightText: 2025 Eden Emulator Project
 # SPDX-License-Identifier: GPL-3.0-or-later
-
-cd eden
 
 export NDK_CCACHE=$(which ccache)
 

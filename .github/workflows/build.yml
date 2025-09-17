@@ -26,8 +26,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  source:
-    name: "Source Pack"
+  summary:
+    name: "Summary"
     runs-on: ubuntu-latest
 
     steps:
@@ -46,9 +46,59 @@ jobs:
           export FORGEJO_TOKEN=${{ secrets.FORGEJO_TOKEN }}
           ./.ci/summary.sh ${{ inputs.build-id }}
 
+  clone:
+    name: "Clone"
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Parse Forgejo payload
+        shell: bash
+        run: |
+          export PAYLOAD_JSON='${{ toJSON(github.event.client_payload) }}'
+          export FORGEJO_TOKEN=${{ secrets.FORGEJO_TOKEN }}
+          ./.ci/parse.sh ${{ inputs.build-id }}
+
       - name: Clone
         shell: bash
-        run: ./.ci/clone.sh true
+        run: ./.ci/clone.sh ${{ inputs.build-id }}
+
+      - name: Upload cloned repo
+        uses: actions/upload-artifact@v4
+        with:
+          name: eden
+          path: |
+            eden/*
+
+  source:
+    name: "Source Pack"
+    runs-on: ubuntu-latest
+    needs: [clone]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Parse Forgejo payload
+        shell: bash
+        run: |
+          export PAYLOAD_JSON='${{ toJSON(github.event.client_payload) }}'
+          export FORGEJO_TOKEN=${{ secrets.FORGEJO_TOKEN }}
+          ./.ci/parse.sh ${{ inputs.build-id }}
+
+      - name: Create job summary
+        run: |
+          export FORGEJO_TOKEN=${{ secrets.FORGEJO_TOKEN }}
+          ./.ci/summary.sh ${{ inputs.build-id }}
+
+      - name: Clone
+        uses: actions/download-artifact@v4
+        with:
+          name: eden
 
       - name: Configure
         run: ./.ci/source/configure.sh
@@ -85,7 +135,7 @@ jobs:
 
   linux:
     name: "Linux (${{ matrix.arch }})"
-    needs: set-matrix
+    needs: [set-matrix, clone]
     runs-on: ${{ matrix.runs-on }}
     strategy:
       fail-fast: false
@@ -118,15 +168,16 @@ jobs:
           ./.ci/parse.sh ${{ inputs.build-id }}
 
       - name: Clone
-        shell: bash
-        run: ./.ci/clone.sh true
+        uses: actions/download-artifact@v4
+        with:
+          name: eden
 
       - name: Set up CPM cache
         uses: actions/cache@v4
         with:
           path: |
-            ${{ github.workspace }}/eden/.cache
-            ${{ github.workspace }}/eden/build/_deps/*-build
+            ${{ github.workspace }}/.cache
+            ${{ github.workspace }}/build/_deps/*-build
           key: ${{ runner.os }}-${{ matrix.arch }}-cpm-${{ github.run_id }}
           restore-keys: |
             ${{ runner.os }}-${{ matrix.arch }}-cpm-
@@ -141,14 +192,28 @@ jobs:
         run: |
           ./.ci/linux/package.sh ${{ matrix.arch }}
 
+      - name: Package (binary)
+        run: |
+          cmake --install build --prefix install/usr
+
+          cd install
+          tar --owner root --group root --zstd -cf Eden-Linux.tar.zst *
+
+      - name: Upload Binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-binary-${{ matrix.arch }}
+          path: Eden-Linux.tar.zst
+
       - name: Upload artifacts
         uses: actions/upload-artifact@v4.6.2
         with:
           name: linux-${{ matrix.arch }}
-          path: artifacts/*
+          path: ./*.AppImage*
 
   windows:
     name: "Windows ${{ matrix.os.arch }} (${{ matrix.compiler }})"
+    needs: [clone]
     env:
       QT_VERSION: 6.9.1
 
@@ -192,15 +257,16 @@ jobs:
           ./.ci/parse.sh ${{ inputs.build-id }}
 
       - name: Clone
-        shell: bash
-        run: ./.ci/clone.sh true
+        uses: actions/download-artifact@v4
+        with:
+          name: eden
 
       - name: Set up CPM cache
         uses: actions/cache@v4
         with:
           path: |
-            ${{ github.workspace }}/eden/.cache
-            ${{ github.workspace }}/eden/build/_deps/*-build
+            ${{ github.workspace }}/.cache
+            ${{ github.workspace }}/build/_deps/*-build
           key: ${{ runner.os }}-${{ matrix.os.arch }}-unix-cpm-${{ github.run_id }}
           restore-keys: |
             ${{ runner.os }}-${{ matrix.os.arch }}-unix-cpm-
@@ -220,7 +286,7 @@ jobs:
         run: |
           export WINDEPLOYQT=windeployqt
           git config --global core.autocrlf off
-          dos2unix eden/.patch/boost/*
+          dos2unix .patch/boost/*
 
           ./.ci/windows/build.sh
 
@@ -238,6 +304,7 @@ jobs:
 
   android:
     runs-on: ubuntu-latest
+    needs: [clone]
     name: "Android"
 
     steps:
@@ -256,15 +323,16 @@ jobs:
           ./.ci/parse.sh ${{ inputs.build-id }}
 
       - name: Clone
-        shell: bash
-        run: ./.ci/clone.sh true
+        uses: actions/download-artifact@v4
+        with:
+          name: eden
 
       - name: Set up CPM cache
         uses: actions/cache@v4
         with:
           path: |
-            ${{ github.workspace }}/eden/.cache
-            ${{ github.workspace }}/eden/build/_deps/*-build
+            ${{ github.workspace }}/.cache
+            ${{ github.workspace }}/build/_deps/*-build
           key: ${{ runner.os }}-cpm-${{ github.run_id }}
           restore-keys: |
             ${{ runner.os }}-cpm-
@@ -281,8 +349,14 @@ jobs:
         run: |
           ./.ci/android/package.sh
 
-      - name: Upload artifacts
+      - name: Upload APK
         uses: actions/upload-artifact@v4.6.2
         with:
           name: android
           path: artifacts/*.apk
+
+      - name: Upload AAB
+        uses: actions/upload-artifact@v4.6.2
+        with:
+          name: android-aab
+          path: artifacts/*.aab

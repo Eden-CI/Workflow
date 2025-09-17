@@ -10,6 +10,6 @@ echo "This is ref [\`$REF\`](https://git.eden-emu.dev/eden-emu/eden/commit/$REF)
 changelog() {
   echo "## Changelog"
   echo
-  echo "Full changelog: [\`$FORGEJO_BEFORE...$FORGEJO_REF\`](https://git.eden-emu.devn/eden-emu/eden/compare/$FORGEJO_BEFORE...$FORGEJO_REF)"
+  echo "Full changelog: [\`$FORGEJO_BEFORE...$FORGEJO_REF\`](https://git.eden-emu.dev/eden-emu/eden/compare/$FORGEJO_BEFORE...$FORGEJO_REF)"
   echo
 }

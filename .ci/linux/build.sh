@@ -3,8 +3,6 @@
 # SPDX-FileCopyrightText: 2025 Eden Emulator Project
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-cd eden
-
 case "$1" in
 amd64 | "")
     echo "Making amd64-v3 optimized build of Eden"
