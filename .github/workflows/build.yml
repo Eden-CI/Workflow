@@ -67,12 +67,19 @@ jobs:
         shell: bash
         run: ./.ci/clone.sh ${{ inputs.build-id }}
 
+      - name: Cleanup
+        run: |
+          cd eden
+          rm -rf .git* .ci .github docs
+
       - name: Upload cloned repo
         uses: actions/upload-artifact@v4
         with:
           name: eden
+          include-hidden-files: true
           path: |
             eden/*
+            eden/.patch
 
   source:
     name: "Source Pack"
@@ -82,18 +89,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Parse Forgejo payload
-        shell: bash
-        run: |
-          export PAYLOAD_JSON='${{ toJSON(github.event.client_payload) }}'
-          export FORGEJO_TOKEN=${{ secrets.FORGEJO_TOKEN }}
-          ./.ci/parse.sh ${{ inputs.build-id }}
-
-      - name: Create job summary
-        run: |
-          export FORGEJO_TOKEN=${{ secrets.FORGEJO_TOKEN }}
-          ./.ci/summary.sh ${{ inputs.build-id }}
 
       - name: Clone
         uses: actions/download-artifact@v4
@@ -150,7 +145,8 @@ jobs:
 
       - name: Install dependencies
         run: |
-          ./.ci/deps/linux.sh
+          chmod a+x ./.ci/linux/deps.sh
+          ./.ci/linux/deps.sh
 
       - name: Set build variables
         shell: bash
@@ -203,7 +199,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: linux-binary-${{ matrix.arch }}
-          path: Eden-Linux.tar.zst
+          path: install/Eden-Linux.tar.zst
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4.6.2
@@ -313,7 +309,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          ./.ci/deps/android.sh
+          ./.ci/android/deps.sh
 
       - name: Parse Forgejo payload
         shell: sh

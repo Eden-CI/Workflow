@@ -19,10 +19,10 @@ cd eden
 git fetch --all
 git checkout $FORGEJO_REF
 
-git symbolic-ref --short HEAD > GIT-REFSPEC
+git rev-parse --abbrev-ref HEAD > GIT-REFSPEC
 git rev-parse --short=10 HEAD > GIT-COMMIT
 git describe --tags HEAD --abbrev=0 > GIT-TAG || echo 'v0.0.3' > GIT-TAG
 
-if [ "$1" == "tag" ]; then
+if [ "$1" = "tag" ]; then
   cp GIT-TAG GIT-RELEASE
 fi
