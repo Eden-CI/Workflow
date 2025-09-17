@@ -42,6 +42,7 @@ jobs:
         run: |
           echo "REPO=eden-emulator/Releases" >> $GITHUB_ENV
           echo "DEVEL=false" >> $GITHUB_ENV
+          echo "BUILD=tag" >> $GITHUB_ENV
 
       - name: Package artifacts nicely
         run: |
@@ -49,9 +50,7 @@ jobs:
           ./pack.sh
 
       - name: Generate changelog
-        run: |
-          export FORGEJO_TOKEN=${{ secrets.FORGEJO_TOKEN }}
-          ./.ci/changelog/tag.sh > changelog.md
+        run: ./.ci/changelog/generate.sh > changelog.md
 
       - name: Release
         uses: softprops/action-gh-release@v2.2.2

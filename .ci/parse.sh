@@ -5,6 +5,7 @@ echo $PAYLOAD_JSON
 case "$1" in
   master)
     FORGEJO_REF=$(echo "$PAYLOAD_JSON" | jq -r '.ref')
+    FORGEJO_BEFORE=$(echo "$PAYLOAD_JSON" | jq -r '.before')
 
     echo "FORGEJO_CLONE_URL=https://git.eden-emu.dev/eden-emu/eden.git" >> $GITHUB_ENV
     ;;

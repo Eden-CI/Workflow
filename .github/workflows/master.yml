@@ -38,6 +38,8 @@ jobs:
         run: |
           echo "REPO=Eden-CI/Master" >> $GITHUB_ENV
           echo "DEVEL=true" >> $GITHUB_ENV
+          echo "TIMESTAMP=$(date +%s)" >> $GITHUB_ENV
+          echo "BUILD=master" >> $GITHUB_ENV
 
       - name: Package artifacts nicely
         run: |
@@ -45,16 +47,13 @@ jobs:
           ./pack.sh
 
       - name: Generate changelog
-        run: |
-          export FORGEJO_TOKEN=${{ secrets.FORGEJO_TOKEN }}
-          export ID=${FORGEJO_REF}
-          ./.ci/changelog/master.sh > changelog.md
+        run: ./.ci/changelog/generate.sh > changelog.md
 
       - name: Release
         uses: softprops/action-gh-release@v2.2.2
         with:
           name: "Eden Master - ${{ env.FORGEJO_REF }}"
-          tag_name: ${{ env.FORGEJO_REF }}
+          tag_name: ${{ env.TIMESTAMP }}-${{ env.FORGEJO_REF }}
           repository: ${{ env.REPO }}
           body_path: ./changelog.md
           prerelease: false

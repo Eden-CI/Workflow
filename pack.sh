@@ -5,7 +5,6 @@ mkdir -p artifacts
 ARCHES="amd64 steamdeck aarch64"
 if [ "$DEVEL" = "false" ]; then
   ARCHES="$ARCHES legacy rog-ally armv9"
-  # "aarch64 armv9"
 fi
 
 for arch in $ARCHES
