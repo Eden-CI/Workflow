@@ -14,7 +14,7 @@ do
     cp linux-$arch/*.AppImage.zsync "artifacts/Eden-Linux-${ID}-${arch}.AppImage.zsync"
   fi
 
-  cp linux-binary-$arch/*.tar.zst "artifacts/Eden-Linux-${ID}-${binary}.tar.zst"
+  cp linux-binary-$arch/*.tar.zst "artifacts/Eden-Linux-${ID}-binary.tar.zst"
 done
 
 cp android/*.apk artifacts/Eden-Android-${ID}.apk
