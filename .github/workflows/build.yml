@@ -136,8 +136,7 @@ jobs:
       fail-fast: false
       matrix:
         os: ${{ fromJson(needs.set-matrix.outputs.matrix) }}
-        include:
-          compiler: [gcc, clang]
+        compiler: [clang, gcc]
 
     container: ghcr.io/pkgforge-dev/archlinux:latest
 
