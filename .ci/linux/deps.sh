@@ -16,6 +16,7 @@ pacman -Syu --noconfirm \
 		cmake \
 		curl \
 		enet \
+		ffnvcodec-headers \
 		fmt \
 		gamemode \
 		git \
@@ -25,6 +26,8 @@ pacman -Syu --noconfirm \
 		libva \
 		libvdpau \
 		libvpx \
+		lld \
+		llvm \
 		mbedtls \
 		mold \
 		nasm \

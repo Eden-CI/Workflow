@@ -52,7 +52,7 @@ native)
     ;;
 esac
 
-export ARCH_FLAGS="$ARCH_FLAGS -O3"
+export ARCH_FLAGS="$ARCH_FLAGS -O3 -pipe -flto=auto"
 
 if [ "$TARGET" = "appimage" ]; then
     EXTRA_CMAKE_FLAGS+=(-DCMAKE_INSTALL_PREFIX=/usr -DYUZU_ROOM=ON -DYUZU_ROOM_STANDALONE=OFF -DYUZU_CMD=OFF)
@@ -60,7 +60,7 @@ else
     EXTRA_CMAKE_FLAGS+=(-DYUZU_USE_PRECOMPILED_HEADERS=OFF)
 fi
 
-[ "$COMPILER" = "clang" ] && EXTRA_CMAKE_FLAGS+=(-DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++)
+[ "$COMPILER" = "clang" ] && EXTRA_CMAKE_FLAGS+=(-DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++) && ARCH_FLAGS="$ARCH_FLAGS -fuse-ld=lld"
 
 [ "$DEVEL" != "true" ] && EXTRA_CMAKE_FLAGS+=(-DENABLE_QT_UPDATE_CHECKER=ON)
 
