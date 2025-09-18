@@ -27,7 +27,6 @@ pacman -Syu --noconfirm \
 		libvdpau \
 		libvpx \
 		lld \
-		llvm \
 		mbedtls \
 		mold \
 		nasm \

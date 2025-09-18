@@ -93,9 +93,10 @@ else
   linux armv9 "armv9-a" "For ARM CPUs made in late 2021 or later"
 fi
 
-echo "We are additionally providing experimental packages built with clang, rather than MSVC. These builds should be identical, if not faster,"
+echo
+echo "We are additionally providing experimental packages built with Clang, rather than GCC. These builds should be identical, if not faster,"
 echo "but how it affects the overall experience is currently unknown. In the future, these builds will be made with PGO to increase speed."
-
+echo
 echo "| Build | Description |"
 echo "| ----- | ----------- |"
 
@@ -123,7 +124,7 @@ echo "| ----- | ----------- |"
 win amd64-msvc amd64 "For any Windows machine running an AMD or Intel CPU"
 win arm64-msvc aarch64 "For any Windows machine running a Qualcomm or other ARM-based SoC"
 echo
-echo "We are additionally providing experimental packages built with clang, rather than MSVC. These builds should be identical, if not faster,"
+echo "We are additionally providing experimental packages built with Clang, rather than MSVC. These builds should be identical, if not faster,"
 echo "but how it affects the overall experience is currently unknown. In the future, these builds will be made with PGO to increase speed."
 echo
 echo "| Build | Description |"
