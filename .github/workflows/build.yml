@@ -129,13 +129,15 @@ jobs:
           echo "matrix=${MATRIX}" >> $GITHUB_OUTPUT
 
   linux:
-    name: "Linux (${{ matrix.arch }})"
+    name: "Linux (${{ matrix.os.arch }}) (${{ matrix.compiler }})"
     needs: [set-matrix, clone]
-    runs-on: ${{ matrix.runs-on }}
+    runs-on: ${{ matrix.os.runs-on }}
     strategy:
       fail-fast: false
       matrix:
-        include: ${{ fromJson(needs.set-matrix.outputs.matrix) }}
+        os: ${{ fromJson(needs.set-matrix.outputs.matrix) }}
+        include:
+          compiler: [gcc, clang]
 
     container: ghcr.io/pkgforge-dev/archlinux:latest
 
@@ -156,6 +158,9 @@ jobs:
           echo "USE_WEBENGINE=${{ inputs.webengine }}" >> $GITHUB_ENV
           echo "USE_MULTIMEDIA=${{ inputs.multimedia }}" >> $GITHUB_ENV
 
+          # TODO(crueter): Clang builds should have PGO
+          echo "COMPILER=${{ matrix.compiler }}"
+
       - name: Parse Forgejo payload
         shell: bash
         run: |
@@ -174,19 +179,19 @@ jobs:
           path: |
             ${{ github.workspace }}/.cache
             ${{ github.workspace }}/build/_deps/*-build
-          key: ${{ runner.os }}-${{ matrix.arch }}-cpm-${{ github.run_id }}
+          key: ${{ runner.os }}-${{ matrix.os.arch }}-cpm-${{ github.run_id }}
           restore-keys: |
-            ${{ runner.os }}-${{ matrix.arch }}-cpm-
+            ${{ runner.os }}-${{ matrix.os.arch }}-cpm-
 
       - name: Build
         shell: bash
         run: |
-          TARGET=appimage ./.ci/linux/build.sh ${{ matrix.arch }}
+          TARGET=appimage ./.ci/linux/build.sh ${{ matrix.os.arch }}
 
       - name: Package
         shell: bash
         run: |
-          ./.ci/linux/package.sh ${{ matrix.arch }}
+          ./.ci/linux/package.sh ${{ matrix.os.arch }}
 
       - name: Package (binary)
         run: |
@@ -198,13 +203,13 @@ jobs:
       - name: Upload Binary
         uses: actions/upload-artifact@v4
         with:
-          name: linux-binary-${{ matrix.arch }}
+          name: linux-binary-${{ matrix.os.arch }}-${{ matrix.compiler }}
           path: install/Eden-Linux.tar.zst
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4.6.2
         with:
-          name: linux-${{ matrix.arch }}
+          name: linux-${{ matrix.os.arch }}-${{ matrix.compiler }}
           path: ./*.AppImage*
 
   windows:
@@ -242,6 +247,7 @@ jobs:
           echo "DEVEL=${{ inputs.devel }}" >> $GITHUB_ENV
           echo "USE_WEBENGINE=${{ inputs.webengine }}" >> $GITHUB_ENV
           echo "USE_MULTIMEDIA=${{ inputs.multimedia }}" >> $GITHUB_ENV
+          # TODO(crueter): Clang builds should have PGO
           echo "COMPILER=${{ matrix.compiler }}" >> $GITHUB_ENV
 
       - name: Parse Forgejo payload
@@ -271,6 +277,13 @@ jobs:
         uses: ilammy/msvc-dev-cmd@v1
         with:
           arch: ${{ matrix.os.arch }}
+
+      - name: Force Clang 20
+        if: matrix.compiler == 'clang'
+        shell: bash
+        run: |
+          echo "C:/Program Files/LLVM/bin" >> $GITHUB_PATH
+          clang-cl --version
 
       - name: Install Vulkan SDK
         shell: powershell

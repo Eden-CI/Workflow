@@ -9,12 +9,16 @@ fi
 
 for arch in $ARCHES
 do
-  cp linux-$arch/*.AppImage "artifacts/Eden-Linux-${ID}-${arch}.AppImage"
-  if [ "$DEVEL" = "false" ]; then
-    cp linux-$arch/*.AppImage.zsync "artifacts/Eden-Linux-${ID}-${arch}.AppImage.zsync"
-  fi
+  for compiler in gcc clang; do
+    ARTIFACT="Eden-Linux-${ID}-${arch}-${compiler}"
 
-  cp linux-binary-$arch/*.tar.zst "artifacts/Eden-Linux-${ID}-${arch}-binary.tar.zst"
+    cp linux-$arch-$compiler/*.AppImage "artifacts/$ARTIFACT.AppImage"
+    if [ "$DEVEL" = "false" ]; then
+      cp linux-$arch-$compiler/*.AppImage.zsync "artifacts/$ARTIFACT.AppImage.zsync"
+    fi
+
+    cp linux-binary-$arch-$compiler/*.tar.zst "artifacts/$ARTIFACT.tar.zst"
+  done
 done
 
 cp android/*.apk artifacts/Eden-Android-${ID}.apk

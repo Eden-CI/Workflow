@@ -9,9 +9,9 @@ linux() {
   DESCRIPTION="$3"
 
   echo -n "| "
-  echo -n "[$PRETTY_ARCH](${BASE_DOWNLOAD_URL}/${TAG}/Eden-Linux-${REF}-${ARCH}.AppImage) | "
+  echo -n "[$PRETTY_ARCH](${BASE_DOWNLOAD_URL}/${TAG}/Eden-Linux-${REF}-${ARCH}-${COMPILER}.AppImage) | "
   if [ "$DEVEL" != "true" ]; then
-    echo -n "([zsync](${BASE_DOWNLOAD_URL}/${TAG}/Eden-Linux-${REF}-${ARCH}.AppImage.zsync)) | "
+    echo -n "([zsync](${BASE_DOWNLOAD_URL}/${TAG}/Eden-Linux-${REF}-${ARCH}-${COMPILER}.AppImage.zsync)) | "
   fi
   echo -n "$DESCRIPTION |"
   echo
@@ -79,6 +79,27 @@ echo
 echo "| Build | Description |"
 echo "| ----- | ----------- |"
 
+COMPILER=gcc
+if [ "$DEVEL" = "true" ]; then
+  linux amd64 "amd64" "For any modern AMD or Intel CPU"
+  linux steamdeck "Steam Deck" "For Steam Deck and other >= Zen 2 AMD CPUs"
+  linux aarch64 "armv8-a" "For ARM CPUs made in mid-2021 or earlier"
+else
+  linux legacy "amd64 (legacy)" "For CPUs older than 2013 or so"
+  linux amd64 "amd64" "For any modern AMD or Intel CPU"
+  linux steamdeck "Steam Deck" "For Steam Deck and other >= Zen 2 AMD CPUs"
+  linux rog-ally "ROG Ally X" "For ROG Ally X and other >= Zen 4 AMD CPUs"
+  linux aarch64 "armv8-a" "For ARM CPUs made in mid-2021 or earlier"
+  linux armv9 "armv9-a" "For ARM CPUs made in late 2021 or later"
+fi
+
+echo "We are additionally providing experimental packages built with clang, rather than MSVC. These builds should be identical, if not faster,"
+echo "but how it affects the overall experience is currently unknown. In the future, these builds will be made with PGO to increase speed."
+
+echo "| Build | Description |"
+echo "| ----- | ----------- |"
+
+COMPILER=clang
 if [ "$DEVEL" = "true" ]; then
   linux amd64 "amd64" "For any modern AMD or Intel CPU"
   linux steamdeck "Steam Deck" "For Steam Deck and other >= Zen 2 AMD CPUs"
@@ -103,7 +124,7 @@ win amd64-msvc amd64 "For any Windows machine running an AMD or Intel CPU"
 win arm64-msvc aarch64 "For any Windows machine running a Qualcomm or other ARM-based SoC"
 echo
 echo "We are additionally providing experimental packages built with clang, rather than MSVC. These builds should be identical, if not faster,"
-echo "but how it affects the overall experience is currently unknown."
+echo "but how it affects the overall experience is currently unknown. In the future, these builds will be made with PGO to increase speed."
 echo
 echo "| Build | Description |"
 echo "| ----- | ----------- |"

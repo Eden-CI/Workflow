@@ -17,7 +17,7 @@ done
 
 cd eden
 git fetch --all
-git checkout $FORGEJO_rEF
+git checkout $FORGEJO_REF
 
 echo $FORGEJO_BRANCH > GIT-REFSPEC
 git rev-parse --short=10 HEAD > GIT-COMMIT
