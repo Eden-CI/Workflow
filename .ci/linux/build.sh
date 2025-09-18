@@ -66,7 +66,6 @@ if [ "$COMPILER" = "clang" ]; then
     EXTRA_CMAKE_FLAGS+=(-DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++)
     ARCH_FLAGS="$ARCH_FLAGS -fuse-ld=lld -w"
 else
-    EXTRA_CMAKE_FLAGS+=(-DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++)
     ARCH_FLAGS="$ARCH_FLAGS -fuse-ld=mold -w"
 fi
 
