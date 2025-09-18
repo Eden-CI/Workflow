@@ -38,23 +38,30 @@ jobs:
         run: |
           echo "REPO=Eden-CI/Master" >> $GITHUB_ENV
           echo "DEVEL=true" >> $GITHUB_ENV
+          echo "TIMESTAMP=$(date +%s)" >> $GITHUB_ENV
+          echo "BUILD=master" >> $GITHUB_ENV
 
       - name: Package artifacts nicely
         run: |
           export ID=${FORGEJO_REF}
           ./pack.sh
 
-      - name: Generate changelog
+      - name: Delete Previous Release
         run: |
-          export FORGEJO_TOKEN=${{ secrets.FORGEJO_TOKEN }}
-          export ID=${FORGEJO_REF}
-          ./.ci/changelog/master.sh > changelog.md
+          gh release delete "continuous" --repo "$REPO" --cleanup-tag  -y
+          sleep 5
+        env:
+          GH_TOKEN: "${{ secrets.CUSTOM_GITHUB_TOKEN }}"
+        continue-on-error: true
+
+      - name: Generate changelog
+        run: ./.ci/changelog/generate.sh > changelog.md
 
       - name: Release
         uses: softprops/action-gh-release@v2.2.2
         with:
           name: "Eden Master - ${{ env.FORGEJO_REF }}"
-          tag_name: ${{ env.FORGEJO_REF }}
+          tag_name: ${{ env.TIMESTAMP }}-${{ env.FORGEJO_REF }}
           repository: ${{ env.REPO }}
           body_path: ./changelog.md
           prerelease: false

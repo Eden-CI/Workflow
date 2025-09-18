@@ -3,11 +3,9 @@
 # SPDX-FileCopyrightText: 2025 eden Emulator Project
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-cd eden
-
 GITDATE="$(git show -s --date=short --format='%ad' | sed 's/-//g')"
 GITREV="$(git show -s --format='%h')"
-ARTIFACTS_DIR="$PWD/../artifacts"
+ARTIFACTS_DIR="$PWD/artifacts"
 mkdir -p "${ARTIFACTS_DIR}/"
 
 REV_NAME="eden-android-${GITDATE}-${GITREV}"
