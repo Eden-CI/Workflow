@@ -97,6 +97,7 @@ cmake .. -G Ninja \
     -DYUZU_ENABLE_LTO=ON \
     -DDYNARMIC_ENABLE_LTO=ON \
     -DYUZU_USE_BUNDLED_OPENSSL=ON \
+    -DYUZU_DISABLE_LLVM=ON \
     "${EXTRA_CMAKE_FLAGS[@]}"
 
 ninja -j$(nproc)
