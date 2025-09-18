@@ -157,7 +157,7 @@ jobs:
           echo "DEVEL=${{ inputs.devel }}" >> $GITHUB_ENV
           echo "USE_WEBENGINE=${{ inputs.webengine }}" >> $GITHUB_ENV
           echo "USE_MULTIMEDIA=${{ inputs.multimedia }}" >> $GITHUB_ENV
-          echo "COMPILER=${{ matrix.compiler }}"
+          echo "COMPILER=${{ matrix.compiler }}" >> $GITHUB_ENV
 
       - name: Parse Forgejo payload
         shell: bash
