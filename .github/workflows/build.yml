@@ -149,6 +149,7 @@ jobs:
           chmod a+x ./.ci/linux/deps.sh
           ./.ci/linux/deps.sh
 
+      # TODO(crueter): PGO
       - name: Set build variables
         shell: bash
         run: |
@@ -156,8 +157,6 @@ jobs:
           echo "DEVEL=${{ inputs.devel }}" >> $GITHUB_ENV
           echo "USE_WEBENGINE=${{ inputs.webengine }}" >> $GITHUB_ENV
           echo "USE_MULTIMEDIA=${{ inputs.multimedia }}" >> $GITHUB_ENV
-
-          # TODO(crueter): Clang builds should have PGO
           echo "COMPILER=${{ matrix.compiler }}"
 
       - name: Parse Forgejo payload
@@ -246,7 +245,6 @@ jobs:
           echo "DEVEL=${{ inputs.devel }}" >> $GITHUB_ENV
           echo "USE_WEBENGINE=${{ inputs.webengine }}" >> $GITHUB_ENV
           echo "USE_MULTIMEDIA=${{ inputs.multimedia }}" >> $GITHUB_ENV
-          # TODO(crueter): Clang builds should have PGO
           echo "COMPILER=${{ matrix.compiler }}" >> $GITHUB_ENV
 
       - name: Parse Forgejo payload
