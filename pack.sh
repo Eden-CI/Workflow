@@ -3,13 +3,15 @@
 mkdir -p artifacts
 
 ARCHES="amd64 steamdeck aarch64"
+COMPILERS="gcc"
 if [ "$DEVEL" = "false" ]; then
   ARCHES="$ARCHES legacy rog-ally armv9"
+  COMPILERS="$COMPILERS clang"
 fi
 
 for arch in $ARCHES
 do
-  for compiler in gcc clang; do
+  for compiler in $COMPILERS; do
     ARTIFACT="Eden-Linux-${ID}-${arch}-${compiler}"
 
     cp linux-$arch-$compiler/*.AppImage "artifacts/$ARTIFACT.AppImage"

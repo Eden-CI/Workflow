@@ -93,25 +93,21 @@ else
   linux armv9 "armv9-a" "For ARM CPUs made in late 2021 or later"
 fi
 
-echo
-echo "We are additionally providing experimental packages built with Clang, rather than GCC. These builds should be identical, if not faster,"
-echo "but how it affects the overall experience is currently unknown. In the future, these builds will be made with PGO to increase speed."
-echo
-echo "| Build | Description |"
-echo "| ----- | ----------- |"
+if [ "$DEVEL" != "true" ]; then
+  echo
+  echo "We are additionally providing experimental packages built with Clang, rather than GCC. These builds should be identical, if not faster,"
+  echo "but how it affects the overall experience is currently unknown. In the future, these builds will be made with PGO to increase speed."
+  echo
+  echo "| Build | Description |"
+  echo "| ----- | ----------- |"
 
-COMPILER=clang
-if [ "$DEVEL" = "true" ]; then
-  linux amd64 "amd64" "For any modern AMD or Intel CPU"
-  linux steamdeck "Steam Deck" "For Steam Deck and other >= Zen 2 AMD CPUs"
-  linux aarch64 "armv8-a" "For ARM CPUs made in mid-2021 or earlier"
-else
-  linux legacy "amd64 (legacy)" "For CPUs older than 2013 or so"
-  linux amd64 "amd64" "For any modern AMD or Intel CPU"
-  linux steamdeck "Steam Deck" "For Steam Deck and other >= Zen 2 AMD CPUs"
-  linux rog-ally "ROG Ally X" "For ROG Ally X and other >= Zen 4 AMD CPUs"
-  linux aarch64 "armv8-a" "For ARM CPUs made in mid-2021 or earlier"
-  linux armv9 "armv9-a" "For ARM CPUs made in late 2021 or later"
+  COMPILER=clang
+  linux legacy "amd64 (legacy) (clang)" "For CPUs older than 2013 or so (clang build)"
+  linux amd64 "amd64 (clang)" "For any modern AMD or Intel CPU (clang build)"
+  linux steamdeck "Steam Deck (clang)" "For Steam Deck and other >= Zen 2 AMD CPUs (clang build)"
+  linux rog-ally "ROG Ally X (clang)" "For ROG Ally X and other >= Zen 4 AMD CPUs (clang build)"
+  linux aarch64 "armv8-a (clang)" "For ARM CPUs made in mid-2021 or earlier (clang build)"
+  linux armv9 "armv9-a (clang)" "For ARM CPUs made in late 2021 or later (clang build)"
 fi
 
 echo
