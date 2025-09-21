@@ -29,4 +29,5 @@ brew install --formula --quiet \
   opus \
   enet \
   spirv-headers \
-  vulkan-headers
+  vulkan-headers \
+  vulkan-utility-libraries
