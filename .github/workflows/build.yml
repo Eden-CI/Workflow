@@ -387,6 +387,7 @@ jobs:
 
   macos:
     runs-on: macos-latest
+    needs: [clone]
     name: "macOS"
 
     steps:
