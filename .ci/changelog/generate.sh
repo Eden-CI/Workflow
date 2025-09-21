@@ -140,6 +140,13 @@ if [ "$DEVEL" != true ]; then
 fi
 
 echo
+echo "### macOS"
+echo
+echo "macOS comes in a tarballed app. These builds are currently experimental, and you should expect major graphical glitches and crashes."
+echo "In order to run the app, you may need to run `xattr -d com.apple.quarantine eden.app` in the directory where you extracted the tarball."
+echo
+echo "[macOS](${BASE_DOWNLOAD_URL}/${TAG}/Eden-macOS-${REF}.tar.zst)"
+echo
 echo "### Source"
 echo
 echo "Contains all source code, submodules, and CPM cache at the time of release."

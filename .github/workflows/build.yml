@@ -384,3 +384,62 @@ jobs:
         with:
           name: android-aab
           path: artifacts/*.aab
+
+  macos:
+    runs-on: macos-latest
+    name: "macOS"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: ./.ci/macos/deps.sh
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: 6.7.3
+          cache: 'true'
+
+      - name: Set build variables
+        shell: bash
+        run: |
+          echo "BUILD_TYPE=${{ inputs.build-type }}" >> $GITHUB_ENV
+          echo "DEVEL=${{ inputs.devel }}" >> $GITHUB_ENV
+          echo "USE_WEBENGINE=${{ inputs.webengine }}" >> $GITHUB_ENV
+          echo "USE_MULTIMEDIA=${{ inputs.multimedia }}" >> $GITHUB_ENV
+
+      - name: Parse Forgejo payload
+        uses: ./.github/workflows/parse
+        with:
+          build-id: ${{ inputs.build-id }}
+
+      - name: Clone
+        uses: actions/download-artifact@v4
+        with:
+          name: eden
+
+      - name: Set up CPM cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ${{ github.workspace }}/.cache
+            ${{ github.workspace }}/build/_deps/*-build
+          key: ${{ runner.os }}-cpm-${{ github.run_id }}
+          restore-keys: |
+            ${{ runner.os }}-cpm-
+
+      - name: Build
+        run: |
+          ./.ci/macos/build.sh
+
+      - name: Package
+        run: |
+          ./.ci/macos/package.sh
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4.6.2
+        with:
+          name: macos
+          path: artifacts/*
