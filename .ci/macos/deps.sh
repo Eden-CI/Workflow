@@ -4,6 +4,7 @@ brew install --formula --quiet \
   autoconf \
   automake \
   boost \
+  enet \
   ffmpeg \
   fmt \
   glslang \
