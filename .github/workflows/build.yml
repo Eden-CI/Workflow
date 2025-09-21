@@ -130,9 +130,9 @@ jobs:
           echo "matrix=${MATRIX}" >> $GITHUB_OUTPUT
 
           if [ "${{ inputs.build-id }}" = "tag" ]; then
-            COMPILERS="[clang, gcc]"
+            COMPILERS='["clang", "gcc"]'
           else
-            COMPILERS="[gcc]"
+            COMPILERS='["gcc"]'
           fi
 
           echo $COMPILERS
