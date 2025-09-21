@@ -112,6 +112,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.set.outputs.matrix }}
+      compilers: ${{ steps.set.outputs.compilers }}
     steps:
       - id: set
         run: |
@@ -128,6 +129,15 @@ jobs:
           echo $MATRIX
           echo "matrix=${MATRIX}" >> $GITHUB_OUTPUT
 
+          if [ "${{ inputs.build-id }}" = "tag" ]; then
+            COMPILERS="[clang, gcc]"
+          else
+            COMPILERS="[gcc]"
+          fi
+
+          echo $COMPILERS
+          echo "compilers=${COMPILERS}" >> $GITHUB_OUTPUT
+
   linux:
     name: "Linux (${{ matrix.os.arch }}) (${{ matrix.compiler }})"
     needs: [set-matrix, clone]
@@ -136,7 +146,7 @@ jobs:
       fail-fast: false
       matrix:
         os: ${{ fromJson(needs.set-matrix.outputs.matrix) }}
-        compiler: [clang, gcc]
+        compiler: ${{ fromJson(needs.set-matrix.outputs.compilers) }}
 
     container: ghcr.io/pkgforge-dev/archlinux:latest
 
