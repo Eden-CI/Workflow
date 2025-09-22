@@ -2,4 +2,4 @@
 
 cd eden
 
-tar --zstd -cf ../source.tar.zst * .*
+tar --zstd -cf ../source.tar.zst * .cache .patch
