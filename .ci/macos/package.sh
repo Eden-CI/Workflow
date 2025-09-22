@@ -4,9 +4,8 @@
 
 ROOTDIR=$PWD
 cd build/bin
-APP=Eden.app
+APP=eden.app
 
-mv *.app $APP
 macdeployqt "$APP" -verbose=2
 macdeployqt "$APP" -always-overwrite -verbose=2
 
