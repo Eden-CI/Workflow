@@ -29,4 +29,3 @@ codesign --deep --force --verbose --sign - "$APP"
 
 mkdir -p ../artifacts
 tar cf ../artifacts/eden.tar.zst "$APP"
-mv ../artifacts ../

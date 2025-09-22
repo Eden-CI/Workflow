@@ -4,6 +4,9 @@ brew install --formula --quiet \
   autoconf \
   automake \
   boost \
+  Catch2 \
+  cmake \
+  cubeb \
   enet \
   ffmpeg \
   fmt \
@@ -12,23 +15,19 @@ brew install --formula --quiet \
   libtool \
   libusb \
   lz4 \
+  mbedtls \
+  molten-vk \
   ninja \
   nlohmann-json \
   openssl \
+  opus \
   pkg-config \
   sdl2 \
   speexdsp \
-  zlib \
-  zstd \
-  cmake \
-  Catch2 \
-  molten-vk \
-  vulkan-loader \
-  spirv-tools \
-  mbedtls \
-  cubeb \
-  opus \
-  enet \
   spirv-headers \
+  spirv-tools \
   vulkan-headers \
-  vulkan-utility-libraries
+  vulkan-loader \
+  vulkan-utility-libraries \
+  zlib \
+  zstd
