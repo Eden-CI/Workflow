@@ -28,5 +28,5 @@ done
 
 codesign --deep --force --verbose --sign - "$APP"
 
-mkdir -p $PWD/artifacts
-tar cf $PWD/artifacts/eden.tar.zst "$APP"
+mkdir -p $ROOTDIR/artifacts
+tar cf $ROOTDIR/artifacts/eden.tar.zst "$APP"
