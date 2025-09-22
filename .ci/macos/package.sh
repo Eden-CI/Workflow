@@ -2,14 +2,16 @@
 
 # credit: escary and hauntek
 
-cd build
-APP=./bin/eden.app
+ROOTDIR=$PWD
+cd build/bin
+APP=Eden.app
 
+mv *.app $APP
 macdeployqt "$APP" -verbose=2
 macdeployqt "$APP" -always-overwrite -verbose=2
 
 # FixMachOLibraryPaths
-find "$APP/Contents/Frameworks" ""$APP/Contents/MacOS"" -type f \( -name "*.dylib" -o -perm +111 \) | while read file; do
+find "$APP/Contents/Frameworks" ""$APP/Contents/MacOS"" -type f \( -name "*.dylib" -o -perm +111 -a -not -name "*Qt*" \) | while read file; do
     if file "$file" | grep -q "Mach-O"; then
         otool -L "$file" | awk '/@rpath\// {print $1}' | while read lib; do
             lib_name="${lib##*/}"
@@ -27,5 +29,5 @@ done
 
 codesign --deep --force --verbose --sign - "$APP"
 
-mkdir -p ../artifacts
-tar cf ../artifacts/eden.tar.zst "$APP"
+mkdir -p $PWD/artifacts
+tar cf $PWD/artifacts/eden.tar.zst "$APP"
