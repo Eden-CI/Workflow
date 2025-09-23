@@ -13,7 +13,7 @@ amd64 | "")
 steamdeck | zen2)
     echo "Making Steam Deck (Zen 2) optimized build of Eden"
     ARCH="steamdeck"
-    ARCH_FLAGS="-march=znver2 -mtune=znver2 -fuse-ld=lld -flto=thin"
+    ARCH_FLAGS="-march=znver2 -mtune=znver2 -fuse-ld=lld -fwhole-program"
     SDL2=external
     export EXTRA_CMAKE_FLAGS=(-DYUZU_BUILD_PRESET=zen2 -DYUZU_SYSTEM_PROFILE=steamdeck)
     ;;
