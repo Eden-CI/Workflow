@@ -8,6 +8,9 @@ export NDK_CCACHE=$(which ccache)
 if [ ! -z "${ANDROID_KEYSTORE_B64}" ]; then
     export ANDROID_KEYSTORE_FILE="${GITHUB_WORKSPACE}/ks.jks"
     base64 --decode <<< "${ANDROID_KEYSTORE_B64}" > "${ANDROID_KEYSTORE_FILE}"
+else
+    echo "CI builds without a valid keystore provided are not supported."
+    exit 1
 fi
 
 keytool -list -v -storepass ${ANDROID_KEYSTORE_PASS} -keystore ${ANDROID_KEYSTORE_FILE} | grep SHA1

@@ -15,6 +15,7 @@ jobs:
       build-type: 'Release'
       devel: false
       build-id: 'tag'
+    secrets: inherit
 
   release:
     name: "Create Release"

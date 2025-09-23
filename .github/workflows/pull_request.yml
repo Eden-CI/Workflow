@@ -13,6 +13,7 @@ jobs:
     uses: ./.github/workflows/build.yml
     with:
       build-id: 'pull_request'
+    secrets: inherit
 
   release:
     name: "Create Release"

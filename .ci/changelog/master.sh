@@ -1,6 +1,6 @@
 #!/bin/sh -ex
 
-TAG=${TIMESTAMP}-${FORGEJO_REF}
+TAG=v${TIMESTAMP}.${FORGEJO_REF}
 REF=${FORGEJO_REF}
 
 brief() {
