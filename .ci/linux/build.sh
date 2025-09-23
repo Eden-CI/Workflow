@@ -54,7 +54,7 @@ native)
     ;;
 esac
 
-export ARCH_FLAGS="$ARCH_FLAGS -O3 -pipe -flto=auto"
+export ARCH_FLAGS="$ARCH_FLAGS -O3 -pipe -flto=thin"
 
 if [ "$TARGET" = "appimage" ]; then
     EXTRA_CMAKE_FLAGS+=(-DCMAKE_INSTALL_PREFIX=/usr -DYUZU_ROOM=ON -DYUZU_ROOM_STANDALONE=OFF -DYUZU_CMD=OFF)
