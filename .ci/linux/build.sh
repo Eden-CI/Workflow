@@ -7,13 +7,13 @@ case "$1" in
 amd64 | "")
     echo "Making amd64-v3 optimized build of Eden"
     ARCH="amd64_v3"
-    ARCH_FLAGS="-march=x86-64-v3"
+    ARCH_FLAGS="-march=x86-64-v3 -mtune=generic -fuse-ld=mold"
     export EXTRA_CMAKE_FLAGS=(-DYUZU_BUILD_PRESET=v3)
     ;;
 steamdeck | zen2)
     echo "Making Steam Deck (Zen 2) optimized build of Eden"
     ARCH="steamdeck"
-    ARCH_FLAGS="-march=znver2 -mtune=znver2"
+    ARCH_FLAGS="-march=znver2 -mtune=znver2 -fuse-ld=lld"
     SDL2=external
     export EXTRA_CMAKE_FLAGS=(-DYUZU_BUILD_PRESET=zen2 -DYUZU_SYSTEM_PROFILE=steamdeck)
     ;;
@@ -64,9 +64,9 @@ fi
 
 if [ "$COMPILER" = "clang" ]; then
     EXTRA_CMAKE_FLAGS+=(-DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++)
-    ARCH_FLAGS="$ARCH_FLAGS -fuse-ld=lld -w"
+    ARCH_FLAGS="$ARCH_FLAGS -w"
 else
-    ARCH_FLAGS="$ARCH_FLAGS -fuse-ld=mold -w"
+    ARCH_FLAGS="$ARCH_FLAGS -w"
 fi
 
 [ "$DEVEL" != "true" ] && EXTRA_CMAKE_FLAGS+=(-DENABLE_QT_UPDATE_CHECKER=ON)
