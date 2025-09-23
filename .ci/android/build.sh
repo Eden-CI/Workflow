@@ -10,6 +10,8 @@ if [ ! -z "${ANDROID_KEYSTORE_B64}" ]; then
     base64 --decode <<< "${ANDROID_KEYSTORE_B64}" > "${ANDROID_KEYSTORE_FILE}"
 fi
 
+keytool -list -v -storepass ${ANDROID_KEYSTORE_PASS} -keystore ${ANDROID_KEYSTORE_FILE} | grep SHA1
+
 cd src/android
 chmod +x ./gradlew
 
