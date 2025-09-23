@@ -7,13 +7,13 @@ case "$1" in
 amd64 | "")
     echo "Making amd64-v3 optimized build of Eden"
     ARCH="amd64_v3"
-    ARCH_FLAGS="-march=x86-64-v3 -mtune=generic -fuse-ld=mold"
-    export EXTRA_CMAKE_FLAGS=(-DYUZU_BUILD_PRESET=v3 YUZU_ENABLE_LTO=ON)
+    ARCH_FLAGS="-march=x86-64-v3 -mtune=generic"
+    export EXTRA_CMAKE_FLAGS=(-DYUZU_BUILD_PRESET=v3)
     ;;
 steamdeck | zen2)
     echo "Making Steam Deck (Zen 2) optimized build of Eden"
     ARCH="steamdeck"
-    ARCH_FLAGS="-march=znver2 -mtune=znver2 -fuse-ld=lld -fwhole-program"
+    ARCH_FLAGS="-march=znver2 -mtune=znver2"
     SDL2=external
     export EXTRA_CMAKE_FLAGS=(-DYUZU_BUILD_PRESET=zen2 -DYUZU_SYSTEM_PROFILE=steamdeck)
     ;;
@@ -89,6 +89,7 @@ cmake .. -G Ninja \
     -DYUZU_USE_QT_WEB_ENGINE=${WEBENGINE:-OFF} \
     -DYUZU_ENABLE_LTO=ON \
     -DDYNARMIC_ENABLE_LTO=ON \
+    -DYUZU_USE_FASTER_LD=ON \
     -DYUZU_USE_BUNDLED_OPENSSL=ON \
     -DYUZU_DISABLE_LLVM=ON \
     "${EXTRA_CMAKE_FLAGS[@]}"
