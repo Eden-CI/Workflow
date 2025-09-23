@@ -143,9 +143,9 @@ echo
 echo "### macOS"
 echo
 echo "macOS comes in a tarballed app. These builds are currently experimental, and you should expect major graphical glitches and crashes."
-echo "In order to run the app, you may need to run `xattr -d com.apple.quarantine eden.app` in the directory where you extracted the tarball."
+echo "In order to run the app, you *may* need to run `xattr -d com.apple.quarantine eden.app` in the directory where you extracted the tarball."
 echo
-echo "[macOS](${BASE_DOWNLOAD_URL}/${TAG}/Eden-macOS-${REF}.tar.zst)"
+echo "[macOS](${BASE_DOWNLOAD_URL}/${TAG}/Eden-macOS-${REF}.tar.gz)"
 echo
 echo "### Source"
 echo

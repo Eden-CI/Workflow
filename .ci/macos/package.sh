@@ -29,4 +29,4 @@ done
 codesign --deep --force --verbose --sign - "$APP"
 
 mkdir -p $ROOTDIR/artifacts
-tar --zstd -cf $ROOTDIR/artifacts/eden.tar.zst "$APP"
+tar czf $ROOTDIR/artifacts/eden.tar.gz "$APP"
