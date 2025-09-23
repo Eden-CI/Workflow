@@ -3,7 +3,7 @@
 # SPDX-FileCopyrightText: 2025 Eden Emulator Project
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-if [ "$COMPILER" == "clang" ]
+if [ "$COMPILER" = "clang" ]
 then
     EXTRA_CMAKE_FLAGS+=(
         -DCMAKE_CXX_COMPILER=clang-cl

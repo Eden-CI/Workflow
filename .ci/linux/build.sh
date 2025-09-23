@@ -8,12 +8,12 @@ amd64 | "")
     echo "Making amd64-v3 optimized build of Eden"
     ARCH="amd64_v3"
     ARCH_FLAGS="-march=x86-64-v3 -mtune=generic -fuse-ld=mold"
-    export EXTRA_CMAKE_FLAGS=(-DYUZU_BUILD_PRESET=v3)
+    export EXTRA_CMAKE_FLAGS=(-DYUZU_BUILD_PRESET=v3 YUZU_ENABLE_LTO=ON)
     ;;
 steamdeck | zen2)
     echo "Making Steam Deck (Zen 2) optimized build of Eden"
     ARCH="steamdeck"
-    ARCH_FLAGS="-march=znver2 -mtune=znver2 -fuse-ld=lld"
+    ARCH_FLAGS="-march=znver2 -mtune=znver2 -fuse-ld=lld -flto=thin"
     SDL2=external
     export EXTRA_CMAKE_FLAGS=(-DYUZU_BUILD_PRESET=zen2 -DYUZU_SYSTEM_PROFILE=steamdeck)
     ;;
@@ -54,27 +54,20 @@ native)
     ;;
 esac
 
-export ARCH_FLAGS="$ARCH_FLAGS -O3 -pipe -flto=thin"
+[ ! -z "$1" ] && shift
 
-if [ "$TARGET" = "appimage" ]; then
-    EXTRA_CMAKE_FLAGS+=(-DCMAKE_INSTALL_PREFIX=/usr -DYUZU_ROOM=ON -DYUZU_ROOM_STANDALONE=OFF -DYUZU_CMD=OFF)
-else
-    EXTRA_CMAKE_FLAGS+=(-DYUZU_USE_PRECOMPILED_HEADERS=OFF)
-fi
+export ARCH_FLAGS="$ARCH_FLAGS -O3 -pipe -w"
 
-if [ "$COMPILER" = "clang" ]; then
-    EXTRA_CMAKE_FLAGS+=(-DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++)
-    ARCH_FLAGS="$ARCH_FLAGS -w"
-else
-    ARCH_FLAGS="$ARCH_FLAGS -w"
-fi
+EXTRA_CMAKE_FLAGS+=(-DCMAKE_INSTALL_PREFIX=/usr -DYUZU_ROOM=ON -DYUZU_ROOM_STANDALONE=OFF -DYUZU_CMD=OFF)
+
+[ "$COMPILER" = "clang" ] && EXTRA_CMAKE_FLAGS+=(-DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++)
 
 [ "$DEVEL" != "true" ] && EXTRA_CMAKE_FLAGS+=(-DENABLE_QT_UPDATE_CHECKER=ON)
 
 if [ "$SDL2" = "external" ]; then
-    EXTRA_CMAKE_FLAGS+=(-DYUZU_USE_BUNDLED_SDL2=OFF -DYUZU_USE_EXTERNAL_SDL2=ON)
+    EXTRA_CMAKE_FLAGS+=(-DYUZU_USE_EXTERNAL_SDL2=ON)
 else
-    EXTRA_CMAKE_FLAGS+=(-DYUZU_USE_BUNDLED_SDL2=ON -DYUZU_USE_EXTERNAL_SDL2=OFF)
+    EXTRA_CMAKE_FLAGS+=(-DYUZU_USE_BUNDLED_SDL2=ON)
 fi
 
 EXTRA_CMAKE_FLAGS+=("$@")
