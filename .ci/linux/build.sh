@@ -70,7 +70,7 @@ else
     EXTRA_CMAKE_FLAGS+=(-DYUZU_USE_BUNDLED_SDL2=ON)
 fi
 
-EXTRA_CMAKE_FLAGS+=("$@")
+echo $EXTRA_CMAKE_FLAGS
 
 mkdir -p build && cd build
 cmake .. -G Ninja \
@@ -93,7 +93,8 @@ cmake .. -G Ninja \
     -DYUZU_USE_BUNDLED_OPENSSL=ON \
     -DYUZU_DISABLE_LLVM=ON \
     -DUSE_CCACHE=${CCACHE:-false} \
-    "${EXTRA_CMAKE_FLAGS[@]}"
+    "${EXTRA_CMAKE_FLAGS[@]}" \
+    "$@"
 
 ninja -j$(nproc)
 

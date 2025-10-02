@@ -14,6 +14,8 @@ if [ "$BUNDLE_QT" = "true" ]; then
     export EXTRA_CMAKE_FLAGS=("${EXTRA_CMAKE_FLAGS[@]}" -DYUZU_USE_BUNDLED_QT=ON)
 fi
 
+echo $EXTRA_CMAKE_FLAGS
+
 mkdir -p build
 cd build
 
@@ -32,6 +34,7 @@ cmake .. -GNinja \
     -DDYNARMIC_TESTS=OFF \
     -DBUILD_TESTING=OFF \
     -DUSE_CCACHE=${CCACHE:-false} \
-    "${EXTRA_CMAKE_FLAGS[@]}"
+    "${EXTRA_CMAKE_FLAGS[@]}" \
+    "$@"
 
 ninja
