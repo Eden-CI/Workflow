@@ -92,6 +92,7 @@ cmake .. -G Ninja \
     -DYUZU_USE_FASTER_LD=ON \
     -DYUZU_USE_BUNDLED_OPENSSL=ON \
     -DYUZU_DISABLE_LLVM=ON \
+    -DUSE_CCACHE=${CCACHE:-false} \
     "${EXTRA_CMAKE_FLAGS[@]}"
 
 ninja -j$(nproc)

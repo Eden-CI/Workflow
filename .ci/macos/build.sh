@@ -31,6 +31,7 @@ cmake .. -GNinja \
     -DYUZU_TESTS=OFF \
     -DDYNARMIC_TESTS=OFF \
     -DBUILD_TESTING=OFF \
+    -DUSE_CCACHE=${CCACHE:-false} \
     "${EXTRA_CMAKE_FLAGS[@]}"
 
 ninja

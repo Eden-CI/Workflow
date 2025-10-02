@@ -165,6 +165,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Install sccache
+        uses: Vee99BR/sccache-action@v0.0.1
+
       - name: Install dependencies
         run: |
           chmod a+x ./.ci/linux/deps.sh
@@ -197,7 +200,6 @@ jobs:
         with:
           path: |
             ${{ github.workspace }}/.cache
-            ${{ github.workspace }}/build/_deps/*-build
           key: ${{ runner.os }}-${{ matrix.os.arch }}-cpm-${{ github.run_id }}
           restore-keys: |
             ${{ runner.os }}-${{ matrix.os.arch }}-cpm-
@@ -205,7 +207,7 @@ jobs:
       - name: Build
         shell: bash
         run: |
-          TARGET=appimage ./.ci/linux/build.sh ${{ matrix.os.arch }}
+          TARGET=appimage CCACHE=true ./.ci/linux/build.sh ${{ matrix.os.arch }}  -DCCACHE_PATH=${SCCACHE_PATH}
 
       - name: Package
         shell: bash
@@ -253,6 +255,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Install sccache
+        uses: Vee99BR/sccache-action@v0.0.1
+
       - name: Install Qt
         uses: jurplel/install-qt-action@v4.3.0
         with:
@@ -286,7 +291,6 @@ jobs:
         with:
           path: |
             ${{ github.workspace }}/.cache
-            ${{ github.workspace }}/build/_deps/*-build
           key: ${{ runner.os }}-${{ matrix.os.arch }}-${{ matrix.compiler }}-unix-cpm-${{ github.run_id }}
           restore-keys: |
             ${{ runner.os }}-${{ matrix.os.arch }}-${{ matrix.compiler }}-unix-cpm-
@@ -315,7 +319,7 @@ jobs:
           git config --global core.autocrlf off
           dos2unix .patch/boost/*
 
-          ./.ci/windows/build.sh
+          CCACHE=true ./.ci/windows/build.sh -DCCACHE_PATH=${SCCACHE_PATH}
 
       - name: Package
         shell: bash
@@ -335,8 +339,20 @@ jobs:
     name: "Android"
 
     steps:
+      - name: Check ANDROID_KEYSTORE_B64 secret
+        run: |
+          if [ -z "${ANDROID_KEYSTORE_B64}" ]; then
+            echo "::error ::ANDROID_KEYSTORE_B64 secret is not set! Build cannot continue."
+            exit 1
+          fi
+        env:
+          ANDROID_KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
+
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Install sccache
+        uses: Vee99BR/sccache-action@v0.0.1
 
       - name: Install dependencies
         run: |
@@ -359,14 +375,13 @@ jobs:
         with:
           path: |
             ${{ github.workspace }}/.cache
-            ${{ github.workspace }}/build/_deps/*-build
           key: ${{ runner.os }}-cpm-${{ github.run_id }}
           restore-keys: |
             ${{ runner.os }}-cpm-
 
       - name: Build
         run: |
-          JAVA_HOME=$JAVA_HOME_17_X64 DEVEL=true ./.ci/android/build.sh
+          JAVA_HOME=$JAVA_HOME_17_X64 DEVEL=true CCACHE_PATH=${SCCACHE_PATH} ./.ci/android/build.sh
         env:
           ANDROID_KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
           ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
@@ -396,6 +411,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Install sccache
+        uses: Vee99BR/sccache-action@v0.0.1
 
       - name: Install dependencies
         run: ./.ci/macos/deps.sh
@@ -431,14 +449,13 @@ jobs:
         with:
           path: |
             ${{ github.workspace }}/.cache
-            ${{ github.workspace }}/build/_deps/*-build
           key: ${{ runner.os }}-cpm-${{ github.run_id }}
           restore-keys: |
             ${{ runner.os }}-cpm-
 
       - name: Build
         run: |
-          ./.ci/macos/build.sh
+          CCACHE=true ./.ci/macos/build.sh -DCCACHE_PATH=${SCCACHE_PATH}
 
       - name: Package
         run: |
