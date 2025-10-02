@@ -4,6 +4,8 @@ echo $PAYLOAD_JSON
 
 DEFAULT=master
 
+echo "FORGEJO_CLONE_URL=https://git.eden-emu.dev/eden-emu/eden.git" >> $GITHUB_ENV
+
 case "$1" in
   master)
     FORGEJO_REF=$(echo "$PAYLOAD_JSON" | jq -r '.ref')
