@@ -1,10 +1,15 @@
 #!/bin/sh -e
 
+# SPDX-FileCopyrightText: 2025 Eden Emulator Project
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 # credit: escary and hauntek
 
 ROOTDIR=$PWD
-cd build/bin
+BUILDDIR=${BUILDDIR:-build}
 APP=eden.app
+
+cd "$BUILDDIR/bin"
 
 macdeployqt "$APP" -verbose=2
 # macdeployqt "$APP" -always-overwrite -verbose=2

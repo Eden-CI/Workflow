@@ -70,10 +70,11 @@ else
     EXTRA_CMAKE_FLAGS+=(-DYUZU_USE_BUNDLED_SDL2=ON)
 fi
 
-EXTRA_CMAKE_FLAGS+=("$@")
+echo $EXTRA_CMAKE_FLAGS
 
-mkdir -p build && cd build
-cmake .. -G Ninja \
+BUILDDIR=${BUILDDIR:-build}
+
+cmake -S . -B "$BUILDDIR" -G Ninja \
     -DCMAKE_BUILD_TYPE=${BUILD_TYPE:-Release} \
     -DENABLE_QT_TRANSLATION=ON \
     -DUSE_DISCORD_PRESENCE=ON \
@@ -93,12 +94,14 @@ cmake .. -G Ninja \
     -DYUZU_USE_FASTER_LD=ON \
     -DYUZU_USE_BUNDLED_OPENSSL=ON \
     -DYUZU_DISABLE_LLVM=ON \
-    "${EXTRA_CMAKE_FLAGS[@]}"
+    -DUSE_CCACHE=${CCACHE:-false} \
+    "${EXTRA_CMAKE_FLAGS[@]}" \
+    "$@"
 
-ninja -j$(nproc)
+ninja -j$(nproc) -C "$BUILDDIR"
 
-if [ -d "bin/Release" ]; then
-    strip -s bin/Release/*
+if [ -d "$BUILDDIR/bin/Release" ]; then
+    strip -s "$BUILDDIR/bin/Release/"*
 else
-    strip -s bin/*
+    strip -s "$BUILDDIR/bin/"*
 fi
