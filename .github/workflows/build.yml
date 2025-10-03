@@ -166,6 +166,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Setup build dir
+        shell: bash
         run: |
           mkdir -p "$BUILD_TMP_DIR"
           echo "BUILD_TMP_DIR=$BUILD_TMP_DIR" >> $GITHUB_ENV
@@ -263,6 +264,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Setup build dir
+        shell: bash
         run: |
           mkdir -p "$BUILD_TMP_DIR"
           echo "BUILD_TMP_DIR=$BUILD_TMP_DIR" >> $GITHUB_ENV
@@ -431,6 +433,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Setup build dir
+        shell: bash
         run: |
           mkdir -p "$BUILD_TMP_DIR"
           echo "BUILD_TMP_DIR=$BUILD_TMP_DIR" >> $GITHUB_ENV
