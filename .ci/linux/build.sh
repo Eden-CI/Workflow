@@ -72,8 +72,9 @@ fi
 
 echo $EXTRA_CMAKE_FLAGS
 
-mkdir -p build && cd build
-cmake .. -G Ninja \
+BUILDDIR=${BUILDDIR:-build}
+
+cmake -S . -B "$BUILDDIR" -G Ninja \
     -DCMAKE_BUILD_TYPE=${BUILD_TYPE:-Release} \
     -DENABLE_QT_TRANSLATION=ON \
     -DUSE_DISCORD_PRESENCE=ON \
@@ -96,10 +97,10 @@ cmake .. -G Ninja \
     "${EXTRA_CMAKE_FLAGS[@]}" \
     "$@"
 
-ninja -j$(nproc)
+ninja -j$(nproc) -C "$BUILDDIR"
 
-if [ -d "bin/Release" ]; then
-    strip -s bin/Release/*
+if [ -d "$BUILDDIR/bin/Release" ]; then
+    strip -s "$BUILDDIR/bin/Release/"*
 else
-    strip -s bin/*
+    strip -s "$BUILDDIR/bin/"*
 fi

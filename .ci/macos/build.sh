@@ -1,5 +1,8 @@
 #!/bin/sh -e
 
+# SPDX-FileCopyrightText: 2025 Eden Emulator Project
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 export LIBVULKAN_PATH="/opt/homebrew/lib/libvulkan.1.dylib"
 
 if [ -z "$BUILD_TYPE" ]; then
@@ -16,10 +19,9 @@ fi
 
 echo $EXTRA_CMAKE_FLAGS
 
-mkdir -p build
-cd build
+BUILDDIR=${BUILDDIR:-build}
 
-cmake .. -GNinja \
+cmake -S . -B "$BUILDDIR" -G Ninja \
     -DYUZU_TESTS=OFF \
     -DYUZU_USE_BUNDLED_QT=OFF \
     -DENABLE_QT_TRANSLATION=ON \
@@ -37,4 +39,4 @@ cmake .. -GNinja \
     "${EXTRA_CMAKE_FLAGS[@]}" \
     "$@"
 
-ninja
+ninja -C "$BUILDDIR"
