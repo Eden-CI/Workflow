@@ -155,14 +155,12 @@ jobs:
     name: "Linux (${{ matrix.os.arch }}) (${{ matrix.compiler }})"
     needs: [set-matrix, clone]
     runs-on: ${{ matrix.os.runs-on }}
+    container: ghcr.io/pkgforge-dev/archlinux:latest
     strategy:
       fail-fast: false
       matrix:
         os: ${{ fromJson(needs.set-matrix.outputs.matrix) }}
         compiler: ${{ fromJson(needs.set-matrix.outputs.compilers) }}
-
-    container: ghcr.io/pkgforge-dev/archlinux:latest
-
     env:
       SCCACHE_GHA_ENABLED: "true"
 
@@ -206,9 +204,9 @@ jobs:
           path: |
             ${{ github.workspace }}/.cache
             ${{ github.workspace }}/build/_deps/*-build
-          key: ${{ runner.os }}-${{ matrix.os.arch }}-cpm-v5-${{ github.run_id }}
+          key: ${{ runner.os }}-${{ matrix.os.arch }}-${{ matrix.compiler }}-cpm-${{ env.CPM_CACHE_VERSION }}-${{ github.run_id }}
           restore-keys: |
-            ${{ runner.os }}-${{ matrix.os.arch }}-cpm-v5-
+            ${{ runner.os }}-${{ matrix.os.arch }}-${{ matrix.compiler }}-cpm-${{ env.CPM_CACHE_VERSION }}-
 
       - name: Build
         shell: bash
@@ -242,10 +240,7 @@ jobs:
   windows:
     name: "Windows ${{ matrix.os.arch }} (${{ matrix.compiler }})"
     needs: [clone]
-    env:
-      QT_VERSION: 6.9.1
-      SCCACHE_GHA_ENABLED: "true"
-
+    runs-on: ${{ matrix.os.runs-on }}
     strategy:
       fail-fast: false
       matrix:
@@ -255,8 +250,9 @@ jobs:
           - runs-on: windows-11-arm
             arch: arm64
         compiler: [clang, msvc]
-
-    runs-on: ${{ matrix.os.runs-on }}
+    env:
+      QT_VERSION: 6.9.1
+      SCCACHE_GHA_ENABLED: "true"
 
     steps:
       - name: Checkout
@@ -299,9 +295,9 @@ jobs:
           path: |
             ${{ github.workspace }}/.cache
             ${{ github.workspace }}/build/_deps/*-build
-          key: ${{ runner.os }}-${{ matrix.os.arch }}-${{ matrix.compiler }}-unix-cpm-v5-${{ github.run_id }}
+          key: ${{ runner.os }}-${{ matrix.os.arch }}-${{ matrix.compiler }}-cpm-${{ env.CPM_CACHE_VERSION }}-${{ github.run_id }}
           restore-keys: |
-            ${{ runner.os }}-${{ matrix.os.arch }}-${{ matrix.compiler }}-unix-cpm-v5-
+            ${{ runner.os }}-${{ matrix.os.arch }}-${{ matrix.compiler }}-cpm-${{ env.CPM_CACHE_VERSION }}-
 
       - name: Set up MSVC
         uses: ilammy/msvc-dev-cmd@v1
@@ -342,9 +338,16 @@ jobs:
           path: artifacts/*
 
   android:
-    runs-on: ubuntu-latest
-    needs: [clone]
     name: "Android"
+    needs: [clone]
+    runs-on: ${{ matrix.os.runs-on }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - runs-on: ubuntu-latest
+            arch: amd64
+        compiler: [universal]
 
     steps:
       - name: Check ANDROID_KEYSTORE_B64 secret
@@ -398,9 +401,9 @@ jobs:
           path: |
             ${{ github.workspace }}/.cache
             ${{ github.workspace }}/build/_deps/*-build
-          key: ${{ runner.os }}-cpm-v5-${{ github.run_id }}
+          key: ${{ runner.os }}-${{ matrix.os.arch }}-${{ matrix.compiler }}-cpm-${{ env.CPM_CACHE_VERSION }}-${{ github.run_id }}
           restore-keys: |
-            ${{ runner.os }}-cpm-v5-
+            ${{ runner.os }}-${{ matrix.os.arch }}-${{ matrix.compiler }}-cpm-${{ env.CPM_CACHE_VERSION }}-
 
       - name: Build
         run: |
@@ -427,9 +430,16 @@ jobs:
           path: artifacts/*.aab
 
   macos:
-    runs-on: macos-latest
-    needs: [clone]
     name: "macOS"
+    needs: [clone]
+    runs-on: ${{ matrix.os.runs-on }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - runs-on: macos-latest
+            arch: arm64
+        compiler: [universal]
     env:
       SCCACHE_GHA_ENABLED: "true"
 
@@ -475,9 +485,9 @@ jobs:
           path: |
             ${{ github.workspace }}/.cache
             ${{ github.workspace }}/build/_deps/*-build
-          key: ${{ runner.os }}-cpm-v5-${{ github.run_id }}
+          key: ${{ runner.os }}-${{ matrix.os.arch }}-${{ matrix.compiler }}-cpm-${{ env.CPM_CACHE_VERSION }}-${{ github.run_id }}
           restore-keys: |
-            ${{ runner.os }}-cpm-v5-
+            ${{ runner.os }}-${{ matrix.os.arch }}-${{ matrix.compiler }}-cpm-${{ env.CPM_CACHE_VERSION }}-
 
       - name: Build
         run: |
