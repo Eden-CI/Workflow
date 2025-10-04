@@ -73,6 +73,8 @@ jobs:
       - name: Cleanup
         run: |
           cd eden
+          # small patch while it isn't merged
+          curl https://git.eden-emu.dev/eden-emu/eden/pulls/2673.patch | git apply
           rm -rf .git* .ci .github docs
 
       - name: Upload cloned repo
@@ -361,6 +363,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Install sccache
+        uses: Vee99BR/sccache-action@v0.0.1
+
       - name: Install dependencies
         run: |
           ./.ci/android/deps.sh
@@ -377,6 +382,16 @@ jobs:
         with:
           name: eden
 
+      - name: Install gradle-cache
+        uses: burrunan/gradle-cache-action@v3
+        with:
+          job-id: android
+          gradle-version: wrapper
+          save-local-build-cache: true
+          save-gradle-dependencies-cache: true
+          remote-build-cache-proxy-enabled: true
+          build-root-directory: src/android
+
       - name: Set up CPM cache
         uses: actions/cache@v4
         with:
@@ -389,7 +404,7 @@ jobs:
 
       - name: Build
         run: |
-          JAVA_HOME=$JAVA_HOME_17_X64 DEVEL=true ./.ci/android/build.sh
+          JAVA_HOME=$JAVA_HOME_17_X64 DEVEL=true CCACHE=true ./.ci/android/build.sh -DCCACHE_PATH=${SCCACHE_PATH}
         env:
           ANDROID_KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
           ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}

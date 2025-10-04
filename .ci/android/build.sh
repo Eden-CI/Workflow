@@ -3,8 +3,6 @@
 # SPDX-FileCopyrightText: 2025 Eden Emulator Project
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-export NDK_CCACHE=$(which ccache)
-
 if [ ! -z "${ANDROID_KEYSTORE_B64}" ]; then
     export ANDROID_KEYSTORE_FILE="${GITHUB_WORKSPACE}/ks.jks"
     base64 --decode <<< "${ANDROID_KEYSTORE_B64}" > "${ANDROID_KEYSTORE_FILE}"
@@ -19,8 +17,15 @@ echo "Keystore SHA1 is ${SHA1SUM}"
 cd src/android
 chmod +x ./gradlew
 
-./gradlew assembleMainlineRelease
-./gradlew bundleMainlineRelease
+./gradlew assembleMainlineRelease \
+    -Dorg.gradle.caching=${CCACHE:-false} \
+    -Dorg.gradle.parallel=${CCACHE:-false} \
+    -PYUZU_ANDROID_ARGS="-DUSE_CCACHE=${CCACHE:-false} $@"
+
+./gradlew bundleMainlineRelease \
+    -Dorg.gradle.caching=${CCACHE:-false} \
+    -Dorg.gradle.parallel=${CCACHE:-false} \
+    -PYUZU_ANDROID_ARGS="-DUSE_CCACHE=${CCACHE:-false} $@"
 
 if [ ! -z "${ANDROID_KEYSTORE_B64}" ]; then
     rm "${ANDROID_KEYSTORE_FILE}"
