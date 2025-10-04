@@ -161,9 +161,15 @@ jobs:
 
     container: ghcr.io/pkgforge-dev/archlinux:latest
 
+    env:
+      SCCACHE_GHA_ENABLED: "true"
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Install sccache
+        uses: Vee99BR/sccache-action@v0.0.1
 
       - name: Install dependencies
         run: |
@@ -205,7 +211,7 @@ jobs:
       - name: Build
         shell: bash
         run: |
-          TARGET=appimage ./.ci/linux/build.sh ${{ matrix.os.arch }}
+          TARGET=appimage CCACHE=true ./.ci/linux/build.sh ${{ matrix.os.arch }} -DCCACHE_PATH=${SCCACHE_PATH}
 
       - name: Package
         shell: bash
@@ -236,6 +242,7 @@ jobs:
     needs: [clone]
     env:
       QT_VERSION: 6.9.1
+      SCCACHE_GHA_ENABLED: "true"
 
     strategy:
       fail-fast: false
@@ -252,6 +259,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Install sccache
+        uses: Vee99BR/sccache-action@v0.0.1
 
       - name: Install Qt
         uses: jurplel/install-qt-action@v4.3.0
@@ -315,7 +325,7 @@ jobs:
           git config --global core.autocrlf off
           dos2unix .patch/boost/*
 
-          ./.ci/windows/build.sh
+          CCACHE=true ./.ci/windows/build.sh -DCCACHE_PATH=${SCCACHE_PATH}
 
       - name: Package
         shell: bash
@@ -405,10 +415,15 @@ jobs:
     runs-on: macos-latest
     needs: [clone]
     name: "macOS"
+    env:
+      SCCACHE_GHA_ENABLED: "true"
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Install sccache
+        uses: Vee99BR/sccache-action@v0.0.1
 
       - name: Install dependencies
         run: ./.ci/macos/deps.sh
@@ -451,7 +466,7 @@ jobs:
 
       - name: Build
         run: |
-          ./.ci/macos/build.sh
+          CCACHE=true ./.ci/macos/build.sh -DCCACHE_PATH=${SCCACHE_PATH}
 
       - name: Package
         run: |
