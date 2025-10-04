@@ -165,6 +165,17 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Setup build dir
+        shell: bash
+        run: |
+          mkdir -p "$BUILD_TMP_DIR"
+          echo "BUILD_TMP_DIR=$BUILD_TMP_DIR" >> $GITHUB_ENV
+        env:
+          BUILD_TMP_DIR: "/tmp/build-${{ matrix.arch }}"
+
+      - name: Install sccache
+        uses: Vee99BR/sccache-action@v0.0.1
+
       - name: Install dependencies
         run: |
           chmod a+x ./.ci/linux/deps.sh
@@ -197,7 +208,6 @@ jobs:
         with:
           path: |
             ${{ github.workspace }}/.cache
-            ${{ github.workspace }}/build/_deps/*-build
           key: ${{ runner.os }}-${{ matrix.os.arch }}-cpm-${{ github.run_id }}
           restore-keys: |
             ${{ runner.os }}-${{ matrix.os.arch }}-cpm-
@@ -205,16 +215,16 @@ jobs:
       - name: Build
         shell: bash
         run: |
-          TARGET=appimage ./.ci/linux/build.sh ${{ matrix.os.arch }}
+          TARGET=appimage CCACHE=true BUILDDIR=$BUILD_TMP_DIR ./.ci/linux/build.sh ${{ matrix.os.arch }}  -DCCACHE_PATH=${SCCACHE_PATH}
 
       - name: Package
         shell: bash
         run: |
-          ./.ci/linux/package.sh ${{ matrix.os.arch }}
+          BUILDDIR=$BUILD_TMP_DIR ./.ci/linux/package.sh ${{ matrix.os.arch }}
 
       - name: Package (binary)
         run: |
-          cmake --install build --prefix install/usr
+          cmake --install $BUILD_TMP_DIR --prefix install/usr
 
           cd install
           tar --owner root --group root --zstd -cf Eden-Linux.tar.zst *
@@ -253,6 +263,17 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Setup build dir
+        shell: bash
+        run: |
+          mkdir -p "$BUILD_TMP_DIR"
+          echo "BUILD_TMP_DIR=$BUILD_TMP_DIR" >> $GITHUB_ENV
+        env:
+          BUILD_TMP_DIR: "/tmp/build-${{ matrix.arch }}"
+
+      - name: Install sccache
+        uses: Vee99BR/sccache-action@v0.0.1
+
       - name: Install Qt
         uses: jurplel/install-qt-action@v4.3.0
         with:
@@ -286,7 +307,6 @@ jobs:
         with:
           path: |
             ${{ github.workspace }}/.cache
-            ${{ github.workspace }}/build/_deps/*-build
           key: ${{ runner.os }}-${{ matrix.os.arch }}-${{ matrix.compiler }}-unix-cpm-${{ github.run_id }}
           restore-keys: |
             ${{ runner.os }}-${{ matrix.os.arch }}-${{ matrix.compiler }}-unix-cpm-
@@ -315,13 +335,13 @@ jobs:
           git config --global core.autocrlf off
           dos2unix .patch/boost/*
 
-          ./.ci/windows/build.sh
+          CCACHE=true BUILDDIR=$BUILD_TMP_DIR ./.ci/windows/build.sh -DCCACHE_PATH=${SCCACHE_PATH}
 
       - name: Package
         shell: bash
         run: |
           export ARCH=${{ matrix.os.arch }}-${{ matrix.compiler }}
-          ./.ci/windows/package.sh
+          BUILDDIR=$BUILD_TMP_DIR ./.ci/windows/package.sh
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4.6.2
@@ -335,8 +355,24 @@ jobs:
     name: "Android"
 
     steps:
+      - name: Check ANDROID_KEYSTORE_B64 secret
+        run: |
+          if [ -z "${ANDROID_KEYSTORE_B64}" ] || \
+             [ -z "${ANDROID_KEY_ALIAS}" ] || \
+             [ -z "${ANDROID_KEYSTORE_PASS}" ]; then
+            echo "::error ::Missing required Android secrets!"
+            exit 1
+          fi
+        env:
+          ANDROID_KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEYSTORE_PASS: ${{ secrets.ANDROID_KEYSTORE_PASS }}
+
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Install sccache
+        uses: Vee99BR/sccache-action@v0.0.1
 
       - name: Install dependencies
         run: |
@@ -359,14 +395,13 @@ jobs:
         with:
           path: |
             ${{ github.workspace }}/.cache
-            ${{ github.workspace }}/build/_deps/*-build
           key: ${{ runner.os }}-cpm-${{ github.run_id }}
           restore-keys: |
             ${{ runner.os }}-cpm-
 
       - name: Build
         run: |
-          JAVA_HOME=$JAVA_HOME_17_X64 DEVEL=true ./.ci/android/build.sh
+          JAVA_HOME=$JAVA_HOME_17_X64 DEVEL=true CCACHE_PATH=${SCCACHE_PATH} ./.ci/android/build.sh
         env:
           ANDROID_KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
           ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
@@ -396,6 +431,17 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Setup build dir
+        shell: bash
+        run: |
+          mkdir -p "$BUILD_TMP_DIR"
+          echo "BUILD_TMP_DIR=$BUILD_TMP_DIR" >> $GITHUB_ENV
+        env:
+          BUILD_TMP_DIR: "/tmp/build-${{ matrix.arch }}"
+
+      - name: Install sccache
+        uses: Vee99BR/sccache-action@v0.0.1
 
       - name: Install dependencies
         run: ./.ci/macos/deps.sh
@@ -431,18 +477,17 @@ jobs:
         with:
           path: |
             ${{ github.workspace }}/.cache
-            ${{ github.workspace }}/build/_deps/*-build
           key: ${{ runner.os }}-cpm-${{ github.run_id }}
           restore-keys: |
             ${{ runner.os }}-cpm-
 
       - name: Build
         run: |
-          ./.ci/macos/build.sh
+          CCACHE=true BUILDDIR=$BUILD_TMP_DIR ./.ci/macos/build.sh -DCCACHE_PATH=${SCCACHE_PATH}
 
       - name: Package
         run: |
-          ./.ci/macos/package.sh
+          BUILDDIR=$BUILD_TMP_DIR ./.ci/macos/package.sh
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4.6.2

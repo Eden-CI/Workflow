@@ -2,7 +2,9 @@
 
 echo $PAYLOAD_JSON
 
-DEFAULT=cmake/no-mold
+DEFAULT=master
+
+echo "FORGEJO_CLONE_URL=https://git.eden-emu.dev/eden-emu/eden.git" >> $GITHUB_ENV
 
 case "$1" in
   master)
@@ -41,7 +43,6 @@ esac
 if [ "$FORGEJO_REF" = "null" ] || [ "$FORGEJO_REF" = "" ]
 then
   FORGEJO_REF=origin/$DEFAULT
-  FORGEJO_BRANCH=cmake/$DEFAULT
 fi
 
 echo "FORGEJO_REF=$FORGEJO_REF" >> $GITHUB_ENV

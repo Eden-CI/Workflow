@@ -1,12 +1,16 @@
 #!/bin/bash
 
+# SPDX-FileCopyrightText: 2025 Eden Emulator Project
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 GITDATE=$(git show -s --date=short --format='%ad' | tr -d "-")
 GITREV=$(git show -s --format='%h')
 
 ZIP_NAME="Eden-Windows-${ARCH}-${GITDATE}-${GITREV}.zip"
 
 ARTIFACTS_DIR="artifacts"
-PKG_DIR="build/pkg"
+BUILDDIR=${BUILDDIR:-build}
+PKG_DIR="${BUILDDIR}/pkg"
 
 mkdir -p "$ARTIFACTS_DIR"
 

@@ -46,7 +46,6 @@ pacman -Syu --noconfirm \
 		unzip \
 		ffnvcodec-headers \
 		vulkan-headers \
-		vulkan-mesa-device-select \
 		vulkan-mesa-layers \
 		vulkan-utility-libraries \
 		wget \
@@ -59,8 +58,11 @@ pacman -Syu --noconfirm \
 		zip \
 		zsync
 
-if [ "$(uname -m)" = 'x86_64' ]; then
+if [ "${ARCH}" = 'x86_64' ]; then
 		pacman -Syu --noconfirm haskell-gnutls svt-av1
+fi
+if [ "${ARCH}" != "aarch64" ]; then
+		pacman -Syu --noconfirm vulkan-mesa-device-select
 fi
 
 echo "Installing debloated packages..."

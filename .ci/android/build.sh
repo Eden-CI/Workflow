@@ -3,7 +3,9 @@
 # SPDX-FileCopyrightText: 2025 Eden Emulator Project
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-export NDK_CCACHE=$(which ccache)
+
+NDK_CCACHE=$(which ${CCACHE_PATH:-ccache} || echo "")
+export NDK_CCACHE
 
 if [ ! -z "${ANDROID_KEYSTORE_B64}" ]; then
     export ANDROID_KEYSTORE_FILE="${GITHUB_WORKSPACE}/ks.jks"
