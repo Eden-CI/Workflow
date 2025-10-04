@@ -335,6 +335,19 @@ jobs:
     name: "Android"
 
     steps:
+      - name: Check ANDROID_KEYSTORE_B64 secret
+        run: |
+          if [ -z "${ANDROID_KEYSTORE_B64}" ] || \
+             [ -z "${ANDROID_KEY_ALIAS}" ] || \
+             [ -z "${ANDROID_KEYSTORE_PASS}" ]; then
+            echo "::error ::Missing required Android secrets!"
+            exit 1
+          fi
+        env:
+          ANDROID_KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEYSTORE_PASS: ${{ secrets.ANDROID_KEYSTORE_PASS }}
+
       - name: Checkout
         uses: actions/checkout@v4
 
