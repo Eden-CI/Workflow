@@ -1,4 +1,4 @@
-#!/bin/sh -e
+#!/bin/bash -e
 
 export LIBVULKAN_PATH="/opt/homebrew/lib/libvulkan.1.dylib"
 
