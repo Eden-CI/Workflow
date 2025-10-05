@@ -20,6 +20,7 @@ fi
 echo $EXTRA_CMAKE_FLAGS
 
 BUILDDIR=${BUILDDIR:-build}
+NUM_JOBS=$(nproc 2>/dev/null || getconf _NPROCESSORS_ONLN 2>/dev/null || echo 2)
 
 cmake -S . -B "$BUILDDIR" -G Ninja \
     -DYUZU_TESTS=OFF \
@@ -40,4 +41,4 @@ cmake -S . -B "$BUILDDIR" -G Ninja \
     "${EXTRA_CMAKE_FLAGS[@]}" \
     "$@"
 
-ninja -C "$BUILDDIR"
+cmake --build "$BUILDDIR" --parallel $NUM_JOBS

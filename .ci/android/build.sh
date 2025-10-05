@@ -17,13 +17,18 @@ echo "Keystore SHA1 is ${SHA1SUM}"
 cd src/android
 chmod +x ./gradlew
 
+NUM_JOBS=$(nproc 2>/dev/null || getconf _NPROCESSORS_ONLN 2>/dev/null || echo 2)
+export CMAKE_BUILD_PARALLEL_LEVEL=$NUM_JOBS
+
 ./gradlew assembleMainlineRelease \
     -Dorg.gradle.caching=${CCACHE:-false} \
     -Dorg.gradle.parallel=${CCACHE:-false} \
+    -Dorg.gradle.workers.max=$NUM_JOBS \
     -PYUZU_ANDROID_ARGS="-DUSE_CCACHE=${CCACHE:-false} $@"
 
 ./gradlew bundleMainlineRelease \
     -Dorg.gradle.caching=${CCACHE:-false} \
+    -Dorg.gradle.workers.max=$NUM_JOBS \
     -Dorg.gradle.parallel=${CCACHE:-false} \
     -PYUZU_ANDROID_ARGS="-DUSE_CCACHE=${CCACHE:-false} $@"
 
