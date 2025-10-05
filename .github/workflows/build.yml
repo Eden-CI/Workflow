@@ -171,6 +171,14 @@ jobs:
       - name: Install sccache
         uses: Vee99BR/sccache-action@v0.0.1
 
+      - name: Cache pacman packages
+        uses: actions/cache@v4
+        with:
+          path: /var/cache/pacman/pkg
+          key: ${{ runner.os }}-${{ matrix.os.arch }}-${{ matrix.compiler }}-pacman-${{ env.CPM_CACHE_VERSION }}-${{ hashFiles('./.ci/linux/deps.sh') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ matrix.os.arch }}-${{ matrix.compiler }}-pacman-${{ env.CPM_CACHE_VERSION }}-
+
       - name: Install dependencies
         run: |
           chmod a+x ./.ci/linux/deps.sh
@@ -449,6 +457,12 @@ jobs:
 
       - name: Install sccache
         uses: Vee99BR/sccache-action@v0.0.1
+
+      - name: Cache Homebrew downloads
+        uses: actions/cache@v4
+        with:
+          path: ~/Library/Caches/Homebrew
+          key: ${{ runner.os }}-${{ matrix.os.arch }}-${{ matrix.compiler }}-brew-${{ env.CPM_CACHE_VERSION }}
 
       - name: Install dependencies
         run: ./.ci/macos/deps.sh
