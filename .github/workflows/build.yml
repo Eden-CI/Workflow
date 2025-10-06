@@ -28,6 +28,7 @@ on:
 env:
   DISABLE_ARM: ${{ vars.DISABLE_ARM }}
   SCCACHE_GHA_ENABLED: "true"
+  CCACHE: "true"
 
 jobs:
   summary:
@@ -170,14 +171,6 @@ jobs:
       - name: Install sccache
         uses: Vee99BR/sccache-action@v0.0.1
 
-      - name: Cache pacman packages
-        uses: actions/cache@v4
-        with:
-          path: /var/cache/pacman/pkg
-          key: ${{ runner.os }}-${{ matrix.os.arch }}-${{ matrix.compiler }}-pacman-${{ env.CPM_CACHE_VERSION }}-${{ hashFiles('./.ci/linux/deps.sh') }}
-          restore-keys: |
-            ${{ runner.os }}-${{ matrix.os.arch }}-${{ matrix.compiler }}-pacman-${{ env.CPM_CACHE_VERSION }}-
-
       - name: Install dependencies
         run: |
           chmod a+x ./.ci/linux/deps.sh
@@ -211,14 +204,12 @@ jobs:
           path: |
             ${{ github.workspace }}/.cache
             ${{ github.workspace }}/build/_deps/*-build
-          key: ${{ runner.os }}-${{ matrix.os.arch }}-${{ matrix.compiler }}-cpm-${{ env.CPM_CACHE_VERSION }}-${{ github.run_id }}
-          restore-keys: |
-            ${{ runner.os }}-${{ matrix.os.arch }}-${{ matrix.compiler }}-cpm-${{ env.CPM_CACHE_VERSION }}-
+          key: ${{ runner.os }}-${{ matrix.os.arch }}-${{ matrix.compiler }}-cpm-${{ env.CPM_CACHE_VERSION }}
 
       - name: Build
         shell: bash
         run: |
-          TARGET=appimage CCACHE=true ./.ci/linux/build.sh ${{ matrix.os.arch }} -DCCACHE_PATH=${SCCACHE_PATH}
+          TARGET=appimage ./.ci/linux/build.sh ${{ matrix.os.arch }} -DCCACHE_PATH=${SCCACHE_PATH}
 
       - name: Package
         shell: bash
@@ -301,9 +292,7 @@ jobs:
           path: |
             ${{ github.workspace }}/.cache
             ${{ github.workspace }}/build/_deps/*-build
-          key: ${{ runner.os }}-${{ matrix.os.arch }}-${{ matrix.compiler }}-cpm-${{ env.CPM_CACHE_VERSION }}-${{ github.run_id }}
-          restore-keys: |
-            ${{ runner.os }}-${{ matrix.os.arch }}-${{ matrix.compiler }}-cpm-${{ env.CPM_CACHE_VERSION }}-
+          key: ${{ runner.os }}-${{ matrix.os.arch }}-${{ matrix.compiler }}-cpm-${{ env.CPM_CACHE_VERSION }}
 
       - name: Set up MSVC
         uses: ilammy/msvc-dev-cmd@v1
@@ -329,7 +318,7 @@ jobs:
           git config --global core.autocrlf off
           dos2unix .patch/boost/*
 
-          CCACHE=true ./.ci/windows/build.sh -DCCACHE_PATH=${SCCACHE_PATH}
+          ./.ci/windows/build.sh -DCCACHE_PATH=${SCCACHE_PATH}
 
       - name: Package
         shell: bash
@@ -407,13 +396,11 @@ jobs:
           path: |
             ${{ github.workspace }}/.cache
             ${{ github.workspace }}/build/_deps/*-build
-          key: ${{ runner.os }}-${{ matrix.os.arch }}-${{ matrix.compiler }}-cpm-${{ env.CPM_CACHE_VERSION }}-${{ github.run_id }}
-          restore-keys: |
-            ${{ runner.os }}-${{ matrix.os.arch }}-${{ matrix.compiler }}-cpm-${{ env.CPM_CACHE_VERSION }}-
+          key: ${{ runner.os }}-${{ matrix.os.arch }}-${{ matrix.compiler }}-cpm-${{ env.CPM_CACHE_VERSION }}
 
       - name: Build
         run: |
-          JAVA_HOME=$JAVA_HOME_17_X64 DEVEL=true CCACHE=true ./.ci/android/build.sh -DCCACHE_PATH=${SCCACHE_PATH}
+          JAVA_HOME=$JAVA_HOME_17_X64 DEVEL=true ./.ci/android/build.sh -DCCACHE_PATH=${SCCACHE_PATH}
         env:
           ANDROID_KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
           ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
@@ -454,12 +441,6 @@ jobs:
       - name: Install sccache
         uses: Vee99BR/sccache-action@v0.0.1
 
-      - name: Cache Homebrew downloads
-        uses: actions/cache@v4
-        with:
-          path: ~/Library/Caches/Homebrew
-          key: ${{ runner.os }}-${{ matrix.os.arch }}-${{ matrix.compiler }}-brew-${{ env.CPM_CACHE_VERSION }}
-
       - name: Install dependencies
         run: ./.ci/macos/deps.sh
 
@@ -495,13 +476,11 @@ jobs:
           path: |
             ${{ github.workspace }}/.cache
             ${{ github.workspace }}/build/_deps/*-build
-          key: ${{ runner.os }}-${{ matrix.os.arch }}-${{ matrix.compiler }}-cpm-${{ env.CPM_CACHE_VERSION }}-${{ github.run_id }}
-          restore-keys: |
-            ${{ runner.os }}-${{ matrix.os.arch }}-${{ matrix.compiler }}-cpm-${{ env.CPM_CACHE_VERSION }}-
+          key: ${{ runner.os }}-${{ matrix.os.arch }}-${{ matrix.compiler }}-cpm-${{ env.CPM_CACHE_VERSION }}
 
       - name: Build
         run: |
-          CCACHE=true ./.ci/macos/build.sh -DCCACHE_PATH=${SCCACHE_PATH}
+          ./.ci/macos/build.sh -DCCACHE_PATH=${SCCACHE_PATH}
 
       - name: Package
         run: |
