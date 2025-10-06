@@ -27,6 +27,7 @@ on:
 
 env:
   DISABLE_ARM: ${{ vars.DISABLE_ARM }}
+  SCCACHE_GHA_ENABLED: "true"
 
 jobs:
   summary:
@@ -161,8 +162,6 @@ jobs:
       matrix:
         os: ${{ fromJson(needs.set-matrix.outputs.matrix) }}
         compiler: ${{ fromJson(needs.set-matrix.outputs.compilers) }}
-    env:
-      SCCACHE_GHA_ENABLED: "true"
 
     steps:
       - name: Checkout
@@ -260,7 +259,6 @@ jobs:
         compiler: [clang, msvc]
     env:
       QT_VERSION: 6.9.1
-      SCCACHE_GHA_ENABLED: "true"
 
     steps:
       - name: Checkout
@@ -448,8 +446,6 @@ jobs:
           - runs-on: macos-latest
             arch: arm64
         compiler: [universal]
-    env:
-      SCCACHE_GHA_ENABLED: "true"
 
     steps:
       - name: Checkout
