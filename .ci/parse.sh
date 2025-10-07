@@ -33,14 +33,14 @@ case "$1" in
     echo "FORGEJO_CLONE_URL=https://git.eden-emu.dev/eden-emu/eden.git" >> $GITHUB_ENV
     ;;
   push)
-    echo "FORGEJO_CLONE_URL=https://git.eden-emu.dev/eden-emu/eden.git" >> $GITHUB_ENV
-    FORGEJO_REF=fork/$DEFAULT
+    echo "FORGEJO_CLONE_URL=https://git.eden-emu.dev/octocar/eden.git" >> $GITHUB_ENV
+    FORGEJO_REF=origin/$DEFAULT
     FORGEJO_BRANCH=$DEFAULT
 esac
 
 if [ "$FORGEJO_REF" = "null" ] || [ "$FORGEJO_REF" = "" ]
 then
-  FORGEJO_REF=fork/$DEFAULT
+  FORGEJO_REF=origin/$DEFAULT
   FORGEJO_BRANCH=$DEFAULT
 fi
 

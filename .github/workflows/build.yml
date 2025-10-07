@@ -27,6 +27,7 @@ on:
 
 env:
   DISABLE_ARM: ${{ vars.DISABLE_ARM }}
+  CPM_CACHE_KEY: "v6"
 
 jobs:
   summary:
@@ -198,9 +199,9 @@ jobs:
           path: |
             ${{ github.workspace }}/.cache
             ${{ github.workspace }}/build/_deps/*-build
-          key: ${{ runner.os }}-${{ matrix.os.arch }}-cpm-v5-${{ github.run_id }}
+          key: ${{ runner.os }}-${{ matrix.os.arch }}-cpm-${{ env.CPM_CACHE_KEY }}-${{ github.run_id }}
           restore-keys: |
-            ${{ runner.os }}-${{ matrix.os.arch }}-cpm-v5-
+            ${{ runner.os }}-${{ matrix.os.arch }}-cpm-${{ env.CPM_CACHE_KEY }}-
 
       - name: Build
         shell: bash
@@ -287,9 +288,9 @@ jobs:
           path: |
             ${{ github.workspace }}/.cache
             ${{ github.workspace }}/build/_deps/*-build
-          key: ${{ runner.os }}-${{ matrix.os.arch }}-${{ matrix.compiler }}-unix-cpm-v5-${{ github.run_id }}
+          key: ${{ runner.os }}-${{ matrix.os.arch }}-${{ matrix.compiler }}-unix-cpm-${{ env.CPM_CACHE_KEY }}-${{ github.run_id }}
           restore-keys: |
-            ${{ runner.os }}-${{ matrix.os.arch }}-${{ matrix.compiler }}-unix-cpm-v5-
+            ${{ runner.os }}-${{ matrix.os.arch }}-${{ matrix.compiler }}-unix-cpm-${{ env.CPM_CACHE_KEY }}-
 
       - name: Set up MSVC
         uses: ilammy/msvc-dev-cmd@v1
@@ -360,9 +361,9 @@ jobs:
           path: |
             ${{ github.workspace }}/.cache
             ${{ github.workspace }}/build/_deps/*-build
-          key: ${{ runner.os }}-cpm-v5-${{ github.run_id }}
+          key: ${{ runner.os }}-cpm-${{ env.CPM_CACHE_KEY }}-${{ github.run_id }}
           restore-keys: |
-            ${{ runner.os }}-cpm-v5-
+            ${{ runner.os }}-cpm-${{ env.CPM_CACHE_KEY }}-
 
       - name: Build
         run: |
@@ -432,9 +433,9 @@ jobs:
           path: |
             ${{ github.workspace }}/.cache
             ${{ github.workspace }}/build/_deps/*-build
-          key: ${{ runner.os }}-cpm-v5-${{ github.run_id }}
+          key: ${{ runner.os }}-cpm-${{ env.CPM_CACHE_KEY }}-${{ github.run_id }}
           restore-keys: |
-            ${{ runner.os }}-cpm-v5-
+            ${{ runner.os }}-cpm-${{ env.CPM_CACHE_KEY }}-
 
       - name: Build
         run: |
