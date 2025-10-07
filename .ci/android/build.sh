@@ -8,7 +8,7 @@ if [ ! -z "${ANDROID_KEYSTORE_B64}" ]; then
     base64 --decode <<< "${ANDROID_KEYSTORE_B64}" > "${ANDROID_KEYSTORE_FILE}"
 else
     echo "CI builds without a valid keystore provided are not supported."
-    if [ "$CI_PR_FORK" = "true" ]; then
+    if [ "$CI_PR_FORK" != "true" ]; then
         exit 1
     fi
 fi
