@@ -1,13 +1,13 @@
-#!/bin/bash -x
+#!/bin/sh -x
 
 echo $PAYLOAD_JSON
 
-DEFAULT=update-fmt
+DEFAULT=sdl3
 
 case "$1" in
   master)
     FORGEJO_REF=$(echo "$PAYLOAD_JSON" | jq -r '.ref')
-    FORGEJO_BEFORE=$(echo "$PAYLOAD_JSON" | jq -r '.before')
+    # FORGEJO_BEFORE=$(echo "$PAYLOAD_JSON" | jq -r '.before')
     FORGEJO_BRANCH=master
 
     echo "FORGEJO_CLONE_URL=https://git.eden-emu.dev/eden-emu/eden.git" >> $GITHUB_ENV

@@ -22,7 +22,7 @@ brew install --formula --quiet \
   openssl \
   opus \
   pkg-config \
-  sdl2 \
+  sdl3 \
   speexdsp \
   spirv-headers \
   spirv-tools \

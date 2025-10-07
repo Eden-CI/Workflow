@@ -1,4 +1,4 @@
-#!/bin/sh -x
+#!/bin/sh -e
 
 TRIES=0
 
@@ -16,10 +16,11 @@ while ! git clone $FORGEJO_CLONE_URL eden; do
 done
 
 cd eden
+git remote add https://git.eden-emu.dev/octocar/eden.git
 git fetch --all
-git checkout $FORGEJO_REF
+git checkout "$FORGEJO_REF"
 
-echo $FORGEJO_BRANCH > GIT-REFSPEC
+echo "$FORGEJO_BRANCH" > GIT-REFSPEC
 git rev-parse --short=10 HEAD > GIT-COMMIT
 git describe --tags HEAD --abbrev=0 > GIT-TAG || echo 'v0.0.3' > GIT-TAG
 
