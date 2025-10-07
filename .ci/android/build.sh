@@ -8,7 +8,9 @@ if [ ! -z "${ANDROID_KEYSTORE_B64}" ]; then
     base64 --decode <<< "${ANDROID_KEYSTORE_B64}" > "${ANDROID_KEYSTORE_FILE}"
 else
     echo "CI builds without a valid keystore provided are not supported."
-    exit 1
+    if [ "$CI_PR_FORK" = "true" ]; then
+        exit 1
+    fi
 fi
 
 SHA1SUM=$(keytool -list -v -storepass ${ANDROID_KEYSTORE_PASS} -keystore ${ANDROID_KEYSTORE_FILE} | grep SHA1 | cut -d " " -f3)

@@ -345,13 +345,17 @@ jobs:
         compiler: [universal]
 
     steps:
-      - name: Check ANDROID_KEYSTORE_B64 secret
+      - name: Check Android secrets
         run: |
-          if [ -z "${ANDROID_KEYSTORE_B64}" ] || \
-             [ -z "${ANDROID_KEY_ALIAS}" ] || \
-             [ -z "${ANDROID_KEYSTORE_PASS}" ]; then
-            echo "::error ::Missing required Android secrets!"
-            exit 1
+          if [ "${{ github.event_name }}" = "pull_request" ] && [ "${{ github.event.pull_request.head.repo.full_name }}" != "${{ github.repository }}" ]; then
+            echo "CI_PR_FORK=true" >> $GITHUB_ENV
+          else
+            if [ -z "${ANDROID_KEYSTORE_B64}" ] || \
+               [ -z "${ANDROID_KEY_ALIAS}" ] || \
+               [ -z "${ANDROID_KEYSTORE_PASS}" ]; then
+              echo "::error ::Missing required Android secrets!"
+              exit 1
+            fi
           fi
         env:
           ANDROID_KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
