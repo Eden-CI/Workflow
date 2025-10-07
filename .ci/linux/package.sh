@@ -45,21 +45,20 @@ BUILDDIR=${BUILDDIR:-build}
 
 EDEN_TAG=$(cat GIT-TAG)
 echo "Making \"$EDEN_TAG\" build"
-# git checkout "$EDEN_TAG"
-VERSION="$(echo "$EDEN_TAG")"
+VERSION="$EDEN_TAG"
 
 export OUTNAME="Eden-$VERSION-$ARCH.AppImage"
 export UPINFO="gh-releases-zsync|eden-emulator|Releases|latest|*-$ARCH.AppImage.zsync"
 
 if [ "$DEVEL" = 'true' ]; then
-	sed -i 's|Name=Eden|Name=Eden Nightly|' $DESKTOP
+	sed -i 's|Name=Eden|Name=Eden Nightly|' "$DESKTOP"
  	UPINFO="$(echo "$UPINFO" | sed 's|Releases|nightly|')"
 fi
 
 # deploy
 wget --retry-connrefused --tries=30 "$SHARUN" -O ./quick-sharun
 chmod +x ./quick-sharun
-./quick-sharun $BUILDDIR/bin/eden
+./quick-sharun "$BUILDDIR"/bin/eden
 
 # Wayland is mankind's worst invention, perhaps only behind war
 echo 'QT_QPA_PLATFORM=xcb' >> AppDir/.env
