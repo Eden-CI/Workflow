@@ -16,7 +16,7 @@ while ! git clone $FORGEJO_CLONE_URL eden; do
 done
 
 cd eden
-git remote add https://git.eden-emu.dev/octocar/eden.git
+git remote add fork https://git.eden-emu.dev/octocar/eden.git
 git fetch --all
 git checkout "$FORGEJO_REF"
 
