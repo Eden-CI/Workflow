@@ -29,6 +29,7 @@ env:
   DISABLE_ARM: ${{ vars.DISABLE_ARM }}
   SCCACHE_GHA_ENABLED: "true"
   CCACHE: "true"
+  CPM_CACHE_VERSION: ""
 
 jobs:
   summary:
@@ -183,6 +184,7 @@ jobs:
           echo "USE_WEBENGINE=${{ inputs.webengine }}" >> $GITHUB_ENV
           echo "USE_MULTIMEDIA=${{ inputs.multimedia }}" >> $GITHUB_ENV
           echo "COMPILER=${{ matrix.compiler }}" >> $GITHUB_ENV
+          echo "CCACHE=${{ env.CCACHE }}" >> $GITHUB_ENV 
 
       - name: Parse Forgejo payload
         shell: bash
@@ -270,6 +272,7 @@ jobs:
           echo "USE_WEBENGINE=${{ inputs.webengine }}" >> $GITHUB_ENV
           echo "USE_MULTIMEDIA=${{ inputs.multimedia }}" >> $GITHUB_ENV
           echo "COMPILER=${{ matrix.compiler }}" >> $GITHUB_ENV
+          echo "CCACHE=${{ env.CCACHE }}" >> $GITHUB_ENV
 
       - name: Parse Forgejo payload
         shell: bash
@@ -370,6 +373,12 @@ jobs:
         run: |
           ./.ci/android/deps.sh
 
+      #TODO: Caio99BR: properly fix this
+      - name: Set build variables
+        shell: bash
+        run: |
+          echo "CCACHE=${{ env.CCACHE }}" >> $GITHUB_ENV
+
       - name: Parse Forgejo payload
         shell: sh
         run: |
@@ -459,6 +468,7 @@ jobs:
           echo "DEVEL=${{ inputs.devel }}" >> $GITHUB_ENV
           echo "USE_WEBENGINE=${{ inputs.webengine }}" >> $GITHUB_ENV
           echo "USE_MULTIMEDIA=${{ inputs.multimedia }}" >> $GITHUB_ENV
+          echo "CCACHE=${{ env.CCACHE }}" >> $GITHUB_ENV
 
       - name: Parse Forgejo payload
         shell: sh
