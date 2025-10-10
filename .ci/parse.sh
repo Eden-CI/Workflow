@@ -2,7 +2,7 @@
 
 echo $PAYLOAD_JSON
 
-DEFAULT=update-fmt
+DEFAULT=test/tzdb
 
 case "$1" in
   master)

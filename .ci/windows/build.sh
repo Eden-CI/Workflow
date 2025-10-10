@@ -9,13 +9,11 @@ then
         -DCMAKE_CXX_COMPILER=clang-cl
         -DCMAKE_C_COMPILER=clang-cl
     )
-
-    LTO=OFF
 fi
 
-[ -z "$WINDEPLOYQT" ] && { echo "WINDEPLOYQT environment variable required."; exit 1; }
+LTO=OFF
 
-echo $EXTRA_CMAKE_FLAGS
+[ -z "$WINDEPLOYQT" ] && { echo "WINDEPLOYQT environment variable required."; exit 1; }
 
 BUILDDIR=${BUILDDIR:-build}
 NUM_JOBS=$(nproc 2>/dev/null || getconf _NPROCESSORS_ONLN 2>/dev/null || echo 2)
