@@ -38,7 +38,7 @@ jobs:
         run: |
           export PAYLOAD_JSON='${{ toJSON(github.event.client_payload) }}'
           export FORGEJO_TOKEN=${{ secrets.FORGEJO_TOKEN }}
-          ./.ci/parse.sh pull_request
+          ./.ci/forgejo-ci.sh --parse pull_request
 
       - name: Set environment variables
         run: |

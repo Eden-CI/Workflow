@@ -45,12 +45,12 @@ jobs:
         run: |
           export PAYLOAD_JSON='${{ toJSON(github.event.client_payload) }}'
           export FORGEJO_TOKEN=${{ secrets.FORGEJO_TOKEN }}
-          ./.ci/parse.sh ${{ inputs.build-id }}
+          ./.ci/forgejo-ci.sh --parse ${{ inputs.build-id }}
 
       - name: Create job summary
         run: |
           export FORGEJO_TOKEN=${{ secrets.FORGEJO_TOKEN }}
-          ./.ci/summary.sh ${{ inputs.build-id }}
+          ./.ci/forgejo-ci.sh --summary ${{ inputs.build-id }}
 
   clone:
     name: "Clone"
@@ -67,11 +67,11 @@ jobs:
         run: |
           export PAYLOAD_JSON='${{ toJSON(github.event.client_payload) }}'
           export FORGEJO_TOKEN=${{ secrets.FORGEJO_TOKEN }}
-          ./.ci/parse.sh ${{ inputs.build-id }}
+          ./.ci/forgejo-ci.sh --parse ${{ inputs.build-id }}
 
       - name: Clone
         shell: bash
-        run: ./.ci/clone.sh ${{ inputs.build-id }}
+        run: ./.ci/forgejo-ci.sh --clone ${{ inputs.build-id }}
 
       - name: Cleanup
         run: |
@@ -191,7 +191,7 @@ jobs:
         run: |
           export PAYLOAD_JSON='${{ toJSON(github.event.client_payload) }}'
           export FORGEJO_TOKEN=${{ secrets.FORGEJO_TOKEN }}
-          ./.ci/parse.sh ${{ inputs.build-id }}
+          ./.ci/forgejo-ci.sh --parse ${{ inputs.build-id }}
 
       - name: Clone
         uses: actions/download-artifact@v4
@@ -280,7 +280,7 @@ jobs:
           pip install requests
           export PAYLOAD_JSON='${{ toJSON(github.event.client_payload) }}'
           export FORGEJO_TOKEN=${{ secrets.FORGEJO_TOKEN }}
-          ./.ci/parse.sh ${{ inputs.build-id }}
+          ./.ci/forgejo-ci.sh --parse ${{ inputs.build-id }}
 
       - name: Clone
         uses: actions/download-artifact@v4
@@ -384,7 +384,7 @@ jobs:
         run: |
           export PAYLOAD_JSON='${{ toJSON(github.event.client_payload) }}'
           export FORGEJO_TOKEN=${{ secrets.FORGEJO_TOKEN }}
-          ./.ci/parse.sh ${{ inputs.build-id }}
+          ./.ci/forgejo-ci.sh --parse ${{ inputs.build-id }}
 
       - name: Clone
         uses: actions/download-artifact@v4
@@ -475,7 +475,7 @@ jobs:
         run: |
           export PAYLOAD_JSON='${{ toJSON(github.event.client_payload) }}'
           export FORGEJO_TOKEN=${{ secrets.FORGEJO_TOKEN }}
-          ./.ci/parse.sh ${{ inputs.build-id }}
+          ./.ci/forgejo-ci.sh --parse ${{ inputs.build-id }}
 
       - name: Clone
         uses: actions/download-artifact@v4
