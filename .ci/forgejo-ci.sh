@@ -91,16 +91,18 @@ clone_repository() {
     rm -rf ./eden || true
   done
 
-  cd eden
-  git fetch --all
-  git checkout "$FORGEJO_REF"
+  if ! git -C eden checkout "$FORGEJO_REF"; then
+    echo "Ref $FORGEJO_REF not found locally, trying to fetch..."
+    git -C eden fetch origin "$FORGEJO_REF"
+    git -C eden checkout "$FORGEJO_REF"
+  fi
 
-  echo "$FORGEJO_BRANCH" > GIT-REFSPEC
-  git rev-parse --short=10 HEAD > GIT-COMMIT
-  git describe --tags HEAD --abbrev=0 > GIT-TAG || echo 'v0.0.3' > GIT-TAG
+  echo "$FORGEJO_BRANCH" > eden/GIT-REFSPEC
+  git -C eden rev-parse --short=10 HEAD > eden/GIT-COMMIT
+  git -C eden describe --tags HEAD --abbrev=0 > eden/GIT-TAG || echo 'v0.0.3' > eden/GIT-TAG
 
   if [ "$1" = "tag" ]; then
-    cp GIT-TAG GIT-RELEASE
+    cp eden/GIT-TAG eden/GIT-RELEASE
   fi
 }
 
