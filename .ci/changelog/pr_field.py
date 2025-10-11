@@ -2,6 +2,7 @@
 
 import os
 import requests
+import json
 
 FORGEJO_HOST = os.getenv("FORGEJO_HOST")
 FORGEJO_REPO = os.getenv("FORGEJO_REPO")
@@ -17,17 +18,15 @@ COMMITS_API_URL = f"https://{FORGEJO_HOST}/api/v1/repos/{FORGEJO_REPO}/commits?s
 def get_pr_json():
     headers = {"Authorization": f"token {FORGEJO_TOKEN}"} if FORGEJO_TOKEN else {}
     response = requests.get(PR_API_URL, headers=headers)
-    response.raise_for_status()
     return response.json()
 
 def get_latest_commit():
     headers = {"Authorization": f"token {FORGEJO_TOKEN}"} if FORGEJO_TOKEN else {}
     response = requests.get(COMMITS_API_URL, headers=headers)
-    response.raise_for_status()
     data = response.json()
     if not isinstance(data, list) or len(data) == 0:
         raise RuntimeError(f"No commits found for branch '{FORGEJO_BRANCH}' in {FORGEJO_REPO}")
-    return data[0]["sha"]
+    return data[0]["sha"][:10]
 
 def get_field():
     try:

@@ -6,6 +6,24 @@
 # Unified CI helper for Forgejo > GitHub integration
 # Supports: --parse, --summary, --clone
 
+get_forgejo_field() {
+    local field="${1:-title}"
+    local url
+    local data
+
+    if [ "$field" = "title" ]; then
+        url="https://$FORGEJO_HOST/api/v1/repos/$FORGEJO_REPO/pulls/$FORGEJO_PR_NUMBER"
+        data=$(curl -s "$url")
+        echo "$data" | jq -r ".${field} // \"No title provided\""
+    elif [ "$field" = "sha" ]; then
+        url="https://$FORGEJO_HOST/api/v1/repos/$FORGEJO_REPO/commits?sha=$FORGEJO_BRANCH&limit=1"
+        data=$(curl -s "$url")
+        echo "$data" | jq -r '.[0].sha[:10]'
+    else
+        echo "No title provided"
+    fi
+}
+
 parse_payload() {
   DEFAULT_JSON="default.json"
   PAYLOAD_JSON="payload.json"
@@ -15,6 +33,15 @@ parse_payload() {
     echo
     echo "Error: $DEFAULT_JSON not found!"
     exit 1
+  fi
+
+  FORGEJO_HOST=$(jq -r '.host // empty' $PAYLOAD_JSON)
+  if [ -z "$FORGEJO_HOST" ]; then
+    FORGEJO_HOST=$(jq -r '.host' $DEFAULT_JSON)
+  fi
+  FORGEJO_REPO=$(jq -r '.repository // empty' $PAYLOAD_JSON)
+  if [ -z "$FORGEJO_REPO" ]; then
+    FORGEJO_REPO=$(jq -r '.repository' $DEFAULT_JSON)
   fi
 
   case "$1" in
@@ -32,7 +59,7 @@ parse_payload() {
       FORGEJO_PR_MERGE_BASE=$(jq -r '.merge_base' $PAYLOAD_JSON)
       FORGEJO_PR_NUMBER=$(jq -r '.number' $PAYLOAD_JSON)
       FORGEJO_PR_URL=$(jq -r '.url' $PAYLOAD_JSON)
-      FORGEJO_PR_TITLE=$(FIELD=title DEFAULT_MSG="No title provided" FORGEJO_PR_NUMBER=$FORGEJO_PR_NUMBER python3 .ci/changelog/pr_field.py)
+      FORGEJO_PR_TITLE=$(get_forgejo_field "title")
 
       echo "FORGEJO_PR_MERGE_BASE=$FORGEJO_PR_MERGE_BASE" >> "$GITHUB_ENV"
       echo "FORGEJO_PR_NUMBER=$FORGEJO_PR_NUMBER" >> "$GITHUB_ENV"
@@ -45,17 +72,9 @@ parse_payload() {
       ;;
   esac
 
-  FORGEJO_HOST=$(jq -r '.host // empty' $PAYLOAD_JSON)
-  if [ "$FORGEJO_HOST" = "null" ] || [ -z "$FORGEJO_HOST" ]; then
-    FORGEJO_HOST=$(jq -r '.host' $DEFAULT_JSON)
-  fi
-  FORGEJO_REPO=$(jq -r '.repository // empty' $PAYLOAD_JSON)
-  if [ "$FORGEJO_REPO" = "null" ] || [ -z "$FORGEJO_REPO" ]; then
-    FORGEJO_REPO=$(jq -r '.repository' $DEFAULT_JSON)
-  fi
-  if [ "$FORGEJO_REF" = "null" ] || [ -z "$FORGEJO_REF" ]; then
-    FORGEJO_REF=$(FIELD=sha python3 .ci/changelog/pr_field.py)
+  if [ -z "$FORGEJO_REF" ]; then
     FORGEJO_BRANCH=$(jq -r '.branch' $DEFAULT_JSON)
+    FORGEJO_REF=$(get_forgejo_field "sha")
   fi
   FORGEJO_CLONE_URL="https://$FORGEJO_HOST/$FORGEJO_REPO.git"
 
