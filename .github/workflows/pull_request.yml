@@ -6,6 +6,7 @@ on:
 
 env:
   DISABLE_ARM: ${{ vars.DISABLE_ARM }}
+  FORGEJO_TOKEN: ${{ secrets.FORGEJO_TOKEN }}
 
 jobs:
   build:
@@ -36,8 +37,7 @@ jobs:
       - name: Parse Forgejo payload
         shell: bash
         run: |
-          export PAYLOAD_JSON='${{ toJSON(github.event.client_payload) }}'
-          export FORGEJO_TOKEN=${{ secrets.FORGEJO_TOKEN }}
+          echo "${{ toJSON(github.event.client_payload) }}" > ./payload.json
           ./.ci/forgejo-ci.sh --parse pull_request
 
       - name: Set environment variables
@@ -48,7 +48,7 @@ jobs:
 
       - name: Package artifacts nicely
         run: |
-          export ID=${FORGEJO_NUMBER}-${FORGEJO_REF}
+          export ID=${FORGEJO_PR_NUMBER}-${FORGEJO_REF}
           ./pack.sh
 
       - name: Install dependencies
@@ -56,13 +56,11 @@ jobs:
 
       - name: Generate changelog
         run: |
-          export FORGEJO_TOKEN=${{ secrets.FORGEJO_TOKEN }}
-
           ./.ci/changelog/generate.sh > changelog.md
 
       - name: Delete Previous Release
         run: |
-          gh release delete "$FORGEJO_NUMBER" --repo "$REPO" --cleanup-tag  -y
+          gh release delete "$FORGEJO_PR_NUMBER" --repo "$REPO" --cleanup-tag  -y
           sleep 5
         env:
           GH_TOKEN: "${{ secrets.CUSTOM_GITHUB_TOKEN }}"
@@ -72,7 +70,7 @@ jobs:
         uses: softprops/action-gh-release@v2.2.2
         with:
           name: "${{ env.FORGEJO_TITLE }}"
-          tag_name: ${{ env.FORGEJO_NUMBER }}-${{ env.FORGEJO_REF }}
+          tag_name: ${{ env.FORGEJO_PR_NUMBER }}-${{ env.FORGEJO_REF }}
           repository: ${{ env.REPO }}
           body_path: ./changelog.md
           token: ${{ secrets.CUSTOM_GITHUB_TOKEN }}
@@ -88,7 +86,7 @@ jobs:
         uses: softprops/action-gh-release@v2.2.2
         with:
           name: ${{ env.FORGEJO_TITLE }}
-          tag_name: ${{ env.FORGEJO_NUMBER }}
+          tag_name: ${{ env.FORGEJO_PR_NUMBER }}
           repository: ${{ env.REPO }}
           body_path: ./changelog.md
           token: ${{ secrets.CUSTOM_GITHUB_TOKEN }}

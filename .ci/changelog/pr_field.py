@@ -4,15 +4,17 @@ import os
 import requests
 import json
 
-PR_API_URL = "https://git.eden-emu.dev/api/v1/repos/eden-emu/eden/pulls"
-FORGEJO_NUMBER = os.getenv("FORGEJO_NUMBER")
+FORGEJO_HOST = os.getenv("FORGEJO_HOST")
+FORGEJO_REPO = os.getenv("FORGEJO_REPO")
+PR_API_URL = f"https://{FORGEJO_HOST}/api/v1/repos/{FORGEJO_REPO}/pulls"
+FORGEJO_PR_NUMBER = os.getenv("FORGEJO_PR_NUMBER")
 FORGEJO_TOKEN = os.getenv("FORGEJO_TOKEN")
 DEFAULT_MSG = os.getenv("DEFAULT_MSG")
 FIELD = os.getenv("FIELD")
 
 def get_pr_json():
-    headers = {"Authorization": f"token {FORGEJO_TOKEN}"}
-    response = requests.get(f"{PR_API_URL}/{FORGEJO_NUMBER}", headers=headers)
+    headers = {"Authorization": f"token {FORGEJO_TOKEN}"} if FORGEJO_TOKEN else {}
+    response = requests.get(f"{PR_API_URL}/{FORGEJO_PR_NUMBER}", headers=headers)
     return response.json()
 
 def get_pr_field():

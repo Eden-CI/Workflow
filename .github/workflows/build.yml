@@ -30,6 +30,7 @@ env:
   SCCACHE_GHA_ENABLED: "true"
   CCACHE: "true"
   CPM_CACHE_VERSION: ""
+  FORGEJO_TOKEN: ${{ secrets.FORGEJO_TOKEN }}
 
 jobs:
   summary:
@@ -43,13 +44,11 @@ jobs:
       - name: Parse Forgejo payload
         shell: bash
         run: |
-          export PAYLOAD_JSON='${{ toJSON(github.event.client_payload) }}'
-          export FORGEJO_TOKEN=${{ secrets.FORGEJO_TOKEN }}
+          echo "${{ toJSON(github.event.client_payload) }}" > ./payload.json
           ./.ci/forgejo-ci.sh --parse ${{ inputs.build-id }}
 
       - name: Create job summary
         run: |
-          export FORGEJO_TOKEN=${{ secrets.FORGEJO_TOKEN }}
           ./.ci/forgejo-ci.sh --summary ${{ inputs.build-id }}
 
   clone:
@@ -65,8 +64,7 @@ jobs:
       - name: Parse Forgejo payload
         shell: bash
         run: |
-          export PAYLOAD_JSON='${{ toJSON(github.event.client_payload) }}'
-          export FORGEJO_TOKEN=${{ secrets.FORGEJO_TOKEN }}
+          echo "${{ toJSON(github.event.client_payload) }}" > ./payload.json
           ./.ci/forgejo-ci.sh --parse ${{ inputs.build-id }}
 
       - name: Clone
@@ -189,8 +187,7 @@ jobs:
       - name: Parse Forgejo payload
         shell: bash
         run: |
-          export PAYLOAD_JSON='${{ toJSON(github.event.client_payload) }}'
-          export FORGEJO_TOKEN=${{ secrets.FORGEJO_TOKEN }}
+          echo "${{ toJSON(github.event.client_payload) }}" > ./payload.json
           ./.ci/forgejo-ci.sh --parse ${{ inputs.build-id }}
 
       - name: Clone
@@ -278,8 +275,7 @@ jobs:
         shell: bash
         run: |
           pip install requests
-          export PAYLOAD_JSON='${{ toJSON(github.event.client_payload) }}'
-          export FORGEJO_TOKEN=${{ secrets.FORGEJO_TOKEN }}
+          echo "${{ toJSON(github.event.client_payload) }}" > ./payload.json
           ./.ci/forgejo-ci.sh --parse ${{ inputs.build-id }}
 
       - name: Clone
@@ -382,8 +378,7 @@ jobs:
       - name: Parse Forgejo payload
         shell: sh
         run: |
-          export PAYLOAD_JSON='${{ toJSON(github.event.client_payload) }}'
-          export FORGEJO_TOKEN=${{ secrets.FORGEJO_TOKEN }}
+          echo "${{ toJSON(github.event.client_payload) }}" > ./payload.json
           ./.ci/forgejo-ci.sh --parse ${{ inputs.build-id }}
 
       - name: Clone
@@ -473,8 +468,7 @@ jobs:
       - name: Parse Forgejo payload
         shell: sh
         run: |
-          export PAYLOAD_JSON='${{ toJSON(github.event.client_payload) }}'
-          export FORGEJO_TOKEN=${{ secrets.FORGEJO_TOKEN }}
+          echo "${{ toJSON(github.event.client_payload) }}" > ./payload.json
           ./.ci/forgejo-ci.sh --parse ${{ inputs.build-id }}
 
       - name: Clone

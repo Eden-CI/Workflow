@@ -7,70 +7,84 @@
 # Supports: --parse, --summary, --clone
 
 parse_payload() {
-  echo "$PAYLOAD_JSON"
+  DEFAULT_JSON="default.json"
+  PAYLOAD_JSON="payload.json"
 
-  DEFAULT=update-fmt
+  if [ ! -f "$DEFAULT_JSON" ]; then
+    echo "You should set 'host', 'repository', 'branch' on $DEFAULT_JSON"
+    echo
+    echo "Error: $DEFAULT_JSON not found!"
+    exit 1
+  fi
 
   case "$1" in
     master)
-      FORGEJO_REF=$(echo "$PAYLOAD_JSON" | jq -r '.ref')
-      FORGEJO_BEFORE=$(echo "$PAYLOAD_JSON" | jq -r '.before')
+      FORGEJO_REF=$(jq -r '.ref' $PAYLOAD_JSON)
       FORGEJO_BRANCH=master
 
-      echo "FORGEJO_CLONE_URL=https://git.eden-emu.dev/eden-emu/eden.git" >> "$GITHUB_ENV"
+      FORGEJO_BEFORE=$(jq -r '.before' $PAYLOAD_JSON)
       echo "FORGEJO_BEFORE=$FORGEJO_BEFORE" >> "$GITHUB_ENV"
       ;;
     pull_request)
-      FORGEJO_REF=$(echo "$PAYLOAD_JSON" | jq -r '.ref')
-      FORGEJO_BRANCH=$(echo "$PAYLOAD_JSON" | jq -r '.branch')
-      FORGEJO_NUMBER=$(echo "$PAYLOAD_JSON" | jq -r '.number')
+      FORGEJO_REF=$(jq -r '.ref' $PAYLOAD_JSON)
+      FORGEJO_BRANCH=$(jq -r '.branch' $PAYLOAD_JSON)
 
-      echo "FORGEJO_CLONE_URL=$(echo "$PAYLOAD_JSON" | jq -r '.clone_url')" >> "$GITHUB_ENV"
-      echo "FORGEJO_NUMBER=$FORGEJO_NUMBER" >> "$GITHUB_ENV"
-      echo "FORGEJO_PR_URL=$(echo "$PAYLOAD_JSON" | jq -r '.url')" >> "$GITHUB_ENV"
-      echo "FORGEJO_MERGE_BASE=$(echo "$PAYLOAD_JSON" | jq -r '.merge_base')" >> "$GITHUB_ENV"
+      FORGEJO_PR_MERGE_BASE=$(jq -r '.merge_base' $PAYLOAD_JSON)
+      FORGEJO_PR_NUMBER=$(jq -r '.number' $PAYLOAD_JSON)
+      FORGEJO_PR_URL=$(jq -r '.url' $PAYLOAD_JSON)
+      FORGEJO_PR_TITLE=$(FIELD=title DEFAULT_MSG="No title provided" FORGEJO_PR_NUMBER=$FORGEJO_PR_NUMBER python3 .ci/changelog/pr_field.py)
 
-      # thanks POSIX
-      FORGEJO_TITLE=$(FIELD=title DEFAULT_MSG="No title provided" FORGEJO_NUMBER=$FORGEJO_NUMBER python3 .ci/changelog/pr_field.py)
-      echo "FORGEJO_TITLE=$FORGEJO_TITLE" >> "$GITHUB_ENV"
+      echo "FORGEJO_PR_MERGE_BASE=$FORGEJO_PR_MERGE_BASE" >> "$GITHUB_ENV"
+      echo "FORGEJO_PR_NUMBER=$FORGEJO_PR_NUMBER" >> "$GITHUB_ENV"
+      echo "FORGEJO_PR_URL=$FORGEJO_PR_URL" >> "$GITHUB_ENV"
+      echo "FORGEJO_PR_TITLE=$FORGEJO_PR_TITLE" >> "$GITHUB_ENV"
       ;;
     tag)
-      FORGEJO_REF=$(echo "$PAYLOAD_JSON" | jq -r '.tag')
+      FORGEJO_REF=$(jq -r '.tag' $PAYLOAD_JSON)
       FORGEJO_BRANCH=stable
-
-      echo "FORGEJO_CLONE_URL=https://git.eden-emu.dev/eden-emu/eden.git" >> "$GITHUB_ENV"
       ;;
     push)
-      echo "FORGEJO_CLONE_URL=https://git.eden-emu.dev/eden-emu/eden.git" >> "$GITHUB_ENV"
-      FORGEJO_REF="origin/$DEFAULT"
-      FORGEJO_BRANCH="$DEFAULT"
+      FORGEJO_REF=$(jq -r '.branch' $DEFAULT_JSON)
+      FORGEJO_BRANCH=$(jq -r '.branch' $DEFAULT_JSON)
       ;;
   esac
 
-  if [ "$FORGEJO_REF" = "null" ] || [ -z "$FORGEJO_REF" ]; then
-    FORGEJO_REF="origin/$DEFAULT"
-    FORGEJO_BRANCH="$DEFAULT"
+  FORGEJO_HOST=$(jq -r '.host // empty' $PAYLOAD_JSON)
+  if [ "$FORGEJO_HOST" = "null" ] || [ -z "$FORGEJO_HOST" ]; then
+    FORGEJO_HOST=$(jq -r '.host' $DEFAULT_JSON)
   fi
+  FORGEJO_REPO=$(jq -r '.repository // empty' $PAYLOAD_JSON)
+  if [ "$FORGEJO_REPO" = "null" ] || [ -z "$FORGEJO_REPO" ]; then
+    FORGEJO_REPO=$(jq -r '.repository' $DEFAULT_JSON)
+  fi
+  if [ "$FORGEJO_REF" = "null" ] || [ -z "$FORGEJO_REF" ]; then
+    FORGEJO_REF=$(jq -r '.branch' $DEFAULT_JSON)
+    FORGEJO_BRANCH=$(jq -r '.branch' $DEFAULT_JSON)
+  fi
+  FORGEJO_CLONE_URL="https://$FORGEJO_HOST/$FORGEJO_REPO.git"
 
+  echo "FORGEJO_HOST=$FORGEJO_HOST" >> "$GITHUB_ENV"
+  echo "FORGEJO_REPO=$FORGEJO_REPO" >> "$GITHUB_ENV"
   echo "FORGEJO_REF=$FORGEJO_REF" >> "$GITHUB_ENV"
   echo "FORGEJO_BRANCH=$FORGEJO_BRANCH" >> "$GITHUB_ENV"
+  echo "FORGEJO_CLONE_URL=$FORGEJO_CLONE_URL" >> "$GITHUB_ENV"
 }
 
 generate_summary() {
   cat << EOF >> "$GITHUB_STEP_SUMMARY"
 ## Job Summary
 -- Triggered By: $1
--- Ref: [\`$FORGEJO_REF\`](https://git.eden-emu.dev/eden-emu/eden/commit/$FORGEJO_REF)
+-- Ref: [\`$FORGEJO_REF\`](https://$FORGEJO_HOST/$FORGEJO_REPO/commit/$FORGEJO_REF)
 EOF
 
   if [ "$1" = "pull_request" ]; then
     {
-      echo "- PR #[${FORGEJO_NUMBER}]($FORGEJO_PR_URL)"
-      echo "- Merge Base: [\`$FORGEJO_MERGE_BASE\`](https://git.eden-emu.dev/eden-emu/eden/commit/$FORGEJO_MERGE_BASE)"
+      echo "- PR #[${FORGEJO_PR_NUMBER}]($FORGEJO_PR_URL)"
+      echo "- Merge Base: [\`$FORGEJO_PR_MERGE_BASE\`](https://$FORGEJO_HOST/$FORGEJO_REPO/commit/$FORGEJO_PR_MERGE_BASE)"
       echo -n "- Title: "
-      echo "$FORGEJO_TITLE"
+      echo "$FORGEJO_PR_TITLE"
       echo
-      FIELD=body DEFAULT_MSG="No changelog provided" FORGEJO_NUMBER=$FORGEJO_NUMBER python3 .ci/changelog/pr_field.py
+      FIELD=body DEFAULT_MSG="No changelog provided" FORGEJO_PR_NUMBER=$FORGEJO_PR_NUMBER python3 .ci/changelog/pr_field.py
     } >> "$GITHUB_STEP_SUMMARY"
   fi
 }

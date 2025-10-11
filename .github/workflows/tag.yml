@@ -38,8 +38,7 @@ jobs:
       - name: Parse Forgejo payload
         shell: bash
         run: |
-          export PAYLOAD_JSON='${{ toJSON(github.event.client_payload) }}'
-          export FORGEJO_TOKEN=${{ secrets.FORGEJO_TOKEN }}
+          echo "${{ toJSON(github.event.client_payload) }}" > ./payload.json
           ./.ci/forgejo-ci.sh --parse tag
 
       - name: Set environment variables
