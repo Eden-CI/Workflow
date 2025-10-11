@@ -5,39 +5,44 @@
 
 export LIBVULKAN_PATH="/opt/homebrew/lib/libvulkan.1.dylib"
 
-if [ -z "$BUILD_TYPE" ]; then
-    export BUILD_TYPE="Release"
-fi
+EXTRA_ARGS=("$@")
+echo "Extra args: ${EXTRA_ARGS[*]}"
 
-if [ "$DEVEL" != "true" ]; then
-    export EXTRA_CMAKE_FLAGS+=(-DENABLE_QT_UPDATE_CHECKER=ON)
-fi
-
-if [ "$BUNDLE_QT" = "true" ]; then
-    export EXTRA_CMAKE_FLAGS+=(-DYUZU_USE_BUNDLED_QT=ON)
-fi
-
-BUILDDIR=${BUILDDIR:-build}
+BUILDDIR="${BUILDDIR:-build}"
 NUM_JOBS=$(nproc 2>/dev/null || getconf _NPROCESSORS_ONLN 2>/dev/null || echo 2)
 
-cmake -S . -B "$BUILDDIR" -G Ninja \
-    -DYUZU_TESTS=OFF \
-    -DYUZU_USE_BUNDLED_QT=OFF \
+ARCH_FLAGS="-w"
+
+PLATFORM_CMAKE_FLAGS=(
+    -DYUZU_USE_BUNDLED_MOLTENVK=ON
+    -DYUZU_USE_BUNDLED_SIRIT=ON
+)
+echo "Platform flags: ${PLATFORM_CMAKE_FLAGS[*]}"
+
+COMMON_CMAKE_FLAGS=(
+    -DBUILD_TESTING=OFF \
+    -DCMAKE_BUILD_TYPE="${BUILD_TYPE:-Release}" \
+    -DCMAKE_C_FLAGS="${ARCH_FLAGS}" \
+    -DCMAKE_CXX_FLAGS="${ARCH_FLAGS}" \
+    -DDYNARMIC_ENABLE_LTO="${LTO:-ON}" \
+    -DDYNARMIC_TESTS=OFF \
     -DENABLE_QT_TRANSLATION=ON \
-    -DYUZU_ENABLE_LTO=ON \
+    -DENABLE_QT_UPDATE_CHECKER="${DEVEL:-true}" \
+    -DUSE_CCACHE="${CCACHE:-false}" \
     -DUSE_DISCORD_PRESENCE=ON \
     -DYUZU_CMD=OFF \
+    -DYUZU_ENABLE_LTO="${LTO:-ON}" \
     -DYUZU_ROOM_STANDALONE=OFF \
-    -DCMAKE_CXX_FLAGS="-w" \
-    -DCMAKE_BUILD_TYPE="$BUILD_TYPE" \
-    -DYUZU_USE_PRECOMPILED_HEADERS=OFF \
-	-DYUZU_USE_BUNDLED_SIRIT=ON \
     -DYUZU_TESTS=OFF \
-    -DDYNARMIC_TESTS=OFF \
-    -DBUILD_TESTING=OFF \
-	-DYUZU_USE_BUNDLED_MOLTENVK=ON \
-    -DUSE_CCACHE="${CCACHE:-false}" \
-    "${EXTRA_CMAKE_FLAGS[@]}" \
-    "$@"
+    -DYUZU_USE_BUNDLED_QT="${BUNDLE_QT:-false}" \
+    -DYUZU_USE_QT_MULTIMEDIA="${USE_MULTIMEDIA:-false}" \
+    -DYUZU_USE_QT_WEB_ENGINE="${USE_WEBENGINE:-false}" \
+)
+echo "Common flags: ${COMMON_CMAKE_FLAGS[*]}"
 
-cmake --build "$BUILDDIR" --parallel "$NUM_JOBS"
+cmake -S . -B "${BUILDDIR}" -G Ninja \
+    "${COMMON_CMAKE_FLAGS[@]}" \
+    "${PLATFORM_CMAKE_FLAGS[@]}" \
+    "${EXTRA_ARGS[@]}"
+
+cmake --build "${BUILDDIR}" --parallel "${NUM_JOBS}"

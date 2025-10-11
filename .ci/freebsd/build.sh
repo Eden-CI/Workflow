@@ -10,32 +10,10 @@ amd64)
     ARCH_FLAGS="-march=x86-64-v3 -mtune=generic"
     EXTRA_CMAKE_FLAGS+=(-DYUZU_BUILD_PRESET=v3)
     ;;
-steamdeck|zen2)
-    echo "Making Steam Deck (Zen 2) optimized build of Eden"
-    SDL2=external
-    ARCH_FLAGS="-march=znver2 -mtune=znver2"
-    EXTRA_CMAKE_FLAGS+=(-DYUZU_BUILD_PRESET=zen2 -DYUZU_SYSTEM_PROFILE=steamdeck)
-    ;;
-rog-ally|allyx|zen4)
-    echo "Making ROG Ally X (Zen 4) optimized build of Eden"
-    SDL2=external
-    ARCH_FLAGS="-march=znver4 -mtune=znver4"
-    EXTRA_CMAKE_FLAGS+=(-DYUZU_BUILD_PRESET=zen4 -DYUZU_SYSTEM_PROFILE=steamdeck)
-    ;;
-legacy)
-    echo "Making amd64 generic build of Eden"
-    ARCH_FLAGS="-march=x86-64 -mtune=generic"
-    EXTRA_CMAKE_FLAGS+=(-DYUZU_BUILD_PRESET=generic)
-    ;;
 aarch64)
     echo "Making armv8-a build of Eden"
     ARCH_FLAGS="-march=armv8-a -mtune=generic"
     EXTRA_CMAKE_FLAGS+=(-DYUZU_BUILD_PRESET=generic)
-    ;;
-armv9)
-    echo "Making armv9-a build of Eden"
-    ARCH_FLAGS="-march=armv9-a -mtune=generic"
-    EXTRA_CMAKE_FLAGS+=(-DYUZU_BUILD_PRESET=armv9)
     ;;
 native)
     echo "Making native build of Eden"
@@ -43,7 +21,7 @@ native)
     EXTRA_CMAKE_FLAGS+=(-DYUZU_BUILD_PRESET=native)
     ;;
 *)
-    echo "Invalid target $1 specified, must be one of: native, amd64, steamdeck, zen2, allyx, rog-ally, zen4, legacy, aarch64, armv9"
+    echo "Invalid target $1 specified, must be one of: native, amd64, aarch64"
     exit 1
     ;;
 esac
@@ -52,12 +30,6 @@ EXTRA_CMAKE_FLAGS+=(-DCMAKE_INSTALL_PREFIX=/usr)
 
 if [ "$COMPILER" = "clang" ]; then
     EXTRA_CMAKE_FLAGS+=(-DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++)
-fi
-
-if [ "$SDL2" = "external" ]; then
-    EXTRA_CMAKE_FLAGS+=(-DYUZU_USE_EXTERNAL_SDL2=ON)
-else
-    EXTRA_CMAKE_FLAGS+=(-DYUZU_USE_BUNDLED_SDL2=ON)
 fi
 echo "Extra CMake flags: ${EXTRA_CMAKE_FLAGS[*]}"
 
@@ -71,12 +43,8 @@ NUM_JOBS=$(nproc 2>/dev/null || getconf _NPROCESSORS_ONLN 2>/dev/null || echo 2)
 ARCH_FLAGS="${ARCH_FLAGS} -O3 -pipe -w"
 
 PLATFORM_CMAKE_FLAGS=(
-    -DYUZU_USE_BUNDLED_FFMPEG=ON
-    -DYUZU_USE_BUNDLED_OPENSSL=ON
-    -DYUZU_USE_BUNDLED_SIRIT=ON
-    -DYUZU_DISABLE_LLVM=ON
-    -DYUZU_USE_CPM=OFF
-    -DYUZU_USE_FASTER_LD=ON
+    -DYUZU_USE_CPM=ON
+    -DENABLE_WEB_SERVICE=OFF
 )
 echo "Platform flags: ${PLATFORM_CMAKE_FLAGS[*]}"
 
@@ -88,9 +56,9 @@ COMMON_CMAKE_FLAGS=(
     -DDYNARMIC_ENABLE_LTO="${LTO:-ON}" \
     -DDYNARMIC_TESTS=OFF \
     -DENABLE_QT_TRANSLATION=ON \
-    -DENABLE_QT_UPDATE_CHECKER="${DEVEL:-true}" \
+    -DENABLE_QT_UPDATE_CHECKER=OFF \
     -DUSE_CCACHE="${CCACHE:-false}" \
-    -DUSE_DISCORD_PRESENCE=ON \
+    -DUSE_DISCORD_PRESENCE=OFF \
     -DYUZU_CMD=OFF \
     -DYUZU_ENABLE_LTO="${LTO:-ON}" \
     -DYUZU_ROOM_STANDALONE=OFF \
