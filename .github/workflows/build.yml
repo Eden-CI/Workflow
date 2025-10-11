@@ -497,3 +497,58 @@ jobs:
         with:
           name: macos
           path: artifacts/*
+
+  freebsd:
+    name: "FreeBSD (Experimental)"
+    needs: [clone]
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - arch: amd64
+        compiler: [clang]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download cloned repo
+        uses: actions/download-artifact@v4
+        with:
+          name: eden
+
+      - name: Parse Forgejo payload
+        run: |
+          echo "${{ toJSON(github.event.client_payload) }}" > ./payload.json
+          ./.ci/forgejo-ci.sh --parse ${{ inputs.build-id }}
+
+      - name: Run FreeBSD VM
+        uses: vmactions/freebsd-vm@v1
+        with:
+          usesh: true
+          prepare: |
+            pkg update -f
+            pkg install -y bash git cmake ninja pkgconf qt6-base llvm sccache
+          run: |
+            echo "=== Iniciando build experimental FreeBSD ==="
+            echo "BUILD_TYPE=${{ inputs.build-type }}" >> $GITHUB_ENV
+            echo "DEVEL=${{ inputs.devel }}" >> $GITHUB_ENV
+            echo "USE_WEBENGINE=${{ inputs.webengine }}" >> $GITHUB_ENV
+            echo "USE_MULTIMEDIA=${{ inputs.multimedia }}" >> $GITHUB_ENV
+            echo "COMPILER=${{ matrix.compiler }}" >> $GITHUB_ENV
+            echo "CCACHE=${{ env.CCACHE }}" >> $GITHUB_ENV
+
+            chmod +x ./.ci/linux/deps.sh
+            chmod +x ./.ci/linux/build.sh
+            chmod +x ./.ci/linux/package.sh
+
+            ./.ci/linux/deps.sh
+            TARGET=freebsd ./.ci/linux/build.sh -DCCACHE_PATH=/usr/local/bin/sccache
+            ./.ci/linux/package.sh
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4.6.2
+        with:
+          name: freebsd-${{ matrix.os.arch }}
+          path: artifacts/*
