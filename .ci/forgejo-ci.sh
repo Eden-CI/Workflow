@@ -43,10 +43,6 @@ parse_payload() {
       FORGEJO_REF=$(jq -r '.tag' $PAYLOAD_JSON)
       FORGEJO_BRANCH=stable
       ;;
-    push)
-      FORGEJO_REF=$(jq -r '.branch' $DEFAULT_JSON)
-      FORGEJO_BRANCH=$(jq -r '.branch' $DEFAULT_JSON)
-      ;;
   esac
 
   FORGEJO_HOST=$(jq -r '.host // empty' $PAYLOAD_JSON)
@@ -58,7 +54,7 @@ parse_payload() {
     FORGEJO_REPO=$(jq -r '.repository' $DEFAULT_JSON)
   fi
   if [ "$FORGEJO_REF" = "null" ] || [ -z "$FORGEJO_REF" ]; then
-    FORGEJO_REF=$(jq -r '.branch' $DEFAULT_JSON)
+    FORGEJO_REF=$(FIELD=sha python3 .ci/changelog/pr_field.py)
     FORGEJO_BRANCH=$(jq -r '.branch' $DEFAULT_JSON)
   fi
   FORGEJO_CLONE_URL="https://$FORGEJO_HOST/$FORGEJO_REPO.git"
@@ -73,8 +69,8 @@ parse_payload() {
 generate_summary() {
   cat << EOF >> "$GITHUB_STEP_SUMMARY"
 ## Job Summary
--- Triggered By: $1
--- Ref: [\`$FORGEJO_REF\`](https://$FORGEJO_HOST/$FORGEJO_REPO/commit/$FORGEJO_REF)
+- Triggered By: $1
+- Ref: [\`$FORGEJO_REF\`](https://$FORGEJO_HOST/$FORGEJO_REPO/commit/$FORGEJO_REF)
 EOF
 
   if [ "$1" = "pull_request" ]; then
