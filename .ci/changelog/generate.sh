@@ -2,7 +2,7 @@
 
 source ./.ci/common/common.sh
 
-case "$BUILD" in
+case "$1" in
   master)
     TAG="v${TIMESTAMP}.${FORGEJO_REF}"
     REF="${FORGEJO_REF}"
@@ -52,7 +52,7 @@ case "$BUILD" in
     }
     ;;
 
-  push)
+  push|test)
     TAG="continuous"
     REF="continuous"
 
@@ -63,6 +63,11 @@ case "$BUILD" in
     changelog() {
       echo
     }
+    ;;
+    *)
+    echo "Type: $1"
+    echo "Supported types: master | pull_request | tag | push | test"
+    exit 1
     ;;
 esac
 

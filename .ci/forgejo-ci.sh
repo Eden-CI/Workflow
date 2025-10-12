@@ -54,12 +54,16 @@ parse_payload() {
       FORGEJO_REF=$(jq -r '.tag' $PAYLOAD_JSON)
       FORGEJO_BRANCH=stable
       ;;
+    push|test)
+      FORGEJO_BRANCH=$(jq -r '.branch' $DEFAULT_JSON)
+      FORGEJO_REF=$(get_forgejo_field field="sha")
+      ;;
+    *)
+      echo "Type: $1"
+      echo "Supported types: master | pull_request | tag | push | test"
+      exit 1
   esac
 
-  if [ -z "$FORGEJO_REF" ]; then
-    FORGEJO_BRANCH=$(jq -r '.branch' $DEFAULT_JSON)
-    FORGEJO_REF=$(get_forgejo_field field="sha")
-  fi
   FORGEJO_CLONE_URL="https://$FORGEJO_HOST/$FORGEJO_REPO.git"
 
   echo "FORGEJO_HOST=$FORGEJO_HOST" >> "$GITHUB_ENV"
@@ -131,7 +135,7 @@ case "$1" in
     ;;
   *)
     echo "Usage: $0 [--parse <type> | --summary <type> | --clone <type>]"
-    echo "Supported types: master | pull_request | tag | push"
+    echo "Supported types: master | pull_request | tag | push | test"
     ;;
 esac
 

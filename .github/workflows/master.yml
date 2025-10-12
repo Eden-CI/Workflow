@@ -44,7 +44,6 @@ jobs:
           echo "REPO=Eden-CI/Master" >> $GITHUB_ENV
           echo "DEVEL=true" >> $GITHUB_ENV
           echo "TIMESTAMP=$(date +%s)" >> $GITHUB_ENV
-          echo "BUILD=master" >> $GITHUB_ENV
 
       - name: Package artifacts nicely
         run: |
@@ -60,7 +59,7 @@ jobs:
         continue-on-error: true
 
       - name: Generate changelog
-        run: ./.ci/changelog/generate.sh > changelog.md
+        run: ./.ci/changelog/generate.sh master > changelog.md
 
       - name: Release
         uses: softprops/action-gh-release@v2.2.2

@@ -44,19 +44,15 @@ jobs:
         run: |
           echo "REPO=Eden-CI/PR" >> $GITHUB_ENV
           echo "DEVEL=true" >> $GITHUB_ENV
-          echo "BUILD=pull_request" >> $GITHUB_ENV
 
       - name: Package artifacts nicely
         run: |
           export ID=${FORGEJO_PR_NUMBER}-${FORGEJO_REF}
           ./pack.sh
 
-      - name: Install dependencies
-        run: sudo apt install -y python3-requests
-
       - name: Generate changelog
         run: |
-          ./.ci/changelog/generate.sh > changelog.md
+          ./.ci/changelog/generate.sh pull_request > changelog.md
 
       - name: Delete Previous Release
         run: |
