@@ -44,7 +44,7 @@ jobs:
         run: |
           echo "REPO=Eden-CI/PR" >> $GITHUB_ENV
           echo "DEVEL=true" >> $GITHUB_ENV
-          echo "BUILD=pr" >> $GITHUB_ENV
+          echo "BUILD=pull_request" >> $GITHUB_ENV
 
       - name: Package artifacts nicely
         run: |

@@ -47,7 +47,7 @@ jobs:
         run: |
           echo "REPO=Eden-CI/Master" >> $GITHUB_ENV
           echo "DEVEL=true" >> $GITHUB_ENV
-          echo "BUILD=test" >> $GITHUB_ENV
+          echo "BUILD=push" >> $GITHUB_ENV
 
       - name: Package artifacts nicely
         run: |

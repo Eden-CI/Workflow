@@ -19,7 +19,7 @@ case "$BUILD" in
     }
     ;;
 
-  pr)
+  pull_request)
     TAG="${FORGEJO_PR_NUMBER}-${FORGEJO_REF}"
     REF="${FORGEJO_PR_NUMBER}-${FORGEJO_REF}"
 
@@ -33,7 +33,7 @@ case "$BUILD" in
     changelog() {
       echo "## Changelog"
       echo
-      get_forgejo_field field="body" default_msg="No changelog provided" pull_request="$FORGEJO_PR_NUMBER"
+      get_forgejo_field field="body" default_msg="No changelog provided" pull_request_number="$FORGEJO_PR_NUMBER"
       echo
     }
     ;;
@@ -52,7 +52,7 @@ case "$BUILD" in
     }
     ;;
 
-  test)
+  push)
     TAG="continuous"
     REF="continuous"
 

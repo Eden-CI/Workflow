@@ -11,6 +11,8 @@ jobs:
   build:
     name: Build
     uses: ./.github/workflows/build.yml
+    with:
+      build-id: 'master'
     secrets: inherit
 
   release:

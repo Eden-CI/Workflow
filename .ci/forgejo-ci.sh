@@ -83,7 +83,7 @@ EOF
       echo -n "- Title: "
       echo "$FORGEJO_PR_TITLE"
       echo
-      get_forgejo_field field="body" default_msg="No changelog provided" pull_request="$FORGEJO_PR_NUMBER"
+      get_forgejo_field field="body" default_msg="No changelog provided" pull_request_number="$FORGEJO_PR_NUMBER"
     } >> "$GITHUB_STEP_SUMMARY"
   fi
 }
