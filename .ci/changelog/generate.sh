@@ -1,68 +1,21 @@
-#!/bin/bash -ex
-
-source ./.ci/common/common.sh
+#!/bin/bash -e
 
 case "$1" in
   master)
     TAG="v${TIMESTAMP}.${FORGEJO_REF}"
     REF="${FORGEJO_REF}"
-
-    brief() {
-      echo "This is ref [\`$FORGEJO_REF\`](https://$FORGEJO_HOST/$FORGEJO_REPO/commit/$FORGEJO_REF) of Eden's master branch."
-    }
-
-    changelog() {
-      echo "## Changelog"
-      echo
-      echo "Full changelog: [\`$FORGEJO_BEFORE...$FORGEJO_REF\`](https://$FORGEJO_HOST/$FORGEJO_REPO/compare/$FORGEJO_BEFORE...$FORGEJO_REF)"
-      echo
-    }
     ;;
-
   pull_request)
     TAG="${FORGEJO_PR_NUMBER}-${FORGEJO_REF}"
     REF="${FORGEJO_PR_NUMBER}-${FORGEJO_REF}"
-
-    brief() {
-      echo "This is pull request number [$FORGEJO_PR_NUMBER]($FORGEJO_PR_URL), ref [\`$FORGEJO_REF\`](https://$FORGEJO_HOST/$FORGEJO_REPO/commit/$FORGEJO_REF) of Eden."
-      echo
-      echo "This PR's merge base is [\`$FORGEJO_PR_MERGE_BASE\`](https://$FORGEJO_HOST/$FORGEJO_REPO/commit/$FORGEJO_PR_MERGE_BASE)."
-      echo "The corresponding master build can be found [here](https://github.com/Eden-CI/Master/releases?q=$FORGEJO_PR_MERGE_BASE&expanded=true)"
-    }
-
-    changelog() {
-      echo "## Changelog"
-      echo
-      get_forgejo_field field="body" default_msg="No changelog provided" pull_request_number="$FORGEJO_PR_NUMBER"
-      echo
-    }
     ;;
-
   tag)
     TAG="${FORGEJO_REF}"
     REF="${FORGEJO_REF}"
-
-    brief() {
-      echo
-    }
-
-    changelog() {
-      echo "## Changelog"
-      echo
-    }
     ;;
-
   push|test)
     TAG="continuous"
     REF="continuous"
-
-    brief() {
-      echo "This is a continuous test build of Eden."
-    }
-
-    changelog() {
-      echo
-    }
     ;;
     *)
     echo "Type: $1"
@@ -70,6 +23,8 @@ case "$1" in
     exit 1
     ;;
 esac
+
+source ./.ci/common/common.sh
 
 BASE_DOWNLOAD_URL="https://github.com/$REPO/releases/download"
 
@@ -119,9 +74,37 @@ src() {
   echo
 }
 
-brief
+case "$1" in
+  master)
+    echo "Eden's 'master' branch build, commit for reference:"
+    echo "- [\`$FORGEJO_REF\`](https://$FORGEJO_HOST/$FORGEJO_REPO/commit/$FORGEJO_REF)"
+    echo
+    echo "Full changelog: [\`$FORGEJO_BEFORE...$FORGEJO_REF\`](https://$FORGEJO_HOST/$FORGEJO_REPO/compare/$FORGEJO_BEFORE...$FORGEJO_REF)"
+    ;;
+  pull_request)
+    echo "Eden's Pull Request Number #[$FORGEJO_PR_NUMBER]($FORGEJO_PR_URL)"
+    echo
+    echo "Commit for reference:"
+    echo "- [\`$FORGEJO_REF\`](https://$FORGEJO_HOST/$FORGEJO_REPO/commit/$FORGEJO_REF)"
+    echo
+    echo "Commit used as the merge base for this Pull Request:"
+    echo "- [\`$FORGEJO_PR_MERGE_BASE\`](https://$FORGEJO_HOST/$FORGEJO_REPO/commit/$FORGEJO_PR_MERGE_BASE)"
+    echo
+    echo "Corresponding 'master' build for reference:"
+    echo "- [\`$FORGEJO_REF\`](https://github.com/Eden-CI/Master/releases?q=$FORGEJO_PR_MERGE_BASE&expanded=true)"
+    echo
+    echo "## Changelog"
+    get_forgejo_field field="body" default_msg="No changelog provided" pull_request_number="$FORGEJO_PR_NUMBER"
+    ;;
+  tag)
+    echo "## Changelog"
+    ;;
+  push|test)
+    echo "Eden's Continuous Integration Test Build"
+    ;;
+esac
 echo
-changelog
+
 echo "## Packages"
 echo
 echo "Desktop builds will automatically put data in \`~/.local/share/eden\` on Linux, or "
@@ -138,40 +121,34 @@ if [ "$DEVEL" = "true" ]; then
   echo "> "
   echo ">Furthermore, sharing these builds and claiming they are the \"official\" or \"release\""
   echo ">builds is **STRICTLY FORBIDDEN** and may result in further action from the Eden development team."
-  echo
 fi
+echo
 
 echo "### Linux"
 echo
 echo "Linux packages are distributed via AppImage. Each build is optimized for a specific architecture."
 echo "See the *Description* column for more info. Note that legacy builds will always work on newer systems."
 echo
-echo "| Build | Description |"
-echo "| ----- | ----------- |"
 
 COMPILER=gcc
-if [ "$DEVEL" = "true" ]; then
-  linux amd64 "amd64" "For any modern AMD or Intel CPU"
-  linux steamdeck "Steam Deck" "For Steam Deck and other >= Zen 2 AMD CPUs"
-  [ "$DISABLE_ARM" != "true" ] && linux aarch64 "armv8-a" "For ARM CPUs made in mid-2021 or earlier"
-else
-  linux legacy "amd64 (legacy)" "For CPUs older than 2013 or so"
-  linux amd64 "amd64" "For any modern AMD or Intel CPU"
-  linux steamdeck "Steam Deck" "For Steam Deck and other >= Zen 2 AMD CPUs"
-  linux rog-ally "ROG Ally X" "For ROG Ally X and other >= Zen 4 AMD CPUs"
-  [ "$DISABLE_ARM" != "true" ] && linux aarch64 "armv8-a" "For ARM CPUs made in mid-2021 or earlier"
-  [ "$DISABLE_ARM" != "true" ] && linux armv9 "armv9-a" "For ARM CPUs made in late 2021 or later"
-fi
-
+echo "| Build | Description |"
+echo "| ----- | ----------- |"
+linux amd64 "amd64" "For any modern AMD or Intel CPU"
+linux steamdeck "Steam Deck" "For Steam Deck and other >= Zen 2 AMD CPUs"
+[ "$DISABLE_ARM" != "true" ] && linux aarch64 "armv8-a" "For ARM CPUs made in mid-2021 or earlier"
 if [ "$DEVEL" != "true" ]; then
+  linux legacy "amd64 (legacy)" "For CPUs older than 2013 or so"
+  linux rog-ally "ROG Ally X" "For ROG Ally X and other >= Zen 4 AMD CPUs"
+  [ "$DISABLE_ARM" != "true" ] && linux armv9 "armv9-a" "For ARM CPUs made in late 2021 or later"
   echo
+
   echo "We are additionally providing experimental packages built with Clang, rather than GCC. These builds should be identical, if not faster,"
   echo "but how it affects the overall experience is currently unknown. In the future, these builds will be made with PGO to increase speed."
   echo
-  echo "| Build | Description |"
-  echo "| ----- | ----------- |"
 
   COMPILER=clang
+  echo "| Build | Description |"
+  echo "| ----- | ----------- |"
   linux legacy "amd64 (legacy) (clang)" "For CPUs older than 2013 or so (clang build)"
   linux amd64 "amd64 (clang)" "For any modern AMD or Intel CPU (clang build)"
   linux steamdeck "Steam Deck (clang)" "For Steam Deck and other >= Zen 2 AMD CPUs (clang build)"
@@ -179,8 +156,8 @@ if [ "$DEVEL" != "true" ]; then
   [ "$DISABLE_ARM" != "true" ] && linux aarch64 "armv8-a (clang)" "For ARM CPUs made in mid-2021 or earlier (clang build)"
   [ "$DISABLE_ARM" != "true" ] && linux armv9 "armv9-a (clang)" "For ARM CPUs made in late 2021 or later (clang build)"
 fi
-
 echo
+
 echo "### Windows"
 echo
 echo "Windows packages are in-place zip files."
@@ -190,6 +167,7 @@ echo "| ----- | ----------- |"
 win amd64-msvc amd64 "For any Windows machine running an AMD or Intel CPU"
 win arm64-msvc aarch64 "For any Windows machine running a Qualcomm or other ARM-based SoC"
 echo
+
 echo "We are additionally providing experimental packages built with Clang, rather than MSVC. These builds should be identical, if not faster,"
 echo "but how it affects the overall experience is currently unknown. In the future, these builds will be made with PGO to increase speed."
 echo
@@ -198,18 +176,18 @@ echo "| ----- | ----------- |"
 win amd64-clang "amd64 (clang)" "For any Windows machine running an AMD or Intel CPU (clang-cl build)"
 win arm64-clang "aarch64 (clang)" "For any Windows machine running a Qualcomm or other ARM-based SoC (clang-cl build)"
 echo
+
 echo "### Android"
 echo
 echo "| Build  | Description |"
 echo "|--------|-------------|"
 android Standard "" "Single APK for all supported Android devices (most users should use this)"
-
 if [ "$DEVEL" != true ]; then
   android Optimized "-Optimized" "For any Android device that has Frame Generation or any other per-device feature"
   android Legacy "-Legacy" "For A6xx. Fixes any games that work on newer devices but don't on Adreno 6xx"
 fi
-
 echo
+
 echo "### macOS"
 echo
 echo "macOS comes in a tarballed app. These builds are currently experimental, and you should expect major graphical glitches and crashes."
