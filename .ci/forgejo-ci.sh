@@ -6,23 +6,7 @@
 # Unified CI helper for Forgejo > GitHub integration
 # Supports: --parse, --summary, --clone
 
-get_forgejo_field() {
-    local field="${1:-title}"
-    local url
-    local data
-
-    if [ "$field" = "title" ]; then
-        url="https://$FORGEJO_HOST/api/v1/repos/$FORGEJO_REPO/pulls/$FORGEJO_PR_NUMBER"
-        data=$(curl -s "$url")
-        echo "$data" | jq -r ".${field} // \"No title provided\""
-    elif [ "$field" = "sha" ]; then
-        url="https://$FORGEJO_HOST/api/v1/repos/$FORGEJO_REPO/commits?sha=$FORGEJO_BRANCH&limit=1"
-        data=$(curl -s "$url")
-        echo "$data" | jq -r '.[0].sha[:10]'
-    else
-        echo "No title provided"
-    fi
-}
+source ./.ci/common/common.sh
 
 parse_payload() {
   DEFAULT_JSON="default.json"
@@ -59,7 +43,7 @@ parse_payload() {
       FORGEJO_PR_MERGE_BASE=$(jq -r '.merge_base' $PAYLOAD_JSON)
       FORGEJO_PR_NUMBER=$(jq -r '.number' $PAYLOAD_JSON)
       FORGEJO_PR_URL=$(jq -r '.url' $PAYLOAD_JSON)
-      FORGEJO_PR_TITLE=$(get_forgejo_field "title")
+      FORGEJO_PR_TITLE=$(get_forgejo_field field="title" default_msg="No title provided")
 
       echo "FORGEJO_PR_MERGE_BASE=$FORGEJO_PR_MERGE_BASE" >> "$GITHUB_ENV"
       echo "FORGEJO_PR_NUMBER=$FORGEJO_PR_NUMBER" >> "$GITHUB_ENV"
@@ -74,7 +58,7 @@ parse_payload() {
 
   if [ -z "$FORGEJO_REF" ]; then
     FORGEJO_BRANCH=$(jq -r '.branch' $DEFAULT_JSON)
-    FORGEJO_REF=$(get_forgejo_field "sha")
+    FORGEJO_REF=$(get_forgejo_field field="sha")
   fi
   FORGEJO_CLONE_URL="https://$FORGEJO_HOST/$FORGEJO_REPO.git"
 
@@ -99,7 +83,7 @@ EOF
       echo -n "- Title: "
       echo "$FORGEJO_PR_TITLE"
       echo
-      FIELD=body DEFAULT_MSG="No changelog provided" FORGEJO_PR_NUMBER=$FORGEJO_PR_NUMBER python3 .ci/changelog/pr_field.py
+      get_forgejo_field field="body" default_msg="No changelog provided" pull_request="$FORGEJO_PR_NUMBER"
     } >> "$GITHUB_STEP_SUMMARY"
   fi
 }

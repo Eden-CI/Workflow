@@ -1,5 +1,10 @@
 #!/bin/sh -ex
 
+# SPDX-FileCopyrightText: Copyright 2025 Eden Emulator Project
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+source ./.ci/common/common.sh
+
 TAG=${FORGEJO_PR_NUMBER}-${FORGEJO_REF}
 REF=${FORGEJO_PR_NUMBER}-${FORGEJO_REF}
 
@@ -13,6 +18,6 @@ brief() {
 changelog() {
 	echo "## Changelog"
 	echo
-	FIELD=body DEFAULT_MSG="No changelog provided" FORGEJO_PR_NUMBER=$FORGEJO_PR_NUMBER python3 .ci/changelog/pr_field.py
+	get_forgejo_field field="body" default_msg="No changelog provided" pull_request="$FORGEJO_PR_NUMBER"
 	echo
 }
