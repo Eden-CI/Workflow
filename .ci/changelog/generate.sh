@@ -4,63 +4,66 @@ source ./.ci/common/common.sh
 
 case "$BUILD" in
   master)
-TAG=v${TIMESTAMP}.${FORGEJO_REF}
-REF=${FORGEJO_REF}
+    TAG="v${TIMESTAMP}.${FORGEJO_REF}"
+    REF="${FORGEJO_REF}"
 
-brief() {
-echo "This is ref [\`$FORGEJO_REF\`](https://$FORGEJO_HOST/$FORGEJO_REPO/commit/$FORGEJO_REF) of Eden's master branch."
-}
+    brief() {
+      echo "This is ref [\`$FORGEJO_REF\`](https://$FORGEJO_HOST/$FORGEJO_REPO/commit/$FORGEJO_REF) of Eden's master branch."
+    }
 
-changelog() {
-  echo "## Changelog"
-  echo
-  echo "Full changelog: [\`$FORGEJO_BEFORE...$FORGEJO_REF\`](https://$FORGEJO_HOST/$FORGEJO_REPO/compare/$FORGEJO_BEFORE...$FORGEJO_REF)"
-  echo
-}
-  ;;
+    changelog() {
+      echo "## Changelog"
+      echo
+      echo "Full changelog: [\`$FORGEJO_BEFORE...$FORGEJO_REF\`](https://$FORGEJO_HOST/$FORGEJO_REPO/compare/$FORGEJO_BEFORE...$FORGEJO_REF)"
+      echo
+    }
+    ;;
+
   pr)
-TAG=${FORGEJO_PR_NUMBER}-${FORGEJO_REF}
-REF=${FORGEJO_PR_NUMBER}-${FORGEJO_REF}
+    TAG="${FORGEJO_PR_NUMBER}-${FORGEJO_REF}"
+    REF="${FORGEJO_PR_NUMBER}-${FORGEJO_REF}"
 
-brief() {
-	echo "This is pull request number [$FORGEJO_PR_NUMBER]($FORGEJO_PR_URL), ref [\`$FORGEJO_REF\`](https://$FORGEJO_HOST/$FORGEJO_REPO/commit/$FORGEJO_REF) of Eden."
-	echo
-	echo "This PR's merge base is [\`$FORGEJO_PR_MERGE_BASE\`](https://$FORGEJO_HOST/$FORGEJO_REPO/commit/$FORGEJO_PR_MERGE_BASE)."
-	echo "The corresponding master build can be found [here](https://github.com/Eden-CI/Master/releases?q=$FORGEJO_PR_MERGE_BASE&expanded=true)"
-}
+    brief() {
+      echo "This is pull request number [$FORGEJO_PR_NUMBER]($FORGEJO_PR_URL), ref [\`$FORGEJO_REF\`](https://$FORGEJO_HOST/$FORGEJO_REPO/commit/$FORGEJO_REF) of Eden."
+      echo
+      echo "This PR's merge base is [\`$FORGEJO_PR_MERGE_BASE\`](https://$FORGEJO_HOST/$FORGEJO_REPO/commit/$FORGEJO_PR_MERGE_BASE)."
+      echo "The corresponding master build can be found [here](https://github.com/Eden-CI/Master/releases?q=$FORGEJO_PR_MERGE_BASE&expanded=true)"
+    }
 
-changelog() {
-	echo "## Changelog"
-	echo
-	get_forgejo_field field="body" default_msg="No changelog provided" pull_request="$FORGEJO_PR_NUMBER"
-	echo
-}
-  ;;
+    changelog() {
+      echo "## Changelog"
+      echo
+      get_forgejo_field field="body" default_msg="No changelog provided" pull_request="$FORGEJO_PR_NUMBER"
+      echo
+    }
+    ;;
+
   tag)
-TAG=${FORGEJO_REF}
-REF=${FORGEJO_REF}
+    TAG="${FORGEJO_REF}"
+    REF="${FORGEJO_REF}"
 
-brief() {
-  echo
-}
+    brief() {
+      echo
+    }
 
-changelog() {
-  echo "## Changelog"
-  echo
-}
-  ;;
+    changelog() {
+      echo "## Changelog"
+      echo
+    }
+    ;;
+
   test)
-TAG=continuous
-REF=continuous
+    TAG="continuous"
+    REF="continuous"
 
-brief() {
-  echo "This is a continuous test build of Eden."
-}
+    brief() {
+      echo "This is a continuous test build of Eden."
+    }
 
-changelog() {
-  echo
-}
-  ;;
+    changelog() {
+      echo
+    }
+    ;;
 esac
 
 BASE_DOWNLOAD_URL="https://github.com/$REPO/releases/download"
