@@ -565,45 +565,68 @@ jobs:
           echo "USE_MULTIMEDIA=${{ inputs.multimedia }}" >> $GITHUB_ENV
           echo "CCACHE=${{ env.CCACHE }}" >> $GITHUB_ENV
 
+      - name: Set up CPM cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ${{ github.workspace }}/.cache
+            ${{ github.workspace }}/build/_deps/*-build
+          key: ${{ runner.os }}-${{ matrix.os.platform }}-${{ matrix.os.arch }}-${{ matrix.compiler }}-cpm-${{ env.CPM_CACHE_VERSION }}
+
+      - name: Set up sccache cache
+        if: matrix.os.platform == 'freebsd'
+        uses: actions/cache@v4
+        with:
+          path: ${{ github.workspace }}/.sccache
+          key: ${{ runner.os }}-${{ matrix.os.platform }}-${{ matrix.os.arch }}-${{ matrix.compiler }}-sccache-${{ env.CPM_CACHE_VERSION }}-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-${{ matrix.os.platform }}-${{ matrix.os.arch }}-${{ matrix.compiler }}-sccache-${{ env.CPM_CACHE_VERSION }}-
+
       - name: Build (FreeBSD)
         if: matrix.os.platform == 'freebsd'
         uses: vmactions/freebsd-vm@v1
         with:
           arch: ${{ matrix.os.vm-arch }}
           usesh: true
-          envs: 'ARCH'
+          envs: 'ARCH BUILD_TYPE DEVEL USE_WEBENGINE USE_MULTIMEDIA CCACHE'
+          copyback: true
           prepare: |
             pkg install -y \
               x11/xorg \
+              devel/sccache \
               shells/bash
           run: |
+            export SCCACHE_DIR=".sccache"
+            export SCCACHE_PATH=$(which sccache)
+            mkdir -p "${SCCACHE_DIR}"
+            ${SCCACHE_PATH} --show-stats
+
             echo "- Install dependencies"
             chmod +x ./.ci/freebsd/deps.sh
             bash ./.ci/freebsd/deps.sh
 
             echo "- Build"
             chmod +x ./.ci/freebsd/build.sh
-            bash ./.ci/freebsd/build.sh ${ARCH}
+            bash ./.ci/freebsd/build.sh ${ARCH} -DCCACHE_PATH=${SCCACHE_PATH}
+            ${SCCACHE_PATH} --show-stats
 
             echo "- Package"
-            chmod +x ./.ci/linux/build.sh
-            bash ./.ci/linux/build.sh ${ARCH}
+            chmod +x ./.ci/linux/package.sh
+            bash ./.ci/linux/package.sh ${ARCH}
 
-      - name: Package (binary)
-        run: |
-          cmake --install build --prefix install/usr
+            cmake --install build --prefix install/usr
 
-          cd install
-          tar --owner root --group root --zstd -cf Eden-Linux.tar.zst *
+            cd install
+            tar --owner root --group root --zstd -cf Eden-Linux.tar.zst *
 
       - name: Upload Binary
         uses: actions/upload-artifact@v4
         with:
-          name: linux-binary-${{ matrix.os.arch }}-${{ matrix.compiler }}
+          name: freebsd-binary-${{ matrix.os.arch }}-${{ matrix.compiler }}
           path: install/Eden-Linux.tar.zst
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4.6.2
         with:
-          name: linux-${{ matrix.os.arch }}-${{ matrix.compiler }}
+          name: freebsd-${{ matrix.os.arch }}-${{ matrix.compiler }}
           path: ./*.AppImage*
