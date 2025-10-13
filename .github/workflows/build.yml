@@ -1,4 +1,4 @@
-name: Build
+name: Master Build Workflow
 
 on:
   workflow_call:
@@ -23,7 +23,6 @@ on:
         description: 'Identifier for workflows and caching'
         type: string
         default: 'master'
-  workflow_dispatch:
 
 env:
   DISABLE_ARM: ${{ vars.DISABLE_ARM }}

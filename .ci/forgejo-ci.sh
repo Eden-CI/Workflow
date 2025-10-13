@@ -74,22 +74,36 @@ parse_payload() {
 }
 
 generate_summary() {
-  cat << EOF >> "$GITHUB_STEP_SUMMARY"
-## Job Summary
-- Triggered By: $1
-- Ref: [\`$FORGEJO_REF\`](https://$FORGEJO_HOST/$FORGEJO_REPO/commit/$FORGEJO_REF)
-EOF
+  echo "## Job Summary" >> "$GITHUB_STEP_SUMMARY"
+  echo "- Triggered By: $1" >> "$GITHUB_STEP_SUMMARY"
+  echo "- Commit: [\`$FORGEJO_REF\`](https://$FORGEJO_HOST/$FORGEJO_REPO/commit/$FORGEJO_REF)" >> "$GITHUB_STEP_SUMMARY"
+  echo >> "$GITHUB_STEP_SUMMARY"
 
-  if [ "$1" = "pull_request" ]; then
-    {
-      echo "- PR #[${FORGEJO_PR_NUMBER}]($FORGEJO_PR_URL)"
-      echo "- Merge Base: [\`$FORGEJO_PR_MERGE_BASE\`](https://$FORGEJO_HOST/$FORGEJO_REPO/commit/$FORGEJO_PR_MERGE_BASE)"
-      echo -n "- Title: "
-      echo "$FORGEJO_PR_TITLE"
-      echo
-      get_forgejo_field field="body" default_msg="No changelog provided" pull_request_number="$FORGEJO_PR_NUMBER"
-    } >> "$GITHUB_STEP_SUMMARY"
-  fi
+  case "$1" in
+    master)
+      echo "## Master Build" >> "$GITHUB_STEP_SUMMARY"
+      echo "- Full changelog: [\`$FORGEJO_BEFORE...$FORGEJO_REF\`](https://$FORGEJO_HOST/$FORGEJO_REPO/compare/$FORGEJO_BEFORE...$FORGEJO_REF)" >> "$GITHUB_STEP_SUMMARY"
+      ;;
+    pull_request)
+      echo "## Pull Request Build" >> "$GITHUB_STEP_SUMMARY"
+      echo "- Pull Request: #[${FORGEJO_PR_NUMBER}]($FORGEJO_PR_URL)" >> "$GITHUB_STEP_SUMMARY"
+      echo "- Merge Base Commit: [\`$FORGEJO_PR_MERGE_BASE\`](https://$FORGEJO_HOST/$FORGEJO_REPO/commit/$FORGEJO_PR_MERGE_BASE)" >> "$GITHUB_STEP_SUMMARY"
+      echo "- PR Title: $FORGEJO_PR_TITLE" >> "$GITHUB_STEP_SUMMARY"
+      echo >> "$GITHUB_STEP_SUMMARY"
+      echo "### Changelog" >> "$GITHUB_STEP_SUMMARY"
+      get_forgejo_field field="body" default_msg="No changelog provided" pull_request_number="$FORGEJO_PR_NUMBER" >> "$GITHUB_STEP_SUMMARY"
+      ;;
+    push|test)
+      echo "## Continuous Integration Test Build" >> "$GITHUB_STEP_SUMMARY"
+      echo "- This build was triggered for testing purposes." >> "$GITHUB_STEP_SUMMARY"
+      ;;
+    *)
+      echo "## Unknown Build Type" >> "$GITHUB_STEP_SUMMARY"
+      echo "- Build type '$1' is not recognized." >> "$GITHUB_STEP_SUMMARY"
+      ;;
+  esac
+
+  echo >> "$GITHUB_STEP_SUMMARY"
 }
 
 clone_repository() {
@@ -99,7 +113,7 @@ clone_repository() {
     echo "Clone failed!"
     TRIES=$((TRIES + 1))
     if [ "$TRIES" = 10 ]; then
-      echo "Failed to clone after ten tries. Exiting."
+      echo "Failed to clone after $TRIES tries. Exiting."
       exit 1
     fi
 
