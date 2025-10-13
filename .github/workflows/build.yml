@@ -538,6 +538,7 @@ jobs:
         compiler: [clang]
     env:
       ARCH: ${{ matrix.os.arch }}
+      SCCACHE_DIR: ${{ github.workspace }}/.sccache
 
     steps:
       - name: Checkout
@@ -569,10 +570,10 @@ jobs:
         if: matrix.os.platform == 'freebsd'
         uses: actions/cache@v4
         with:
-          path: ${{ github.workspace }}/.sccache
-          key: ${{ runner.os }}-${{ matrix.os.platform }}-${{ matrix.os.arch }}-${{ matrix.compiler }}-sccache-${{ env.CPM_CACHE_VERSION }}-${{ github.sha }}
+          path: ${{ env.SCCACHE_DIR }}
+          key: ${{ runner.os }}-${{ matrix.os.platform }}-${{ matrix.os.arch }}-${{ matrix.compiler }}-sccache${{ env.CPM_CACHE_VERSION }}-${{ github.sha }}
           restore-keys: |
-            ${{ runner.os }}-${{ matrix.os.platform }}-${{ matrix.os.arch }}-${{ matrix.compiler }}-sccache-${{ env.CPM_CACHE_VERSION }}-
+            ${{ runner.os }}-${{ matrix.os.platform }}-${{ matrix.os.arch }}-${{ matrix.compiler }}-sccache${{ env.CPM_CACHE_VERSION }}-
 
       - name: Build (FreeBSD)
         if: matrix.os.platform == 'freebsd'
@@ -580,8 +581,7 @@ jobs:
         with:
           arch: ${{ matrix.os.vm-arch }}
           usesh: true
-          envs: 'ARCH BUILD_TYPE DEVEL USE_WEBENGINE USE_MULTIMEDIA CCACHE'
-          sync: sshfs 
+          envs: 'ARCH BUILD_TYPE DEVEL USE_WEBENGINE USE_MULTIMEDIA CCACHE SCCCAHE_DIR'
           prepare: |
             pkg install -y \
               x11-servers/xorg-server \
@@ -589,9 +589,7 @@ jobs:
               ftp/wget \
               shells/bash
           run: |
-            export SCCACHE_DIR=".sccache"
             export SCCACHE_PATH=$(which sccache)
-            mkdir -p "${SCCACHE_DIR}"
             ${SCCACHE_PATH} --show-stats
 
             echo "- Install dependencies"
