@@ -28,7 +28,7 @@ env:
   DISABLE_ARM: ${{ vars.DISABLE_ARM }}
   SCCACHE_GHA_ENABLED: "true"
   CCACHE: "true"
-  CPM_CACHE_VERSION: "0"
+  CPM_CACHE_VERSION: ""
   FORGEJO_TOKEN: ${{ secrets.FORGEJO_TOKEN }}
 
 jobs:
@@ -564,14 +564,6 @@ jobs:
           echo "USE_WEBENGINE=${{ inputs.webengine }}" >> $GITHUB_ENV
           echo "USE_MULTIMEDIA=${{ inputs.multimedia }}" >> $GITHUB_ENV
           echo "CCACHE=${{ env.CCACHE }}" >> $GITHUB_ENV
-
-      - name: Set up CPM cache
-        uses: actions/cache@v4
-        with:
-          path: |
-            ${{ github.workspace }}/.cache
-            ${{ github.workspace }}/build/_deps/*-build
-          key: ${{ runner.os }}-${{ matrix.os.platform }}-${{ matrix.os.arch }}-${{ matrix.compiler }}-cpm-${{ env.CPM_CACHE_VERSION }}
 
       - name: Set up sccache cache
         if: matrix.os.platform == 'freebsd'
