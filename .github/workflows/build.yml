@@ -538,7 +538,7 @@ jobs:
         compiler: [clang]
     env:
       ARCH: ${{ matrix.os.arch }}
-      SCCACHE_DIR: ${{ github.workspace }}/.sccache
+      CCACHE_DIR: ${{ github.workspace }}/.ccache
 
     steps:
       - name: Checkout
@@ -570,10 +570,10 @@ jobs:
         if: matrix.os.platform == 'freebsd'
         uses: actions/cache@v4
         with:
-          path: ${{ env.SCCACHE_DIR }}
-          key: ${{ runner.os }}-${{ matrix.os.platform }}-${{ matrix.os.arch }}-${{ matrix.compiler }}-sccache${{ env.CPM_CACHE_VERSION }}-${{ github.sha }}
+          path: ${{ env.CCACHE_DIR }}
+          key: ${{ runner.os }}-${{ matrix.os.platform }}-${{ matrix.os.arch }}-${{ matrix.compiler }}-ccache-${{ env.CPM_CACHE_VERSION }}-${{ github.sha }}
           restore-keys: |
-            ${{ runner.os }}-${{ matrix.os.platform }}-${{ matrix.os.arch }}-${{ matrix.compiler }}-sccache${{ env.CPM_CACHE_VERSION }}-
+            ${{ runner.os }}-${{ matrix.os.platform }}-${{ matrix.os.arch }}-${{ matrix.compiler }}-sccache-${{ env.CPM_CACHE_VERSION }}-
 
       - name: Build (FreeBSD)
         if: matrix.os.platform == 'freebsd'
@@ -581,16 +581,16 @@ jobs:
         with:
           arch: ${{ matrix.os.vm-arch }}
           usesh: true
-          envs: 'ARCH BUILD_TYPE DEVEL USE_WEBENGINE USE_MULTIMEDIA CCACHE SCCCAHE_DIR'
+          envs: 'ARCH BUILD_TYPE DEVEL USE_WEBENGINE USE_MULTIMEDIA CCACHE CCCAHE_DIR'
           prepare: |
             pkg install -y \
               x11-servers/xorg-server \
-              devel/sccache \
+              devel/ccache \
               ftp/wget \
               shells/bash
           run: |
-            export SCCACHE_PATH=$(which sccache)
-            ${SCCACHE_PATH} --show-stats
+            export CCACHE_PATH=$(which ccache)
+            ${CCACHE_PATH} --show-stats
 
             echo "- Install dependencies"
             chmod +x ./.ci/freebsd/deps.sh
@@ -598,11 +598,13 @@ jobs:
 
             echo "- Build"
             chmod +x ./.ci/freebsd/build.sh
-            bash ./.ci/freebsd/build.sh ${ARCH} -DCCACHE_PATH=${SCCACHE_PATH}
-            ${SCCACHE_PATH} --show-stats
+            bash ./.ci/freebsd/build.sh ${ARCH} -DCCACHE_PATH=${CCACHE_PATH}
+            ${CCACHE_PATH} --show-stats
 
             echo "- Package"
-            chmod +x ./.ci/linux/package.sh
+            wget http://svn.exactcode.de/t2/trunk/package/xorg/xorg-server/xvfb-run.sh
+            chmod +x ./.ci/linux/package.sh xvfb-run.sh
+            cp xvfb-run.sh /usr/local/bin/xvfb-run
             bash ./.ci/linux/package.sh ${ARCH}
 
             cmake --install build --prefix install/usr
