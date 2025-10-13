@@ -577,7 +577,7 @@ jobs:
         if: matrix.os.platform == 'freebsd'
         uses: actions/cache@v4
         with:
-          path: ${{ github.workspace }}/.sccache
+          path: $HOME/work/.sccache
           key: ${{ runner.os }}-${{ matrix.os.platform }}-${{ matrix.os.arch }}-${{ matrix.compiler }}-sccache-${{ env.CPM_CACHE_VERSION }}-${{ github.sha }}
           restore-keys: |
             ${{ runner.os }}-${{ matrix.os.platform }}-${{ matrix.os.arch }}-${{ matrix.compiler }}-sccache-${{ env.CPM_CACHE_VERSION }}-
@@ -598,7 +598,7 @@ jobs:
               ftp/wget \
               shells/bash
           run: |
-            export SCCACHE_DIR=".sccache"
+            export SCCACHE_DIR="$HOME/work/.sccache"
             export SCCACHE_PATH=$(which sccache)
             mkdir -p "${SCCACHE_DIR}"
             ${SCCACHE_PATH} --show-stats
