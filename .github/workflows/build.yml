@@ -589,10 +589,11 @@ jobs:
           arch: ${{ matrix.os.vm-arch }}
           usesh: true
           envs: 'ARCH BUILD_TYPE DEVEL USE_WEBENGINE USE_MULTIMEDIA CCACHE'
+          sync: rsync
           copyback: true
           prepare: |
             pkg install -y \
-              x11/xorg \
+              x11-servers/xorg-server \
               devel/sccache \
               ftp/wget \
               shells/bash
