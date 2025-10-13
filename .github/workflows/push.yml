@@ -1,12 +1,9 @@
-name: "- Test Build Workflow"
+name: "- Push Build Workflow"
 
 on:
   push:
     branches:
       - 'master'
-  pull_request:
-    branches:
-      - '*'
   workflow_dispatch:
 
 env:
@@ -17,7 +14,7 @@ jobs:
     name: Build
     uses: ./.github/workflows/build.yml
     with:
-      build-id: push
+      build-id: 'push'
     secrets: inherit
 
   release:
@@ -58,7 +55,6 @@ jobs:
         run: ./.ci/changelog/generate.sh push > changelog.md
 
       - name: Release
-        if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
         uses: softprops/action-gh-release@v2.2.2
         with:
           name: "Eden Continuous Build - ${{ env.FORGEJO_REF }}"
