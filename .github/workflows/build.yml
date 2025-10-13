@@ -28,7 +28,7 @@ env:
   DISABLE_ARM: ${{ vars.DISABLE_ARM }}
   SCCACHE_GHA_ENABLED: "true"
   CCACHE: "true"
-  CPM_CACHE_VERSION: ""
+  CPM_CACHE_VERSION: "0"
   FORGEJO_TOKEN: ${{ secrets.FORGEJO_TOKEN }}
 
 jobs:
