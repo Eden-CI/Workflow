@@ -524,7 +524,7 @@ jobs:
           path: artifacts/*
 
   unix:
-    name: "FreeBSD (Build Only)"
+    name: "FreeBSD"
     needs: [clone]
     runs-on: ${{ matrix.os.runs-on }}
     strategy:
@@ -574,6 +574,7 @@ jobs:
           envs: 'ARCH'
           prepare: |
             pkg install -y \
+              x11/xorg \
               shells/bash
           run: |
             echo "- Install dependencies"
@@ -583,3 +584,26 @@ jobs:
             echo "- Build"
             chmod +x ./.ci/freebsd/build.sh
             bash ./.ci/freebsd/build.sh ${ARCH}
+
+            echo "- Package"
+            chmod +x ./.ci/linux/build.sh
+            bash ./.ci/linux/build.sh ${ARCH}
+
+      - name: Package (binary)
+        run: |
+          cmake --install build --prefix install/usr
+
+          cd install
+          tar --owner root --group root --zstd -cf Eden-Linux.tar.zst *
+
+      - name: Upload Binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-binary-${{ matrix.os.arch }}-${{ matrix.compiler }}
+          path: install/Eden-Linux.tar.zst
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4.6.2
+        with:
+          name: linux-${{ matrix.os.arch }}-${{ matrix.compiler }}
+          path: ./*.AppImage*
