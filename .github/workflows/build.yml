@@ -523,7 +523,7 @@ jobs:
           path: artifacts/*
 
   unix:
-    name: "FreeBSD (Experimental)"
+    name: "FreeBSD (Build Only)"
     needs: [clone]
     runs-on: ${{ matrix.os.runs-on }}
     strategy:
@@ -555,13 +555,6 @@ jobs:
           echo "${{ toJSON(github.event.client_payload) }}" > ./payload.json
           ./.ci/forgejo-ci.sh --parse ${{ inputs.build-id }}
 
-      - name: Configure sccache tokens
-        uses: actions/github-script@v7
-        with:
-         script: |
-           core.exportVariable('ACTIONS_RESULTS_URL', process.env.ACTIONS_RESULTS_URL || '');
-           core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env.ACTIONS_RUNTIME_TOKEN || '');
-
       - name: Set build variables
         shell: bash
         run: |
@@ -577,55 +570,8 @@ jobs:
         with:
           arch: ${{ matrix.os.vm-arch }}
           usesh: true
-          envs: 'ARCH CCACHE SCCACHE_PATH SCCACHE_GHA_ENABLED ACTIONS_RESULTS_URL ACTIONS_RUNTIME_TOKEN'
-          prepare: |
-            pkg install -y \
-              shells/bash \
-              devel/git \
-              lang/rust \
-              devel/cmake \
-              devel/llvm \
-              devel/pkgconf \
-              www/curl \
-              ftp/wget \
-              archivers/zip \
-              archivers/unzip 
-            echo "- Build sccache from source"
-            git clone https://github.com/mozilla/sccache.git /tmp/sccache
-            cd /tmp/sccache
-            cargo build --release --features=gha
-            install -m755 target/release/sccache /usr/local/bin/sccache
-            sccache --version
+          envs: 'ARCH'
           run: |
-            echo "- Install sccache"
-            export SCCACHE_PATH=$(which sccache)
-            export SCCACHE_GHA_ENABLED=on
-            export ACTIONS_RESULTS_URL="${ACTIONS_RESULTS_URL}"
-            export ACTIONS_RUNTIME_TOKEN="${ACTIONS_RUNTIME_TOKEN}"
-            echo "SCCACHE_PATH=${SCCACHE_PATH}" >> $GITHUB_ENV
-            echo "SCCACHE_GHA_ENABLED=${SCCACHE_GHA_ENABLED}" >> $GITHUB_ENV
-            echo "ACTIONS_RESULTS_URL=${ACTIONS_RESULTS_URL}" >> $GITHUB_ENV
-            echo "ACTIONS_RUNTIME_TOKEN=${ACTIONS_RUNTIME_TOKEN}" >> $GITHUB_ENV
-            ${SCCACHE_PATH} --start-server
-            grep GHA /tmp/sccache.log || echo "GHA backend not active"
-
-            echo "- Install dependencies"
-            chmod +x ./.ci/freebsd/deps.sh
-            bash ./.ci/freebsd/deps.sh
-
             echo "- Build"
             chmod +x ./.ci/freebsd/build.sh
-            bash ./.ci/freebsd/build.sh ${ARCH} -DCCACHE_PATH=${SCCACHE_PATH}
-
-            echo "- Package"
-            chmod +x ./.ci/linux/package.sh
-            bash ./.ci/linux/package.sh
-
-            echo "- sccache status"
-            ${SCCACHE_PATH} --show-stats
-
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v4.6.2
-        with:
-          name: freebsd-${{ matrix.os.arch }}
-          path: artifacts/*
+            bash ./.ci/freebsd/build.sh ${ARCH}
