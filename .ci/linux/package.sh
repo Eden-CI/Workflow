@@ -5,6 +5,20 @@
 
 # This script assumes you're in the source directory
 
+download() {
+    url="$1"; out="$2"
+    if command -v wget >/dev/null 2>&1; then
+        wget --retry-connrefused --tries=30 "$url" -O "$out"
+    elif command -v curl >/dev/null 2>&1; then
+        curl -L --retry 30 -o "$out" "$url"
+    elif command -v fetch >/dev/null 2>&1; then
+        fetch -o "$out" "$url"
+    else
+        echo "Error: no downloader found." >&2
+        exit 1
+    fi
+}
+
 URUNTIME="https://raw.githubusercontent.com/pkgforge-dev/Anylinux-AppImages/refs/heads/main/useful-tools/uruntime2appimage.sh"
 SHARUN="https://raw.githubusercontent.com/pkgforge-dev/Anylinux-AppImages/refs/heads/main/useful-tools/quick-sharun.sh"
 
@@ -52,22 +66,26 @@ export OUTNAME="Eden-$VERSION-$ARCH.AppImage"
 export UPINFO="gh-releases-zsync|eden-emulator|Releases|latest|*-$ARCH.AppImage.zsync"
 
 if [ "$DEVEL" = 'true' ]; then
-	sed -i 's|Name=Eden|Name=Eden Nightly|' $DESKTOP
- 	UPINFO="$(echo "$UPINFO" | sed 's|Releases|nightly|')"
+    case "$(uname)" in
+        FreeBSD|Darwin) sed -i '' 's|Name=Eden|Name=Eden Nightly|' "$DESKTOP" ;;
+        *) sed -i 's|Name=Eden|Name=Eden Nightly|' "$DESKTOP" ;;
+    esac
+    export UPINFO="$(echo "$UPINFO" | sed 's|Releases|nightly|')"
 fi
 
+
 # deploy
-wget --retry-connrefused --tries=30 "$SHARUN" -O ./quick-sharun
+download "$SHARUN" ./quick-sharun
 chmod +x ./quick-sharun
-./quick-sharun $BUILDDIR/bin/eden
+env LC_ALL=C ./quick-sharun "$BUILDDIR/bin/eden"
 
 # Wayland is mankind's worst invention, perhaps only behind war
+mkdir -p AppDir
 echo 'QT_QPA_PLATFORM=xcb' >> AppDir/.env
 
 # MAKE APPIMAGE WITH URUNTIME
 echo "Generating AppImage..."
-
-wget --retry-connrefused --tries=30 "$URUNTIME" -O ./uruntime2appimage
+download "$URUNTIME" ./uruntime2appimage
 chmod +x ./uruntime2appimage
 ./uruntime2appimage
 

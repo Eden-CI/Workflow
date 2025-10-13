@@ -8,10 +8,33 @@
 
 source ./.ci/common/common.sh
 
+load_payload_env() {
+  FORGEJO_LENV="forgejo.env"
+
+  if [ -f "$FORGEJO_LENV" ]; then
+    if [ "$CI" = "true" ]; then
+      # Safe export to GITHUB_ENV
+      while IFS= read -r line; do
+        echo "$line" >> "$GITHUB_ENV"
+      done < "$FORGEJO_LENV"
+    else
+      set -a
+      source "$FORGEJO_LENV"
+      set +a
+    fi
+  fi
+}
+
 parse_payload() {
   DEFAULT_JSON="default.json"
   PAYLOAD_JSON="payload.json"
+  FORGEJO_LENV="forgejo.env"
 
+  : > "$FORGEJO_LENV"
+
+  if [ ! -f "$PAYLOAD_JSON" ]; then
+     echo "null" > $PAYLOAD_JSON
+  fi
   if [ ! -f "$DEFAULT_JSON" ]; then
     echo "You should set 'host', 'repository', 'branch' on $DEFAULT_JSON"
     echo
@@ -20,12 +43,39 @@ parse_payload() {
   fi
 
   FORGEJO_HOST=$(jq -r '.host // empty' $PAYLOAD_JSON)
-  if [ -z "$FORGEJO_HOST" ]; then
-    FORGEJO_HOST=$(jq -r '.host' $DEFAULT_JSON)
-  fi
   FORGEJO_REPO=$(jq -r '.repository // empty' $PAYLOAD_JSON)
-  if [ -z "$FORGEJO_REPO" ]; then
-    FORGEJO_REPO=$(jq -r '.repository' $DEFAULT_JSON)
+  if [ -z "$FORGEJO_HOST" ] || [ -z "$FORGEJO_REPO" ]; then
+    FALLBACK_IDX=0
+    FORGEJO_HOST=$(jq -r ".[$FALLBACK_IDX].host" $DEFAULT_JSON)
+    FORGEJO_REPO=$(jq -r ".[$FALLBACK_IDX].repository" $DEFAULT_JSON)
+  fi
+  FORGEJO_CLONE_URL="https://$FORGEJO_HOST/$FORGEJO_REPO.git"
+
+  if ! curl -sSfL "$FORGEJO_CLONE_URL" >/dev/null 2>&1; then
+    echo "Repository $FORGEJO_CLONE_URL is not reachable."
+    echo "Check URL or authentication."
+    echo
+    echo "Using fallback mirrors from $DEFAULT_JSON..."
+
+    FORGEJO_MIRROR=false
+    count=$(jq 'length' "$DEFAULT_JSON")
+
+    for i in $(seq 1 $((count - 1))); do
+      FALLBACK_IDX=$i
+      FORGEJO_HOST=$(jq -r ".[$FALLBACK_IDX].host" $DEFAULT_JSON)
+      FORGEJO_REPO=$(jq -r ".[$FALLBACK_IDX].repository" $DEFAULT_JSON)
+      FORGEJO_CLONE_URL="https://$FORGEJO_HOST/$FORGEJO_REPO.git"
+      echo "Reaching repository $FORGEJO_CLONE_URL..."
+      if curl -sSfL "$FORGEJO_CLONE_URL" >/dev/null 2>&1; then
+        FORGEJO_MIRROR=true
+        echo "FORGEJO_MIRROR=true" >> "$FORGEJO_LENV"
+        break
+      fi
+    done
+   if [ "$FORGEJO_MIRROR" != true ]; then
+      echo "No reachable repository found in $DEFAULT_JSON" >&2
+      exit 1
+    fi
   fi
 
   case "$1" in
@@ -34,7 +84,7 @@ parse_payload() {
       FORGEJO_BRANCH=master
 
       FORGEJO_BEFORE=$(jq -r '.before' $PAYLOAD_JSON)
-      echo "FORGEJO_BEFORE=$FORGEJO_BEFORE" >> "$GITHUB_ENV"
+      echo "FORGEJO_BEFORE=$FORGEJO_BEFORE" >> "$FORGEJO_LENV"
       ;;
     pull_request)
       FORGEJO_REF=$(jq -r '.ref' $PAYLOAD_JSON)
@@ -43,19 +93,19 @@ parse_payload() {
       FORGEJO_PR_MERGE_BASE=$(jq -r '.merge_base' $PAYLOAD_JSON)
       FORGEJO_PR_NUMBER=$(jq -r '.number' $PAYLOAD_JSON)
       FORGEJO_PR_URL=$(jq -r '.url' $PAYLOAD_JSON)
-      FORGEJO_PR_TITLE=$(get_forgejo_field field="title" default_msg="No title provided")
+      FORGEJO_PR_TITLE=$(get_forgejo_field field="title" default_msg="No title provided" pull_request_number="$FORGEJO_PR_NUMBER")
 
-      echo "FORGEJO_PR_MERGE_BASE=$FORGEJO_PR_MERGE_BASE" >> "$GITHUB_ENV"
-      echo "FORGEJO_PR_NUMBER=$FORGEJO_PR_NUMBER" >> "$GITHUB_ENV"
-      echo "FORGEJO_PR_URL=$FORGEJO_PR_URL" >> "$GITHUB_ENV"
-      echo "FORGEJO_PR_TITLE=$FORGEJO_PR_TITLE" >> "$GITHUB_ENV"
+      echo "FORGEJO_PR_MERGE_BASE=$FORGEJO_PR_MERGE_BASE" >> "$FORGEJO_LENV"
+      echo "FORGEJO_PR_NUMBER=$FORGEJO_PR_NUMBER" >> "$FORGEJO_LENV"
+      echo "FORGEJO_PR_URL=$FORGEJO_PR_URL" >> "$FORGEJO_LENV"
+      echo "FORGEJO_PR_TITLE=$FORGEJO_PR_TITLE" >> "$FORGEJO_LENV"
       ;;
     tag)
       FORGEJO_REF=$(jq -r '.tag' $PAYLOAD_JSON)
       FORGEJO_BRANCH=stable
       ;;
     push|test)
-      FORGEJO_BRANCH=$(jq -r '.branch' $DEFAULT_JSON)
+      FORGEJO_BRANCH=$(jq -r ".[$FALLBACK_IDX].branch" $DEFAULT_JSON)
       FORGEJO_REF=$(get_forgejo_field field="sha")
       ;;
     *)
@@ -64,13 +114,11 @@ parse_payload() {
       exit 1
   esac
 
-  FORGEJO_CLONE_URL="https://$FORGEJO_HOST/$FORGEJO_REPO.git"
-
-  echo "FORGEJO_HOST=$FORGEJO_HOST" >> "$GITHUB_ENV"
-  echo "FORGEJO_REPO=$FORGEJO_REPO" >> "$GITHUB_ENV"
-  echo "FORGEJO_REF=$FORGEJO_REF" >> "$GITHUB_ENV"
-  echo "FORGEJO_BRANCH=$FORGEJO_BRANCH" >> "$GITHUB_ENV"
-  echo "FORGEJO_CLONE_URL=$FORGEJO_CLONE_URL" >> "$GITHUB_ENV"
+  echo "FORGEJO_HOST=$FORGEJO_HOST" >> "$FORGEJO_LENV"
+  echo "FORGEJO_REPO=$FORGEJO_REPO" >> "$FORGEJO_LENV"
+  echo "FORGEJO_REF=$FORGEJO_REF" >> "$FORGEJO_LENV"
+  echo "FORGEJO_BRANCH=$FORGEJO_BRANCH" >> "$FORGEJO_LENV"
+  echo "FORGEJO_CLONE_URL=$FORGEJO_CLONE_URL" >> "$FORGEJO_LENV"
 }
 
 generate_summary() {
@@ -78,6 +126,12 @@ generate_summary() {
   echo "- Triggered By: $1" >> "$GITHUB_STEP_SUMMARY"
   echo "- Commit: [\`$FORGEJO_REF\`](https://$FORGEJO_HOST/$FORGEJO_REPO/commit/$FORGEJO_REF)" >> "$GITHUB_STEP_SUMMARY"
   echo >> "$GITHUB_STEP_SUMMARY"
+
+  if [ "$FORGEJO_MIRROR" = true ]; then
+    echo "## Using mirror:" >> "$GITHUB_STEP_SUMMARY"
+    echo "- Mirror URL: [\`$FORGEJO_HOST/$FORGEJO_REPO\`]($FORGEJO_CLONE_URL)" >> "$GITHUB_STEP_SUMMARY"
+    echo >> "$GITHUB_STEP_SUMMARY"
+  fi
 
   case "$1" in
     master)
@@ -107,20 +161,14 @@ generate_summary() {
 }
 
 clone_repository() {
-  TRIES=0
+  if ! curl -sSfL "$FORGEJO_CLONE_URL" >/dev/null 2>&1; then
+    echo "Repository $FORGEJO_CLONE_URL is not reachable."
+    echo "Check URL or authentication."
+    echo
+    exit 1
+  fi
 
-  while ! git clone "$FORGEJO_CLONE_URL" eden; do
-    echo "Clone failed!"
-    TRIES=$((TRIES + 1))
-    if [ "$TRIES" = 10 ]; then
-      echo "Failed to clone after $TRIES tries. Exiting."
-      exit 1
-    fi
-
-    sleep 5
-    echo "Trying clone again..."
-    rm -rf ./eden || true
-  done
+  git clone "$FORGEJO_CLONE_URL" eden
 
   if ! git -C eden checkout "$FORGEJO_REF"; then
     echo "Ref $FORGEJO_REF not found locally, trying to fetch..."
@@ -147,8 +195,11 @@ case "$1" in
   --clone)
     clone_repository "$2"
     ;;
+  --load-payload-env)
+    load_payload_env
+    ;;
   *)
-    echo "Usage: $0 [--parse <type> | --summary <type> | --clone <type>]"
+    echo "Usage: $0 [--parse <type> | --summary <type> | --clone <type> | --load-payload-env]"
     echo "Supported types: master | pull_request | tag | push | test"
     ;;
 esac

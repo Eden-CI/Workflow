@@ -13,7 +13,7 @@ get_forgejo_field() {
             field=*)        field="${arg#*=}" ;;
             pull_request_number=*) pull_request_number="${arg#*=}" ;;
             default_msg=*)  default_msg="${arg#*=}" ;;
-            *) echo "Unknown argument: $arg" >&2 ;;
+            *) exit 1 ;;
         esac
     done
 
@@ -23,13 +23,25 @@ get_forgejo_field() {
 
     local auth_header=()
     if [ -n "$FORGEJO_TOKEN" ]; then
-        auth_header=(-H "Authorization: token $FORGEJO_TOKEN")
+        response=$(curl -s -o /dev/null -w "%{http_code}" -H "Authorization: token $FORGEJO_TOKEN" "https://$FORGEJO_HOST/api/v1/user")
+
+        if [ "$response" -eq 200 ]; then
+            auth_header=(-H "Authorization: token $FORGEJO_TOKEN")
+        fi
     fi
 
     if [[ -n "$pull_request_number" ]]; then
         url="https://$FORGEJO_HOST/api/v1/repos/$FORGEJO_REPO/pulls/$pull_request_number"
-        data=$(curl -s "${auth_header[@]}" "$url" || true)
+    else
+        url="https://$FORGEJO_HOST/api/v1/repos/$FORGEJO_REPO/commits?sha=$FORGEJO_BRANCH&limit=1"
+    fi
 
+    data=$(curl -s "${auth_header[@]}" "$url" || true)
+    if ! echo "$data" | jq empty; then
+        exit 1
+    fi
+
+    if [[ -n "$pull_request_number" ]]; then
         case "$field" in
             title) result=$(echo "$data" | jq -r '.title // empty') ;;
             body)  result=$(echo "$data" | jq -r '.body // empty') ;;
@@ -37,9 +49,6 @@ get_forgejo_field() {
             *)     result="" ;;
         esac
     else
-        url="https://$FORGEJO_HOST/api/v1/repos/$FORGEJO_REPO/commits?sha=$FORGEJO_BRANCH&limit=1"
-        data=$(curl -s "${auth_header[@]}" "$url" || true)
-
         case "$field" in
             title) result=$(echo "$data" | jq -r '.[0].commit.message | split("\n")[0] // empty') ;;
             body)  result=$(echo "$data" | jq -r '.[0].commit.message | split("\n")[1:] | join("\n") // empty') ;;

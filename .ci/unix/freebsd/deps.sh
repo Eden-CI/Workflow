@@ -23,6 +23,7 @@ pkg install -y \
   lang/gcc12 \
   security/mbedtls3 \
   www/cpp-httplib \
+  x11-servers/xorg-server \
   graphics/glslang \
   graphics/vulkan-headers \
   graphics/vulkan-utility-libraries

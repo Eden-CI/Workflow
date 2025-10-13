@@ -3,3 +3,4 @@ changelog.md
 git-archive-all*
 source.*
 payload.json
+forgejo.env

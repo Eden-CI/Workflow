@@ -32,8 +32,8 @@ env:
   FORGEJO_TOKEN: ${{ secrets.FORGEJO_TOKEN }}
 
 jobs:
-  summary:
-    name: "Summary"
+  parse:
+    name: "Parse Forgejo payload"
     runs-on: ubuntu-latest
 
     steps:
@@ -45,6 +45,31 @@ jobs:
         run: |
           echo "${{ toJSON(github.event.client_payload) }}" > ./payload.json
           ./.ci/forgejo-ci.sh --parse ${{ inputs.build-id }}
+
+      - name: Upload payload environment
+        uses: actions/upload-artifact@v4
+        with:
+          name: forgejo-env
+          path: forgejo.env
+
+  summary:
+    name: "Summary"
+    runs-on: ubuntu-latest
+    needs: [parse]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download Forgejo environment
+        uses: actions/download-artifact@v4
+        with:
+          name: forgejo-env
+
+      - name: Load payload environment
+        shell: bash
+        run: |
+          ./.ci/forgejo-ci.sh --load-payload-env
 
       - name: Create job summary
         run: |
@@ -53,6 +78,7 @@ jobs:
   clone:
     name: "Clone"
     runs-on: ubuntu-latest
+    needs: [parse]
 
     steps:
       - name: Checkout
@@ -60,11 +86,15 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Parse Forgejo payload
+      - name: Download Forgejo environment
+        uses: actions/download-artifact@v4
+        with:
+          name: forgejo-env
+
+      - name: Load payload environment
         shell: bash
         run: |
-          echo "${{ toJSON(github.event.client_payload) }}" > ./payload.json
-          ./.ci/forgejo-ci.sh --parse ${{ inputs.build-id }}
+          ./.ci/forgejo-ci.sh --load-payload-env
 
       - name: Clone
         shell: bash
@@ -111,6 +141,7 @@ jobs:
   set-matrix:
     name: "Generate Linux matrix"
     runs-on: ubuntu-latest
+    needs: [parse]
     outputs:
       matrix: ${{ steps.set.outputs.matrix }}
       compilers: ${{ steps.set.outputs.compilers }}
@@ -213,11 +244,15 @@ jobs:
           echo "COMPILER=${{ matrix.compiler }}" >> $GITHUB_ENV
           echo "CCACHE=${{ env.CCACHE }}" >> $GITHUB_ENV 
 
-      - name: Parse Forgejo payload
+      - name: Download Forgejo environment
+        uses: actions/download-artifact@v4
+        with:
+          name: forgejo-env
+
+      - name: Load payload environment
         shell: bash
         run: |
-          echo "${{ toJSON(github.event.client_payload) }}" > ./payload.json
-          ./.ci/forgejo-ci.sh --parse ${{ inputs.build-id }}
+          ./.ci/forgejo-ci.sh --load-payload-env
 
       - name: Clone
         uses: actions/download-artifact@v4
@@ -300,12 +335,15 @@ jobs:
           echo "COMPILER=${{ matrix.compiler }}" >> $GITHUB_ENV
           echo "CCACHE=${{ env.CCACHE }}" >> $GITHUB_ENV
 
-      - name: Parse Forgejo payload
+      - name: Download Forgejo environment
+        uses: actions/download-artifact@v4
+        with:
+          name: forgejo-env
+
+      - name: Load payload environment
         shell: bash
         run: |
-          pip install requests
-          echo "${{ toJSON(github.event.client_payload) }}" > ./payload.json
-          ./.ci/forgejo-ci.sh --parse ${{ inputs.build-id }}
+          ./.ci/forgejo-ci.sh --load-payload-env
 
       - name: Clone
         uses: actions/download-artifact@v4
@@ -378,6 +416,7 @@ jobs:
         run: |
           if [ "${{ needs.check-android-secrets.outputs.CI_PR_FORK }}" = "true" ]; then
             echo "This is a pull request, skipping sensitive Android steps"
+            echo "CI_PR_FORK=true" >> $GITHUB_ENV
           fi
 
       - name: Checkout
@@ -399,11 +438,15 @@ jobs:
         run: |
           echo "CCACHE=${{ env.CCACHE }}" >> $GITHUB_ENV
 
-      - name: Parse Forgejo payload
-        shell: sh
+      - name: Download Forgejo environment
+        uses: actions/download-artifact@v4
+        with:
+          name: forgejo-env
+
+      - name: Load payload environment
+        shell: bash
         run: |
-          echo "${{ toJSON(github.event.client_payload) }}" > ./payload.json
-          ./.ci/forgejo-ci.sh --parse ${{ inputs.build-id }}
+          ./.ci/forgejo-ci.sh --load-payload-env
 
       - name: Clone
         uses: actions/download-artifact@v4
@@ -489,11 +532,15 @@ jobs:
           echo "USE_MULTIMEDIA=${{ inputs.multimedia }}" >> $GITHUB_ENV
           echo "CCACHE=${{ env.CCACHE }}" >> $GITHUB_ENV
 
-      - name: Parse Forgejo payload
-        shell: sh
+      - name: Download Forgejo environment
+        uses: actions/download-artifact@v4
+        with:
+          name: forgejo-env
+
+      - name: Load payload environment
+        shell: bash
         run: |
-          echo "${{ toJSON(github.event.client_payload) }}" > ./payload.json
-          ./.ci/forgejo-ci.sh --parse ${{ inputs.build-id }}
+          ./.ci/forgejo-ci.sh --load-payload-env
 
       - name: Clone
         uses: actions/download-artifact@v4
@@ -523,20 +570,21 @@ jobs:
           path: artifacts/*
 
   unix:
-    name: "FreeBSD (Experimental)"
+    name: "Unix"
     needs: [clone]
-    runs-on: ${{ matrix.os.runs-on }}
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
         os:
           - platform: freebsd
-            runs-on: ubuntu-latest
+            name: FreeBSD
             arch: amd64
             vm-arch: x86_64
         compiler: [clang]
     env:
       ARCH: ${{ matrix.os.arch }}
+      SCCACHE_DIR: ${{ github.workspace }}/.sccache
 
     steps:
       - name: Checkout
@@ -550,17 +598,15 @@ jobs:
         with:
           name: eden
 
-      - name: Parse Forgejo payload
-        run: |
-          echo "${{ toJSON(github.event.client_payload) }}" > ./payload.json
-          ./.ci/forgejo-ci.sh --parse ${{ inputs.build-id }}
-
-      - name: Configure sccache tokens
-        uses: actions/github-script@v7
+      - name: Download Forgejo environment
+        uses: actions/download-artifact@v4
         with:
-         script: |
-           core.exportVariable('ACTIONS_RESULTS_URL', process.env.ACTIONS_RESULTS_URL || '');
-           core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env.ACTIONS_RUNTIME_TOKEN || '');
+          name: forgejo-env
+
+      - name: Load payload environment
+        shell: bash
+        run: |
+          ./.ci/forgejo-ci.sh --load-payload-env
 
       - name: Set build variables
         shell: bash
@@ -571,61 +617,54 @@ jobs:
           echo "USE_MULTIMEDIA=${{ inputs.multimedia }}" >> $GITHUB_ENV
           echo "CCACHE=${{ env.CCACHE }}" >> $GITHUB_ENV
 
+      - name: Configure sccache
+        uses: actions/github-script@v8
+        with:
+          script: |
+            core.exportVariable('ACTIONS_RESULTS_URL', process.env.ACTIONS_RESULTS_URL || '');
+            core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env.ACTIONS_RUNTIME_TOKEN || '');
+            core.exportVariable('ACTIONS_CACHE_SERVICE_V2', `on`);
+
       - name: Build (FreeBSD)
         if: matrix.os.platform == 'freebsd'
         uses: vmactions/freebsd-vm@v1
         with:
           arch: ${{ matrix.os.vm-arch }}
           usesh: true
-          envs: 'ARCH CCACHE SCCACHE_PATH SCCACHE_GHA_ENABLED ACTIONS_RESULTS_URL ACTIONS_RUNTIME_TOKEN'
+          envs: 'ARCH BUILD_TYPE DEVEL USE_WEBENGINE USE_MULTIMEDIA CCACHE SCCACHE_DIR SCCACHE_GHA_ENABLED ACTIONS_RESULTS_URL ACTIONS_RUNTIME_TOKEN ACTIONS_CACHE_SERVICE_V2'
           prepare: |
             pkg install -y \
-              shells/bash \
-              devel/git \
-              lang/rust \
-              devel/cmake \
-              devel/llvm \
-              devel/pkgconf \
-              www/curl \
+              devel/sccache \
               ftp/wget \
-              archivers/zip \
-              archivers/unzip 
-            echo "- Build sccache from source"
-            git clone https://github.com/mozilla/sccache.git /tmp/sccache
-            cd /tmp/sccache
-            cargo build --release --features=gha
-            install -m755 target/release/sccache /usr/local/bin/sccache
-            sccache --version
+              shells/bash
           run: |
-            echo "- Install sccache"
             export SCCACHE_PATH=$(which sccache)
-            export SCCACHE_GHA_ENABLED=on
-            export ACTIONS_RESULTS_URL="${ACTIONS_RESULTS_URL}"
-            export ACTIONS_RUNTIME_TOKEN="${ACTIONS_RUNTIME_TOKEN}"
-            echo "SCCACHE_PATH=${SCCACHE_PATH}" >> $GITHUB_ENV
-            echo "SCCACHE_GHA_ENABLED=${SCCACHE_GHA_ENABLED}" >> $GITHUB_ENV
-            echo "ACTIONS_RESULTS_URL=${ACTIONS_RESULTS_URL}" >> $GITHUB_ENV
-            echo "ACTIONS_RUNTIME_TOKEN=${ACTIONS_RUNTIME_TOKEN}" >> $GITHUB_ENV
-            ${SCCACHE_PATH} --start-server
-            grep GHA /tmp/sccache.log || echo "GHA backend not active"
+            chmod +x ./.ci/unix/freebsd/*
 
             echo "- Install dependencies"
-            chmod +x ./.ci/freebsd/deps.sh
-            bash ./.ci/freebsd/deps.sh
+            bash ./.ci/unix/freebsd/deps.sh
 
             echo "- Build"
-            chmod +x ./.ci/freebsd/build.sh
-            bash ./.ci/freebsd/build.sh ${ARCH} -DCCACHE_PATH=${SCCACHE_PATH}
+            bash ./.ci/unix/freebsd/build.sh ${ARCH} -DCCACHE_PATH=${SCCACHE_PATH}
+
+            echo "### SCCache stats" >> "$GITHUB_STEP_SUMMARY"
+            ${SCCACHE_PATH} --show-stats >> "$GITHUB_STEP_SUMMARY" 2>&1
 
             echo "- Package"
-            chmod +x ./.ci/linux/package.sh
-            bash ./.ci/linux/package.sh
+            bash ./.ci/unix/freebsd/package.sh ${ARCH}
 
-            echo "- sccache status"
-            ${SCCACHE_PATH} --show-stats
+            cmake --install build --prefix install/usr
+            cd install
+            tar --owner root --group root --zstd -cf Eden-FreeBSD.tar.zst *
+
+      - name: Upload Binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.os.platform }}-binary-${{ matrix.os.arch }}-${{ matrix.compiler }}
+          path: install/Eden-${{ matrix.os.name }}.tar.zst
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4.6.2
         with:
-          name: freebsd-${{ matrix.os.arch }}
+          name: ${{ matrix.os.platform }}-${{ matrix.os.arch }}-${{ matrix.compiler }}
           path: artifacts/*
