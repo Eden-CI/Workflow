@@ -594,6 +594,7 @@ jobs:
             pkg install -y \
               x11/xorg \
               devel/sccache \
+              ftp/wget \
               shells/bash
           run: |
             export SCCACHE_DIR=".sccache"
