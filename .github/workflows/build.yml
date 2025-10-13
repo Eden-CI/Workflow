@@ -378,6 +378,7 @@ jobs:
         run: |
           if [ "${{ needs.check-android-secrets.outputs.CI_PR_FORK }}" = "true" ]; then
             echo "This is a pull request, skipping sensitive Android steps"
+            echo "CI_PR_FORK=true" >> $GITHUB_ENV
           fi
 
       - name: Checkout
@@ -571,7 +572,14 @@ jobs:
           arch: ${{ matrix.os.vm-arch }}
           usesh: true
           envs: 'ARCH'
+          prepare: |
+            pkg install -y \
+              shells/bash
           run: |
+            echo "- Install dependencies"
+            chmod +x ./.ci/freebsd/deps.sh
+            bash ./.ci/freebsd/deps.sh
+
             echo "- Build"
             chmod +x ./.ci/freebsd/build.sh
             bash ./.ci/freebsd/build.sh ${ARCH}
