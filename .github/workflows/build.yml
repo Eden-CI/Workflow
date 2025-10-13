@@ -149,6 +149,36 @@ jobs:
           echo $COMPILERS
           echo "compilers=${COMPILERS}" >> $GITHUB_OUTPUT
 
+  check-android-secrets:
+    name: Check Android Secrets
+    runs-on: ubuntu-latest
+    outputs:
+      CI_SECRETS_STATUS: ${{ steps.check.outputs.CI_SECRETS_STATUS }}
+      CI_PR_FORK: ${{ steps.check.outputs.CI_PR_FORK }}
+    steps:
+      - id: check
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ] && \
+             [ "${{ github.event.pull_request.head.repo.full_name }}" != "${{ github.repository }}" ]; then
+            echo "CI_PR_FORK=true" >> $GITHUB_OUTPUT
+          else
+            echo "CI_PR_FORK=false" >> $GITHUB_OUTPUT
+          fi
+
+          if [ -z "${ANDROID_KEYSTORE_B64}" ] || \
+             [ -z "${ANDROID_KEY_ALIAS}" ] || \
+             [ -z "${ANDROID_KEYSTORE_PASS}" ]; then
+            echo "Android secrets missing, skipping Android-dependent jobs."
+            echo "CI_SECRETS_STATUS=false" >> $GITHUB_OUTPUT
+          else
+            echo "All Android secrets are present."
+            echo "CI_SECRETS_STATUS=true" >> $GITHUB_OUTPUT
+          fi
+        env:
+          ANDROID_KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEYSTORE_PASS: ${{ secrets.ANDROID_KEYSTORE_PASS }}
+
   linux:
     name: "Linux (${{ matrix.os.arch }}) (${{ matrix.compiler }})"
     needs: [set-matrix, clone]
@@ -330,7 +360,7 @@ jobs:
 
   android:
     name: "Android"
-    needs: [clone]
+    needs: [clone, check-android-secrets]
     runs-on: ${{ matrix.os.runs-on }}
     strategy:
       fail-fast: false
@@ -340,23 +370,15 @@ jobs:
             arch: amd64
         compiler: [universal]
 
+    if: |
+      needs.check-android-secrets.outputs.CI_SECRETS_STATUS == 'true' ||
+      needs.check-android-secrets.outputs.CI_PR_FORK == 'true'
     steps:
       - name: Check Android secrets
         run: |
-          if [ "${{ github.event_name }}" = "pull_request" ] && [ "${{ github.event.pull_request.head.repo.full_name }}" != "${{ github.repository }}" ]; then
-            echo "CI_PR_FORK=true" >> $GITHUB_ENV
-          else
-            if [ -z "${ANDROID_KEYSTORE_B64}" ] || \
-               [ -z "${ANDROID_KEY_ALIAS}" ] || \
-               [ -z "${ANDROID_KEYSTORE_PASS}" ]; then
-              echo "::error ::Missing required Android secrets!"
-              exit 1
-            fi
+          if [ "${{ needs.check-android-secrets.outputs.CI_PR_FORK }}" = "true" ]; then
+            echo "This is a pull request, skipping sensitive Android steps"
           fi
-        env:
-          ANDROID_KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
-          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
-          ANDROID_KEYSTORE_PASS: ${{ secrets.ANDROID_KEYSTORE_PASS }}
 
       - name: Checkout
         uses: actions/checkout@v4
