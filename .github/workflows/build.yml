@@ -581,7 +581,7 @@ jobs:
           arch: ${{ matrix.os.vm-arch }}
           usesh: true
           envs: 'ARCH BUILD_TYPE DEVEL USE_WEBENGINE USE_MULTIMEDIA CCACHE'
-          sync: nfs
+          sync: sshfs 
           prepare: |
             pkg install -y \
               x11-servers/xorg-server \
