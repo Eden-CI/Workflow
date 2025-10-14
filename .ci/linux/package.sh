@@ -72,7 +72,7 @@ download() {
 
 download "$SHARUN" ./quick-sharun
 chmod +x ./quick-sharun
-./quick-sharun "$BUILDDIR/bin/eden"
+env LC_ALL=C ./quick-sharun "$BUILDDIR/bin/eden"
 
 # Wayland is mankind's worst invention, perhaps only behind war
 mkdir -p AppDir
