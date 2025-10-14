@@ -2,20 +2,20 @@
 
 # platform handling
 case "$(uname -s)" in
-    Linux*)
+	Linux*)
 		PLATFORM=linux
 		PACKAGE=false
 		FFMPEG=ON
 		OPENSSL=ON
 		;;
-    Darwin*)
+	Darwin*)
 		PLATFORM=macos
 		PACKAGE=false
 		FFMPEG=OFF
 		OPENSSL=OFF
 		export LIBVULKAN_PATH="/opt/homebrew/lib/libvulkan.1.dylib"
 		;;
-    CYGWIN*|MSYS*|MINGW*)
+	CYGWIN*|MSYS*|MINGW*)
 		PLATFORM=win
 		PACKAGE=true
 		OPENSSL=ON
@@ -25,14 +25,14 @@ case "$(uname -s)" in
 		# TODO: msys2 has better lto
 		LTO=off
 		;;
-    FreeBSD*)
+	FreeBSD*)
 		PLATFORM=freebsd
 		PACKAGE=false
 		FFMPEG=OFF
 		UPDATES=OFF
 		OPENSSL=OFF
 		;;
-    *)
+	*)
 		echo "Unknown platform $(uname -s)"
 		exit 1 ;;
 esac
