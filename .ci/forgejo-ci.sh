@@ -14,6 +14,31 @@ log_debug() {
     fi
 }
 
+forgejo_api_get() {
+  local url="$1"
+  local response
+  local retries=5
+  local delay=10
+
+  for i in $(seq 1 $retries); do
+    echo "[DEBUG] Fetching (attempt $i/$retries): $url"
+    response=$(curl -sSL -H "Authorization: token ${FORGEJO_TOKEN}" "$url")
+
+    # Testa se é JSON válido
+    if echo "$response" | jq empty 2>/dev/null; then
+      echo "$response"
+      return 0
+    fi
+
+    echo "[WARN] Non-JSON response (maybe Cloudflare). Retrying in $delay seconds..."
+    echo "[DEBUG] Raw response snippet: $(echo "$response" | head -n 5)"
+    sleep "$delay"
+  done
+
+  echo "[ERROR] All retries failed: Cloudflare still blocking."
+  return 1
+}
+
 get_forgejo_field() {
     local field="sha"
     local pull_request_number=""
@@ -50,6 +75,8 @@ get_forgejo_field() {
     else
         url="https://$FORGEJO_HOST/api/v1/repos/$FORGEJO_REPO/commits?sha=$FORGEJO_BRANCH&limit=1"
     fi
+
+    forgejo_api_get
 
     log_debug "Fetching URL: $url"
     data=$(curl -sS "${auth_header[@]}" "$url" || true)
