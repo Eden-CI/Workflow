@@ -26,7 +26,7 @@ mkdir -p "$ARTIFACTS_DIR"
 TMP_DIR=$(mktemp -d)
 
 cp -r "$PKG_DIR"/* "$TMP_DIR"/
-cp LICENSE* README* "$TMP_DIR"/
+cp -r LICENSE* README* "$TMP_DIR"/
 
 7z a -tzip "$ARTIFACTS_DIR/$ZIP_NAME" "$TMP_DIR"/*
 
