@@ -648,7 +648,9 @@ jobs:
             bash ./.ci/unix/freebsd/build.sh ${ARCH} -DCCACHE_PATH=${SCCACHE_PATH}
 
             echo "### SCCache stats" >> "$GITHUB_STEP_SUMMARY"
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
             ${SCCACHE_PATH} --show-stats >> "$GITHUB_STEP_SUMMARY" 2>&1
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
 
             echo "- Package"
             bash ./.ci/unix/freebsd/package.sh ${ARCH}
