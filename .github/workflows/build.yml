@@ -538,7 +538,7 @@ jobs:
         compiler: [clang]
     env:
       ARCH: ${{ matrix.os.arch }}
-      CCACHE_DIR: ${{ github.workspace }}/.ccache
+      SCCACHE_DIR: ${{ github.workspace }}/.sccache
 
     steps:
       - name: Checkout
@@ -566,12 +566,12 @@ jobs:
           echo "USE_MULTIMEDIA=${{ inputs.multimedia }}" >> $GITHUB_ENV
           echo "CCACHE=${{ env.CCACHE }}" >> $GITHUB_ENV
 
-      - name: Set up ccache
+      - name: Set up sccache
         if: always()
         uses: actions/cache@v4
         with:
-          path: ${{ env.CCACHE_DIR }}
-          key: ${{ runner.os }}-${{ matrix.os.platform }}-${{ matrix.os.arch }}-${{ matrix.compiler }}-ccache-${{ env.CPM_CACHE_VERSION }}-${{ github.sha }}
+          path: ${{ env.SCCACHE_DIR }}
+          key: ${{ runner.os }}-${{ matrix.os.platform }}-${{ matrix.os.arch }}-${{ matrix.compiler }}-sccache-${{ env.CPM_CACHE_VERSION }}-${{ github.sha }}
           restore-keys: |
             ${{ runner.os }}-${{ matrix.os.platform }}-${{ matrix.os.arch }}-${{ matrix.compiler }}-sccache-${{ env.CPM_CACHE_VERSION }}-
 
@@ -581,16 +581,16 @@ jobs:
         with:
           arch: ${{ matrix.os.vm-arch }}
           usesh: true
-          envs: 'ARCH BUILD_TYPE DEVEL USE_WEBENGINE USE_MULTIMEDIA CCACHE CCACHE_DIR'
+          envs: 'ARCH BUILD_TYPE DEVEL USE_WEBENGINE USE_MULTIMEDIA CCACHE SCCACHE_DIR'
           prepare: |
             pkg install -y \
               x11-servers/xorg-server \
-              devel/ccache \
+              devel/sccache \
               ftp/wget \
               shells/bash
           run: |
-            export CCACHE_PATH=$(which ccache)
-            ${CCACHE_PATH} --show-stats
+            export SCCACHE_PATH=$(which sccache)
+            ${SCCACHE_PATH} --show-stats
 
             echo "- Install dependencies"
             chmod +x ./.ci/freebsd/deps.sh
@@ -598,8 +598,8 @@ jobs:
 
             echo "- Build"
             chmod +x ./.ci/freebsd/build.sh
-            bash ./.ci/freebsd/build.sh ${ARCH} -DCCACHE_PATH=${CCACHE_PATH}
-            ${CCACHE_PATH} --show-stats
+            bash ./.ci/freebsd/build.sh ${ARCH} -DCCACHE_PATH=${SCCACHE_PATH}
+            ${SCCACHE_PATH} --show-stats
 
             echo "- Package"
             wget http://svn.exactcode.de/t2/trunk/package/xorg/xorg-server/xvfb-run.sh
