@@ -6,16 +6,19 @@ case "$(uname -s)" in
 		PLATFORM=linux
 		PACKAGE=false
 		FFMPEG=ON
+		BUNDLE=ON
 		;;
     Darwin*)
 		PLATFORM=macos
 		PACKAGE=false
 		FFMPEG=OFF
+		BUNDLE=OFF
 		export LIBVULKAN_PATH="/opt/homebrew/lib/libvulkan.1.dylib"
 		;;
     CYGWIN*|MSYS*|MINGW*)
 		PLATFORM=win
 		PACKAGE=true
+		BUNDLE=ON
 		FFMPEG=ON
 
 		# LTO is completely broken on MSVC
@@ -27,6 +30,7 @@ case "$(uname -s)" in
 		PACKAGE=false
 		FFMPEG=OFF
 		UPDATES=OFF
+		BUNDLE=OFF
 		;;
     *)
 		echo "Unknown platform $(uname -s)"
@@ -38,3 +42,4 @@ export PACKAGE
 export LTO
 export UPDATES
 export FFMPEG
+export BUNDLE

@@ -52,10 +52,11 @@ parse_payload() {
 		FORGEJO_HOST=$(jq -r ".[$FALLBACK_IDX].host" $DEFAULT_JSON)
 		FORGEJO_REPO=$(jq -r ".[$FALLBACK_IDX].repository" $DEFAULT_JSON)
 	fi
-	FORGEJO_CLONE_URL="https://$FORGEJO_HOST/$FORGEJO_REPO.git"
+	FORGEJO_HTTP_URL="https://$FORGEJO_HOST/$FORGEJO_REPO"
+	FORGEJO_CLONE_URL="$FORGEJO_HTTP_URL.git"
 
-	if ! curl -sSfL "$FORGEJO_CLONE_URL" >/dev/null 2>&1; then
-		echo "Repository $FORGEJO_CLONE_URL is not reachable."
+	if ! curl -sSfL "$FORGEJO_HTTP_URL" >/dev/null 2>&1; then
+		echo "Repository $FORGEJO_HTTP_URL is not reachable."
 		echo "Check URL or authentication."
 		echo
 		echo "Using fallback mirrors from $DEFAULT_JSON..."
@@ -67,9 +68,10 @@ parse_payload() {
 			FALLBACK_IDX=$i
 			FORGEJO_HOST=$(jq -r ".[$FALLBACK_IDX].host" $DEFAULT_JSON)
 			FORGEJO_REPO=$(jq -r ".[$FALLBACK_IDX].repository" $DEFAULT_JSON)
-			FORGEJO_CLONE_URL="https://$FORGEJO_HOST/$FORGEJO_REPO.git"
-			echo "Reaching repository $FORGEJO_CLONE_URL..."
-			if curl -sSfL "$FORGEJO_CLONE_URL" >/dev/null 2>&1; then
+			FORGEJO_HTTP_URL="https://$FORGEJO_HOST/$FORGEJO_REPO"
+			FORGEJO_CLONE_URL="$FORGEJO_HTTP_URL.git"
+			echo "Reaching repository $FORGEJO_HTTP_URL..."
+			if curl -sSfL "$FORGEJO_HTTP_URL" >/dev/null 2>&1; then
 				FORGEJO_MIRROR=true
 				echo "FORGEJO_MIRROR=true" >>"$FORGEJO_LENV"
 				break

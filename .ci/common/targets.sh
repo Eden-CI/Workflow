@@ -48,11 +48,15 @@ if [ "$PLATFORM" = "linux" ] || [ "$COMPILER" = "clang" ]; then
 			echo "Making package-friendly amd64 build of Eden"
 			ARCH_FLAGS="-march=x86-64 -mtune=generic"
 			PACKAGE=true
+			FFMPEG=OFF
+			BUNDLE=OFF
 			;;
 		package-aarch64)
 			echo "Making package-friendly aarch64 build of Eden"
 			ARCH_FLAGS="-march=armv8-a -mtune=generic"
 			PACKAGE=true
+			FFMPEG=OFF
+			BUNDLE=OFF
 			;;
 		*)
 			echo "Invalid target $1 specified, must be one of: native, amd64, steamdeck, zen2, allyx, rog-ally, zen4, legacy, aarch64, armv9"
@@ -79,3 +83,5 @@ export ARCH_CMAKE
 export SDL_FLAGS
 export PACKAGE
 export ARCH
+export BUNDLE
+export FFMPEG

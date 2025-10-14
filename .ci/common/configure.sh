@@ -30,20 +30,14 @@ fi
 # sdl/arch handling (targets)
 . .ci/common/targets.sh
 
-# Determine if we need to build standalone executables, bundle deps, etc.
-if [ "$PACKAGE" = "true" ]; then
-	BUNDLE=OFF
-	FFMPEG=OFF
-else
-	BUNDLE=ON
-fi
-
 case "$PLATFORM" in
 	(freebsd)
 		PLATFORM_FLAGS=(
 			-DYUZU_USE_CPM=ON
 			-DENABLE_WEB_SERVICE=OFF
 		)
+		UPDATES=OFF
+		export UPDATES
 		;;
 	(*) ;;
 esac
