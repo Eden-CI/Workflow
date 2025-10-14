@@ -265,7 +265,7 @@ jobs:
 
       - name: Configure
         shell: bash
-        run:  .ci/source/configure.sh -DCCACHE_PATH=${SCCACHE_PATH}
+        run:  .ci/common/configure.sh -DCCACHE_PATH=${SCCACHE_PATH}
 
       - name: Build
         shell: bash
@@ -373,7 +373,7 @@ jobs:
         run: |
           git config --global core.autocrlf off
           dos2unix .patch/boost/*
-          .ci/source/configure.sh -DCCACHE_PATH=${SCCACHE_PATH}
+          .ci/common/configure.sh -DCCACHE_PATH=${SCCACHE_PATH}
 
       - name: Build
         shell: bash
@@ -531,7 +531,7 @@ jobs:
           key: ${{ runner.os }}-${{ matrix.os.arch }}-${{ matrix.compiler }}-cpm-${{ env.CPM_CACHE_VERSION }}
 
       - name: Configure
-        run: .ci/source/configure.sh -DCCACHE_PATH=${SCCACHE_PATH}
+        run: .ci/common/configure.sh -DCCACHE_PATH=${SCCACHE_PATH}
 
       - name: Build
         run: cmake --build build
@@ -612,7 +612,7 @@ jobs:
             bash ./.ci/freebsd/deps.sh
 
             echo "- Configure"
-            bash .ci/source/configure.sh -DCCACHE_PATH=${SCCACHE_PATH}
+            bash .ci/common/configure.sh -DCCACHE_PATH=${SCCACHE_PATH}
 
             echo "- Build"
             cmake --build build
