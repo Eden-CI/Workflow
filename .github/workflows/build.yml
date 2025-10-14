@@ -614,7 +614,7 @@ jobs:
             bash ./.ci/freebsd/deps.sh
 
             echo "- Configure"
-            bash .ci/common/configure.sh -DCCACHE_PATH=${SCCACHE_PATH}
+            bash -ex .ci/common/configure.sh -DCCACHE_PATH=${SCCACHE_PATH}
 
             echo "- Build"
             cmake --build build

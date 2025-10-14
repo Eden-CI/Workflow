@@ -30,6 +30,9 @@ fi
 # sdl/arch handling (targets)
 . .ci/common/targets.sh
 
+# compiler handling
+. .ci/common/compiler.sh
+
 case "$PLATFORM" in
 	(freebsd)
 		PLATFORM_FLAGS=(
@@ -70,7 +73,7 @@ COMMON_FLAGS=(
 
 	# Bundled stuff (only if not building for a pkg)
 	-DYUZU_USE_BUNDLED_FFMPEG="${FFMPEG:-ON}"
-    -DYUZU_USE_BUNDLED_OPENSSL="${BUNDLE:-ON}"
+    -DYUZU_USE_BUNDLED_OPENSSL="${OPENSSL:-ON}"
     -DYUZU_DISABLE_LLVM=ON
 
 	# macos only
