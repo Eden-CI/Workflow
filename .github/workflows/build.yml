@@ -601,7 +601,8 @@ jobs:
               ftp/wget \
               shells/bash
           run: |
-            echo "RESULTS URL: $ACTIONS_RESULTS_URL"
+            export SCCACHE_GHA_CACHE_TO="sccache-freebsd-"
+            export SCCACHE_GHA_CACHE_FROM="sccache"
             export SCCACHE_PATH=$(which sccache)
             ${SCCACHE_PATH} --show-stats
 
