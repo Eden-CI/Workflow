@@ -34,11 +34,16 @@ get_forgejo_field() {
 
     local auth_header=()
     if [ -n "$FORGEJO_TOKEN" ]; then
-        auth_header=(-H "Authorization: token $FORGEJO_TOKEN")
+        auth_header+=(-H "Authorization: token $FORGEJO_TOKEN")
         log_debug "Using Forgejo token for authentication"
     else
         log_debug "No Forgejo token provided"
     fi
+
+    auth_header+=(
+        -A "Mozilla/5.0 (X11; Linux x86_64; rv:132.0) Gecko/20100101 Firefox/132.0"
+        -H "Accept: application/json"
+    )
 
     if [[ -n "$pull_request_number" ]]; then
         url="https://$FORGEJO_HOST/api/v1/repos/$FORGEJO_REPO/pulls/$pull_request_number"
