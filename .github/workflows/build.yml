@@ -118,6 +118,7 @@ jobs:
             eden/*
             eden/.patch
 
+  # TODO(crueter): Each dependent job should use the source pack
   source:
     name: "Source Pack"
     runs-on: ubuntu-latest
@@ -310,6 +311,7 @@ jobs:
         compiler: [clang, msvc]
     env:
       QT_VERSION: 6.9.1
+      TARGET: ${{ matrix.os.arch }}
 
     steps:
       - name: Checkout

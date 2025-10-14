@@ -33,6 +33,7 @@ fi
 # Determine if we need to build standalone executables, bundle deps, etc.
 if [ "$PACKAGE" = "true" ]; then
 	BUNDLE=OFF
+	FFMPEG=OFF
 else
 	BUNDLE=ON
 fi
@@ -74,9 +75,9 @@ COMMON_FLAGS=(
     -DYUZU_USE_BUNDLED_SIRIT=ON
 
 	# Bundled stuff (only if not building for a pkg)
-	-DYUZU_USE_BUNDLED_FFMPEG="${BUNDLE:-ON}"
+	-DYUZU_USE_BUNDLED_FFMPEG="${FFMPEG:-ON}"
     -DYUZU_USE_BUNDLED_OPENSSL="${BUNDLE:-ON}"
-    -DYUZU_DISABLE_LLVM="${BUNDLE:-ON}"
+    -DYUZU_DISABLE_LLVM=ON
 
 	# macos only
 	-DYUZU_USE_BUNDLED_MOLTENVK=ON

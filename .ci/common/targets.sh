@@ -27,7 +27,7 @@ if [ "$PLATFORM" = "linux" ] || [ "$COMPILER" = "clang" ]; then
 			ARCH_FLAGS="-march=x86-64 -mtune=generic"
 			ARCH=legacy
 			;;
-		aarch64)
+		aarch64|arm64)
 			echo "Making armv8-a build of Eden"
 			ARCH_FLAGS="-march=armv8-a -mtune=generic"
 			ARCH=aarch64
