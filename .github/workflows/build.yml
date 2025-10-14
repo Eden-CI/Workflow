@@ -574,18 +574,14 @@ jobs:
             core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env.ACTIONS_RUNTIME_TOKEN || '');
             core.exportVariable('ACTIONS_CACHE_SERVICE_V2', `on`);
 
-      - name: Use variable
-        run: |
-          echo "RESULTS URL: $ACTIONS_RESULTS_URL"
-
-      - name: Set up sccache
-        if: always()
-        uses: actions/cache@v4
-        with:
-          path: ${{ env.SCCACHE_DIR }}
-          key: ${{ runner.os }}-${{ matrix.os.platform }}-${{ matrix.os.arch }}-${{ matrix.compiler }}-sccache-${{ env.CPM_CACHE_VERSION }}-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-${{ matrix.os.platform }}-${{ matrix.os.arch }}-${{ matrix.compiler }}-sccache-${{ env.CPM_CACHE_VERSION }}-
+#      - name: Set up sccache
+#        if: always()
+#        uses: actions/cache@v4
+#        with:
+#          path: ${{ env.SCCACHE_DIR }}
+#          key: ${{ runner.os }}-${{ matrix.os.platform }}-${{ matrix.os.arch }}-${{ matrix.compiler }}-sccache-${{ env.CPM_CACHE_VERSION }}-${{ github.sha }}
+#          restore-keys: |
+#            ${{ runner.os }}-${{ matrix.os.platform }}-${{ matrix.os.arch }}-${{ matrix.compiler }}-sccache-${{ env.CPM_CACHE_VERSION }}-
 
       - name: Build (FreeBSD)
         if: matrix.os.platform == 'freebsd'
@@ -601,8 +597,6 @@ jobs:
               ftp/wget \
               shells/bash
           run: |
-            export SCCACHE_GHA_CACHE_TO="sccache-freebsd-"
-            export SCCACHE_GHA_CACHE_FROM="sccache"
             export SCCACHE_PATH=$(which sccache)
             ${SCCACHE_PATH} --show-stats
 
