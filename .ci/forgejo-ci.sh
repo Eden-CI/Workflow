@@ -55,7 +55,7 @@ parse_payload() {
 	FORGEJO_HTTP_URL="https://$FORGEJO_HOST/$FORGEJO_REPO"
 	FORGEJO_CLONE_URL="$FORGEJO_HTTP_URL.git"
 
-	if ! curl -sSfL "$FORGEJO_HTTP_URL" >/dev/null 2>&1; then
+	if ! curl -sSfvL "$FORGEJO_HTTP_URL"; then
 		echo "Repository $FORGEJO_HTTP_URL is not reachable."
 		echo "Check URL or authentication."
 		echo
