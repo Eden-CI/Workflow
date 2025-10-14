@@ -606,10 +606,10 @@ jobs:
               shells/bash
           run: |
             export SCCACHE_PATH=$(which sccache)
-            chmod +x ./.ci/unix/freebsd/*
+            chmod +x ./.ci/freebsd/*
 
             echo "- Install dependencies"
-            bash ./.ci/unix/freebsd/deps.sh
+            bash ./.ci/freebsd/deps.sh
 
             echo "- Configure"
             bash .ci/source/configure.sh -DCCACHE_PATH=${SCCACHE_PATH}
@@ -623,7 +623,7 @@ jobs:
             echo '```' >> "$GITHUB_STEP_SUMMARY"
 
             echo "- Package"
-            bash ./.ci/unix/freebsd/package.sh ${ARCH}
+            bash ./.ci/freebsd/package.sh ${ARCH}
 
             cmake --install build --prefix install/usr
             cd install
