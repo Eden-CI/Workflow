@@ -566,8 +566,8 @@ jobs:
           echo "USE_MULTIMEDIA=${{ inputs.multimedia }}" >> $GITHUB_ENV
           echo "CCACHE=${{ env.CCACHE }}" >> $GITHUB_ENV
 
-      - name: Set up sccache cache
-        if: matrix.os.platform == 'freebsd'
+      - name: Set up ccache
+        if: always()
         uses: actions/cache@v4
         with:
           path: ${{ env.CCACHE_DIR }}
@@ -581,7 +581,7 @@ jobs:
         with:
           arch: ${{ matrix.os.vm-arch }}
           usesh: true
-          envs: 'ARCH BUILD_TYPE DEVEL USE_WEBENGINE USE_MULTIMEDIA CCACHE CCCAHE_DIR'
+          envs: 'ARCH BUILD_TYPE DEVEL USE_WEBENGINE USE_MULTIMEDIA CCACHE CCACHE_DIR'
           prepare: |
             pkg install -y \
               x11-servers/xorg-server \
