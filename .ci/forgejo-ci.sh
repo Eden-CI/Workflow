@@ -6,6 +6,14 @@
 # Unified CI helper for Forgejo > GitHub integration
 # Supports: --parse, --summary, --clone
 
+DEBUG=${DEBUG:-1}
+
+log_debug() {
+    if [ "$DEBUG" = "1" ]; then
+        echo "[DEBUG] $@" >&2
+    fi
+}
+
 get_forgejo_field() {
     local field="sha"
     local pull_request_number=""
@@ -27,12 +35,24 @@ get_forgejo_field() {
     local auth_header=()
     if [ -n "$FORGEJO_TOKEN" ]; then
         auth_header=(-H "Authorization: token $FORGEJO_TOKEN")
+        log_debug "Using Forgejo token for authentication"
+    else
+        log_debug "No Forgejo token provided"
     fi
 
     if [[ -n "$pull_request_number" ]]; then
         url="https://$FORGEJO_HOST/api/v1/repos/$FORGEJO_REPO/pulls/$pull_request_number"
-        data=$(curl -s "${auth_header[@]}" "$url" || true)
+    else
+        url="https://$FORGEJO_HOST/api/v1/repos/$FORGEJO_REPO/commits?sha=$FORGEJO_BRANCH&limit=1"
+    fi
 
+    log_debug "Fetching URL: $url"
+    data=$(curl -sS "${auth_header[@]}" "$url" || true)
+
+    log_debug "Raw response from Forgejo:"
+    echo "$data" | jq . >&2 || echo "[DEBUG] Non-JSON response: $data" >&2
+
+    if [[ -n "$pull_request_number" ]]; then
         case "$field" in
             title) result=$(echo "$data" | jq -r '.title // empty') ;;
             body)  result=$(echo "$data" | jq -r '.body // empty') ;;
@@ -40,15 +60,18 @@ get_forgejo_field() {
             *)     result="" ;;
         esac
     else
-        url="https://$FORGEJO_HOST/api/v1/repos/$FORGEJO_REPO/commits?sha=$FORGEJO_BRANCH&limit=1"
-        data=$(curl -s "${auth_header[@]}" "$url" || true)
-
         case "$field" in
             title) result=$(echo "$data" | jq -r '.[0].commit.message | split("\n")[0] // empty') ;;
             body)  result=$(echo "$data" | jq -r '.[0].commit.message | split("\n")[1:] | join("\n") // empty') ;;
             sha)   result=$(echo "$data" | jq -r '.[0].sha[:10] // empty') ;;
             *)     result="" ;;
         esac
+    fi
+
+    if [ -z "$result" ]; then
+        log_debug "No data found for field '$field', using default message."
+    else
+        log_debug "Extracted field '$field': $result"
     fi
 
     echo "${result:-$default_msg}"
@@ -65,6 +88,8 @@ parse_payload() {
     exit 1
   fi
 
+  log_debug "Reading configuration from JSON files"
+
   FORGEJO_HOST=$(jq -r '.host // empty' $PAYLOAD_JSON)
   if [ -z "$FORGEJO_HOST" ]; then
     FORGEJO_HOST=$(jq -r '.host' $DEFAULT_JSON)
@@ -74,22 +99,24 @@ parse_payload() {
     FORGEJO_REPO=$(jq -r '.repository' $DEFAULT_JSON)
   fi
 
+  log_debug "FORGEJO_HOST=$FORGEJO_HOST"
+  log_debug "FORGEJO_REPO=$FORGEJO_REPO"
+
   case "$1" in
     master)
       FORGEJO_REF=$(jq -r '.ref' $PAYLOAD_JSON)
       FORGEJO_BRANCH=master
-
       FORGEJO_BEFORE=$(jq -r '.before' $PAYLOAD_JSON)
       echo "FORGEJO_BEFORE=$FORGEJO_BEFORE" >> "$GITHUB_ENV"
       ;;
     pull_request)
       FORGEJO_REF=$(jq -r '.ref' $PAYLOAD_JSON)
       FORGEJO_BRANCH=$(jq -r '.branch' $PAYLOAD_JSON)
-
       FORGEJO_PR_MERGE_BASE=$(jq -r '.merge_base' $PAYLOAD_JSON)
       FORGEJO_PR_NUMBER=$(jq -r '.number' $PAYLOAD_JSON)
       FORGEJO_PR_URL=$(jq -r '.url' $PAYLOAD_JSON)
-      FORGEJO_PR_TITLE=$(get_forgejo_field field="title" default_msg="No title provided")
+      FORGEJO_PR_TITLE=$(get_forgejo_field field="title" default_msg="No title provided" pull_request_number="$FORGEJO_PR_NUMBER")
+      log_debug "Pull Request #$FORGEJO_PR_NUMBER for branch $FORGEJO_BRANCH"
 
       echo "FORGEJO_PR_MERGE_BASE=$FORGEJO_PR_MERGE_BASE" >> "$GITHUB_ENV"
       echo "FORGEJO_PR_NUMBER=$FORGEJO_PR_NUMBER" >> "$GITHUB_ENV"
@@ -102,6 +129,7 @@ parse_payload() {
       ;;
     push|test)
       FORGEJO_BRANCH=$(jq -r '.branch' $DEFAULT_JSON)
+      log_debug "Detected branch=$FORGEJO_BRANCH"
       FORGEJO_REF=$(get_forgejo_field field="sha")
       ;;
     *)
@@ -111,6 +139,10 @@ parse_payload() {
   esac
 
   FORGEJO_CLONE_URL="https://$FORGEJO_HOST/$FORGEJO_REPO.git"
+
+  log_debug "FORGEJO_REF=$FORGEJO_REF"
+  log_debug "FORGEJO_BRANCH=$FORGEJO_BRANCH"
+  log_debug "FORGEJO_CLONE_URL=$FORGEJO_CLONE_URL"
 
   echo "FORGEJO_HOST=$FORGEJO_HOST" >> "$GITHUB_ENV"
   echo "FORGEJO_REPO=$FORGEJO_REPO" >> "$GITHUB_ENV"
@@ -154,6 +186,7 @@ generate_summary() {
 
 clone_repository() {
   TRIES=0
+  log_debug "Cloning repository: $FORGEJO_CLONE_URL"
 
   while ! git clone "$FORGEJO_CLONE_URL" eden; do
     echo "Clone failed!"
@@ -198,4 +231,3 @@ case "$1" in
     echo "Supported types: master | pull_request | tag | push | test"
     ;;
 esac
-
