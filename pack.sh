@@ -40,3 +40,5 @@ if [ -d "source" ]; then
 fi
 
 cp -r macos/*.tar.gz artifacts/Eden-macOS-${ID}.tar.gz
+
+cp -r freebsd-amd64-clang/*.tar.zst artifacts/Eden-FreeBSD-${ID}-amd64-clang.tar.zst

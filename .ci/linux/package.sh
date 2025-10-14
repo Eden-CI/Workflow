@@ -5,6 +5,8 @@
 
 # This script assumes you're in the source directory
 
+# shellcheck disable=SC1091
+
 download() {
     url="$1"; out="$2"
     if command -v wget >/dev/null 2>&1; then
@@ -28,51 +30,31 @@ export OPTIMIZE_LAUNCH=1
 export DEPLOY_OPENGL=1
 export DEPLOY_VULKAN=1
 
-case "$1" in
-    amd64|"")
-        echo "Packaging amd64-v3 optimized build of Eden"
-        ARCH="amd64"
-        ;;
-    steamdeck)
-        echo "Packaging Steam Deck (Zen 2) optimized build of Eden"
-        ARCH="steamdeck"
-        ;;
-    rog-ally|allyx)
-        echo "Packaging ROG Ally X (Zen 4) optimized build of Eden"
-        ARCH="rog-ally-x"
-        ;;
-    legacy)
-        echo "Packaging amd64 generic build of Eden"
-        ARCH=legacy
-        ;;
-    aarch64)
-        echo "Packaging armv8-a build of Eden"
-        ARCH=aarch64
-        ;;
-    armv9)
-        echo "Packaging armv9-a build of Eden"
-        ARCH=armv9
-        ;;
-esac
+. .ci/common/targets.sh
 
 BUILDDIR=${BUILDDIR:-build}
 
-EDEN_TAG=$(cat GIT-TAG)
-echo "Making \"$EDEN_TAG\" build"
-# git checkout "$EDEN_TAG"
-VERSION="$(echo "$EDEN_TAG")"
+if [ -d "${BUILDDIR}/bin/Release" ]; then
+    strip -s "${BUILDDIR}/bin/Release/"*
+else
+    strip -s "${BUILDDIR}/bin/"*
+fi
+
+VERSION=$(cat GIT-TAG)
+echo "Making \"$VERSION\" build"
 
 export OUTNAME="Eden-$VERSION-$ARCH.AppImage"
-export UPINFO="gh-releases-zsync|eden-emulator|Releases|latest|*-$ARCH.AppImage.zsync"
+UPINFO="gh-releases-zsync|eden-emulator|Releases|latest|*-$ARCH.AppImage.zsync"
 
 if [ "$DEVEL" = 'true' ]; then
     case "$(uname)" in
         FreeBSD|Darwin) sed -i '' 's|Name=Eden|Name=Eden Nightly|' "$DESKTOP" ;;
         *) sed -i 's|Name=Eden|Name=Eden Nightly|' "$DESKTOP" ;;
     esac
-    export UPINFO="$(echo "$UPINFO" | sed 's|Releases|nightly|')"
+    UPINFO="$(echo "$UPINFO" | sed 's|Releases|nightly|')"
 fi
 
+export UPINFO
 
 # deploy
 download "$SHARUN" ./quick-sharun

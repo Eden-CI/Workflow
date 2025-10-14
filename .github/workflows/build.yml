@@ -28,8 +28,12 @@ env:
   DISABLE_ARM: ${{ vars.DISABLE_ARM }}
   SCCACHE_GHA_ENABLED: "true"
   CCACHE: "true"
-  CPM_CACHE_VERSION: ""
+  CPM_CACHE_VERSION: "v7"
   FORGEJO_TOKEN: ${{ secrets.FORGEJO_TOKEN }}
+  DEVEL: ${{ inputs.devel }}
+  BUILD_TYPE: ${{ inputs.build-type }}
+  USE_WEBENGINE: ${{ inputs.webengine }}
+  USE_MULTIMEDIA: ${{ inputs.multimedia }}
 
 jobs:
   parse:
@@ -103,7 +107,7 @@ jobs:
       - name: Cleanup
         run: |
           cd eden
-          rm -rf .git* .ci .github docs
+          rm -rf .git* .ci .github
 
       - name: Upload cloned repo
         uses: actions/upload-artifact@v4
@@ -126,11 +130,11 @@ jobs:
       - name: Clone
         uses: actions/download-artifact@v4
 
-      - name: Configure
-        run: ./.ci/source/configure.sh
+      - name: Build
+        run: ./.ci/source/build.sh
 
-      - name: Pack
-        run: ./.ci/source/pack.sh
+      - name: Package
+        run: ./.ci/source/package.sh
 
       - name: Upload source
         uses: actions/upload-artifact@v4.6.2
@@ -221,6 +225,10 @@ jobs:
         os: ${{ fromJson(needs.set-matrix.outputs.matrix) }}
         compiler: ${{ fromJson(needs.set-matrix.outputs.compilers) }}
 
+    env:
+      TARGET: "${{ matrix.os.arch }}"
+      COMPILER: "${{ matrix.compiler }}"
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -232,17 +240,6 @@ jobs:
         run: |
           chmod a+x ./.ci/linux/deps.sh
           ./.ci/linux/deps.sh
-
-      # TODO(crueter): PGO
-      - name: Set build variables
-        shell: bash
-        run: |
-          echo "BUILD_TYPE=${{ inputs.build-type }}" >> $GITHUB_ENV
-          echo "DEVEL=${{ inputs.devel }}" >> $GITHUB_ENV
-          echo "USE_WEBENGINE=${{ inputs.webengine }}" >> $GITHUB_ENV
-          echo "USE_MULTIMEDIA=${{ inputs.multimedia }}" >> $GITHUB_ENV
-          echo "COMPILER=${{ matrix.compiler }}" >> $GITHUB_ENV
-          echo "CCACHE=${{ env.CCACHE }}" >> $GITHUB_ENV 
 
       - name: Download Forgejo environment
         uses: actions/download-artifact@v4
@@ -264,19 +261,21 @@ jobs:
         with:
           path: |
             ${{ github.workspace }}/.cache
-            ${{ github.workspace }}/build/_deps/*-build
           key: ${{ runner.os }}-${{ matrix.os.arch }}-${{ matrix.compiler }}-cpm-${{ env.CPM_CACHE_VERSION }}
+
+      - name: Configure
+        shell: bash
+        run:  .ci/source/configure.sh -DCCACHE_PATH=${SCCACHE_PATH}
 
       - name: Build
         shell: bash
-        run: |
-          TARGET=appimage ./.ci/linux/build.sh ${{ matrix.os.arch }} -DCCACHE_PATH=${SCCACHE_PATH}
+        run: cmake --build build
 
       - name: Package
         shell: bash
-        run: |
-          ./.ci/linux/package.sh ${{ matrix.os.arch }}
+        run: ./.ci/linux/package.sh ${{ matrix.os.arch }}
 
+      # TODO(crueter): separate package stuff
       - name: Package (binary)
         run: |
           cmake --install build --prefix install/usr
@@ -328,12 +327,7 @@ jobs:
       - name: Set build variables
         shell: bash
         run: |
-          echo "BUILD_TYPE=${{ inputs.build-type }}" >> $GITHUB_ENV
-          echo "DEVEL=${{ inputs.devel }}" >> $GITHUB_ENV
-          echo "USE_WEBENGINE=${{ inputs.webengine }}" >> $GITHUB_ENV
-          echo "USE_MULTIMEDIA=${{ inputs.multimedia }}" >> $GITHUB_ENV
           echo "COMPILER=${{ matrix.compiler }}" >> $GITHUB_ENV
-          echo "CCACHE=${{ env.CCACHE }}" >> $GITHUB_ENV
 
       - name: Download Forgejo environment
         uses: actions/download-artifact@v4
@@ -355,7 +349,6 @@ jobs:
         with:
           path: |
             ${{ github.workspace }}/.cache
-            ${{ github.workspace }}/build/_deps/*-build
           key: ${{ runner.os }}-${{ matrix.os.arch }}-${{ matrix.compiler }}-cpm-${{ env.CPM_CACHE_VERSION }}
 
       - name: Set up MSVC
@@ -375,20 +368,20 @@ jobs:
         run: |
           ./.ci/windows/install-vulkan-sdk.ps1
 
-      - name: Build
+      - name: Configure
         shell: bash
         run: |
-          export WINDEPLOYQT=windeployqt
           git config --global core.autocrlf off
           dos2unix .patch/boost/*
+          .ci/source/configure.sh -DCCACHE_PATH=${SCCACHE_PATH}
 
-          ./.ci/windows/build.sh -DCCACHE_PATH=${SCCACHE_PATH}
+      - name: Build
+        shell: bash
+        run: cmake --build build
 
       - name: Package
         shell: bash
-        run: |
-          export ARCH=${{ matrix.os.arch }}-${{ matrix.compiler }}
-          ./.ci/windows/package.sh
+        run: ARCH=${{ matrix.os.arch }}-${{ matrix.compiler }} ./.ci/windows/package.sh
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4.6.2
@@ -432,12 +425,6 @@ jobs:
         run: |
           ./.ci/android/deps.sh
 
-      #TODO: Caio99BR: properly fix this
-      - name: Set build variables
-        shell: bash
-        run: |
-          echo "CCACHE=${{ env.CCACHE }}" >> $GITHUB_ENV
-
       - name: Download Forgejo environment
         uses: actions/download-artifact@v4
         with:
@@ -468,7 +455,6 @@ jobs:
         with:
           path: |
             ${{ github.workspace }}/.cache
-            ${{ github.workspace }}/build/_deps/*-build
           key: ${{ runner.os }}-${{ matrix.os.arch }}-${{ matrix.compiler }}-cpm-${{ env.CPM_CACHE_VERSION }}
 
       - name: Build
@@ -480,8 +466,7 @@ jobs:
           ANDROID_KEYSTORE_PASS: ${{ secrets.ANDROID_KEYSTORE_PASS }}
 
       - name: Package
-        run: |
-          ./.ci/android/package.sh
+        run: ./.ci/android/package.sh
 
       - name: Upload APK
         uses: actions/upload-artifact@v4.6.2
@@ -523,15 +508,6 @@ jobs:
           version: 6.7.3
           cache: 'true'
 
-      - name: Set build variables
-        shell: bash
-        run: |
-          echo "BUILD_TYPE=${{ inputs.build-type }}" >> $GITHUB_ENV
-          echo "DEVEL=${{ inputs.devel }}" >> $GITHUB_ENV
-          echo "USE_WEBENGINE=${{ inputs.webengine }}" >> $GITHUB_ENV
-          echo "USE_MULTIMEDIA=${{ inputs.multimedia }}" >> $GITHUB_ENV
-          echo "CCACHE=${{ env.CCACHE }}" >> $GITHUB_ENV
-
       - name: Download Forgejo environment
         uses: actions/download-artifact@v4
         with:
@@ -552,16 +528,16 @@ jobs:
         with:
           path: |
             ${{ github.workspace }}/.cache
-            ${{ github.workspace }}/build/_deps/*-build
           key: ${{ runner.os }}-${{ matrix.os.arch }}-${{ matrix.compiler }}-cpm-${{ env.CPM_CACHE_VERSION }}
 
+      - name: Configure
+        run: .ci/source/configure.sh -DCCACHE_PATH=${SCCACHE_PATH}
+
       - name: Build
-        run: |
-          ./.ci/macos/build.sh -DCCACHE_PATH=${SCCACHE_PATH}
+        run: cmake --build build
 
       - name: Package
-        run: |
-          ./.ci/macos/package.sh
+        run: ./.ci/macos/package.sh
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4.6.2
@@ -608,15 +584,6 @@ jobs:
         run: |
           ./.ci/forgejo-ci.sh --load-payload-env
 
-      - name: Set build variables
-        shell: bash
-        run: |
-          echo "BUILD_TYPE=${{ inputs.build-type }}" >> $GITHUB_ENV
-          echo "DEVEL=${{ inputs.devel }}" >> $GITHUB_ENV
-          echo "USE_WEBENGINE=${{ inputs.webengine }}" >> $GITHUB_ENV
-          echo "USE_MULTIMEDIA=${{ inputs.multimedia }}" >> $GITHUB_ENV
-          echo "CCACHE=${{ env.CCACHE }}" >> $GITHUB_ENV
-
       - name: Configure sccache
         uses: actions/github-script@v8
         with:
@@ -644,8 +611,11 @@ jobs:
             echo "- Install dependencies"
             bash ./.ci/unix/freebsd/deps.sh
 
+            echo "- Configure"
+            bash .ci/source/configure.sh -DCCACHE_PATH=${SCCACHE_PATH}
+
             echo "- Build"
-            bash ./.ci/unix/freebsd/build.sh ${ARCH} -DCCACHE_PATH=${SCCACHE_PATH}
+            cmake --build build
 
             echo "### SCCache stats" >> "$GITHUB_STEP_SUMMARY"
             echo '```' >> "$GITHUB_STEP_SUMMARY"

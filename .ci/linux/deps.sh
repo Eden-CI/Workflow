@@ -1,65 +1,62 @@
-#!/bin/sh
+#!/bin/sh -eux
 
-set -eux
-
-ARCH="$(uname -m)"
 EXTRA_PACKAGES="https://raw.githubusercontent.com/pkgforge-dev/Anylinux-AppImages/refs/heads/main/useful-tools/get-debloated-pkgs.sh"
 
 echo "Installing build dependencies..."
 echo "---------------------------------------------------------------"
 pacman -Syu --noconfirm --overwrite "*" \
-		base-devel \
-		boost-libs \
-		boost \
-		catch2 \
-		clang \
-		cmake \
-		curl \
-		enet \
-		ffnvcodec-headers \
-		fmt \
-		gamemode \
-		git \
-		glslang \
-		inetutils \
-		jq \
-		libva \
-		libvdpau \
-		libvpx \
-		lld \
-		llvm \
-		mbedtls \
-		mold \
-		nasm \
-		ninja \
-		nlohmann-json \
-		patchelf \
-		pulseaudio \
-		pulseaudio-alsa \
-		python-requests \
-		qt6ct \
-		qt6-tools \
-		qt6-wayland \
-		spirv-headers \
-		spirv-tools \
-		strace \
-		unzip \
-		ffnvcodec-headers \
-		vulkan-headers \
-		vulkan-mesa-layers \
-		vulkan-utility-libraries \
-		wget \
-		wireless_tools \
-		xcb-util-cursor \
-		xcb-util-image \
-		xcb-util-renderutil \
-		xcb-util-wm \
-		xorg-server-xvfb \
-		zip \
-		zsync
+	base-devel \
+	boost-libs \
+	boost \
+	catch2 \
+	clang \
+	cmake \
+	curl \
+	enet \
+	ffnvcodec-headers \
+	fmt \
+	gamemode \
+	git \
+	glslang \
+	inetutils \
+	jq \
+	libva \
+	libvdpau \
+	libvpx \
+	lld \
+	llvm \
+	mbedtls \
+	mold \
+	nasm \
+	ninja \
+	nlohmann-json \
+	patchelf \
+	pulseaudio \
+	pulseaudio-alsa \
+	python-requests \
+	qt6ct \
+	qt6-tools \
+	qt6-wayland \
+	spirv-headers \
+	spirv-tools \
+	strace \
+	unzip \
+	ffnvcodec-headers \
+	vulkan-headers \
+	vulkan-mesa-layers \
+	vulkan-utility-libraries \
+	wget \
+	wireless_tools \
+	xcb-util-cursor \
+	xcb-util-image \
+	xcb-util-renderutil \
+	xcb-util-wm \
+	xorg-server-xvfb \
+	zip \
+	zsync
 
 if [ "$(uname -m)" = 'x86_64' ]; then
-		pacman -Syu --noconfirm --overwrite "*" haskell-gnutls svt-av1
+	pacman -Syu --noconfirm --overwrite "*" haskell-gnutls svt-av1
 fi
 
 echo "Installing debloated packages..."

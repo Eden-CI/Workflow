@@ -1,5 +1,7 @@
 #!/bin/bash -e
 
+# shellcheck disable=SC1091
+
 case "$1" in
   master)
     TAG="v${TIMESTAMP}.${FORGEJO_REF}"
@@ -24,7 +26,7 @@ case "$1" in
     ;;
 esac
 
-source ./.ci/common/common.sh
+source ./.ci/common/field.sh
 
 BASE_DOWNLOAD_URL="https://github.com/$REPO/releases/download"
 
