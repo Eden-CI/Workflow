@@ -24,7 +24,6 @@ forgejo_api_get() {
     echo "[DEBUG] Fetching (attempt $i/$retries): $url"
     response=$(curl -sSL -H "Authorization: token ${FORGEJO_TOKEN}" "$url")
 
-    # Testa se é JSON válido
     if echo "$response" | jq empty 2>/dev/null; then
       echo "$response"
       return 0
@@ -76,7 +75,7 @@ get_forgejo_field() {
         url="https://$FORGEJO_HOST/api/v1/repos/$FORGEJO_REPO/commits?sha=$FORGEJO_BRANCH&limit=1"
     fi
 
-    forgejo_api_get
+    forgejo_api_get "$url"
 
     log_debug "Fetching URL: $url"
     data=$(curl -sS "${auth_header[@]}" "$url" || true)
