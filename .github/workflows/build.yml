@@ -39,7 +39,6 @@ jobs:
   clone:
     name: "Parse and Clone"
     runs-on: ubuntu-latest
-    needs: [parse]
 
     steps:
       - name: Checkout
