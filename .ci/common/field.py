@@ -42,6 +42,7 @@ def get_forgejo_field(**kwargs):
             data = json.loads(response.read().decode())
     except (urllib.error.HTTPError, urllib.error.URLError, json.JSONDecodeError) as e:
         print(e)
+        print(f"Attempted URL {url}, host {forgejo_host}, repo {forgejo_repo}")
         sys.exit(1)
 
     try:
