@@ -29,6 +29,7 @@ parse_payload() {
 	DEFAULT_JSON="default.json"
 	PAYLOAD_JSON="payload.json"
 	FORGEJO_LENV="forgejo.env"
+	FALLBACK_IDX=0
 
 	: >"$FORGEJO_LENV"
 
@@ -43,10 +44,11 @@ parse_payload() {
 	fi
 
 	FORGEJO_HOST=$(jq -r '.host // empty' $PAYLOAD_JSON)
+	if [ -z "$FORGEJO_HOST" ]; then
+		FORGEJO_HOST=$(jq -r ".[$FALLBACK_IDX].host" $DEFAULT_JSON)
+	fi
 	FORGEJO_REPO=$(jq -r '.repository // empty' $PAYLOAD_JSON)
 	if [ -z "$FORGEJO_HOST" ] || [ -z "$FORGEJO_REPO" ]; then
-		FALLBACK_IDX=0
-		FORGEJO_HOST=$(jq -r ".[$FALLBACK_IDX].host" $DEFAULT_JSON)
 		FORGEJO_REPO=$(jq -r ".[$FALLBACK_IDX].repository" $DEFAULT_JSON)
 	fi
 	FORGEJO_HTTP_URL="https://$FORGEJO_HOST/$FORGEJO_REPO"
