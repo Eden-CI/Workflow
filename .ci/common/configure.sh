@@ -78,6 +78,9 @@ COMMON_FLAGS=(
 	# macos only
 	-DYUZU_USE_BUNDLED_MOLTENVK=ON
 
+	# We do NOT want to bundle LLVM
+	-DYUZU_DISABLE_LLVM=ON
+
 	# packaging stuff
 	-DCMAKE_INSTALL_PREFIX=/usr
 	-DYUZU_CMD="${STANDALONE:-OFF}"
