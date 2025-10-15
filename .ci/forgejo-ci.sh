@@ -126,6 +126,11 @@ parse_payload() {
 		echo "FORGEJO_BRANCH=$FORGEJO_BRANCH"
 		echo "FORGEJO_CLONE_URL=$FORGEJO_CLONE_URL"
 	} >> "$FORGEJO_LENV"
+
+	export FORGEJO_HOST
+	export FORGEJO_BRANCH
+	export FORGEJO_REPO
+	export FORGEJO_REF
 }
 
 # TODO: cleanup, cat-eof?
