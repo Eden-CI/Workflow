@@ -3,10 +3,5 @@
     "host": "git.eden-emu.dev",
     "repository": "eden-emu/eden",
     "branch": "master"
-  },
-  {
-    "host": "git.mundra.dev",
-    "repository": "caio99br/eden",
-    "branch": "master"
   }
 ]
