@@ -107,6 +107,7 @@ jobs:
           cd eden
           wget https://git.eden-emu.dev/eden-emu/eden/pulls/2741.patch
           git apply 2741.patch
+          rm 2741.patch
 
       - name: Cleanup
         run: |

@@ -64,7 +64,8 @@ if [ "$PLATFORM" = "linux" ] || [ "$COMPILER" = "clang" ]; then
 			;;
 	esac
 
-	ARCH_FLAGS="${ARCH_FLAGS} -O3 -pipe"
+	ARCH_FLAGS="${ARCH_FLAGS} -O3"
+	[ "$PLATFORM" = "linux" ] && ARCH_FLAGS="${ARCH_FLAGS} -pipe"
 	ARCH_CMAKE=(
 		-DCMAKE_C_FLAGS="${ARCH_FLAGS}"
 		-DCMAKE_CXX_FLAGS="${ARCH_FLAGS}"
