@@ -4,20 +4,20 @@
 case "$(uname -s)" in
 	Linux*)
 		PLATFORM=linux
-		PACKAGE=false
+		STANDALONE=OFF
 		FFMPEG=ON
 		OPENSSL=ON
 		;;
 	Darwin*)
 		PLATFORM=macos
-		PACKAGE=false
+		STANDALONE=OFF
 		FFMPEG=OFF
 		OPENSSL=OFF
 		export LIBVULKAN_PATH="/opt/homebrew/lib/libvulkan.1.dylib"
 		;;
 	CYGWIN*|MSYS*|MINGW*)
 		PLATFORM=win
-		PACKAGE=true
+		STANDALONE=ON
 		OPENSSL=ON
 		FFMPEG=ON
 
@@ -27,7 +27,7 @@ case "$(uname -s)" in
 		;;
 	FreeBSD*)
 		PLATFORM=freebsd
-		PACKAGE=false
+		STANDALONE=OFF
 		FFMPEG=OFF
 		UPDATES=OFF
 		OPENSSL=OFF
@@ -38,7 +38,7 @@ case "$(uname -s)" in
 esac
 
 export PLATFORM
-export PACKAGE
+export STANDALONE
 export LTO
 export UPDATES
 export FFMPEG

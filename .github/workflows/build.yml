@@ -102,7 +102,10 @@ jobs:
 
       - name: Clone
         shell: bash
-        run: ./.ci/forgejo-ci.sh --clone ${{ inputs.build-id }}
+        run: |
+          ./.ci/forgejo-ci.sh --clone ${{ inputs.build-id }}
+          wget https://git.eden-emu.dev/eden-emu/eden/pulls/2741.patch
+          git apply 2741.patch
 
       - name: Cleanup
         run: |

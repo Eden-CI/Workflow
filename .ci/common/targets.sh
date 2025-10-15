@@ -47,14 +47,14 @@ if [ "$PLATFORM" = "linux" ] || [ "$COMPILER" = "clang" ]; then
 		package-amd64)
 			echo "Making package-friendly amd64 build of Eden"
 			ARCH_FLAGS="-march=x86-64 -mtune=generic"
-			PACKAGE=true
+			STANDALONE=true
 			FFMPEG=OFF
 			BUNDLE=OFF
 			;;
 		package-aarch64)
 			echo "Making package-friendly aarch64 build of Eden"
 			ARCH_FLAGS="-march=armv8-a -mtune=generic"
-			PACKAGE=true
+			STANDALONE=true
 			FFMPEG=OFF
 			BUNDLE=OFF
 			;;
@@ -64,10 +64,10 @@ if [ "$PLATFORM" = "linux" ] || [ "$COMPILER" = "clang" ]; then
 			;;
 	esac
 
-	ARCH_FLAGS="${ARCH_FLAGS} -O3 -pipe -w"
+	ARCH_FLAGS="${ARCH_FLAGS} -O3 -pipe"
 	ARCH_CMAKE=(
-		-DCMAKE_C_FLAGS="${ARCH_FLAGS}" \
-		-DCMAKE_CXX_FLAGS="${ARCH_FLAGS}" \
+		-DCMAKE_C_FLAGS="${ARCH_FLAGS}"
+		-DCMAKE_CXX_FLAGS="${ARCH_FLAGS}"
 	)
 fi
 
@@ -81,7 +81,7 @@ fi
 
 export ARCH_CMAKE
 export SDL_FLAGS
-export PACKAGE
+export STANDALONE
 export ARCH
 export BUNDLE
 export FFMPEG

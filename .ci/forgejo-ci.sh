@@ -1,4 +1,4 @@
-#!/bin/bash -ex
+#!/bin/sh -e
 
 # SPDX-FileCopyrightText: Copyright 2025 Eden Emulator Project
 # SPDX-License-Identifier: GPL-3.0-or-later
@@ -9,7 +9,7 @@
 # shellcheck disable=SC1091
 # shellcheck disable=SC1090
 
-source ./.ci/common/field.sh
+. ./.ci/common/field.sh
 
 load_payload_env() {
 	FORGEJO_LENV="forgejo.env"
@@ -18,11 +18,11 @@ load_payload_env() {
 		if [ "$CI" = "true" ]; then
 			# Safe export to GITHUB_ENV
 			while IFS= read -r line; do
-				echo "$line" >>"$GITHUB_ENV"
+				echo "$line" >> "$GITHUB_ENV"
 			done <"$FORGEJO_LENV"
 		else
 			set -a
-			source "$FORGEJO_LENV"
+			. "$FORGEJO_LENV"
 			set +a
 		fi
 	fi
@@ -55,7 +55,7 @@ parse_payload() {
 	FORGEJO_HTTP_URL="https://$FORGEJO_HOST/$FORGEJO_REPO"
 	FORGEJO_CLONE_URL="$FORGEJO_HTTP_URL.git"
 
-	if ! curl -sSfvL "$FORGEJO_HTTP_URL"; then
+	if ! curl -sSfL "$FORGEJO_HTTP_URL" >/dev/null 2>&1; then
 		echo "Repository $FORGEJO_HTTP_URL is not reachable."
 		echo "Check URL or authentication."
 		echo
@@ -73,7 +73,7 @@ parse_payload() {
 			echo "Reaching repository $FORGEJO_HTTP_URL..."
 			if curl -sSfL "$FORGEJO_HTTP_URL" >/dev/null 2>&1; then
 				FORGEJO_MIRROR=true
-				echo "FORGEJO_MIRROR=true" >>"$FORGEJO_LENV"
+				echo "FORGEJO_MIRROR=true" >> "$FORGEJO_LENV"
 				break
 			fi
 		done
@@ -89,7 +89,7 @@ parse_payload() {
 		FORGEJO_BRANCH=master
 
 		FORGEJO_BEFORE=$(jq -r '.before' $PAYLOAD_JSON)
-		echo "FORGEJO_BEFORE=$FORGEJO_BEFORE" >>"$FORGEJO_LENV"
+		echo "FORGEJO_BEFORE=$FORGEJO_BEFORE" >> "$FORGEJO_LENV"
 		;;
 	pull_request)
 		FORGEJO_REF=$(jq -r '.ref' $PAYLOAD_JSON)
@@ -133,42 +133,42 @@ parse_payload() {
 
 # TODO: cleanup, cat-eof?
 generate_summary() {
-	echo "## Job Summary" >>"$GITHUB_STEP_SUMMARY"
-	echo "- Triggered By: $1" >>"$GITHUB_STEP_SUMMARY"
-	echo "- Commit: [\`$FORGEJO_REF\`](https://$FORGEJO_HOST/$FORGEJO_REPO/commit/$FORGEJO_REF)" >>"$GITHUB_STEP_SUMMARY"
-	echo >>"$GITHUB_STEP_SUMMARY"
+	echo "## Job Summary" >> "$GITHUB_STEP_SUMMARY"
+	echo "- Triggered By: $1" >> "$GITHUB_STEP_SUMMARY"
+	echo "- Commit: [\`$FORGEJO_REF\`](https://$FORGEJO_HOST/$FORGEJO_REPO/commit/$FORGEJO_REF)" >> "$GITHUB_STEP_SUMMARY"
+	echo >> "$GITHUB_STEP_SUMMARY"
 
 	if [ "$FORGEJO_MIRROR" = true ]; then
-		echo "## Using mirror:" >>"$GITHUB_STEP_SUMMARY"
-		echo "- Mirror URL: [\`$FORGEJO_HOST/$FORGEJO_REPO\`]($FORGEJO_CLONE_URL)" >>"$GITHUB_STEP_SUMMARY"
-		echo >>"$GITHUB_STEP_SUMMARY"
+		echo "## Using mirror:" >> "$GITHUB_STEP_SUMMARY"
+		echo "- Mirror URL: [\`$FORGEJO_HOST/$FORGEJO_REPO\`]($FORGEJO_CLONE_URL)" >> "$GITHUB_STEP_SUMMARY"
+		echo >> "$GITHUB_STEP_SUMMARY"
 	fi
 
 	case "$1" in
 	master)
-		echo "## Master Build" >>"$GITHUB_STEP_SUMMARY"
-		echo "- Full changelog: [\`$FORGEJO_BEFORE...$FORGEJO_REF\`](https://$FORGEJO_HOST/$FORGEJO_REPO/compare/$FORGEJO_BEFORE...$FORGEJO_REF)" >>"$GITHUB_STEP_SUMMARY"
+		echo "## Master Build" >> "$GITHUB_STEP_SUMMARY"
+		echo "- Full changelog: [\`$FORGEJO_BEFORE...$FORGEJO_REF\`](https://$FORGEJO_HOST/$FORGEJO_REPO/compare/$FORGEJO_BEFORE...$FORGEJO_REF)" >> "$GITHUB_STEP_SUMMARY"
 		;;
 	pull_request)
-		echo "## Pull Request Build" >>"$GITHUB_STEP_SUMMARY"
-		echo "- Pull Request: #[${FORGEJO_PR_NUMBER}]($FORGEJO_PR_URL)" >>"$GITHUB_STEP_SUMMARY"
-		echo "- Merge Base Commit: [\`$FORGEJO_PR_MERGE_BASE\`](https://$FORGEJO_HOST/$FORGEJO_REPO/commit/$FORGEJO_PR_MERGE_BASE)" >>"$GITHUB_STEP_SUMMARY"
-		echo "- PR Title: $FORGEJO_PR_TITLE" >>"$GITHUB_STEP_SUMMARY"
-		echo >>"$GITHUB_STEP_SUMMARY"
-		echo "### Changelog" >>"$GITHUB_STEP_SUMMARY"
-		get_forgejo_field field="body" default_msg="No changelog provided" pull_request_number="$FORGEJO_PR_NUMBER" >>"$GITHUB_STEP_SUMMARY"
+		echo "## Pull Request Build" >> "$GITHUB_STEP_SUMMARY"
+		echo "- Pull Request: #[${FORGEJO_PR_NUMBER}]($FORGEJO_PR_URL)" >> "$GITHUB_STEP_SUMMARY"
+		echo "- Merge Base Commit: [\`$FORGEJO_PR_MERGE_BASE\`](https://$FORGEJO_HOST/$FORGEJO_REPO/commit/$FORGEJO_PR_MERGE_BASE)" >> "$GITHUB_STEP_SUMMARY"
+		echo "- PR Title: $FORGEJO_PR_TITLE" >> "$GITHUB_STEP_SUMMARY"
+		echo >> "$GITHUB_STEP_SUMMARY"
+		echo "### Changelog" >> "$GITHUB_STEP_SUMMARY"
+		get_forgejo_field field="body" default_msg="No changelog provided" pull_request_number="$FORGEJO_PR_NUMBER" >> "$GITHUB_STEP_SUMMARY"
 		;;
 	push | test)
-		echo "## Continuous Integration Test Build" >>"$GITHUB_STEP_SUMMARY"
-		echo "- This build was triggered for testing purposes." >>"$GITHUB_STEP_SUMMARY"
+		echo "## Continuous Integration Test Build" >> "$GITHUB_STEP_SUMMARY"
+		echo "- This build was triggered for testing purposes." >> "$GITHUB_STEP_SUMMARY"
 		;;
 	*)
-		echo "## Unknown Build Type" >>"$GITHUB_STEP_SUMMARY"
-		echo "- Build type '$1' is not recognized." >>"$GITHUB_STEP_SUMMARY"
+		echo "## Unknown Build Type" >> "$GITHUB_STEP_SUMMARY"
+		echo "- Build type '$1' is not recognized." >> "$GITHUB_STEP_SUMMARY"
 		;;
 	esac
 
-	echo >>"$GITHUB_STEP_SUMMARY"
+	echo >> "$GITHUB_STEP_SUMMARY"
 }
 
 clone_repository() {
