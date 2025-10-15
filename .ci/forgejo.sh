@@ -196,7 +196,7 @@ clone_repository() {
 		git -C eden checkout "$FORGEJO_REF"
 	fi
 
-	echo "FORGEJO_PR_MERGE_BASE=$(git merge-base master HEAD | cut -c1-10)" >> "$FORGEJO_LENV"
+	echo "FORGEJO_PR_MERGE_BASE=$(git merge-base origin/master HEAD | cut -c1-10)" >> "$FORGEJO_LENV"
 
 	echo "$FORGEJO_BRANCH" > eden/GIT-REFSPEC
 	git -C eden rev-parse --short=10 HEAD > eden/GIT-COMMIT
