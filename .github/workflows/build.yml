@@ -36,52 +36,8 @@ env:
   USE_MULTIMEDIA: ${{ inputs.multimedia }}
 
 jobs:
-  parse:
-    name: "Parse Forgejo payload"
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Parse Forgejo payload
-        shell: bash
-        run: |
-          echo '${{ toJSON(github.event.client_payload) }}' > ./payload.json
-          cat payload.json
-          ./.ci/forgejo-ci.sh --parse ${{ inputs.build-id }}
-
-      - name: Upload payload environment
-        uses: actions/upload-artifact@v4
-        with:
-          name: forgejo-env
-          path: forgejo.env
-
-  summary:
-    name: "Summary"
-    runs-on: ubuntu-latest
-    needs: [parse]
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Download Forgejo environment
-        uses: actions/download-artifact@v4
-        with:
-          name: forgejo-env
-
-      - name: Load payload environment
-        shell: bash
-        run: |
-          ./.ci/forgejo-ci.sh --load-payload-env
-
-      - name: Create job summary
-        run: |
-          ./.ci/forgejo-ci.sh --summary ${{ inputs.build-id }}
-
   clone:
-    name: "Clone"
+    name: "Parse and Clone"
     runs-on: ubuntu-latest
     needs: [parse]
 
@@ -91,20 +47,22 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Download Forgejo environment
-        uses: actions/download-artifact@v4
-        with:
-          name: forgejo-env
+      - name: Parse Forgejo payload
+        shell: bash
+        run: |
+          echo '${{ toJSON(github.event.client_payload) }}' > ./payload.json
+          cat payload.json
+          ./.ci/forgejo.sh --parse ${{ inputs.build-id }}
 
       - name: Load payload environment
         shell: bash
         run: |
-          ./.ci/forgejo-ci.sh --load-payload-env
+          ./.ci/forgejo.sh --load-payload-env
 
       - name: Clone
         shell: bash
         run: |
-          ./.ci/forgejo-ci.sh --clone ${{ inputs.build-id }}
+          ./.ci/forgejo.sh --clone ${{ inputs.build-id }}
           # cd eden
           # wget https://git.eden-emu.dev/eden-emu/eden/pulls/2741.patch
           # git apply 2741.patch
@@ -115,6 +73,12 @@ jobs:
           cd eden
           rm -rf .git* .ci .github
 
+      - name: Upload payload environment
+        uses: actions/upload-artifact@v4
+        with:
+          name: forgejo-env
+          path: forgejo.env
+
       - name: Upload cloned repo
         uses: actions/upload-artifact@v4
         with:
@@ -123,6 +87,30 @@ jobs:
           path: |
             eden/*
             eden/.patch
+
+  summary:
+    name: "Summary"
+    runs-on: ubuntu-latest
+    needs: [clone]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download Forgejo environment
+        uses: actions/download-artifact@v4
+        with:
+          name: forgejo-env
+
+      - name: Load payload environment
+        shell: bash
+        run: |
+          ./.ci/forgejo.sh --load-payload-env
+
+      - name: Create job summary
+        run: |
+          ./.ci/forgejo.sh --summary ${{ inputs.build-id }}
+
 
   # TODO(crueter): Each dependent job should use the source pack
   source:
@@ -152,7 +140,6 @@ jobs:
   set-matrix:
     name: "Generate Linux matrix"
     runs-on: ubuntu-latest
-    needs: [parse]
     outputs:
       matrix: ${{ steps.set.outputs.matrix }}
       compilers: ${{ steps.set.outputs.compilers }}
@@ -256,7 +243,7 @@ jobs:
       - name: Load payload environment
         shell: bash
         run: |
-          ./.ci/forgejo-ci.sh --load-payload-env
+          ./.ci/forgejo.sh --load-payload-env
 
       - name: Clone
         uses: actions/download-artifact@v4
@@ -345,7 +332,7 @@ jobs:
       - name: Load payload environment
         shell: bash
         run: |
-          ./.ci/forgejo-ci.sh --load-payload-env
+          ./.ci/forgejo.sh --load-payload-env
 
       - name: Clone
         uses: actions/download-artifact@v4
@@ -441,7 +428,7 @@ jobs:
       - name: Load payload environment
         shell: bash
         run: |
-          ./.ci/forgejo-ci.sh --load-payload-env
+          ./.ci/forgejo.sh --load-payload-env
 
       - name: Clone
         uses: actions/download-artifact@v4
@@ -524,7 +511,7 @@ jobs:
       - name: Load payload environment
         shell: bash
         run: |
-          ./.ci/forgejo-ci.sh --load-payload-env
+          ./.ci/forgejo.sh --load-payload-env
 
       - name: Clone
         uses: actions/download-artifact@v4
@@ -590,7 +577,7 @@ jobs:
       - name: Load payload environment
         shell: bash
         run: |
-          ./.ci/forgejo-ci.sh --load-payload-env
+          ./.ci/forgejo.sh --load-payload-env
 
       - name: Configure sccache
         uses: actions/github-script@v8

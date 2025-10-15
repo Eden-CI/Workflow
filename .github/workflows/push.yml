@@ -35,16 +35,16 @@ jobs:
       - name: Download artifacts
         uses: actions/download-artifact@v4
 
-      - name: Parse Forgejo payload
+      - name: Load payload environment
         shell: bash
         run: |
-          echo "${{ toJSON(github.event.client_payload) }}" > ./payload.json
-          ./.ci/forgejo-ci.sh --parse push
+          ./.ci/forgejo.sh --load-payload-env
 
       - name: Set environment variables
         run: |
           echo "REPO=Eden-CI/Master" >> $GITHUB_ENV
           echo "DEVEL=true" >> $GITHUB_ENV
+          echo "TIMESTAMP=$(date +%s)" >> $GITHUB_ENV
 
       - name: Package artifacts nicely
         run: |
@@ -58,7 +58,7 @@ jobs:
         uses: softprops/action-gh-release@v2.2.2
         with:
           name: "Eden Continuous Build - ${{ env.FORGEJO_REF }}"
-          tag_name: continuous
+          tag_name: v${{ env.TIMESTAMP }}.${{ env.FORGEJO_REF }}
           repository: ${{ env.REPO }}
           body_path: ./changelog.md
           prerelease: false

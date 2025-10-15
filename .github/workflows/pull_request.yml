@@ -34,11 +34,10 @@ jobs:
       - name: Download artifacts
         uses: actions/download-artifact@v4
 
-      - name: Parse Forgejo payload
+      - name: Load payload environment
         shell: bash
         run: |
-          echo "${{ toJSON(github.event.client_payload) }}" > ./payload.json
-          ./.ci/forgejo-ci.sh --parse pull_request
+          ./.ci/forgejo.sh --load-payload-env
 
       - name: Set environment variables
         run: |

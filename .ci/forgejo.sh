@@ -8,9 +8,10 @@
 
 # shellcheck disable=SC1090
 
-load_payload_env() {
-	FORGEJO_LENV="forgejo.env"
+FORGEJO_LENV=${FORGEJO_LENV:-"forgejo.env"}
+touch "$FORGEJO_LENV"
 
+load_payload_env() {
 	if [ -f "$FORGEJO_LENV" ]; then
 		if [ "$CI" = "true" ]; then
 			# Safe export to GITHUB_ENV
@@ -28,62 +29,56 @@ load_payload_env() {
 parse_payload() {
 	DEFAULT_JSON="default.json"
 	PAYLOAD_JSON="payload.json"
-	FORGEJO_LENV="forgejo.env"
-
-	: >"$FORGEJO_LENV"
 
 	if [ ! -f "$PAYLOAD_JSON" ]; then
-		echo "null" >$PAYLOAD_JSON
+		echo "null" > $PAYLOAD_JSON
 	fi
+
+	# default.json defines mirrors (should rarely be used unless Cloudflare does funny things)
 	if [ ! -f "$DEFAULT_JSON" ]; then
-		echo "You should set 'host', 'repository', 'branch' on $DEFAULT_JSON"
-		echo
 		echo "Error: $DEFAULT_JSON not found!"
+		echo
+		echo "You should set: 'host', 'repository', 'clone_url', and 'branch' on $DEFAULT_JSON"
 		exit 1
 	fi
 
+	# Payloads do not define host
+	# This is just for verbosity
 	FORGEJO_HOST=$(jq -r '.host // empty' $PAYLOAD_JSON)
 	FORGEJO_REPO=$(jq -r '.repository // empty' $PAYLOAD_JSON)
-	if [ -z "$FORGEJO_HOST" ] || [ -z "$FORGEJO_REPO" ]; then
-		FALLBACK_IDX=0
+	FORGEJO_CLONE_URL=$(jq -r '.clone_url // empty' $PAYLOAD_JSON)
+	FORGEJO_BRANCH=$(jq -r '.branch // empty' $PAYLOAD_JSON)
+
+	# NB: mirrors do not work for our purposes unless they magically can mirror everything in 10 seconds
+	FALLBACK_IDX=0
+	if [ -z "$FORGEJO_HOST" ]; then
 		FORGEJO_HOST=$(jq -r ".[$FALLBACK_IDX].host" $DEFAULT_JSON)
+	fi
+
+	if [ -z "$FORGEJO_REPO" ]; then
 		FORGEJO_REPO=$(jq -r ".[$FALLBACK_IDX].repository" $DEFAULT_JSON)
 	fi
-	FORGEJO_HTTP_URL="https://$FORGEJO_HOST/$FORGEJO_REPO"
-	FORGEJO_CLONE_URL="$FORGEJO_HTTP_URL.git"
 
-	if ! curl -sSfL "$FORGEJO_HTTP_URL" >/dev/null 2>&1; then
-		echo "Repository $FORGEJO_HTTP_URL is not reachable."
+	[ -z "$FORGEJO_CLONE_URL" ] && FORGEJO_CLONE_URL="https://$FORGEJO_HOST/$FORGEJO_REPO.git"
+
+	TRIES=0
+	while ! curl -sSfL "$FORGEJO_CLONE_URL" >/dev/null 2>&1; do
+		echo "Repository $FORGEJO_CLONE_URL is unreachable."
 		echo "Check URL or authentication."
-		echo
-		echo "Using fallback mirrors from $DEFAULT_JSON..."
 
-		FORGEJO_MIRROR=false
-		count=$(jq 'length' "$DEFAULT_JSON")
-
-		for i in $(seq 1 $((count - 1))); do
-			FALLBACK_IDX=$i
-			FORGEJO_HOST=$(jq -r ".[$FALLBACK_IDX].host" $DEFAULT_JSON)
-			FORGEJO_REPO=$(jq -r ".[$FALLBACK_IDX].repository" $DEFAULT_JSON)
-			FORGEJO_HTTP_URL="https://$FORGEJO_HOST/$FORGEJO_REPO"
-			FORGEJO_CLONE_URL="$FORGEJO_HTTP_URL.git"
-			echo "Reaching repository $FORGEJO_HTTP_URL..."
-			if curl -sSfL "$FORGEJO_HTTP_URL" >/dev/null 2>&1; then
-				FORGEJO_MIRROR=true
-				echo "FORGEJO_MIRROR=true" >> "$FORGEJO_LENV"
-				break
-			fi
-		done
-		if [ "$FORGEJO_MIRROR" != true ]; then
-			echo "No reachable repository found in $DEFAULT_JSON" >&2
+		TRIES=$((TRIES + 1))
+		if [ "$TRIES" = 10 ]; then
+			echo "Failed to reach $FORGEJO_CLONE_URL after ten tries. Exiting."
 			exit 1
 		fi
-	fi
+
+		sleep 5
+		echo "Trying again..."
+	done
 
 	export FORGEJO_HOST
 	export FORGEJO_BRANCH
 	export FORGEJO_REPO
-	export FORGEJO_REF
 
 	case "$1" in
 	master)
@@ -97,13 +92,11 @@ parse_payload() {
 		FORGEJO_REF=$(jq -r '.ref' $PAYLOAD_JSON)
 		FORGEJO_BRANCH=$(jq -r '.branch' $PAYLOAD_JSON)
 
-		FORGEJO_PR_MERGE_BASE=$(jq -r '.merge_base' $PAYLOAD_JSON)
 		FORGEJO_PR_NUMBER=$(jq -r '.number' $PAYLOAD_JSON)
 		FORGEJO_PR_URL=$(jq -r '.url' $PAYLOAD_JSON)
 		FORGEJO_PR_TITLE=$(.ci/common/field.py field="title" default_msg="No title provided" pull_request_number="$FORGEJO_PR_NUMBER")
 
 		{
-			echo "FORGEJO_PR_MERGE_BASE=$FORGEJO_PR_MERGE_BASE"
 			echo "FORGEJO_PR_NUMBER=$FORGEJO_PR_NUMBER"
 			echo "FORGEJO_PR_URL=$FORGEJO_PR_URL"
 			echo "FORGEJO_PR_TITLE=$FORGEJO_PR_TITLE"
@@ -181,17 +174,35 @@ clone_repository() {
 		exit 1
 	fi
 
-	git clone "$FORGEJO_CLONE_URL" eden
+	TRIES=0
+	while ! git clone "$FORGEJO_CLONE_URL" eden; do
+		echo "Repository $FORGEJO_CLONE_URL is not reachable."
+		echo "Check URL or authentication."
+
+		TRIES=$((TRIES + 1))
+		if [ "$TRIES" = 10 ]; then
+			echo "Failed to clone $FORGEJO_CLONE_URL after ten tries. Exiting."
+			exit 1
+		fi
+
+		sleep 5
+		echo "Trying clone again..."
+		rm -rf ./eden || true
+	done
 
 	if ! git -C eden checkout "$FORGEJO_REF"; then
 		echo "Ref $FORGEJO_REF not found locally, trying to fetch..."
-		git -C eden fetch origin "$FORGEJO_REF"
+		git -C eden fetch --all
 		git -C eden checkout "$FORGEJO_REF"
 	fi
 
+	echo "FORGEJO_PR_MERGE_BASE=$(git merge-base master HEAD | cut -c1-10)" >> "$FORGEJO_LENV"
+
 	echo "$FORGEJO_BRANCH" > eden/GIT-REFSPEC
-	git -C eden rev-parse --short=10 HEAD >eden/GIT-COMMIT
-	git -C eden describe --tags HEAD --abbrev=0 >eden/GIT-TAG || echo 'v0.0.3' >eden/GIT-TAG
+	git -C eden rev-parse --short=10 HEAD > eden/GIT-COMMIT
+	git -C eden describe --tags HEAD --abbrev=0 > eden/GIT-TAG || echo 'v0.0.3' > eden/GIT-TAG
+
+	# slight hack: also add the merge base
 
 	if [ "$1" = "tag" ]; then
 		cp eden/GIT-TAG eden/GIT-RELEASE
@@ -212,7 +223,25 @@ case "$1" in
 	load_payload_env
 	;;
 *)
-	echo "Usage: $0 [--parse <type> | --summary <type> | --clone <type> | --load-payload-env]"
-	echo "Supported types: master | pull_request | tag | push | test"
+	cat << EOF
+Usage: $0 [--parse <type> | --summary <type> | --clone <type> | --load-payload-env]
+Supported types: master | pull_request | tag | push | test
+
+Commands:
+    --load-payload-env: Load the payload environment from forgejo.env.
+
+        Set FORGEJO_LENV to use a custom environment file.
+
+    --parse: Parses an existing payload from payload.json, and creates
+             a Forgejo environment file.
+
+        If the payload doesn't exist, uses the latest master of the default host in default.json.
+
+    --summary: Generates a summary for the payload (requires loaded environment).
+
+        Output is placed in GITHUB_STEP_SUMMARY, usually this is for GitHub Actions
+
+    --clone: Clones the target repository and checks out the correct reference (requires loaded environment).
+EOF
 	;;
 esac
