@@ -74,7 +74,6 @@ COMMON_FLAGS=(
 	# Bundled stuff (only if not building for a pkg)
 	-DYUZU_USE_BUNDLED_FFMPEG="${FFMPEG:-ON}"
 	-DYUZU_USE_BUNDLED_OPENSSL="${OPENSSL:-ON}"
-	-DYUZU_DISABLE_LLVM=ON
 
 	# macos only
 	-DYUZU_USE_BUNDLED_MOLTENVK=ON
