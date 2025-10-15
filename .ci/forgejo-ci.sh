@@ -80,6 +80,11 @@ parse_payload() {
 		fi
 	fi
 
+	export FORGEJO_HOST
+	export FORGEJO_BRANCH
+	export FORGEJO_REPO
+	export FORGEJO_REF
+
 	case "$1" in
 	master)
 		FORGEJO_REF=$(jq -r '.ref' $PAYLOAD_JSON)
@@ -126,11 +131,6 @@ parse_payload() {
 		echo "FORGEJO_BRANCH=$FORGEJO_BRANCH"
 		echo "FORGEJO_CLONE_URL=$FORGEJO_CLONE_URL"
 	} >> "$FORGEJO_LENV"
-
-	export FORGEJO_HOST
-	export FORGEJO_BRANCH
-	export FORGEJO_REPO
-	export FORGEJO_REF
 }
 
 # TODO: cleanup, cat-eof?
