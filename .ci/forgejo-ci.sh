@@ -6,10 +6,7 @@
 # Unified CI helper for Forgejo > GitHub integration
 # Supports: --parse, --summary, --clone
 
-# shellcheck disable=SC1091
 # shellcheck disable=SC1090
-
-. ./.ci/common/field.sh
 
 load_payload_env() {
 	FORGEJO_LENV="forgejo.env"
@@ -98,7 +95,7 @@ parse_payload() {
 		FORGEJO_PR_MERGE_BASE=$(jq -r '.merge_base' $PAYLOAD_JSON)
 		FORGEJO_PR_NUMBER=$(jq -r '.number' $PAYLOAD_JSON)
 		FORGEJO_PR_URL=$(jq -r '.url' $PAYLOAD_JSON)
-		FORGEJO_PR_TITLE=$(get_forgejo_field field="title" default_msg="No title provided" pull_request_number="$FORGEJO_PR_NUMBER")
+		FORGEJO_PR_TITLE=$(.ci/common/field.py field="title" default_msg="No title provided" pull_request_number="$FORGEJO_PR_NUMBER")
 
 		{
 			echo "FORGEJO_PR_MERGE_BASE=$FORGEJO_PR_MERGE_BASE"
@@ -113,7 +110,7 @@ parse_payload() {
 		;;
 	push | test)
 		FORGEJO_BRANCH=$(jq -r ".[$FALLBACK_IDX].branch" $DEFAULT_JSON)
-		FORGEJO_REF=$(get_forgejo_field field="sha")
+		FORGEJO_REF=$(.ci/common/field.py field="sha")
 		;;
 	*)
 		echo "Type: $1"
@@ -156,7 +153,7 @@ generate_summary() {
 		echo "- PR Title: $FORGEJO_PR_TITLE" >> "$GITHUB_STEP_SUMMARY"
 		echo >> "$GITHUB_STEP_SUMMARY"
 		echo "### Changelog" >> "$GITHUB_STEP_SUMMARY"
-		get_forgejo_field field="body" default_msg="No changelog provided" pull_request_number="$FORGEJO_PR_NUMBER" >> "$GITHUB_STEP_SUMMARY"
+		.ci/common/field.py field="body" default_msg="No changelog provided" pull_request_number="$FORGEJO_PR_NUMBER" >> "$GITHUB_STEP_SUMMARY"
 		;;
 	push | test)
 		echo "## Continuous Integration Test Build" >> "$GITHUB_STEP_SUMMARY"

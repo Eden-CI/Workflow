@@ -36,7 +36,7 @@ get_forgejo_field() {
 	fi
 
 	data=$(curl -s $auth_header "$url" || true)
-	if ! echo "$data" | jq empty; then
+	if ! echo $data | jq empty; then
 		exit 1
 	fi
 

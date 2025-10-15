@@ -96,7 +96,7 @@ case "$1" in
     echo "- [\`$FORGEJO_REF\`](https://github.com/Eden-CI/Master/releases?q=$FORGEJO_PR_MERGE_BASE&expanded=true)"
     echo
     echo "## Changelog"
-    get_forgejo_field field="body" default_msg="No changelog provided" pull_request_number="$FORGEJO_PR_NUMBER"
+    .ci/common/field.py field="body" default_msg="No changelog provided" pull_request_number="$FORGEJO_PR_NUMBER"
     ;;
   tag)
     echo "## Changelog"
