@@ -186,8 +186,8 @@ clone_repository() {
 	git clone "$FORGEJO_CLONE_URL" eden
 
 	if ! git -C eden checkout "$FORGEJO_REF"; then
-		echo "Ref $FORGEJO_REF not found locally, trying to fetch..."
-		git -C eden fetch origin "$FORGEJO_REF"
+		echo "Reference '$FORGEJO_REF' not found directly, trying to fetch..."
+		git -C eden fetch --all
 		git -C eden checkout "$FORGEJO_REF"
 	fi
 
