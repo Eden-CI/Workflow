@@ -3,6 +3,10 @@
 # SPDX-FileCopyrightText: Copyright 2025 Eden Emulator Project
 # SPDX-License-Identifier: GPL-3.0-or-later
 
+# shellcheck disable=SC2090
+# shellcheck disable=SC2086
+# shellcheck disable=SC2089
+
 get_forgejo_field() {
 	field="sha"
 	pull_request_number=""
@@ -31,7 +35,7 @@ get_forgejo_field() {
 		url="https://$FORGEJO_HOST/api/v1/repos/$FORGEJO_REPO/commits?sha=$FORGEJO_BRANCH&limit=1"
 	fi
 
-	data=$(curl -s "$auth_header" "$url" || true)
+	data=$(curl -s $auth_header "$url" || true)
 	if ! echo "$data" | jq empty; then
 		exit 1
 	fi
