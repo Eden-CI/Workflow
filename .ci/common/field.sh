@@ -4,9 +4,9 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 get_forgejo_field() {
-	local field="sha"
-	local pull_request_number=""
-	local default_msg="No data provided"
+	field="sha"
+	pull_request_number=""
+	default_msg="No data provided"
 
 	for arg in "$@"; do
 		case $arg in
@@ -17,11 +17,6 @@ get_forgejo_field() {
 		esac
 	done
 
-	local url
-	local data
-	local result
-
-	local auth_header=()
 	if [ -n "$FORGEJO_TOKEN" ]; then
 		response=$(curl -s -o /dev/null -w "%{http_code}" -H "Authorization: token $FORGEJO_TOKEN" "https://$FORGEJO_HOST/api/v1/user")
 
@@ -30,7 +25,7 @@ get_forgejo_field() {
 		fi
 	fi
 
-	if [[ -n "$pull_request_number" ]]; then
+	if [ -n "$pull_request_number" ]; then
 		url="https://$FORGEJO_HOST/api/v1/repos/$FORGEJO_REPO/pulls/$pull_request_number"
 	else
 		url="https://$FORGEJO_HOST/api/v1/repos/$FORGEJO_REPO/commits?sha=$FORGEJO_BRANCH&limit=1"
@@ -41,7 +36,7 @@ get_forgejo_field() {
 		exit 1
 	fi
 
-	if [[ -n "$pull_request_number" ]]; then
+	if [ -n "$pull_request_number" ]; then
 		case "$field" in
 			title)	result=$(echo "$data" | jq -r '.title // empty') ;;
 			body)	result=$(echo "$data" | jq -r '.body // empty') ;;
