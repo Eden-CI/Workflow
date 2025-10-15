@@ -5,13 +5,12 @@
 
 # This script assumes you're in the source directory
 
-EDEN_TAG=$(cat GIT-TAG)
-VERSION="$(echo "$EDEN_TAG")"
+VERSION=$(cat GIT-TAG)
 PKG_NAME="Eden-${VERSION}-${ARCH}"
 PKG_DIR="install/usr"
 BUILDDIR="${BUILDDIR:-build}"
 
-echo "Making \"$EDEN_TAG\" build"
+echo "Making \"$VERSION\" build"
 
 mkdir -p "${PKG_DIR}/lib/qt6"
 
@@ -54,7 +53,7 @@ done
 
 # Copy Qt6 translations
 mkdir -p "${PKG_DIR}/share/translations"
-cp -v ${BUILDDIR}/src/yuzu/*.qm "${PKG_DIR}/share/translations/"
+cp -v "${BUILDDIR}/src/yuzu"/*.qm "${PKG_DIR}/share/translations/"
 
 # Strip binaries
 strip "${PKG_DIR}/bin/eden"

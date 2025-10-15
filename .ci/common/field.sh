@@ -1,4 +1,4 @@
-#!/bin/bash -e
+#!/bin/sh -e
 
 # SPDX-FileCopyrightText: Copyright 2025 Eden Emulator Project
 # SPDX-License-Identifier: GPL-3.0-or-later
@@ -21,7 +21,7 @@ get_forgejo_field() {
 		response=$(curl -s -o /dev/null -w "%{http_code}" -H "Authorization: token $FORGEJO_TOKEN" "https://$FORGEJO_HOST/api/v1/user")
 
 		if [ "$response" -eq 200 ]; then
-			auth_header=(-H "Authorization: token $FORGEJO_TOKEN")
+			auth_header="-H \"Authorization: token $FORGEJO_TOKEN\""
 		fi
 	fi
 
@@ -31,7 +31,7 @@ get_forgejo_field() {
 		url="https://$FORGEJO_HOST/api/v1/repos/$FORGEJO_REPO/commits?sha=$FORGEJO_BRANCH&limit=1"
 	fi
 
-	data=$(curl -s "${auth_header[@]}" "$url" || true)
+	data=$(curl -s "$auth_header" "$url" || true)
 	if ! echo "$data" | jq empty; then
 		exit 1
 	fi
