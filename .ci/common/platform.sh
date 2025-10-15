@@ -29,8 +29,7 @@ case "$(uname -s)" in
 		PLATFORM=freebsd
 		STANDALONE=OFF
 		FFMPEG=OFF
-		UPDATES=OFF
-		OPENSSL=OFF
+		OPENSSL=ON
 		;;
 	*)
 		echo "Unknown platform $(uname -s)"
@@ -40,6 +39,5 @@ esac
 export PLATFORM
 export STANDALONE
 export LTO
-export UPDATES
 export FFMPEG
 export OPENSSL

@@ -33,18 +33,6 @@ fi
 # compiler handling
 . .ci/common/compiler.sh
 
-case "$PLATFORM" in
-	(freebsd)
-		PLATFORM_FLAGS=(
-			-DYUZU_USE_CPM=ON
-			-DENABLE_WEB_SERVICE=OFF
-		)
-		UPDATES=OFF
-		export UPDATES
-		;;
-	(*) ;;
-esac
-
 # Flags all targets use
 COMMON_FLAGS=(
 	# DO not build tests
