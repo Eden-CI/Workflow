@@ -10,6 +10,7 @@ ROOTDIR="$PWD"
 cd makedeb-src
 git checkout stable
 
+sudo apt update
 sudo apt install -y asciidoctor binutils build-essential curl fakeroot file \
 	gettext gawk libarchive-tools lsb-release python3 python3-apt zstd
 
