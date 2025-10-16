@@ -16,6 +16,7 @@
 # shellcheck disable=SC1091
 
 BUILDDIR="${BUILDDIR:-build}"
+BUILDDIR="${BUILDDIR:-$PWD}"
 
 # annoying
 if [ "$DEVEL" = "true" ]; then
@@ -25,13 +26,13 @@ else
 fi
 
 # platform handling
-. .ci/common/platform.sh
+. "$ROOTDIR"/.ci/common/platform.sh
 
 # sdl/arch handling (targets)
-. .ci/common/targets.sh
+. "$ROOTDIR"/.ci/common/targets.sh
 
 # compiler handling
-. .ci/common/compiler.sh
+. "$ROOTDIR"/.ci/common/compiler.sh
 
 # Flags all targets use
 COMMON_FLAGS=(
