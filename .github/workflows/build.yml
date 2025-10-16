@@ -207,6 +207,67 @@ jobs:
           ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
           ANDROID_KEYSTORE_PASS: ${{ secrets.ANDROID_KEYSTORE_PASS }}
 
+  ubuntu:
+    name: "Ubuntu 24.04 (${{ matrix.os.arch }})"
+    needs: [clone]
+    runs-on: ${{ matrix.os.runs-on }}
+    container: ghcr.io/pkgforge-dev/archlinux:latest
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - arch: aarch64
+            runs-on: ubuntu-24.04-arm
+          - arch: amd64
+            runs-on: ubuntu-24.04
+
+    env:
+      ARCH: "${{ matrix.os.arch }}"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install sccache
+        uses: Vee99BR/sccache-action@v0.0.1
+
+      - name: Install dependencies
+        run: |
+          chmod a+x ./.ci/deb/deps.sh
+          ./.ci/deb/deps.sh
+
+      - name: Download Forgejo environment
+        uses: actions/download-artifact@v4
+        with:
+          name: forgejo-env
+
+      - name: Load payload environment
+        shell: bash
+        run: |
+          ./.ci/forgejo.sh --load-payload-env
+
+      - name: Clone
+        uses: actions/download-artifact@v4
+        with:
+          name: eden
+
+      - name: Set up CPM cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ${{ github.workspace }}/.cache
+          key: ${{ runner.os }}-${{ matrix.os.arch }}-${{ matrix.compiler }}-cpm-${{ env.CPM_CACHE_VERSION }}
+
+      - name: Build
+        shell: bash
+        run: .ci/deb/build.sh
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4.6.2
+        with:
+          name: ubuntu-${{ matrix.os.arch }}
+          path: ./*.tar*
+
   linux:
     name: "Linux (${{ matrix.os.arch }}) (${{ matrix.compiler }})"
     needs: [set-matrix, clone]
@@ -223,6 +284,7 @@ jobs:
       COMPILER: "${{ matrix.compiler }}"
 
     steps:
+      # TODO(crueter): can we make this less repetitive?
       - name: Checkout
         uses: actions/checkout@v4
 
