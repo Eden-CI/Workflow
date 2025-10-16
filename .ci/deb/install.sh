@@ -2,9 +2,7 @@
 # The installation script for makedeb. This is the script that's shown and gets ran from https://makedeb.org.
 
 # Handy env vars.
-MAKEDEB_RELEASE="${MAKEDEB_RELEASE:-}"
 makedeb_url='makedeb.org'
-noninteractive_mode=0
 apt_args=()
 
 die_cmd() {
@@ -27,12 +25,8 @@ fi
 
 echo "makedeb installer"
 
-if ! echo "${-}" | grep -q i; then
-    echo "Running in noninteractive mode."
-    noninteractive_mode=1
-    export DEBIAN_FRONTEND=noninteractive
-    apt_args+=('-y')
-fi
+export DEBIAN_FRONTEND=noninteractive
+apt_args+=('-y')
 
 echo "Ensuring needed packages are installed..."
 if ! sudo apt-get update "${apt_args[@]}"; then
@@ -49,38 +43,6 @@ fi
 
 echo
 
-if (( "${noninteractive_mode}" )) && [[ "${MAKEDEB_RELEASE:+x}" == '' ]]; then
-    echo "The script was ran in noninteractive mode, but no makedeb package was specified to install."
-    echo "Please specify a package to install via the 'MAKEDEB_RELEASE' environment variable."
-    die_cmd "Available packages are 'makedeb', 'makedeb-beta', and 'makedeb-alpha'."
-elif [[ "${MAKEDEB_RELEASE:+x}" == '' ]]; then
-    echo "Multiple releases of makedeb are available for installation."
-    echo "Currently, you can install one of 'makedeb', 'makedeb-beta', or"
-    echo "'makedeb-alpha'."
-
-    while true; do
-        read -p "$(question "Which release would you like? ")" MAKEDEB_RELEASE
-
-        if ! echo "${MAKEDEB_RELEASE}" | grep -qE '^makedeb$|^makedeb-beta$|^makedeb-alpha$'; then
-            echo "Invalid response: ${MAKEDEB_RELEASE}"
-            continue
-        fi
-
-        break
-    done
-
-    echo
-fi
-
-case "${MAKEDEB_RELEASE}" in
-    makedeb|makedeb-alpha|makedeb-beta)
-        ;;
-    *)
-        echo
-        echo "Invalid \$MAKEDEB_RELEASE: '${MAKEDEB_RELEASE}'"
-        exit 1 ;;
-esac
-
 echo "Setting up makedeb APT repository..."
 if ! wget -qO - "https://proget.${makedeb_url}/debian-feeds/makedeb.pub" | gpg --dearmor | sudo tee /usr/share/keyrings/makedeb-archive-keyring.gpg 1> /dev/null; then
     die_cmd "Failed to set up makedeb APT repository."
@@ -93,8 +55,8 @@ if ! sudo apt-get update "${apt_args[@]}"; then
 fi
 
 echo
-echo "Installing '${MAKEDEB_RELEASE}'..."
-if ! sudo apt-get install "${apt_args[@]}" -- "${MAKEDEB_RELEASE}"; then
+echo "Installing..."
+if ! sudo apt-get install "${apt_args[@]}" -- makedeb; then
     die_cmd "Failed to install package."
 fi
 
