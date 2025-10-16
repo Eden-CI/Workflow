@@ -16,7 +16,7 @@
 # shellcheck disable=SC1091
 
 BUILDDIR="${BUILDDIR:-build}"
-BUILDDIR="${BUILDDIR:-$PWD}"
+ROOTDIR="${ROOTDIR:-$PWD}"
 
 # annoying
 if [ "$DEVEL" = "true" ]; then
