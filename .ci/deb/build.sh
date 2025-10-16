@@ -19,5 +19,5 @@ sed "s/%PKGVER%/$ARCH/"   $DEST.3 > $DEST
 
 rm $DEST.*
 
-makepkg --printsrcinfo > .SRCINFO
-makepkg -s
+makedeb --printsrcinfo > .SRCINFO
+makedeb -s
