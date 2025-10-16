@@ -3,7 +3,7 @@
 SRC=.ci/deb/PKGBUILD.in
 DEST=PKGBUILD
 
-TAG=$(cat GIT-TAG | sed 's/.git//')
+TAG=$(cat GIT-TAG | sed 's/.git//' | sed 's/d//')
 if [ -f GIT-RELEASE ]; then
 	REF=$(cat GIT-TAG | cut -d'v' -f2)
 	PKGVER="$REF"
@@ -19,5 +19,5 @@ sed "s/%PKGVER%/$ARCH/"   $DEST.3 > $DEST
 
 rm $DEST.*
 
-makedeb --printsrcinfo > .SRCINFO
+makedeb --print-srcinfo > .SRCINFO
 makedeb -s
