@@ -2,6 +2,8 @@
 
 MANDB=/var/lib/man-db/auto-update
 
+ROOTDIR="$PWD"
+
 [ -f $MANDB ] && sudo rm $MANDB
 
 [ ! -d makedeb ] && git clone 'https://github.com/makedeb/makedeb' makedeb-src
@@ -11,11 +13,8 @@ git checkout stable
 sudo apt install -y asciidoctor binutils build-essential curl fakeroot file \
 	gettext gawk libarchive-tools lsb-release python3 python3-apt zstd
 
-make prepare VERSION=16.0.0 RELEASE=stable TARGET=apt CURRENT_VERSION=16.0.0 FILESYSTEM_PREFIX="$PWD/makedeb"
+make prepare VERSION=16.0.0 RELEASE=stable TARGET=apt CURRENT_VERSION=16.0.0 FILESYSTEM_PREFIX="$ROOTDIR/makedeb"
 make
-make package DESTDIR="$PWD/makedeb" TARGET=apt
-mv makedeb ..
+make package DESTDIR="$ROOTDIR/makedeb" TARGET=apt
 
-cd ..
-
-[ -n "$GITHUB_PATH" ] && echo "$PWD/makedeb/usr/bin" >> "$GITHUB_PATH"
+[ -n "$GITHUB_PATH" ] && echo "$ROOTDIR/makedeb/usr/bin" >> "$GITHUB_PATH"
