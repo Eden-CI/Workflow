@@ -16,17 +16,20 @@ depends=('libasound2t64' 'libboost-context-dev' 'libglu1-mesa-dev' 'libhidapi-de
 	'libfmt-dev' 'liblz4-dev' 'nlohmann-json3-dev' 'libzstd-dev' 'libssl-dev' 'libavfilter-dev'
 	'libavcodec-dev' 'libswscale-dev' 'zlib1g-dev' 'libva-dev' 'libvdpau-dev'
 	'libzydis-dev' 'zydis-tools' 'libzycore-dev'
-	'libvulkan-dev' 'spirv-tools' 'spirv-headers' 'libusb-1.0-0-dev' 'libxbyak-dev'
-	'libqt6core5compat6')
+	'libvulkan-dev' 'spirv-tools' 'spirv-headers' 'libusb-1.0-0-dev'
+	'libqt6core5compat6' 'libquazip1-qt6-dev')
+
 makedepends=('autoconf' 'glslang-tools' 'cmake' 'git' 'gcc' 'g++' 'ninja-build' 'qt6-tools-dev' 'libtool' 'nasm'
 	'vulkan-utility-libraries-dev' 'pkg-config' )
+makedepends_amd64=('libxbyak-dev')
+
 source=("file://$GITHUB_WORKSPACE")
 sha256sums=('SKIP')
 
 build() {
 	export TARGET=package-%ARCH%
 	export COMPILER=gcc
-	.ci/common/configure.sh -DCCACHE_PATH="${SCCACHE_PATH}"
+	"$ROOTDIR"/.ci/common/configure.sh -DCCACHE_PATH="${SCCACHE_PATH}"
 	cmake --build build
 }
 

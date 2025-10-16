@@ -19,5 +19,7 @@ sed "s/%PKGVER%/$ARCH/"   $DEST.3 > $DEST
 
 rm $DEST.*
 
+ROOTDIR="$PWD"
+
 makedeb --print-srcinfo > .SRCINFO
 makedeb -s
