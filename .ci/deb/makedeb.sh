@@ -18,4 +18,4 @@ mv makedeb ..
 
 cd ..
 
-[ -n "$GITHUB_PATH" ] && echo "$PWD/makedeb" >> "$GITHUB_PATH"
+[ -n "$GITHUB_PATH" ] && echo "$PWD/makedeb/usr/bin" >> "$GITHUB_PATH"
