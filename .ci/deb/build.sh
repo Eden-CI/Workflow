@@ -3,7 +3,7 @@
 SRC=.ci/deb/PKGBUILD.in
 DEST=PKGBUILD
 
-TAG=$(cat GIT-TAG | sed 's/.git//' | sed 's/d//')
+TAG=$(cat GIT-TAG | sed 's/.git//' | sed 's/v//')
 if [ -f GIT-RELEASE ]; then
 	REF=$(cat GIT-TAG | cut -d'v' -f2)
 	PKGVER="$REF"
