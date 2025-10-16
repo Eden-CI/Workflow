@@ -255,7 +255,7 @@ jobs:
         with:
           path: |
             ${{ github.workspace }}/.cache
-          key: ${{ runner.os }}-${{ matrix.os.arch }}-${{ matrix.compiler }}-cpm-${{ env.CPM_CACHE_VERSION }}
+          key: ${{ matrix.os.runs-on }}-cpm-${{ env.CPM_CACHE_VERSION }}
 
       - name: Build
         shell: bash

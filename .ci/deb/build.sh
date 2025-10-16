@@ -3,10 +3,6 @@
 SRC=.ci/deb/PKGBUILD.in
 DEST=PKGBUILD
 
-eden/GIT-RELEASE
-eden/GIT-TAG
-eden/GIT-COMMIT
-
 TAG=$(cat GIT-TAG | sed 's/.git//')
 if [ -f GIT-RELEASE ]; then
 	REF=$(cat GIT-TAG | cut -d'v' -f2)
