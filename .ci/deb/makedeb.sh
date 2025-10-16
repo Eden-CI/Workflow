@@ -11,7 +11,7 @@ git checkout stable
 sudo apt install -y asciidoctor binutils build-essential curl fakeroot file \
 	gettext gawk libarchive-tools lsb-release python3 python3-apt zstd
 
-make prepare VERSION=16.0.0 RELEASE=stable TARGET=apt CURRENT_VERSION=16.0.0
+make prepare VERSION=16.0.0 RELEASE=stable TARGET=apt CURRENT_VERSION=16.0.0 FILESYSTEM_PREFIX="$PWD/makedeb"
 make
 make package DESTDIR="$PWD/makedeb" TARGET=apt
 mv makedeb ..
