@@ -2,10 +2,6 @@
 
 export ROOTDIR="$PWD"
 
-if ! command -v sudo >/dev/null 2>&1 ; then
-	alias sudo="su - root -c"
-fi
-
 GITHUB_WORKSPACE="${GITHUB_WORKSPACE:-.}"
 
 # install makedeb
@@ -42,6 +38,10 @@ sed "s/%PKGVER%/$PKGVER/" $DEST.2 > $DEST.3
 sed "s/%ARCH%/$ARCH/"     $DEST.3 > $DEST
 
 rm $DEST.*
+
+if ! command -v sudo >/dev/null 2>&1 ; then
+	alias sudo="su - root -c"
+fi
 
 makedeb --print-srcinfo > .SRCINFO
 makedeb -s

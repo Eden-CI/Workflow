@@ -13,7 +13,7 @@ fi
 if command -v apt >/dev/null 2>&1 ; then
 	$SUDO apt update
 	$SUDO apt install -y asciidoctor binutils build-essential curl fakeroot file \
-		gettext gawk libarchive-tools lsb-release python3 python3-apt zstd
+		gettext gawk libarchive-tools lsb-release python3 python3-apt zstd sudo
 fi
 
 # if in a container (does not have sudo), make a build user and run as that
