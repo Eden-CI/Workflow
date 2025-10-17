@@ -179,7 +179,7 @@ jobs:
   status:
     name: "Send Commit Status to Forgejo"
     needs: [source, deb, linux, windows, android, macos, unix]
-    if: ${{ always() }}
+    if: ${{ always() && ((inputs.build-id || '') == 'master' || (inputs.build-id || '') == 'pull_request') }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -189,12 +189,21 @@ jobs:
         with:
           name: forgejo-env
 
-      - name: Send Final Status to Forgejo
-        if: ${{ inputs.build-id == 'master' || inputs.build-id == 'pull_request' }}
-        shell: bash
-        env:
-          STATUS: ${{ cancelled() && 'cancelled' || failure() && 'failure' || 'success' }}
+      - name: Load payload environment
         run: |
           ./.ci/forgejo.sh --load-payload-env
 
-          python ./.ci/common/status.py "$STATUS"
+      - name: Send cancelled status
+        if: ${{ cancelled() }}
+        shell: bash
+        run: python3 ./.ci/common/status.py cancelled
+
+      - name: Send failure status
+        if: ${{ failure() }}
+        shell: bash
+        run: python3 ./.ci/common/status.py failure
+
+      - name: Send success status
+        if: ${{ success() }}
+        shell: bash
+        run: python3 ./.ci/common/status.py success
