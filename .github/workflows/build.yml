@@ -172,9 +172,9 @@ jobs:
 
           # TODO: disable pgo on non-release builds, please
           if [ "${{ inputs.build-id }}" = "tag" ]; then
-            COMPILER='["${CLANG},${GCC},${PGO}"]'
+            COMPILER="[${CLANG},${GCC},${PGO}]"
           else
-            COMPILER='["${CLANG},${GCC},${PGO}"]'
+            COMPILER="[${CLANG},${GCC},${PGO}]"
           fi
 
           echo $COMPILER
@@ -194,9 +194,9 @@ jobs:
 
           # TODO: disable pgo on non-release builds, please
           if [ "${{ inputs.build-id }}" = "tag" ]; then
-            COMPILER='["${CLANG},${MSVC},${PGO}"]'
+            COMPILER="[${CLANG},${MSVC},${PGO}]"
           else
-            COMPILER='["${CLANG},${MSVC},${PGO}"]'
+            COMPILER="[${CLANG},${MSVC},${PGO}]"
           fi
 
           echo $COMPILER
