@@ -3,12 +3,12 @@
 SRC=.ci/deb/PKGBUILD.in
 DEST=PKGBUILD
 
-TAG=$(cat GIT-TAG | sed 's/.git//' | sed 's/v//')
-if [ -f GIT-RELEASE ]; then
-	REF=$(cat GIT-TAG | cut -d'v' -f2)
+TAG=$(cat "$GITHUB_WORKSPACE"/GIT-TAG | sed 's/.git//' | sed 's/v//')
+if [ -f "$GITHUB_WORKSPACE"/GIT-RELEASE ]; then
+	REF=$(cat "$GITHUB_WORKSPACE"/GIT-TAG | cut -d'v' -f2)
 	PKGVER="$REF"
 else
-	REF=$(cat GIT-COMMIT)
+	REF=$(cat "$GITHUB_WORKSPACE"/GIT-COMMIT)
 	PKGVER="$TAG.$REF"
 fi
 
@@ -23,3 +23,6 @@ export ROOTDIR="$PWD"
 
 makedeb --print-srcinfo > .SRCINFO
 makedeb -s
+
+# for some grand reason, makepkg does not exit on errors
+ls eden*.deb || exit 1

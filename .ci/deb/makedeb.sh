@@ -6,13 +6,13 @@ ROOTDIR="$PWD"
 
 [ -f $MANDB ] && sudo rm $MANDB
 
-[ ! -d makedeb ] && git clone 'https://github.com/makedeb/makedeb' makedeb-src
+[ ! -d makedeb-src ] && git clone 'https://github.com/makedeb/makedeb' makedeb-src
 cd makedeb-src
 git checkout stable
 
-sudo apt update
-sudo apt install -y asciidoctor binutils build-essential curl fakeroot file \
-	gettext gawk libarchive-tools lsb-release python3 python3-apt zstd
+# sudo apt update
+# sudo apt install -y asciidoctor binutils build-essential curl fakeroot file \
+# 	gettext gawk libarchive-tools lsb-release python3 python3-apt zstd
 
 make prepare VERSION=16.0.0 RELEASE=stable TARGET=apt CURRENT_VERSION=16.0.0 FILESYSTEM_PREFIX="$ROOTDIR/makedeb"
 make

@@ -1,8 +1,15 @@
 changelog.md
 /eden
-git-archive-all*
-source.*
+
+# envs
 payload.json
 forgejo.env
+
+# makedeb stuff
 /install
 /makedeb*
+/PKGBUILD
+/.SRCINFO
+*.deb
+/src
+/pkg

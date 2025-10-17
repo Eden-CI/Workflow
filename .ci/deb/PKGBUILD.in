@@ -24,9 +24,11 @@ makedepends=('autoconf' 'glslang-tools' 'cmake' 'git' 'gcc' 'g++' 'ninja-build' 
 makedepends_amd64=('libxbyak-dev')
 
 source=("file://$GITHUB_WORKSPACE")
+noextract=("file://$GITHUB_WORKSPACE")
 sha256sums=('SKIP')
 
 build() {
+	cd "$GITHUB_WORKSPACE"
 	export TARGET=package-%ARCH%
 	export COMPILER=gcc
 	"$ROOTDIR"/.ci/common/configure.sh -DCCACHE_PATH="${SCCACHE_PATH}"
@@ -34,5 +36,6 @@ build() {
 }
 
 package() {
+	cd "$GITHUB_WORKSPACE"
 	DESTDIR="$pkgdir" cmake --install build
 }
