@@ -3,7 +3,7 @@
 SRC=.ci/deb/PKGBUILD.in
 DEST=PKGBUILD
 
-TAG=$(cat "$GITHUB_WORKSPACE"/GIT-TAG | sed 's/.git//' | sed 's/v//' | sed 's/-/_')
+TAG=$(cat "$GITHUB_WORKSPACE"/GIT-TAG | sed 's/.git//' | sed 's/v//' | sed 's/-/_/')
 if [ -f "$GITHUB_WORKSPACE"/GIT-RELEASE ]; then
 	REF=$(cat "$GITHUB_WORKSPACE"/GIT-TAG | cut -d'v' -f2)
 	PKGVER="$REF"
