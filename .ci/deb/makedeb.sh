@@ -20,6 +20,11 @@ fi
 if ! command -v sudo > /dev/null 2>&1 ; then
 	useradd -m -s /bin/bash -d /build build
 	echo "build ALL=NOPASSWD: ALL" >> /etc/sudoers
+
+	# copy workspace stuff over
+	cp -r ./* .* /build
+	chown -R build:build /build/* /build/.*
+
 	su - build -c sh -c "$PWD/.ci/deb/build.sh"
 	cp /build/*.deb .
 # otherwise just run normally
