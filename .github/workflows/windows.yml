@@ -5,6 +5,7 @@ on:
     inputs:
       build-id:
         description: "build id"
+        type: string
         required: true
 
 jobs:
