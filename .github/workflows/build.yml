@@ -375,7 +375,7 @@ jobs:
           path: ./*.AppImage*
 
   windows:
-    name: "Windows ${{ matrix.os.arch }} (${{ matrix.compiler.program }})"
+    name: "Windows ${{ matrix.os.arch }} (${{ matrix.compiler.program }} ${{ matrix.compiler.target }})"
     needs: [win-matrix, clone]
     runs-on: ${{ matrix.os.runs-on }}
     strategy:

@@ -81,8 +81,8 @@ if [ "$PLATFORM" = "linux" ] || [ "$COMPILER" = "clang" ]; then
 
 		PROFDATA="$PWD/eden.profdata"
 		[ -f "$PROFDATA" ] && rm -f "$PROFDATA"
-		wget https://github.com/Eden-CI/PGO/releases/latest/download/eden.profdata
-		ARCH_FLAGS="${ARCH_FLAGS} -fprofile-use=$PROFDATA -fprofile-correction -Wno-backend-plugin -Wno-profile-instr-unprofiled -Wno-profile-instr-out-of-date"
+		curl https://github.com/Eden-CI/PGO/releases/latest/download/eden.profdata -o eden.profdata
+		ARCH_FLAGS="${ARCH_FLAGS} -fprofile-use=$PROFDATA -Wno-backend-plugin -Wno-profile-instr-unprofiled -Wno-profile-instr-out-of-date"
 	fi
 fi
 
