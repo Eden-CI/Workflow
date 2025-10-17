@@ -22,6 +22,8 @@ env:
 
 jobs:
   clone:
+    outputs:
+      cachever: ${{ steps.out.outputs.cachever }}
     name: "Parse and Clone"
     runs-on: ubuntu-latest
 
@@ -47,6 +49,13 @@ jobs:
         shell: bash
         run: |
           ./.ci/forgejo.sh --summary ${{ inputs.build-id }}
+
+      # for some amazing reason you can't pass env vars to reusable workflows
+      - name: Setup Outputs
+        id: out
+        shell: bash
+        run: |
+          echo "cachever=${CPM_CACHE_VERSION}" >> "$GITHUB_OUTPUT"
 
       - name: Clone
         shell: bash
@@ -107,7 +116,7 @@ jobs:
     uses: ./.github/workflows/deb.yml
     with:
       build-id: '${{ inputs.build-id }}'
-      cpm-cache-version: '${{ env.CPM_CACHE_VERSION }}'
+      cpm-cache-version: '${{ needs.clone.outputs.cachever }}'
       devel: ${{ inputs.devel }}
     secrets: inherit
 
@@ -117,7 +126,7 @@ jobs:
     uses: ./.github/workflows/appimage.yml
     with:
       build-id: '${{ inputs.build-id }}'
-      cpm-cache-version: '${{ env.CPM_CACHE_VERSION }}'
+      cpm-cache-version: '${{ needs.clone.outputs.cachever }}'
       devel: ${{ inputs.devel }}
     secrets: inherit
 
@@ -127,7 +136,7 @@ jobs:
     uses: ./.github/workflows/windows.yml
     with:
       build-id: '${{ inputs.build-id }}'
-      cpm-cache-version: '${{ env.CPM_CACHE_VERSION }}'
+      cpm-cache-version: '${{ needs.clone.outputs.cachever }}'
       devel: ${{ inputs.devel }}
     secrets: inherit
 
@@ -137,7 +146,7 @@ jobs:
     uses: ./.github/workflows/android.yml
     with:
       build-id: '${{ inputs.build-id }}'
-      cpm-cache-version: '${{ env.CPM_CACHE_VERSION }}'
+      cpm-cache-version: '${{ needs.clone.outputs.cachever }}'
       devel: ${{ inputs.devel }}
     secrets: inherit
 
@@ -147,7 +156,7 @@ jobs:
     uses: ./.github/workflows/macos.yml
     with:
       build-id: '${{ inputs.build-id }}'
-      cpm-cache-version: '${{ env.CPM_CACHE_VERSION }}'
+      cpm-cache-version: '${{ needs.clone.outputs.cachever }}'
       devel: ${{ inputs.devel }}
     secrets: inherit
 
@@ -157,6 +166,6 @@ jobs:
     uses: ./.github/workflows/unix.yml
     with:
       build-id: '${{ inputs.build-id }}'
-      cpm-cache-version: '${{ env.CPM_CACHE_VERSION }}'
+      cpm-cache-version: '${{ needs.clone.outputs.cachever }}'
       devel: ${{ inputs.devel }}
     secrets: inherit
