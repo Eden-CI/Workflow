@@ -3,22 +3,10 @@ name: Master Build Workflow
 on:
   workflow_call:
     inputs:
-      build-type:
-        description: 'What build type to use (e.g. RelWithDebInfo, Release)'
-        type: string
-        default: 'Release'
       devel:
         description: 'Development mode (disables update checker, adds nightly qualifier)'
         type: boolean
         default: true
-      webengine:
-        description: 'Use QtWebEngine. Increases build size by 60-90MB.'
-        type: boolean
-        default: false
-      multimedia:
-        description: 'Use QtMultimedia. Increases build size by 20MB.'
-        type: boolean
-        default: false
       build-id:
         description: 'Identifier for workflows and caching'
         type: string
@@ -31,9 +19,6 @@ env:
   CPM_CACHE_VERSION: "v7"
   FORGEJO_TOKEN: ${{ secrets.FORGEJO_TOKEN }}
   DEVEL: ${{ inputs.devel }}
-  BUILD_TYPE: ${{ inputs.build-type }}
-  USE_WEBENGINE: ${{ inputs.webengine }}
-  USE_MULTIMEDIA: ${{ inputs.multimedia }}
 
 jobs:
   clone:
@@ -122,6 +107,8 @@ jobs:
     uses: ./.github/workflows/deb.yml
     with:
       build-id: '${{ inputs.build-id }}'
+      cpm-cache-version: '${{ env.CPM_CACHE_VERSION }}'
+      devel: ${{ inputs.devel }}
     secrets: inherit
 
   linux:
@@ -130,6 +117,8 @@ jobs:
     uses: ./.github/workflows/appimage.yml
     with:
       build-id: '${{ inputs.build-id }}'
+      cpm-cache-version: '${{ env.CPM_CACHE_VERSION }}'
+      devel: ${{ inputs.devel }}
     secrets: inherit
 
   windows:
@@ -138,6 +127,8 @@ jobs:
     uses: ./.github/workflows/windows.yml
     with:
       build-id: '${{ inputs.build-id }}'
+      cpm-cache-version: '${{ env.CPM_CACHE_VERSION }}'
+      devel: ${{ inputs.devel }}
     secrets: inherit
 
   android:
@@ -146,6 +137,8 @@ jobs:
     uses: ./.github/workflows/android.yml
     with:
       build-id: '${{ inputs.build-id }}'
+      cpm-cache-version: '${{ env.CPM_CACHE_VERSION }}'
+      devel: ${{ inputs.devel }}
     secrets: inherit
 
   macos:
@@ -154,6 +147,8 @@ jobs:
     uses: ./.github/workflows/macos.yml
     with:
       build-id: '${{ inputs.build-id }}'
+      cpm-cache-version: '${{ env.CPM_CACHE_VERSION }}'
+      devel: ${{ inputs.devel }}
     secrets: inherit
 
   unix:
@@ -162,4 +157,6 @@ jobs:
     uses: ./.github/workflows/unix.yml
     with:
       build-id: '${{ inputs.build-id }}'
+      cpm-cache-version: '${{ env.CPM_CACHE_VERSION }}'
+      devel: ${{ inputs.devel }}
     secrets: inherit

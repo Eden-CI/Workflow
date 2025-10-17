@@ -7,6 +7,21 @@ inputs:
   name:
     description: 'what to name this workflow'
     required: true
+  cpm-cache-version:
+    description: "CPM cache version (e.g. v7)"
+    type: string
+    required: true
+  devel:
+    description: 'development build'
+    type: string
+    required: true
+
+env:
+  DISABLE_ARM: ${{ vars.DISABLE_ARM }}
+  SCCACHE_GHA_ENABLED: "true"
+  CCACHE: "true"
+  FORGEJO_TOKEN: ${{ secrets.FORGEJO_TOKEN }}
+  DEVEL: ${{ inputs.devel }}
 
 runs:
   using: composite
@@ -18,6 +33,7 @@ runs:
       uses: ./.github/workflows/setup
       with:
         key: ${{ inputs.name }}-${{ inputs.arch }}
+        version: ${{ inputs.cpm-cache-version }}
 
     - name: Build
       shell: bash

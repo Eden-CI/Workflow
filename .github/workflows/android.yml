@@ -7,6 +7,23 @@ on:
         description: "build id"
         type: string
         required: true
+      cpm-cache-version:
+        description: "CPM cache version (e.g. v7)"
+        type: string
+        required: true
+      devel:
+        description: 'development build'
+        type: string
+        required: true
+
+env:
+  ANDROID_KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
+  ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+  ANDROID_KEYSTORE_PASS: ${{ secrets.ANDROID_KEYSTORE_PASS }}
+  SCCACHE_GHA_ENABLED: "true"
+  CCACHE: "true"
+  FORGEJO_TOKEN: ${{ secrets.FORGEJO_TOKEN }}
+  DEVEL: ${{ inputs.devel }}
 
 jobs:
   check-android-secrets:
@@ -34,10 +51,6 @@ jobs:
             echo "All Android secrets are present."
             echo "CI_SECRETS_STATUS=true" >> $GITHUB_OUTPUT
           fi
-        env:
-          ANDROID_KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
-          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
-          ANDROID_KEYSTORE_PASS: ${{ secrets.ANDROID_KEYSTORE_PASS }}
 
   android:
     name: "Android"
@@ -83,10 +96,6 @@ jobs:
       - name: Build
         run: |
           JAVA_HOME=$JAVA_HOME_17_X64 DEVEL=true ./.ci/android/build.sh -DCCACHE_PATH=${SCCACHE_PATH}
-        env:
-          ANDROID_KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
-          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
-          ANDROID_KEYSTORE_PASS: ${{ secrets.ANDROID_KEYSTORE_PASS }}
 
       - name: Package
         run: ./.ci/android/package.sh

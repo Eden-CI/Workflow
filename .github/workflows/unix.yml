@@ -8,6 +8,21 @@ on:
         description: "build id"
         type: string
         required: true
+      cpm-cache-version:
+        description: "CPM cache version (e.g. v7)"
+        type: string
+        required: true
+      devel:
+        description: 'development build'
+        type: string
+        required: true
+
+env:
+  DISABLE_ARM: ${{ vars.DISABLE_ARM }}
+  SCCACHE_GHA_ENABLED: "true"
+  CCACHE: "true"
+  FORGEJO_TOKEN: ${{ secrets.FORGEJO_TOKEN }}
+  DEVEL: ${{ inputs.devel }}
 
 jobs:
   unix:
@@ -37,6 +52,7 @@ jobs:
         uses: ./.github/workflows/setup
         with:
           key: ${{ matrix.os.name }}-${{ matrix.os.arch }}-${{ matrix.compiler }}
+          version: ${{ inputs.cpm-cache-version }}
 
       - name: Configure sccache
         uses: actions/github-script@v8
@@ -52,7 +68,7 @@ jobs:
         with:
           arch: ${{ matrix.os.vm-arch }}
           usesh: true
-          envs: 'ARCH BUILD_TYPE DEVEL USE_WEBENGINE USE_MULTIMEDIA CCACHE SCCACHE_DIR SCCACHE_GHA_ENABLED ACTIONS_RESULTS_URL ACTIONS_RUNTIME_TOKEN ACTIONS_CACHE_SERVICE_V2'
+          envs: 'ARCH DEVEL CCACHE SCCACHE_DIR SCCACHE_GHA_ENABLED ACTIONS_RESULTS_URL ACTIONS_RUNTIME_TOKEN ACTIONS_CACHE_SERVICE_V2'
           prepare: |
             pkg install -y \
               devel/sccache \

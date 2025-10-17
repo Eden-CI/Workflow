@@ -7,6 +7,21 @@ on:
         description: "build id"
         type: string
         required: true
+      cpm-cache-version:
+        description: "CPM cache version (e.g. v7)"
+        type: string
+        required: true
+      devel:
+        description: 'development build'
+        type: string
+        required: true
+
+env:
+  DISABLE_ARM: ${{ vars.DISABLE_ARM }}
+  SCCACHE_GHA_ENABLED: "true"
+  CCACHE: "true"
+  FORGEJO_TOKEN: ${{ secrets.FORGEJO_TOKEN }}
+  DEVEL: ${{ inputs.devel }}
 
 jobs:
   win-matrix:
@@ -59,6 +74,7 @@ jobs:
         uses: ./.github/workflows/setup
         with:
           key: ${{ runner.os }}-${{ matrix.os.arch }}-${{ matrix.compiler.program }}
+          version: ${{ inputs.cpm-cache-version }}
 
       - name: Install Qt
         uses: jurplel/install-qt-action@v4.3.0
