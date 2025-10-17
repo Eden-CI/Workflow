@@ -14,12 +14,6 @@ runs:
     - name: Install sccache
       uses: Vee99BR/sccache-action@v0.0.1
 
-    - name: Install makedeb
-      shell: bash
-      run: |
-        chmod a+x ./.ci/deb/makedeb.sh
-        ./.ci/deb/makedeb.sh
-
     - name: Download Forgejo environment
       uses: actions/download-artifact@v4
       with:
@@ -44,9 +38,11 @@ runs:
 
     - name: Build
       shell: bash
+      run: |
+        chmod a+x ./.ci/deb/makedeb.sh
+        ./.ci/deb/makedeb.sh
       env:
         ARCH: ${{ inputs.arch }}
-      run: .ci/deb/build.sh
 
     - name: Upload artifacts
       uses: actions/upload-artifact@v4.6.2
