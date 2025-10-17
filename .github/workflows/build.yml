@@ -238,7 +238,7 @@ jobs:
   linux:
     name: "AppImage"
     # needs: [clone]
-    uses: ./.github/workflows/platforms/appimage.yml
+    uses: ./.github/workflows/appimage.yml
     with:
       build-id: '${{ inputs.build-id }}'
     secrets: inherit
@@ -246,7 +246,7 @@ jobs:
   windows:
     name: "Windows"
     # needs: [clone]
-    uses: ./.github/workflows/platforms/appimage.yml
+    uses: ./.github/workflows/appimage.yml
     with:
       build-id: '${{ inputs.build-id }}'
     secrets: inherit
