@@ -61,7 +61,6 @@ jobs:
       - name: summary
         shell: bash
         run: |
-          CI=false ./.ci/forgejo.sh --load-payload-env
           ./.ci/forgejo.sh --summary ${{ inputs.build-id }}
 
       - name: Clone

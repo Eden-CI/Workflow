@@ -19,8 +19,6 @@ load_payload_env() {
 				echo "$line" >> "$GITHUB_ENV"
 			done <"$FORGEJO_LENV"
 		else
-			echo "Sourcing $FORGEJO_LENV"
-			ls $FORGEJO_LENV
 			set -a
 			. "$FORGEJO_LENV"
 			set +a
