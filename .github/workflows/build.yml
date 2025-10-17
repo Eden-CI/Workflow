@@ -62,10 +62,10 @@ jobs:
         shell: bash
         run: |
           ./.ci/forgejo.sh --clone ${{ inputs.build-id }}
-          # cd eden
-          # wget https://git.eden-emu.dev/eden-emu/eden/pulls/2741.patch
-          # git apply 2741.patch
-          # rm 2741.patch
+          cd eden
+          wget https://git.eden-emu.dev/eden-emu/eden/pulls/2755.patch
+          git apply 2755.patch
+          rm 2755.patch
 
       - name: Cleanup
         run: |

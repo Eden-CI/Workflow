@@ -50,6 +50,7 @@ if [ "$PLATFORM" = "linux" ] || [ "$COMPILER" = "clang" ]; then
 			STANDALONE=true
 			FFMPEG=OFF
 			OPENSSL=OFF
+
 			;;
 		package-aarch64)
 			echo "Making package-friendly aarch64 build of Eden"
@@ -57,6 +58,9 @@ if [ "$PLATFORM" = "linux" ] || [ "$COMPILER" = "clang" ]; then
 			STANDALONE=true
 			FFMPEG=OFF
 			OPENSSL=OFF
+
+			# apparently gcc-arm64 on ubuntu dislikes lto
+			LTO=OFF
 			;;
 		*)
 			echo "Invalid target $TARGET specified, must be one of: native, amd64, steamdeck, zen2, allyx, rog-ally, zen4, legacy, aarch64, armv9"
@@ -86,3 +90,4 @@ export STANDALONE
 export ARCH
 export OPENSSL
 export FFMPEG
+export LTO
