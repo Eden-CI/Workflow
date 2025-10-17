@@ -6,6 +6,10 @@ on:
       - '*'
   workflow_dispatch:
 
+concurrency:
+  group: test-build
+  cancel-in-progress: true
+
 env:
   DISABLE_ARM: ${{ vars.DISABLE_ARM }}
 

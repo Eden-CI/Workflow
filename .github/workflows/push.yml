@@ -6,6 +6,10 @@ on:
       - 'master'
   workflow_dispatch:
 
+concurrency:
+  group: push-build
+  cancel-in-progress: true
+
 env:
   DISABLE_ARM: ${{ vars.DISABLE_ARM }}
 
