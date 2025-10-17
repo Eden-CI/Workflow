@@ -166,9 +166,9 @@ jobs:
           echo $MATRIX
           echo "matrix=${MATRIX}" >> $GITHUB_OUTPUT
 
-          PGO='{"target": "clang", "target": "pgo"}'
-          CLANG='{"target": "clang", "target": "standard"}'
-          GCC='{"target": "gcc", "target": "standard"}'
+          PGO='{"program": "clang", "target": "pgo"}'
+          CLANG='{"program": "clang", "target": "standard"}'
+          GCC='{"program": "gcc", "target": "standard"}'
 
           # TODO: disable pgo on non-release builds, please
           if [ "${{ inputs.build-id }}" = "tag" ]; then
@@ -188,9 +188,9 @@ jobs:
     steps:
       - id: set
         run: |
-          PGO='{"target": "clang", "target": "pgo"}'
-          CLANG='{"target": "clang", "target": "standard"}'
-          MSVC='{"target": "msvc", "target": "standard"}'
+          PGO='{"program": "clang", "target": "pgo"}'
+          CLANG='{"program": "clang", "target": "standard"}'
+          MSVC='{"program": "msvc", "target": "standard"}'
 
           # TODO: disable pgo on non-release builds, please
           if [ "${{ inputs.build-id }}" = "tag" ]; then
@@ -469,7 +469,7 @@ jobs:
           path: artifacts/*
 
   android:
-    name: "Android"
+    name: "Android (armv8)"
     needs: [clone, check-android-secrets]
     runs-on: ${{ matrix.os.runs-on }}
     strategy:
@@ -560,7 +560,7 @@ jobs:
           path: artifacts/*.aab
 
   macos:
-    name: "macOS"
+    name: "macOS (${{ matrix.os.arch }})"
     needs: [clone]
     runs-on: ${{ matrix.os.runs-on }}
     strategy:
@@ -625,7 +625,7 @@ jobs:
           path: artifacts/*
 
   unix:
-    name: "Unix"
+    name: "${{ matrix.os.name }} (${{ matrix.os.arch }})"
     needs: [clone]
     runs-on: ubuntu-latest
     strategy:
