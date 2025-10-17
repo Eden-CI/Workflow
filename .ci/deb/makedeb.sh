@@ -6,9 +6,9 @@ ROOTDIR="$PWD"
 
 # containers don't need sudo
 if command -v sudo > /dev/null ; then
-	SUDO=""
-else
 	SUDO=sudo
+else
+	SUDO=""
 fi
 
 [ -f $MANDB ] && $SUDO rm $MANDB
