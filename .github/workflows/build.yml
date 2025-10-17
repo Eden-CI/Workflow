@@ -224,7 +224,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Composite
+      - name: Build & Package
         uses: ./.github/workflows/debian
         with:
           arch: ${{ matrix.os.arch }}
@@ -248,7 +248,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Composite
+      - name: Build & Package
         uses: ./.github/workflows/debian
         with:
           arch: ${{ matrix.os.arch }}
@@ -272,7 +272,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Composite
+      - name: Build & Package
         uses: ./.github/workflows/debian
         with:
           arch: ${{ matrix.os.arch }}

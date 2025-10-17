@@ -1,9 +1,36 @@
 #!/bin/sh -ex
 
+MANDB=/var/lib/man-db/auto-update
+export ROOTDIR="$PWD"
+
+[ -f $MANDB ] && sudo rm $MANDB
+
+# install makedeb
+echo "-- Installing makedeb..."
+[ ! -d makedeb-src ] && git clone 'https://github.com/makedeb/makedeb' makedeb-src
+cd makedeb-src
+git checkout stable
+
+if command -v apt > /dev/null; then
+	sudo apt update
+	sudo apt install -y asciidoctor binutils build-essential curl fakeroot file \
+		gettext gawk libarchive-tools lsb-release python3 python3-apt zstd
+fi
+
+make prepare VERSION=16.0.0 RELEASE=stable TARGET=apt CURRENT_VERSION=16.0.0 FILESYSTEM_PREFIX="$ROOTDIR/makedeb"
+make
+make package DESTDIR="$ROOTDIR/makedeb" TARGET=apt
+
+export PATH="$ROOTDIR/makedeb/usr/bin:$PATH"
+
+# now build
+echo "-- Building..."
+cd "$ROOTDIR"
+
 SRC=.ci/deb/PKGBUILD.in
 DEST=PKGBUILD
 
-TAG=$(cat "$GITHUB_WORKSPACE"/GIT-TAG | sed 's/.git//' | sed 's/v//' | sed 's/-/_/')
+TAG=$(cat "$GITHUB_WORKSPACE"/GIT-TAG | sed 's/.git//' | sed 's/v//' | sed 's/-/_/' | tr -d '\n')
 if [ -f "$GITHUB_WORKSPACE"/GIT-RELEASE ]; then
 	REF=$(cat "$GITHUB_WORKSPACE"/GIT-TAG | cut -d'v' -f2)
 	PKGVER="$REF"
@@ -15,11 +42,9 @@ fi
 sed "s/%TAG%/$TAG/"       $SRC    > $DEST.1
 sed "s/%REF%/$REF/"       $DEST.1 > $DEST.2
 sed "s/%PKGVER%/$PKGVER/" $DEST.2 > $DEST.3
-sed "s/%ARCH%/$ARCH/"   $DEST.3 > $DEST
+sed "s/%ARCH%/$ARCH/"     $DEST.3 > $DEST
 
 rm $DEST.*
-
-export ROOTDIR="$PWD"
 
 makedeb --print-srcinfo > .SRCINFO
 makedeb -s
