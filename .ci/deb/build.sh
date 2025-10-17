@@ -43,6 +43,8 @@ if ! command -v sudo >/dev/null 2>&1 ; then
 	alias sudo="su - root -c"
 fi
 
+export DEBIAN_FRONTEND=noninteractive
+
 makedeb --print-srcinfo > .SRCINFO
 makedeb -s
 
