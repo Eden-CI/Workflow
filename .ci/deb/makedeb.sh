@@ -31,8 +31,8 @@ if ! command -v sudo > /dev/null 2>&1 ; then
 	chown -R build:build ./* .patch .ci .reuse
 	chown -R build:build .cache || true
 	sudo -E -u build "$PWD/.ci/deb/build.sh"
-	mv .cache "$WORKSPACE"
 	rm -rf "$WORKSPACE"/.cache
+	mv .cache "$WORKSPACE"
 	cp ./*.deb "$WORKSPACE"
 # otherwise just run normally
 else
