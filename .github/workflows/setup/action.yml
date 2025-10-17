@@ -8,9 +8,6 @@ inputs:
     description: 'CPM cache version'
     required: true
 
-env:
-  FORGEJO_TOKEN: ${{ secrets.FORGEJO_TOKEN }}
-
 runs:
   using: composite
   steps:
