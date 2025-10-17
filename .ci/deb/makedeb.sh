@@ -21,6 +21,7 @@ if ! command -v sudo > /dev/null 2>&1 ; then
 	useradd -m -s /bin/bash -d /build build
 	echo "build ALL=NOPASSWD: ALL" >> /etc/sudoers
 	su - build -c sh -c "$PWD/.ci/deb/build.sh"
+	cp /build/*.deb .
 # otherwise just run normally
 else
 	.ci/deb/build.sh

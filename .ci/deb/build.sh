@@ -2,6 +2,8 @@
 
 export ROOTDIR="$PWD"
 
+GITHUB_WORKSPACE="${GITHUB_WORKSPACE:-.}"
+
 # install makedeb
 echo "-- Installing makedeb..."
 [ ! -d makedeb-src ] && git clone 'https://github.com/makedeb/makedeb' makedeb-src
