@@ -1,0 +1,104 @@
+name: Android
+
+on:
+  workflow_call:
+    inputs:
+      build-id:
+        description: "build id"
+        type: string
+        required: true
+
+jobs:
+  check-android-secrets:
+    name: Check Android Secrets
+    runs-on: ubuntu-latest
+    outputs:
+      CI_SECRETS_STATUS: ${{ steps.check.outputs.CI_SECRETS_STATUS }}
+      CI_PR_FORK: ${{ steps.check.outputs.CI_PR_FORK }}
+    steps:
+      - id: check
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ] && \
+             [ "${{ github.event.pull_request.head.repo.full_name }}" != "${{ github.repository }}" ]; then
+            echo "CI_PR_FORK=true" >> $GITHUB_OUTPUT
+          else
+            echo "CI_PR_FORK=false" >> $GITHUB_OUTPUT
+          fi
+
+          if [ -z "${ANDROID_KEYSTORE_B64}" ] || \
+             [ -z "${ANDROID_KEY_ALIAS}" ] || \
+             [ -z "${ANDROID_KEYSTORE_PASS}" ]; then
+            echo "Android secrets missing, skipping Android-dependent jobs."
+            echo "CI_SECRETS_STATUS=false" >> $GITHUB_OUTPUT
+          else
+            echo "All Android secrets are present."
+            echo "CI_SECRETS_STATUS=true" >> $GITHUB_OUTPUT
+          fi
+        env:
+          ANDROID_KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEYSTORE_PASS: ${{ secrets.ANDROID_KEYSTORE_PASS }}
+
+  android:
+    name: "Android"
+    needs: [check-android-secrets]
+    runs-on: ubuntu-latest
+
+    if: |
+      needs.check-android-secrets.outputs.CI_SECRETS_STATUS == 'true' ||
+      needs.check-android-secrets.outputs.CI_PR_FORK == 'true'
+    steps:
+      - name: Check Android secrets
+        run: |
+          if [ "${{ needs.check-android-secrets.outputs.CI_PR_FORK }}" = "true" ]; then
+            echo "This is a pull request, skipping sensitive Android steps"
+            echo "CI_PR_FORK=true" >> $GITHUB_ENV
+          fi
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Disable man-db updates
+        run: sudo rm /var/lib/man-db/auto-update
+
+      - name: Setup
+        uses: ./.github/workflows/setup
+        with:
+          key: ${{ runner.os }}-amd64-universal
+
+      - name: Install dependencies
+        run: |
+          ./.ci/android/deps.sh
+
+      - name: Install gradle-cache
+        uses: burrunan/gradle-cache-action@v3
+        with:
+          job-id: android
+          gradle-version: wrapper
+          save-local-build-cache: true
+          save-gradle-dependencies-cache: true
+          remote-build-cache-proxy-enabled: true
+          build-root-directory: src/android
+
+      - name: Build
+        run: |
+          JAVA_HOME=$JAVA_HOME_17_X64 DEVEL=true ./.ci/android/build.sh -DCCACHE_PATH=${SCCACHE_PATH}
+        env:
+          ANDROID_KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEYSTORE_PASS: ${{ secrets.ANDROID_KEYSTORE_PASS }}
+
+      - name: Package
+        run: ./.ci/android/package.sh
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4.6.2
+        with:
+          name: android
+          path: artifacts/*.apk
+
+      - name: Upload AAB
+        uses: actions/upload-artifact@v4.6.2
+        with:
+          name: android-aab
+          path: artifacts/*.aab

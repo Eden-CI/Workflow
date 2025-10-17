@@ -10,7 +10,7 @@ on:
 
 jobs:
   set-matrix:
-    name: "Generate matrix"
+    name: "Generate AppImage Matrix"
     runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.set.outputs.matrix }}
@@ -48,7 +48,7 @@ jobs:
           if [ "${{ inputs.build-id }}" = "tag" ]; then
             COMPILER="[${GCC},${CLANG},${PGO}]"
           else
-            COMPILER="[${GCC},${CLANG}]"
+            COMPILER="[${GCC}]"
           fi
 
           echo $COMPILER

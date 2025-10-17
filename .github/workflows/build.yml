@@ -57,6 +57,7 @@ jobs:
         shell: bash
         run: |
           ./.ci/forgejo.sh --load-payload-env
+          ./.ci/forgejo.sh --summary ${{ inputs.build-id }}
 
       - name: Clone
         shell: bash
@@ -87,29 +88,6 @@ jobs:
             eden/*
             eden/.patch
 
-  summary:
-    name: "Summary"
-    runs-on: ubuntu-latest
-    needs: [clone]
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Download Forgejo environment
-        uses: actions/download-artifact@v4
-        with:
-          name: forgejo-env
-
-      - name: Load payload environment
-        shell: bash
-        run: |
-          ./.ci/forgejo.sh --load-payload-env
-
-      - name: Create job summary
-        run: |
-          ./.ci/forgejo.sh --summary ${{ inputs.build-id }}
-
   source:
     name: "Source Pack"
     runs-on: ubuntu-latest
@@ -134,106 +112,13 @@ jobs:
           name: source
           path: source.*
 
-  check-android-secrets:
-    name: Check Android Secrets
-    runs-on: ubuntu-latest
-    outputs:
-      CI_SECRETS_STATUS: ${{ steps.check.outputs.CI_SECRETS_STATUS }}
-      CI_PR_FORK: ${{ steps.check.outputs.CI_PR_FORK }}
-    steps:
-      - id: check
-        run: |
-          if [ "${{ github.event_name }}" = "pull_request" ] && \
-             [ "${{ github.event.pull_request.head.repo.full_name }}" != "${{ github.repository }}" ]; then
-            echo "CI_PR_FORK=true" >> $GITHUB_OUTPUT
-          else
-            echo "CI_PR_FORK=false" >> $GITHUB_OUTPUT
-          fi
-
-          if [ -z "${ANDROID_KEYSTORE_B64}" ] || \
-             [ -z "${ANDROID_KEY_ALIAS}" ] || \
-             [ -z "${ANDROID_KEYSTORE_PASS}" ]; then
-            echo "Android secrets missing, skipping Android-dependent jobs."
-            echo "CI_SECRETS_STATUS=false" >> $GITHUB_OUTPUT
-          else
-            echo "All Android secrets are present."
-            echo "CI_SECRETS_STATUS=true" >> $GITHUB_OUTPUT
-          fi
-        env:
-          ANDROID_KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
-          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
-          ANDROID_KEYSTORE_PASS: ${{ secrets.ANDROID_KEYSTORE_PASS }}
-
-  ubuntu:
-    name: "Ubuntu 24.04 (${{ matrix.os.arch }})"
+  deb:
+    name: ".deb builds"
     needs: [clone]
-    runs-on: ${{ matrix.os.runs-on }}
-    strategy:
-      fail-fast: false
-      matrix:
-        os:
-          - arch: aarch64
-            runs-on: ubuntu-24.04-arm
-          - arch: amd64
-            runs-on: ubuntu-24.04
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Build & Package
-        uses: ./.github/workflows/debian
-        with:
-          arch: ${{ matrix.os.arch }}
-          name: ubuntu
-
-  debian-13:
-    name: "Debian 13 (${{ matrix.os.arch }})"
-    needs: [clone]
-    runs-on: ${{ matrix.os.runs-on }}
-    container: ghcr.io/nilcons/debian:latest
-    strategy:
-      fail-fast: false
-      matrix:
-        os:
-          - arch: aarch64
-            runs-on: ubuntu-24.04-arm
-          - arch: amd64
-            runs-on: ubuntu-24.04
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Build & Package
-        uses: ./.github/workflows/debian
-        with:
-          arch: ${{ matrix.os.arch }}
-          name: debian-13
-
-  debian-12:
-    name: "Debian 12 (${{ matrix.os.arch }})"
-    needs: [clone]
-    runs-on: ${{ matrix.os.runs-on }}
-    container: ghcr.io/xrplf/ci/debian-bookworm:gcc-12
-    strategy:
-      fail-fast: false
-      matrix:
-        os:
-          - arch: aarch64
-            runs-on: ubuntu-24.04-arm
-          - arch: amd64
-            runs-on: ubuntu-24.04
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Build & Package
-        uses: ./.github/workflows/debian
-        with:
-          arch: ${{ matrix.os.arch }}
-          name: debian-12
+    uses: ./.github/workflows/deb.yml
+    with:
+      build-id: '${{ inputs.build-id }}'
+    secrets: inherit
 
   linux:
     name: "AppImage"
@@ -253,189 +138,24 @@ jobs:
 
   android:
     name: "Android"
-    needs: [clone, check-android-secrets]
-    runs-on: ubuntu-latest
-
-    if: |
-      needs.check-android-secrets.outputs.CI_SECRETS_STATUS == 'true' ||
-      needs.check-android-secrets.outputs.CI_PR_FORK == 'true'
-    steps:
-      - name: Check Android secrets
-        run: |
-          if [ "${{ needs.check-android-secrets.outputs.CI_PR_FORK }}" = "true" ]; then
-            echo "This is a pull request, skipping sensitive Android steps"
-            echo "CI_PR_FORK=true" >> $GITHUB_ENV
-          fi
-
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Disable man-db updates
-        run: sudo rm /var/lib/man-db/auto-update
-
-      - name: Setup
-        uses: ./.github/workflows/setup
-        with:
-          key: ${{ runner.os }}-amd64-universal
-
-      - name: Install dependencies
-        run: |
-          ./.ci/android/deps.sh
-
-      - name: Install gradle-cache
-        uses: burrunan/gradle-cache-action@v3
-        with:
-          job-id: android
-          gradle-version: wrapper
-          save-local-build-cache: true
-          save-gradle-dependencies-cache: true
-          remote-build-cache-proxy-enabled: true
-          build-root-directory: src/android
-
-      - name: Build
-        run: |
-          JAVA_HOME=$JAVA_HOME_17_X64 DEVEL=true ./.ci/android/build.sh -DCCACHE_PATH=${SCCACHE_PATH}
-        env:
-          ANDROID_KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
-          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
-          ANDROID_KEYSTORE_PASS: ${{ secrets.ANDROID_KEYSTORE_PASS }}
-
-      - name: Package
-        run: ./.ci/android/package.sh
-
-      - name: Upload APK
-        uses: actions/upload-artifact@v4.6.2
-        with:
-          name: android
-          path: artifacts/*.apk
-
-      - name: Upload AAB
-        uses: actions/upload-artifact@v4.6.2
-        with:
-          name: android-aab
-          path: artifacts/*.aab
+    needs: [clone]
+    uses: ./.github/workflows/android.yml
+    with:
+      build-id: '${{ inputs.build-id }}'
+    secrets: inherit
 
   macos:
-    name: "macOS (${{ matrix.os.arch }})"
+    name: "macOS"
     needs: [clone]
-    runs-on: ${{ matrix.os.runs-on }}
-    strategy:
-      fail-fast: false
-      matrix:
-        os:
-          - runs-on: macos-latest
-            arch: arm64
-        compiler: [universal]
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup
-        uses: ./.github/workflows/setup
-        with:
-          key: ${{ runner.os }}-${{ matrix.os.arch }}-${{ matrix.compiler }}
-
-      - name: Install dependencies
-        run: ./.ci/macos/deps.sh
-
-      - name: Install Qt
-        uses: jurplel/install-qt-action@v4
-        with:
-          version: 6.7.3
-          cache: 'true'
-
-      - name: Configure
-        run: .ci/common/configure.sh -DCCACHE_PATH=${SCCACHE_PATH}
-
-      - name: Build
-        run: cmake --build build
-
-      - name: Package
-        run: ./.ci/macos/package.sh
-
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v4.6.2
-        with:
-          name: macos
-          path: artifacts/*
+    uses: ./.github/workflows/macos.yml
+    with:
+      build-id: '${{ inputs.build-id }}'
+    secrets: inherit
 
   unix:
-    name: "${{ matrix.os.name }} (${{ matrix.os.arch }})"
+    name: "UNIX"
     needs: [clone]
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        os:
-          - platform: freebsd
-            name: FreeBSD
-            arch: amd64
-            vm-arch: x86_64
-        compiler: [clang]
-    env:
-      ARCH: ${{ matrix.os.arch }}
-      SCCACHE_DIR: ${{ github.workspace }}/.sccache
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Disable man-db updates
-        run: sudo rm /var/lib/man-db/auto-update
-
-      - name: Setup
-        uses: ./.github/workflows/setup
-        with:
-          key: ${{ matrix.os.name }}-${{ matrix.os.arch }}-${{ matrix.compiler }}
-
-      - name: Configure sccache
-        uses: actions/github-script@v8
-        with:
-          script: |
-            core.exportVariable('ACTIONS_RESULTS_URL', process.env.ACTIONS_RESULTS_URL || '');
-            core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env.ACTIONS_RUNTIME_TOKEN || '');
-            core.exportVariable('ACTIONS_CACHE_SERVICE_V2', `on`);
-
-      - name: Build (FreeBSD)
-        if: matrix.os.platform == 'freebsd'
-        uses: vmactions/freebsd-vm@v1
-        with:
-          arch: ${{ matrix.os.vm-arch }}
-          usesh: true
-          envs: 'ARCH BUILD_TYPE DEVEL USE_WEBENGINE USE_MULTIMEDIA CCACHE SCCACHE_DIR SCCACHE_GHA_ENABLED ACTIONS_RESULTS_URL ACTIONS_RUNTIME_TOKEN ACTIONS_CACHE_SERVICE_V2'
-          prepare: |
-            pkg install -y \
-              devel/sccache \
-              ftp/wget \
-              shells/bash
-          run: |
-            export SCCACHE_PATH=$(which sccache)
-            chmod +x ./.ci/freebsd/*
-
-            echo "- Install dependencies"
-            bash ./.ci/freebsd/deps.sh
-
-            echo "- Configure"
-            bash -ex .ci/common/configure.sh -DCCACHE_PATH=${SCCACHE_PATH}
-
-            echo "- Build"
-            cmake --build build
-
-            echo "### SCCache stats" >> "$GITHUB_STEP_SUMMARY"
-            echo '```' >> "$GITHUB_STEP_SUMMARY"
-            ${SCCACHE_PATH} --show-stats >> "$GITHUB_STEP_SUMMARY" 2>&1
-            echo '```' >> "$GITHUB_STEP_SUMMARY"
-
-            echo "- Package"
-            bash ./.ci/freebsd/package.sh ${ARCH}
-
-            cmake --install build --prefix install/usr
-            cd install
-            tar --owner root --group root --zstd -cf Eden-FreeBSD.tar.zst *
-
-      - name: Upload Binary
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ matrix.os.platform }}-binary-${{ matrix.os.arch }}-${{ matrix.compiler }}
-          path: install/Eden-${{ matrix.os.name }}.tar.zst
+    uses: ./.github/workflows/unix.yml
+    with:
+      build-id: '${{ inputs.build-id }}'
+    secrets: inherit

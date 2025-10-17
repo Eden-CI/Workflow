@@ -163,15 +163,15 @@ echo
 COMPILER=gcc-standard
 linux_builds "GCC"
 
-echo
-echo "We are additionally providing experimental packages built with Clang, rather than GCC. These builds should be identical, if not faster,"
-echo "but how it affects the overall experience is currently unknown. In the future, these builds will be made with PGO to increase speed."
-echo
-
-COMPILER=clang-standard
-linux_builds "Clang"
-
 if [ "$DEVEL" != "true" ]; then
+	echo
+	echo "We are additionally providing experimental packages built with Clang, rather than GCC. These builds should be identical, if not faster,"
+	echo "but how it affects the overall experience is currently unknown. In the future, these builds will be made with PGO to increase speed."
+	echo
+
+	COMPILER=clang-standard
+	linux_builds "Clang"
+
 	echo
 	echo "We are additionally providing experimental PGO packages. These should have improved performance, but may be unstable or have bugs."
 	echo
