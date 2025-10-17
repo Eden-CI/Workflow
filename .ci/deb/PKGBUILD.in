@@ -27,11 +27,11 @@ makedepends=('autoconf' 'glslang-tools' 'cmake' 'git' 'gcc' 'g++' 'ninja-build' 
 _newbdeps=('libfrozen-dev' 'vulkan-utility-libraries-dev' 'libvulkan-memory-allocator-dev')
 _newrdeps=('libasound2t64' 'libdiscord-rpc-dev')
 
-noble_makedepends=("${_newbdeps[@]}")
-noble_depends=("${_newrdeps[@]}")
+noble_makedepends=("${makedepends[@]}" "${_newbdeps[@]}")
+noble_depends=("${depends[@]}" "${_newrdeps[@]}")
 
-trixie_makedepends=("${_newbdeps[@]}")
-trixie_depends=("${_newrdeps[@]}")
+trixie_makedepends=("${makedepends[@]}" "${_newbdeps[@]}")
+trixie_depends=("${depends[@]}" "${_newrdeps[@]}")
 
 source=("file://$GITHUB_WORKSPACE")
 noextract=("file://$GITHUB_WORKSPACE")
