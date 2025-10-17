@@ -3,20 +3,20 @@
 MANDB=/var/lib/man-db/auto-update
 export ROOTDIR="$PWD"
 
-[ -f $MANDB ] && sudo rm $MANDB
-
-if command -v apt >/dev/null 2>&1 ; then
-    # Use sudo if available, otherwise run directly
-    if command -v sudo >/dev/null 2>&1 ; then
-		SUDO=sudo
-    fi
+# Use sudo if available, otherwise run directly
+if command -v sudo >/dev/null 2>&1 ; then
+	SUDO=sudo
 fi
 
-$SUDO apt update
-$SUDO apt install -y asciidoctor binutils build-essential curl fakeroot file \
-	gettext gawk libarchive-tools lsb-release python3 python3-apt zstd
+[ -f $MANDB ] && $SUDO rm $MANDB
 
-# if in a container (does not have sudo), install sudo and make a build user
+if command -v apt >/dev/null 2>&1 ; then
+	$SUDO apt update
+	$SUDO apt install -y asciidoctor binutils build-essential curl fakeroot file \
+		gettext gawk libarchive-tools lsb-release python3 python3-apt zstd
+fi
+
+# if in a container (does not have sudo), make a build user and run as that
 if ! command -v sudo > /dev/null 2>&1 ; then
 	useradd -m -s /bin/bash -d /build build
 	echo "build ALL=NOPASSWD: ALL" >> /etc/sudoers
