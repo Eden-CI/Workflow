@@ -89,4 +89,4 @@ CMAKE_FLAGS=(
 	"${EXTRA_ARGS[@]}"
 )
 
-cmake -S . -B "${BUILDDIR}" -G Ninja "${CMAKE_FLAGS[@]}"
+cmake -S . -B "${BUILDDIR}" -G Ninja "${CMAKE_FLAGS[@]}" || ( ls -lh . build && exit 1 )

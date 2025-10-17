@@ -41,6 +41,7 @@ build() {
 	cd "$GITHUB_WORKSPACE"
 	export TARGET=package-%ARCH%
 	export COMPILER=gcc
+    rm -rf build
 	"$ROOTDIR"/.ci/common/configure.sh -DCCACHE_PATH="${SCCACHE_PATH}"
 	cmake --build build
 }
