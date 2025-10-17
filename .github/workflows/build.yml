@@ -222,7 +222,7 @@ jobs:
 
     steps:
       - name: Composite
-        uses: ./.github/actions/debian
+        uses: ./.github/workflows/debian
         with:
           arch: ${{ matrix.os.arch }}
           name: ubuntu
@@ -243,7 +243,7 @@ jobs:
 
     steps:
       - name: Composite
-        uses: ./.github/actions/debian
+        uses: ./.github/workflows/debian
         with:
           arch: ${{ matrix.os.arch }}
           name: debian-13
@@ -264,7 +264,7 @@ jobs:
 
     steps:
       - name: Composite
-        uses: ./.github/actions/debian
+        uses: ./.github/workflows/debian
         with:
           arch: ${{ matrix.os.arch }}
           name: debian-12
