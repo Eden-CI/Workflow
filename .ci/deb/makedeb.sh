@@ -26,11 +26,11 @@ if ! command -v sudo > /dev/null 2>&1 ; then
 	# copy workspace stuff over
 	cp -r ./* .patch .ci .reuse /build
 	cp -r .cache /build || true
-	chown -R build:build /build
 
 	cd /build
+	chown -R build:build ./* .patch .ci .reuse
 	sudo -E -u build "$PWD/.ci/deb/build.sh"
-	cp /build/*.deb "$WORKSPACE"
+	cp ./*.deb "$WORKSPACE"
 # otherwise just run normally
 else
 	.ci/deb/build.sh
