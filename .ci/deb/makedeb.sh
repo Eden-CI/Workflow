@@ -22,7 +22,8 @@ if ! command -v sudo > /dev/null 2>&1 ; then
 	echo "build ALL=NOPASSWD: ALL" >> /etc/sudoers
 
 	# copy workspace stuff over
-	cp -r ./* .cache .patch .ci .reuse /build
+	cp -r ./* .patch .ci .reuse /build
+	cp -r .cache /build || true
 	chown -R build:build /build
 
 	su - build -c sh -c "$PWD/.ci/deb/build.sh"
