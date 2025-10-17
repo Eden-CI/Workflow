@@ -3,7 +3,7 @@
 export ROOTDIR="$PWD"
 
 if ! command -v sudo >/dev/null 2>&1 ; then
-	alias sudo="su -c"
+	alias sudo="su - root -c"
 fi
 
 GITHUB_WORKSPACE="${GITHUB_WORKSPACE:-.}"
