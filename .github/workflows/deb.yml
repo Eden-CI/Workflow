@@ -1,4 +1,4 @@
-name: .deb builds
+name: "[Internal CI] .deb builds"
 
 on:
   workflow_call:

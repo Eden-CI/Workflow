@@ -1,5 +1,4 @@
-
-name: UNIX
+name: "[Internal CI] UNIX"
 
 on:
   workflow_call:

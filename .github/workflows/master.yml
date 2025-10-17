@@ -1,4 +1,4 @@
-name: Create Master Release
+name: "[Auto] Build on push to 'master'"
 
 on:
   repository_dispatch:

@@ -1,4 +1,4 @@
-name: "- Push Build Workflow"
+name: "[Manual] Build on 'master'"
 
 on:
   push:

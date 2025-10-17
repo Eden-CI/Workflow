@@ -1,4 +1,4 @@
-name: Master Build Workflow
+name: "[Internal CI][Master] Build Workflow"
 
 on:
   workflow_call:
