@@ -11,13 +11,13 @@ url="https://eden-emu.dev"
 license=('GPL3')
 
 # TODO(crueter): Separate some more bdeps/rdeps
-depends=('libboost-context-dev' 'libglu1-mesa-dev' 'libhidapi-dev'
+depends=('libglu1-mesa-dev' 'libhidapi-dev'
 	'libpulse-dev' 'libudev-dev' 'libxcb-icccm4' 'libxcb-image0' 'libxcb-keysyms1'
 	'libxcb-render-util0' 'libxcb-xinerama0' 'libxcb-xkb1' 'libxext-dev' 'libxkbcommon-x11-0'
 	'mesa-common-dev' 'qt6-base-private-dev' 'libenet-dev' 'libsimpleini-dev' 'libcpp-jwt-dev'
 	'libfmt-dev' 'liblz4-dev' 'libzstd-dev' 'libssl-dev' 'libavfilter-dev'
 	'libavcodec-dev' 'libswscale-dev' 'zlib1g-dev' 'libva-dev' 'libvdpau-dev' 'libcpp-httplib-dev'
-	'libzydis-dev' 'zydis-tools' 'libzycore-dev' 'libboost-fiber-dev' 'libcubeb-dev'
+	'libzydis-dev' 'zydis-tools' 'libzycore-dev' 'libcubeb-dev'
 	'libvulkan-dev' 'spirv-tools' 'libusb-1.0-0-dev' 'libsdl2-dev'
 	'libqt6core5compat6' 'libquazip1-qt6-dev' 'libopus-dev')
 
@@ -25,13 +25,17 @@ makedepends=('autoconf' 'glslang-tools' 'cmake' 'git' 'gcc' 'g++' 'ninja-build' 
 	'libtool' 'nasm' 'pkg-config' 'nlohmann-json3-dev' 'spirv-headers')
 
 _newbdeps=('libfrozen-dev' 'vulkan-utility-libraries-dev' 'libvulkan-memory-allocator-dev')
-_newrdeps=('libasound2t64' 'libdiscord-rpc-dev')
+_newrdeps=('libasound2t64' 'libdiscord-rpc-dev' 'libboost-context-dev' 'libboost-fiber-dev')
 
 noble_makedepends=("${makedepends[@]}" "${_newbdeps[@]}")
 noble_depends=("${depends[@]}" "${_newrdeps[@]}")
 
 trixie_makedepends=("${makedepends[@]}" "${_newbdeps[@]}")
-trixie_depends=("${depends[@]}" "${_newrdeps[@]}")
+trixie_depends=("${depends[@]}" "${_newrdeps[@]}" 'libmbedtls-dev')
+
+# absolutely awesome feature where projects with boost don't compile on gcc 12 unless
+# you use boost 1.81 SPECIFICALLY (which isn't default for some wonderful reason)
+bookworm_depends=("${depends[@]}" 'libboost-context1.81-dev' 'libboost-fiber1.81-dev')
 
 source=("file://$GITHUB_WORKSPACE")
 noextract=("file://$GITHUB_WORKSPACE")
