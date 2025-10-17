@@ -19,6 +19,8 @@ env:
   CPM_CACHE_VERSION: "v7"
   FORGEJO_TOKEN: ${{ secrets.FORGEJO_TOKEN }}
   DEVEL: ${{ inputs.devel }}
+  TEMP_PATCH_STATUS: "false"
+  TEMP_PATCH: "2755"
 
 jobs:
   clone:
@@ -51,11 +53,6 @@ jobs:
         run: |
           python ./.ci/common/status.py start
 
-      - name: summary
-        shell: bash
-        run: |
-          ./.ci/forgejo.sh --summary ${{ inputs.build-id }}
-
       # for some amazing reason you can't pass env vars to reusable workflows
       - name: Setup Outputs
         id: out
@@ -67,15 +64,23 @@ jobs:
         shell: bash
         run: |
           ./.ci/forgejo.sh --clone ${{ inputs.build-id }}
-          # cd eden
-          # wget https://git.eden-emu.dev/eden-emu/eden/pulls/2755.patch
-          # git apply 2755.patch
-          # rm 2755.patch
+
+      - name: Apply Temporary Patch
+        if: ${{ env.TEMP_PATCH_STATUS == 'true' }}
+        shell: bash
+        run: |
+          wget https://git.eden-emu.dev/eden-emu/eden/pulls/${TEMP_PATCH}.patch
+          git -C eden apply ../${TEMP_PATCH}.patch
+          rm ${TEMP_PATCH}.patch
+
+      - name: Summary
+        shell: bash
+        run: |
+          ./.ci/forgejo.sh --summary ${{ inputs.build-id }}
 
       - name: Cleanup
         run: |
-          cd eden
-          rm -rf .git* .ci .github
+          rm -rf eden/.git* eden/.ci eden/.github
 
       - name: Upload payload environment
         uses: actions/upload-artifact@v4
