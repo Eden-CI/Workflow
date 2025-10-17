@@ -7,9 +7,6 @@ inputs:
   name:
     description: 'what to name this workflow'
     required: true
-  container:
-    description: 'whether or not this is in a container'
-    required: true
 
 runs:
   using: composite
@@ -22,8 +19,6 @@ runs:
       run: |
         chmod a+x ./.ci/deb/makedeb.sh
         ./.ci/deb/makedeb.sh
-      env:
-        CONTAINER: "${{ inputs.container }}"
 
     - name: Download Forgejo environment
       uses: actions/download-artifact@v4

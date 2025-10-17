@@ -5,7 +5,7 @@ MANDB=/var/lib/man-db/auto-update
 ROOTDIR="$PWD"
 
 # containers don't need sudo
-if [ "$CONTAINER" = "true" ]; then
+if command -v sudo > /dev/null ; then
 	SUDO=""
 else
 	SUDO=sudo
