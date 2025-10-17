@@ -45,6 +45,12 @@ jobs:
         run: |
           ./.ci/forgejo.sh --load-payload-env
 
+      - name: Send Commit Status to Forgejo
+        if: ${{ inputs.build-id == 'master' || inputs.build-id == 'pull_request' }}
+        shell: bash
+        run: |
+          python ./.ci/common/status.py start
+
       - name: summary
         shell: bash
         run: |
@@ -169,3 +175,26 @@ jobs:
       cpm-cache-version: '${{ needs.clone.outputs.cachever }}'
       devel: ${{ inputs.devel }}
     secrets: inherit
+
+  status:
+    name: "Send Commit Status to Forgejo"
+    needs: [source, deb, linux, windows, android, macos, unix]
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Download payload environment
+        uses: actions/download-artifact@v4
+        with:
+          name: forgejo-env
+
+      - name: Send Final Status to Forgejo
+        if: ${{ inputs.build-id == 'master' || inputs.build-id == 'pull_request' }}
+        shell: bash
+        env:
+          STATUS: ${{ cancelled() && 'cancelled' || failure() && 'failure' || 'success' }}
+        run: |
+          ./.ci/forgejo.sh --load-payload-env
+
+          python ./.ci/common/status.py "$STATUS"
