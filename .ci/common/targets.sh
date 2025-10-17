@@ -72,10 +72,18 @@ if [ "$PLATFORM" = "linux" ] || [ "$COMPILER" = "clang" ]; then
 
 	ARCH_FLAGS="${ARCH_FLAGS} -O3"
 	[ "$PLATFORM" = "linux" ] && ARCH_FLAGS="${ARCH_FLAGS} -pipe"
-	ARCH_CMAKE=(
-		-DCMAKE_C_FLAGS="${ARCH_FLAGS}"
-		-DCMAKE_CXX_FLAGS="${ARCH_FLAGS}"
-	)
+
+	# For PGO, we fetch profdata and add it to our flags
+	if [ "$PGO" = "true" ]; then
+		echo "Creating PGO build"
+
+		CCACHE=OFF
+
+		PROFDATA="$PWD/eden.profdata"
+		[ -f "$PROFDATA" ] && rm -f "$PROFDATA"
+		wget https://github.com/Eden-CI/PGO/releases/latest/download/eden.profdata
+		ARCH_FLAGS="${ARCH_FLAGS} -fprofile-use=$PROFDATA -fprofile-correction"
+	fi
 fi
 
 # Steamdeck targets need older sdl2
@@ -91,6 +99,8 @@ if [ "$PACKAGE" = "true" ]; then
 	SDL_FLAGS=(-DYUZU_USE_BUNDLED_SDL2=OFF)
 fi
 
+[ -n "$ARCH_FLAGS" ] && ARCH_CMAKE=(-DCMAKE_C_FLAGS="${ARCH_FLAGS}" -DCMAKE_CXX_FLAGS="${ARCH_FLAGS}")
+
 export ARCH_CMAKE
 export SDL_FLAGS
 export STANDALONE
@@ -98,3 +108,4 @@ export ARCH
 export OPENSSL
 export FFMPEG
 export LTO
+export CCACHE

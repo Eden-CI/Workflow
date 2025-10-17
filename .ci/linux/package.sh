@@ -43,8 +43,8 @@ fi
 VERSION=$(cat GIT-TAG)
 echo "Making \"$VERSION\" build"
 
-export OUTNAME="Eden-$VERSION-$ARCH.AppImage"
-UPINFO="gh-releases-zsync|eden-emulator|Releases|latest|*-$ARCH.AppImage.zsync"
+export OUTNAME="Eden-$VERSION-$ARCH-$COMPILER-$PGO_TARGET.AppImage"
+UPINFO="gh-releases-zsync|eden-emulator|Releases|latest|*-$ARCH-$COMPILER-$PGO_TARGET.AppImage.zsync"
 
 if [ "$DEVEL" = 'true' ]; then
     case "$(uname)" in
