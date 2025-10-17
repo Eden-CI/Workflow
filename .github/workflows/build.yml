@@ -26,6 +26,8 @@ jobs:
   clone:
     outputs:
       cachever: ${{ steps.out.outputs.cachever }}
+      concurrency_group: ${{ steps.concurrency.outputs.group_key }}
+      cancel_in_progress: ${{ steps.concurrency.outputs.cancel_in_progress }}
     name: "Parse and Clone"
     runs-on: ubuntu-latest
 
@@ -59,6 +61,25 @@ jobs:
         shell: bash
         run: |
           echo "cachever=${CPM_CACHE_VERSION}" >> "$GITHUB_OUTPUT"
+
+      - name: Define Concurrency group
+        id: concurrency
+        shell: bash
+        run: |
+          if [[ -n "${FORGEJO_PR_NUMBER}" ]]; then
+            GROUP_KEY="pr-${{ inputs.build-id }}-${FORGEJO_PR_NUMBER}"
+            CANCEL_IN_PROGRESS=true
+          else
+            GROUP_KEY="branch-${{ inputs.build-id }}-${FORGEJO_BRANCH}"
+            if [[ "${FORGEJO_BRANCH}" == "master" && "${{ inputs.build-id }}" == "master" ]]; then
+              CANCEL_IN_PROGRESS=false
+            else
+              CANCEL_IN_PROGRESS=true
+            fi
+          fi
+          echo "group_key=$GROUP_KEY" >> "$GITHUB_OUTPUT"
+          echo "cancel_in_progress=$CANCEL_IN_PROGRESS" >> "$GITHUB_OUTPUT"
+          echo "Concurrency group: $GROUP_KEY, Cancel in progress: $CANCEL_IN_PROGRESS"
 
       - name: Clone
         shell: bash
@@ -97,10 +118,27 @@ jobs:
             eden/*
             eden/.patch
 
+  concurrency-check:
+    name: "Concurrency Check"
+    runs-on: ubuntu-latest
+    needs: [clone]
+    concurrency:
+      group: ${{ needs.clone.outputs.concurrency_group }}
+      cancel-in-progress: ${{ needs.clone.outputs.cancel_in_progress }}
+    steps:
+      - name: Confirm concurrency group
+        run: |
+          echo "Using concurrency group: ${{ needs.clone.outputs.concurrency_group }}"
+          if [[ "${{ needs.clone.outputs.concurrency_group }}" == "branch-master-master" ]]; then
+            echo "This build cant be auto-cancelled (continuos master branch build)."
+          else
+            echo "Concurrent runs of this group will be cancelled if a new one starts."
+          fi
+
   source:
     name: "Source Pack"
     runs-on: ubuntu-latest
-    needs: [clone]
+    needs: [concurrency-check]
 
     steps:
       - name: Checkout
@@ -123,7 +161,7 @@ jobs:
 
   deb:
     name: ".deb builds"
-    needs: [clone]
+    needs: [concurrency-check]
     uses: ./.github/workflows/deb.yml
     with:
       build-id: '${{ inputs.build-id }}'
@@ -133,7 +171,7 @@ jobs:
 
   linux:
     name: "AppImage"
-    needs: [clone]
+    needs: [concurrency-check]
     uses: ./.github/workflows/appimage.yml
     with:
       build-id: '${{ inputs.build-id }}'
@@ -143,7 +181,7 @@ jobs:
 
   windows:
     name: "Windows"
-    needs: [clone]
+    needs: [concurrency-check]
     uses: ./.github/workflows/windows.yml
     with:
       build-id: '${{ inputs.build-id }}'
@@ -153,7 +191,7 @@ jobs:
 
   android:
     name: "Android"
-    needs: [clone]
+    needs: [concurrency-check]
     uses: ./.github/workflows/android.yml
     with:
       build-id: '${{ inputs.build-id }}'
@@ -163,7 +201,7 @@ jobs:
 
   macos:
     name: "macOS"
-    needs: [clone]
+    needs: [concurrency-check]
     uses: ./.github/workflows/macos.yml
     with:
       build-id: '${{ inputs.build-id }}'
@@ -173,7 +211,7 @@ jobs:
 
   unix:
     name: "UNIX"
-    needs: [clone]
+    needs: [concurrency-check]
     uses: ./.github/workflows/unix.yml
     with:
       build-id: '${{ inputs.build-id }}'
