@@ -129,6 +129,16 @@ jobs:
       - name: Package
         run: ./.ci/source/package.sh
 
+      - name: Upload raw source
+        uses: actions/upload-artifact@v4
+        with:
+          name: source-raw
+          include-hidden-files: true
+          path: |
+            eden/*
+            eden/.patch
+            eden/.cache
+
       - name: Upload source
         uses: actions/upload-artifact@v4.6.2
         with:
@@ -319,7 +329,7 @@ jobs:
       - name: Clone
         uses: actions/download-artifact@v4
         with:
-          name: source
+          name: source-raw
 
       - name: Configure
         shell: bash
@@ -387,7 +397,7 @@ jobs:
       - name: Clone
         uses: actions/download-artifact@v4
         with:
-          name: source
+          name: source-raw
 
       - name: Set up MSVC
         uses: ilammy/msvc-dev-cmd@v1
@@ -476,7 +486,7 @@ jobs:
       - name: Clone
         uses: actions/download-artifact@v4
         with:
-          name: source
+          name: source-raw
 
       - name: Install gradle-cache
         uses: burrunan/gradle-cache-action@v3
@@ -552,7 +562,7 @@ jobs:
       - name: Clone
         uses: actions/download-artifact@v4
         with:
-          name: source
+          name: source-raw
 
       - name: Configure
         run: .ci/common/configure.sh -DCCACHE_PATH=${SCCACHE_PATH}
@@ -570,7 +580,7 @@ jobs:
           path: artifacts/*
 
   unix:
-    name: "${{ matrix.os.name }} (${{ matrix.arch }})"
+    name: "${{ matrix.os.name }} (${{ matrix.os.arch }})"
     needs: [source]
     runs-on: ubuntu-latest
     strategy:
@@ -596,7 +606,7 @@ jobs:
       - name: Clone
         uses: actions/download-artifact@v4
         with:
-          name: source
+          name: source-raw
 
       - name: Download Forgejo environment
         uses: actions/download-artifact@v4
