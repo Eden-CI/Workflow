@@ -47,7 +47,8 @@ if [ "$PLATFORM" = "linux" ] || [ "$COMPILER" = "clang" ]; then
 		package-amd64)
 			echo "Making package-friendly amd64 build of Eden"
 			ARCH_FLAGS="-march=x86-64 -mtune=generic"
-			STANDALONE=true
+			STANDALONE=ON
+			PACKAGE=true
 			FFMPEG=OFF
 			OPENSSL=OFF
 
@@ -55,7 +56,8 @@ if [ "$PLATFORM" = "linux" ] || [ "$COMPILER" = "clang" ]; then
 		package-aarch64)
 			echo "Making package-friendly aarch64 build of Eden"
 			ARCH_FLAGS="-march=armv8-a -mtune=generic"
-			STANDALONE=true
+			STANDALONE=ON
+			PACKAGE=true
 			FFMPEG=OFF
 			OPENSSL=OFF
 
@@ -82,6 +84,11 @@ if [ "$STEAMDECK" = "true" ]; then
 		-DYUZU_SYSTEM_PROFILE=steamdeck
 		-DYUZU_USE_EXTERNAL_SDL2=ON
 	)
+fi
+
+# Package targets use system sdl2
+if [ "$PACKAGE" = "true" ]; then
+	SDL_FLAGS=(-DYUZU_USE_BUNDLED_SDL2=OFF)
 fi
 
 export ARCH_CMAKE
