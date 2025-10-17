@@ -21,7 +21,7 @@ if ! command -v sudo > /dev/null 2>&1 ; then
 	useradd -m -s /bin/bash -d /build build
 	echo "build ALL=NOPASSWD: ALL" >> /etc/sudoers
 
-	apt install sudo
+	apt install -y sudo
 
 	# copy workspace stuff over
 	cp -r ./* .patch .ci .reuse /build
