@@ -28,7 +28,7 @@ if ! command -v sudo > /dev/null 2>&1 ; then
 	cp -r .cache /build || true
 	chown -R build:build /build
 
-	su - build -c sh -c "export ARCH=$ARCH && $PWD/.ci/deb/build.sh"
+	sudo -E -u build "$PWD/.ci/deb/build.sh"
 	cp /build/*.deb .
 # otherwise just run normally
 else
