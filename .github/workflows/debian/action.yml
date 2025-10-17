@@ -14,27 +14,10 @@ runs:
     - name: Install sccache
       uses: Vee99BR/sccache-action@v0.0.1
 
-    - name: Download Forgejo environment
-      uses: actions/download-artifact@v4
+    - name: Setup
+      uses: ./.github/workflows/setup
       with:
-        name: forgejo-env
-
-    - name: Load payload environment
-      shell: bash
-      run: |
-        ./.ci/forgejo.sh --load-payload-env
-
-    - name: Clone
-      uses: actions/download-artifact@v4
-      with:
-        name: eden
-
-    - name: Set up CPM cache
-      uses: actions/cache@v4
-      with:
-        path: |
-          ${{ github.workspace }}/.cache
-        key: ${{ inputs.name }}-${{ inputs.arch }}-cpm-${{ env.CPM_CACHE_VERSION }}
+        key: ${{ inputs.name }}-${{ inputs.arch }}
 
     - name: Build
       shell: bash

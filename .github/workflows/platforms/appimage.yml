@@ -1,0 +1,105 @@
+name: AppImage
+
+on:
+  workflow_call:
+    inputs:
+      build-id:
+        description: "build id"
+        required: true
+
+jobs:
+  set-matrix:
+    name: "Generate matrix"
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set.outputs.matrix }}
+      compiler: ${{ steps.set.outputs.compiler }}
+    steps:
+      - id: set
+        run: |
+          BASE='[{"runs-on": "ubuntu-latest", "arch": "amd64"},{"runs-on": "ubuntu-latest", "arch": "steamdeck"}'
+          ARM=',{"runs-on": "ubuntu-24.04-arm", "arch": "aarch64"}'
+
+          if [ "${{ env.DISABLE_ARM }}" != true ]; then
+            BASE="${BASE}${ARM}"
+          fi
+
+          EXTRA=',{"runs-on": "ubuntu-latest", "arch": "legacy"},{"runs-on": "ubuntu-latest", "arch": "rog-ally"}'
+          ARM=',{"runs-on": "ubuntu-24.04-arm", "arch": "armv9"}'
+
+          if [ "${{ env.DISABLE_ARM }}" != true ]; then
+            EXTRA="${EXTRA}${ARM}"
+          fi
+
+          if [ "${{ inputs.build-id }}" = "tag" ]; then
+            MATRIX="${BASE}${EXTRA}]"
+          else
+            MATRIX="${BASE}]"
+          fi
+
+          echo $MATRIX
+          echo "matrix=${MATRIX}" >> $GITHUB_OUTPUT
+
+          PGO='{"program": "clang", "target": "pgo"}'
+          CLANG='{"program": "clang", "target": "standard"}'
+          GCC='{"program": "gcc", "target": "standard"}'
+
+          if [ "${{ inputs.build-id }}" = "tag" ]; then
+            COMPILER="[${GCC},${CLANG},${PGO}]"
+          else
+            COMPILER="[${GCC},${CLANG}]"
+          fi
+
+          echo $COMPILER
+          echo "compiler=${COMPILER}" >> $GITHUB_OUTPUT
+
+  linux:
+    name: "${{ matrix.os.arch }}) ${{ matrix.compiler.program }} ${{ matrix.compiler.target }}"
+    needs: [clone, set-matrix]
+    runs-on: ${{ matrix.os.runs-on }}
+    container: ghcr.io/pkgforge-dev/archlinux:latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ${{ fromJson(needs.set-matrix.outputs.matrix) }}
+        compiler: ${{ fromJson(needs.set-matrix.outputs.compiler) }}
+
+    env:
+      TARGET: "${{ matrix.os.arch }}"
+      COMPILER: "${{ matrix.compiler.program }}"
+      PGO_TARGET: "${{ matrix.compiler.target }}"
+      GITHUB_TOKEN: "${{ secrets.CUSTOM_GITHUB_TOKEN }}"
+      FULL_ARCH: ${{ matrix.os.arch }}-${{ matrix.compiler.program }}-${{ matrix.compiler.target }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup
+        uses: ./.github/workflows/setup
+        with:
+          key: ${{ runner.os }}-${{ matrix.os.arch }}-${{ matrix.compiler.program }}
+
+      - name: Install dependencies
+        run: |
+          chmod a+x ./.ci/linux/deps.sh
+          ./.ci/linux/deps.sh
+
+      - name: Configure
+        shell: bash
+        run:  .ci/common/configure.sh -DCCACHE_PATH=${SCCACHE_PATH}
+
+      - name: Build
+        shell: bash
+        run: cmake --build build
+
+      - name: Package
+        shell: bash
+        run: ./.ci/linux/package.sh
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4.6.2
+        with:
+          name: linux-${{ matrix.os.arch }}-${{ matrix.compiler.program }}-${{ matrix.compiler.target }}
+          path: ./*.AppImage*

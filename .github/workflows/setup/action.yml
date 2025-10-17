@@ -1,0 +1,42 @@
+name: Setup
+
+inputs:
+  key:
+    description: 'CPM cache key'
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Install sccache
+      uses: Vee99BR/sccache-action@v0.0.1
+
+    - name: Download Forgejo environment
+      uses: actions/download-artifact@v4
+      with:
+        name: forgejo-env
+
+    - name: Load payload environment
+      shell: bash
+      run: |
+        ./.ci/forgejo.sh --load-payload-env
+
+    - name: Clone
+      uses: actions/download-artifact@v4
+      with:
+        name: eden
+
+    - name: Set up CPM cache
+      uses: actions/cache@v4
+      with:
+        path: |
+          ${{ github.workspace }}/.cache
+        key: ${{ inputs.key }}-cpm-${{ env.CPM_CACHE_VERSION }}
+
+    - name: Build
+      shell: bash
+      run: |
+        chmod a+x ./.ci/deb/makedeb.sh
+        ./.ci/deb/makedeb.sh
+      env:
+        ARCH: ${{ inputs.arch }}

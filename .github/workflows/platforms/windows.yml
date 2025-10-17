@@ -1,0 +1,110 @@
+name: Windows
+
+on:
+  workflow_call:
+    inputs:
+      build-id:
+        description: "build id"
+        required: true
+
+jobs:
+  win-matrix:
+    name: "Generate Windows compilers"
+    runs-on: ubuntu-latest
+    outputs:
+      compiler: ${{ steps.set.outputs.compiler }}
+    steps:
+      - id: set
+        run: |
+          PGO='{"program": "clang", "target": "pgo"}'
+          CLANG='{"program": "clang", "target": "standard"}'
+          MSVC='{"program": "msvc", "target": "standard"}'
+
+          if [ "${{ inputs.build-id }}" = "tag" ]; then
+            COMPILER="[${MSVC},${CLANG},${PGO}]"
+          else
+            COMPILER="[${MSVC},${CLANG}]"
+          fi
+
+          echo $COMPILER
+          echo "compiler=${COMPILER}" >> $GITHUB_OUTPUT
+
+  windows:
+    name: "${{ matrix.os.arch }} ${{ matrix.compiler.program }} ${{ matrix.compiler.target }}"
+    needs: [clone, win-matrix]
+    runs-on: ${{ matrix.os.runs-on }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - runs-on: windows-latest
+            arch: amd64
+          - runs-on: windows-11-arm
+            arch: arm64
+        compiler: ${{ fromJson(needs.win-matrix.outputs.compiler) }}
+
+    env:
+      QT_VERSION: 6.9.1
+      TARGET: ${{ matrix.os.arch }}
+      COMPILER: "${{ matrix.compiler.program }}"
+      PGO_TARGET: "${{ matrix.compiler.target }}"
+      ARCH: ${{ matrix.os.arch }}-${{ matrix.compiler.program }}-${{ matrix.compiler.target }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup
+        uses: ./.github/workflows/setup
+        with:
+          key: ${{ runner.os }}-${{ matrix.os.arch }}-${{ matrix.compiler.program }}
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v4.3.0
+        with:
+          version: ${{ env.QT_VERSION }}
+          cache: 'true'
+
+      - name: Load payload environment
+        shell: bash
+        run: |
+          ./.ci/forgejo.sh --load-payload-env
+
+      - name: Set up MSVC
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: ${{ matrix.os.arch }}
+
+      - name: Force Clang 20
+        if: matrix.compiler == 'clang'
+        shell: bash
+        run: |
+          echo "C:/Program Files/LLVM/bin" >> $GITHUB_PATH
+          clang-cl --version
+
+      - name: Install Vulkan SDK
+        shell: powershell
+        run: |
+          ./.ci/windows/install-vulkan-sdk.ps1
+
+      - name: Configure
+        shell: bash
+        run: |
+          git config --global core.autocrlf off
+          dos2unix .patch/boost/*
+          .ci/common/configure.sh -DCCACHE_PATH=${SCCACHE_PATH}
+
+      - name: Build
+        shell: bash
+        run: cmake --build build
+
+      - name: Package
+        shell: bash
+        run: ./.ci/windows/package.sh
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4.6.2
+        with:
+          name: windows-${{ env.ARCH }}
+          path: artifacts/*
+
