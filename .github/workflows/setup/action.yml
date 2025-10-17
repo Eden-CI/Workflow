@@ -32,11 +32,3 @@ runs:
         path: |
           ${{ github.workspace }}/.cache
         key: ${{ inputs.key }}-cpm-${{ env.CPM_CACHE_VERSION }}
-
-    - name: Build
-      shell: bash
-      run: |
-        chmod a+x ./.ci/deb/makedeb.sh
-        ./.ci/deb/makedeb.sh
-      env:
-        ARCH: ${{ inputs.arch }}

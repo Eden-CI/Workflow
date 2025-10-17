@@ -246,7 +246,7 @@ jobs:
   windows:
     name: "Windows"
     needs: [clone]
-    uses: ./.github/workflows/appimage.yml
+    uses: ./.github/workflows/windows.yml
     with:
       build-id: '${{ inputs.build-id }}'
     secrets: inherit

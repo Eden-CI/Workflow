@@ -55,7 +55,7 @@ jobs:
           echo "compiler=${COMPILER}" >> $GITHUB_OUTPUT
 
   linux:
-    name: "${{ matrix.os.arch }}) ${{ matrix.compiler.program }} ${{ matrix.compiler.target }}"
+    name: "AppImage ${{ matrix.os.arch }} ${{ matrix.compiler.program }} ${{ matrix.compiler.target }}"
     needs: [set-matrix]
     runs-on: ${{ matrix.os.runs-on }}
     container: ghcr.io/pkgforge-dev/archlinux:latest
