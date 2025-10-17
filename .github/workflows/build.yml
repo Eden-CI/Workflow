@@ -139,7 +139,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.set.outputs.matrix }}
-      compilers: ${{ steps.set.outputs.compiler }}
+      compiler: ${{ steps.set.outputs.compiler }}
     steps:
       - id: set
         run: |
@@ -184,7 +184,7 @@ jobs:
     name: "Generate Windows compilers"
     runs-on: ubuntu-latest
     outputs:
-      compilers: ${{ steps.set.outputs.compiler }}
+      compiler: ${{ steps.set.outputs.compiler }}
     steps:
       - id: set
         run: |
