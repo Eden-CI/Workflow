@@ -319,7 +319,8 @@ jobs:
       COMPILER: "${{ matrix.compiler.program }}"
       PGO_TARGET: "${{ matrix.compiler.target }}"
       GITHUB_TOKEN: "${{ secrets.CUSTOM_GITHUB_TOKEN }}"
-      ARCH: ${{ matrix.os.arch }}-${{ matrix.compiler.program }}-${{ matrix.compiler.target }}
+      ARCH: ${{ matrix.os.arch }}
+      FULL_ARCH: ${{ matrix.os.arch }}-${{ matrix.compiler.program }}-${{ matrix.compiler.target }}
 
     steps:
       # TODO(crueter): can we make this less repetitive?
