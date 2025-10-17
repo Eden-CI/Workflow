@@ -30,8 +30,6 @@ export OPTIMIZE_LAUNCH=1
 export DEPLOY_OPENGL=1
 export DEPLOY_VULKAN=1
 
-. .ci/common/targets.sh
-
 BUILDDIR=${BUILDDIR:-build}
 
 if [ -d "${BUILDDIR}/bin/Release" ]; then
