@@ -15,7 +15,7 @@ fi
 sed "s/%TAG%/$TAG/"       $SRC    > $DEST.1
 sed "s/%REF%/$REF/"       $DEST.1 > $DEST.2
 sed "s/%PKGVER%/$PKGVER/" $DEST.2 > $DEST.3
-sed "s/%PKGVER%/$ARCH/"   $DEST.3 > $DEST
+sed "s/%ARCH%/$ARCH/"   $DEST.3 > $DEST
 
 rm $DEST.*
 
