@@ -136,13 +136,14 @@ if [ "$DEVEL" = "true" ]; then
 fi
 echo
 
+# TODO(crueter): let's make this all one table
 echo "### Linux"
 echo
 echo "Linux packages are distributed via AppImage. Each build is optimized for a specific architecture."
 echo "See the *Description* column for more info. Note that legacy builds will always work on newer systems."
 echo
 
-COMPILER=gcc
+COMPILER=gcc-standard
 echo "| Build | Description |"
 echo "| ----- | ----------- |"
 linux amd64 "amd64" "For any modern AMD or Intel CPU"
@@ -157,16 +158,31 @@ if [ "$DEVEL" != "true" ]; then
 	echo "We are additionally providing experimental packages built with Clang, rather than GCC. These builds should be identical, if not faster,"
 	echo "but how it affects the overall experience is currently unknown. In the future, these builds will be made with PGO to increase speed."
 	echo
-
-	COMPILER=clang
 	echo "| Build | Description |"
 	echo "| ----- | ----------- |"
+
+	COMPILER=clang-standard
 	linux legacy "amd64 (legacy) (clang)" "For CPUs older than 2013 or so (clang build)"
 	linux amd64 "amd64 (clang)" "For any modern AMD or Intel CPU (clang build)"
 	linux steamdeck "Steam Deck (clang)" "For Steam Deck and other >= Zen 2 AMD CPUs (clang build)"
 	linux rog-ally "ROG Ally X (clang)" "For ROG Ally X and other >= Zen 4 AMD CPUs (clang build)"
 	[ "$DISABLE_ARM" != "true" ] && linux aarch64 "armv8-a (clang)" "For ARM CPUs made in mid-2021 or earlier (clang build)"
 	[ "$DISABLE_ARM" != "true" ] && linux armv9 "armv9-a (clang)" "For ARM CPUs made in late 2021 or later (clang build)"
+	echo
+
+	echo "We are additionally providing experimental PGO packages. These should have improved performance, but may be unstable or have bugs."
+	echo
+	echo "| Build | Description |"
+	echo "| ----- | ----------- |"
+
+	COMPILER=clang-pgo
+	linux legacy "amd64 (legacy) (PGO)" "For CPUs older than 2013 or so (PGO build)"
+	linux amd64 "amd64 (PGO)" "For any modern AMD or Intel CPU (PGO build)"
+	linux steamdeck "Steam Deck (PGO)" "For Steam Deck and other >= Zen 2 AMD CPUs (PGO build)"
+	linux rog-ally "ROG Ally X (PGO)" "For ROG Ally X and other >= Zen 4 AMD CPUs (PGO build)"
+	[ "$DISABLE_ARM" != "true" ] && linux aarch64 "armv8-a (PGO)" "For ARM CPUs made in mid-2021 or earlier (PGO build)"
+	[ "$DISABLE_ARM" != "true" ] && linux armv9 "armv9-a (PGO)" "For ARM CPUs made in late 2021 or later (PGO build)"
+	echo
 fi
 echo
 
@@ -188,18 +204,28 @@ echo "Windows packages are in-place zip files."
 echo
 echo "| Build | Description |"
 echo "| ----- | ----------- |"
-win amd64-msvc amd64 "For any Windows machine running an AMD or Intel CPU"
-win arm64-msvc aarch64 "For any Windows machine running a Qualcomm or other ARM-based SoC"
+win amd64-msvc-standard amd64 "For any Windows machine running an AMD or Intel CPU"
+win arm64-msvc-standard aarch64 "For any Windows machine running a Qualcomm or other ARM-based SoC"
 echo
 
 echo "We are additionally providing experimental packages built with Clang, rather than MSVC. These builds should be identical, if not faster,"
-echo "but how it affects the overall experience is currently unknown. In the future, these builds will be made with PGO to increase speed."
+echo "but how it affects the overall experience is currently unknown."
 echo
 echo "| Build | Description |"
 echo "| ----- | ----------- |"
-win amd64-clang "amd64 (clang)" "For any Windows machine running an AMD or Intel CPU (clang-cl build)"
-win arm64-clang "aarch64 (clang)" "For any Windows machine running a Qualcomm or other ARM-based SoC (clang-cl build)"
+win amd64-clang-standard "amd64 (clang)" "For any Windows machine running an AMD or Intel CPU (clang-cl build)"
+win arm64-clang-standard "aarch64 (clang)" "For any Windows machine running a Qualcomm or other ARM-based SoC (clang-cl build)"
 echo
+
+if [ "$DEVEL" != "true" ]; then
+	echo "We are additionally providing experimental PGO packages. These should have improved performance, but may be unstable or have bugs."
+	echo
+	echo "| Build | Description |"
+	echo "| ----- | ----------- |"
+	win amd64-clang-pgo "amd64 (clang)" "For any Windows machine running an AMD or Intel CPU (PGO build)"
+	win arm64-clang-pgo "aarch64 (clang)" "For any Windows machine running a Qualcomm or other ARM-based SoC (PGO build)"
+	echo
+fi
 
 echo "### Android"
 echo
