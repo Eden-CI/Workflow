@@ -1,5 +1,7 @@
 #!/bin/sh -ex
 
+export ROOTDIR="$PWD"
+
 # install makedeb
 echo "-- Installing makedeb..."
 [ ! -d makedeb-src ] && git clone 'https://github.com/makedeb/makedeb' makedeb-src
