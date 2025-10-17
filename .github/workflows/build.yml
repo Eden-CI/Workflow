@@ -124,7 +124,7 @@ jobs:
     needs: [clone]
     concurrency:
       group: ${{ needs.clone.outputs.concurrency_group }}
-      cancel-in-progress: ${{ needs.clone.outputs.cancel_in_progress }}
+      cancel-in-progress: ${{ fromJSON(needs.clone.outputs.cancel_in_progress) }}
     steps:
       - name: Confirm concurrency group
         run: |
