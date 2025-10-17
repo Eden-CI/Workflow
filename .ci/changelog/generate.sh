@@ -173,7 +173,9 @@ echo
 echo "### Debian/Ubuntu"
 echo
 echo "These are prebuilt \`.deb\` packages for Ubuntu and Debian. To install them, run \`sudo dpkg -i Eden-<platform>-<version>.deb\`."
-echo "Note that these use system drivers, and so you may have some graphical bugs with these builds as opposed to the appimage."
+echo "Note that these use system drivers, and so you may have some graphical bugs with these builds as opposed to the AppImage."
+echo "The AppImage always bundles the latest MESA drivers, whereas your system may be running drivers from 2023 or earlier."
+echo "RADV especially is noted to have significant issues on these older versions."
 echo
 echo "| Build | Description |"
 echo "| ----- | ----------- |"

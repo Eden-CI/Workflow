@@ -29,13 +29,6 @@ runs:
       with:
         name: eden
 
-    - name: Set up CPM cache
-      uses: actions/cache@v4
-      with:
-        path: |
-          ${{ github.workspace }}/.cache
-        key: ${{ inputs.name }}-${{ inputs.arch }}-cpm-${{ env.CPM_CACHE_VERSION }}
-
     - name: Build
       shell: bash
       run: |
