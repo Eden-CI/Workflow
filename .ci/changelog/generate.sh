@@ -222,8 +222,8 @@ if [ "$DEVEL" != "true" ]; then
 	echo
 	echo "| Build | Description |"
 	echo "| ----- | ----------- |"
-	win amd64-clang-pgo "amd64 (clang)" "For any Windows machine running an AMD or Intel CPU (PGO build)"
-	win arm64-clang-pgo "aarch64 (clang)" "For any Windows machine running a Qualcomm or other ARM-based SoC (PGO build)"
+	win amd64-clang-pgo "amd64 (PGO)" "For any Windows machine running an AMD or Intel CPU (PGO build)"
+	win arm64-clang-pgo "aarch64 (PGO)" "For any Windows machine running a Qualcomm or other ARM-based SoC (PGO build)"
 	echo
 fi
 

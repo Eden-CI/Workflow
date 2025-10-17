@@ -19,20 +19,25 @@ for arch in $ARCHES; do
 		cp "linux-$arch-$compiler-standard"/*.AppImage "artifacts/$ARTIFACT.AppImage"
 		if [ "$DEVEL" = "false" ]; then
 			cp "linux-$arch-$compiler-standard"/*.AppImage.zsync "artifacts/$ARTIFACT.AppImage.zsync"
-			cp "linux-$arch-$compiler-pgo"/*.AppImage.zsync "artifacts/$ARTIFACT-PGO.AppImage.zsync"
 		fi
-
-		# TODO: put this in devel = false
-		cp "linux-$arch-$compiler-pgo"/*.AppImage "artifacts/$ARTIFACT-PGO.AppImage"
 	done
+
+	ARTIFACT="Eden-Linux-${ID}-${arch}-clang-pgo"
+
+	cp "linux-$arch-clang-pgo"/*.AppImage.zsync "artifacts/$ARTIFACT.AppImage.zsync"
+
+	# TODO: put this in devel = false
+	cp "linux-$arch-clang-pgo"/*.AppImage "artifacts/$ARTIFACT.AppImage"
 done
 
 cp android/*.apk "artifacts/Eden-Android-${ID}.apk"
 
 for arch in amd64 arm64; do
 	for compiler in clang msvc; do
-		cp "windows-$arch-${compiler}"/*.zip "artifacts/Eden-Windows-${ID}-${arch}-${compiler}.zip"
+		cp "windows-$arch-${compiler}-standard"/*.zip "artifacts/Eden-Windows-${ID}-${arch}-${compiler}.zip"
 	done
+
+	cp "windows-$arch-clang-pgo"/*.zip "artifacts/Eden-Windows-${ID}-${arch}-clang-pgo.zip"
 done
 
 if [ -d "source" ]; then
