@@ -2,7 +2,7 @@
 
 export ROOTDIR="$PWD"
 
-GITHUB_WORKSPACE="${GITHUB_WORKSPACE:-.}"
+GITHUB_WORKSPACE="$ROOTDIR"
 
 # install makedeb
 echo "-- Installing makedeb..."

@@ -1,7 +1,7 @@
 #!/bin/sh -e
 
 MANDB=/var/lib/man-db/auto-update
-export ROOTDIR="$PWD"
+WORKSPACE="$PWD"
 
 # Use sudo if available, otherwise run directly
 if command -v sudo >/dev/null 2>&1 ; then
@@ -28,8 +28,9 @@ if ! command -v sudo > /dev/null 2>&1 ; then
 	cp -r .cache /build || true
 	chown -R build:build /build
 
+	cd /build
 	sudo -E -u build "$PWD/.ci/deb/build.sh"
-	cp /build/*.deb .
+	cp /build/*.deb "$WORKSPACE"
 # otherwise just run normally
 else
 	.ci/deb/build.sh
