@@ -221,6 +221,9 @@ jobs:
             runs-on: ubuntu-24.04
 
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Composite
         uses: ./.github/workflows/debian
         with:
@@ -242,6 +245,9 @@ jobs:
             runs-on: ubuntu-24.04
 
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Composite
         uses: ./.github/workflows/debian
         with:
@@ -263,6 +269,9 @@ jobs:
             runs-on: ubuntu-24.04
 
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Composite
         uses: ./.github/workflows/debian
         with:
