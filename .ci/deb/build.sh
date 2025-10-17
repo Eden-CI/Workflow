@@ -43,10 +43,8 @@ if ! command -v sudo >/dev/null 2>&1 ; then
 	alias sudo="su - root -c"
 fi
 
-export DEBIAN_FRONTEND=noninteractive
-
 makedeb --print-srcinfo > .SRCINFO
-makedeb -s
+makedeb -s --no-confirm
 
 # for some grand reason, makepkg does not exit on errors
 ls eden*.deb || exit 1
