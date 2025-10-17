@@ -4,15 +4,22 @@ MANDB=/var/lib/man-db/auto-update
 
 ROOTDIR="$PWD"
 
-[ -f $MANDB ] && sudo rm $MANDB
+# containers don't need sudo
+if [ "$CONTAINER" = "true" ]; then
+	SUDO=""
+else
+	SUDO=sudo
+fi
+
+[ -f $MANDB ] && $SUDO rm $MANDB
 
 [ ! -d makedeb-src ] && git clone 'https://github.com/makedeb/makedeb' makedeb-src
 cd makedeb-src
 git checkout stable
 
 if command -v apt > /dev/null; then
-	sudo apt update
-	sudo apt install -y asciidoctor binutils build-essential curl fakeroot file \
+	$SUDO apt update
+	$SUDO apt install -y asciidoctor binutils build-essential curl fakeroot file \
 		gettext gawk libarchive-tools lsb-release python3 python3-apt zstd
 fi
 
