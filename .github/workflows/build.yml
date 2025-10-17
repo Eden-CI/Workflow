@@ -267,6 +267,68 @@ jobs:
           name: ubuntu-${{ matrix.os.arch }}
           path: ./eden*.deb
 
+  ubuntu:
+    name: "Ubuntu 24.04 (${{ matrix.os.arch }})"
+    needs: [clone]
+    runs-on: ${{ matrix.os.runs-on }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - arch: aarch64
+            runs-on: ubuntu-24.04-arm
+          - arch: amd64
+            runs-on: ubuntu-24.04
+
+    steps:
+      - name: Composite
+        uses: ./.github/actions/debian
+        with:
+          arch: ${{ matrix.os.arch }}
+          name: ubuntu
+
+  debian-13:
+    name: "Debian 13 (${{ matrix.os.arch }})"
+    needs: [clone]
+    runs-on: ${{ matrix.os.runs-on }}
+    container: ghcr.io/nilcons/debian:latest
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - arch: aarch64
+            runs-on: ubuntu-24.04-arm
+          - arch: amd64
+            runs-on: ubuntu-24.04
+
+    steps:
+      - name: Composite
+        uses: ./.github/actions/debian
+        with:
+          arch: ${{ matrix.os.arch }}
+          name: debian-13
+
+  debian-12:
+    name: "Debian 12 (${{ matrix.os.arch }})"
+    needs: [clone]
+    runs-on: ${{ matrix.os.runs-on }}
+    container: ghcr.io/xrplf/ci/debian-bookworm:gcc-12
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - arch: aarch64
+            runs-on: ubuntu-24.04-arm
+          - arch: amd64
+            runs-on: ubuntu-24.04
+
+    steps:
+      - name: Composite
+        uses: ./.github/actions/debian
+        with:
+          arch: ${{ matrix.os.arch }}
+          name: debian-12
+
   linux:
     name: "Linux (${{ matrix.os.arch }}) (${{ matrix.compiler }})"
     needs: [set-matrix, clone]
@@ -328,21 +390,7 @@ jobs:
 
       - name: Package
         shell: bash
-        run: ./.ci/linux/package.sh ${{ matrix.os.arch }}
-
-      # TODO(crueter): separate package stuff
-      - name: Package (binary)
-        run: |
-          cmake --install build --prefix install/usr
-
-          cd install
-          tar --owner root --group root --zstd -cf Eden-Linux.tar.zst *
-
-      - name: Upload Binary
-        uses: actions/upload-artifact@v4
-        with:
-          name: linux-binary-${{ matrix.os.arch }}-${{ matrix.compiler }}
-          path: install/Eden-Linux.tar.zst
+        run: ./.ci/linux/package.sh
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4.6.2

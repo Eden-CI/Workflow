@@ -21,8 +21,6 @@ do
     if [ "$DEVEL" = "false" ]; then
       cp "linux-$arch-$compiler"/*.AppImage.zsync "artifacts/$ARTIFACT.AppImage.zsync"
     fi
-
-    # cp "linux-binary-$arch-$compiler"/*.tar.zst "artifacts/$ARTIFACT.tar.zst"
   done
 done
 
@@ -43,3 +41,11 @@ cp -r macos/*.tar.gz "artifacts/Eden-macOS-${ID}.tar.gz"
 
 # TODO
 cp -r freebsd-binary-amd64-clang/*.tar.zst "artifacts/Eden-FreeBSD-${ID}-amd64-clang.tar.zst"
+
+for arch in aarch64 amd64; do
+	cp ubuntu-$arch/*.deb "artifacts/Eden-Ubuntu-24.04-${ID}-$arch.deb"
+
+	for ver in 12 13; do
+		cp debian-$ver-$arch "artifacts/Eden-Debian-$ver-${ID}-$arch.deb"
+	done
+done
