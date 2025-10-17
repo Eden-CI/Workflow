@@ -18,10 +18,10 @@ fi
 
 # if in a container (does not have sudo), make a build user and run as that
 if ! command -v sudo > /dev/null 2>&1 ; then
+	apt install -y sudo
+
 	useradd -m -s /bin/bash -d /build build
 	echo "build ALL=NOPASSWD: ALL" >> /etc/sudoers
-
-	apt install -y sudo
 
 	# copy workspace stuff over
 	cp -r ./* .patch .ci .reuse /build
