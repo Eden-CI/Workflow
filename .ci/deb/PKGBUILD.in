@@ -9,19 +9,21 @@ pkgdesc="High-performance Nintendo Switch emulator forked from yuzu."
 arch=('amd64' 'arm64')
 url="https://eden-emu.dev"
 license=('GPL3')
-depends=('libasound2t64' 'libboost-context-dev' 'libglu1-mesa-dev' 'libhidapi-dev' 'libfrozen-dev'
+
+# TODO(crueter): Separate some more bdeps/rdeps
+depends=('libasound2t64' 'libboost-context-dev' 'libglu1-mesa-dev' 'libhidapi-dev'
 	'libpulse-dev' 'libudev-dev' 'libxcb-icccm4' 'libxcb-image0' 'libxcb-keysyms1'
 	'libxcb-render-util0' 'libxcb-xinerama0' 'libxcb-xkb1' 'libxext-dev' 'libxkbcommon-x11-0'
 	'mesa-common-dev' 'qt6-base-private-dev' 'libenet-dev' 'libsimpleini-dev' 'libcpp-jwt-dev'
-	'libfmt-dev' 'liblz4-dev' 'nlohmann-json3-dev' 'libzstd-dev' 'libssl-dev' 'libavfilter-dev'
+	'libfmt-dev' 'liblz4-dev' 'libzstd-dev' 'libssl-dev' 'libavfilter-dev'
 	'libavcodec-dev' 'libswscale-dev' 'zlib1g-dev' 'libva-dev' 'libvdpau-dev' 'libcpp-httplib-dev'
 	'libzydis-dev' 'zydis-tools' 'libzycore-dev' 'libboost-fiber-dev' 'libcubeb-dev'
 	'libvulkan-dev' 'spirv-tools' 'spirv-headers' 'libusb-1.0-0-dev' 'libsdl2-dev'
-	'libqt6core5compat6' 'libquazip1-qt6-dev' 'libopus-dev' 'libdiscord-rpc-dev'
-	'libvulkan-memory-allocator-dev')
+	'libqt6core5compat6' 'libquazip1-qt6-dev' 'libopus-dev' 'libdiscord-rpc-dev')
 
-makedepends=('autoconf' 'glslang-tools' 'cmake' 'git' 'gcc' 'g++' 'ninja-build' 'qt6-tools-dev' 'libtool' 'nasm'
-	'vulkan-utility-libraries-dev' 'pkg-config' )
+makedepends=('autoconf' 'glslang-tools' 'cmake' 'git' 'gcc' 'g++' 'ninja-build' 'qt6-tools-dev'
+	'libtool' 'nasm' 'vulkan-utility-libraries-dev' 'pkg-config' 'libfrozen-dev'
+	'libvulkan-memory-allocator-dev' 'nlohmann-json3-dev')
 
 source=("file://$GITHUB_WORKSPACE")
 noextract=("file://$GITHUB_WORKSPACE")
