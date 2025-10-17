@@ -15,7 +15,7 @@ depends=('libasound2t64' 'libboost-context-dev' 'libglu1-mesa-dev' 'libhidapi-de
 	'mesa-common-dev' 'qt6-base-private-dev' 'libmbedtls-dev'
 	'libfmt-dev' 'liblz4-dev' 'nlohmann-json3-dev' 'libzstd-dev' 'libssl-dev' 'libavfilter-dev'
 	'libavcodec-dev' 'libswscale-dev' 'zlib1g-dev' 'libva-dev' 'libvdpau-dev'
-	'libzydis-dev' 'zydis-tools' 'libzycore-dev'
+	'libzydis-dev' 'zydis-tools' 'libzycore-dev' 'libboost-fiber-dev'
 	'libvulkan-dev' 'spirv-tools' 'spirv-headers' 'libusb-1.0-0-dev'
 	'libqt6core5compat6' 'libquazip1-qt6-dev' 'libopus-dev' )
 
