@@ -56,7 +56,7 @@ jobs:
 
   linux:
     name: "${{ matrix.os.arch }}) ${{ matrix.compiler.program }} ${{ matrix.compiler.target }}"
-    needs: [clone, set-matrix]
+    needs: [set-matrix]
     runs-on: ${{ matrix.os.runs-on }}
     container: ghcr.io/pkgforge-dev/archlinux:latest
 

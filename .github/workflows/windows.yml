@@ -32,7 +32,7 @@ jobs:
 
   windows:
     name: "${{ matrix.os.arch }} ${{ matrix.compiler.program }} ${{ matrix.compiler.target }}"
-    needs: [clone, win-matrix]
+    needs: [win-matrix]
     runs-on: ${{ matrix.os.runs-on }}
     strategy:
       fail-fast: false

@@ -237,7 +237,7 @@ jobs:
 
   linux:
     name: "AppImage"
-    # needs: [clone]
+    needs: [clone]
     uses: ./.github/workflows/appimage.yml
     with:
       build-id: '${{ inputs.build-id }}'
@@ -245,7 +245,7 @@ jobs:
 
   windows:
     name: "Windows"
-    # needs: [clone]
+    needs: [clone]
     uses: ./.github/workflows/appimage.yml
     with:
       build-id: '${{ inputs.build-id }}'
