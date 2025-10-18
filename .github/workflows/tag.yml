@@ -80,6 +80,7 @@ jobs:
       #     releaseName: ${{ env.FORGEJO_REF }}
 
       - name: Release
+        id: release
         uses: softprops/action-gh-release@v2.2.2
         with:
           name: "Eden ${{ env.FORGEJO_REF }}"
@@ -94,3 +95,14 @@ jobs:
           make_latest: true
           files: |
             artifacts/*
+
+      - name: Add release URL to summary
+        run: |
+          {
+            echo "## Release Summary"
+            echo ""
+            echo "- View Release on GitHub: [${{ env.FORGEJO_REF }}](${{ steps.release.outputs.url }})"
+            echo ""
+          } > RELEASE_GITHUB_SUMMARY.md
+          cat "$GITHUB_SUMMARY" > OLD_GITHUB_SUMMARY.md
+          cat RELEASE_GITHUB_SUMMARY.md OLD_GITHUB_SUMMARY.md > "$GITHUB_SUMMARY"

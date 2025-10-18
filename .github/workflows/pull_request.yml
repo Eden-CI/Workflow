@@ -81,6 +81,7 @@ jobs:
             artifacts/*
 
       - name: Release (PR)
+        id: release
         uses: softprops/action-gh-release@v2.2.2
         with:
           name: ${{ env.FORGEJO_PR_TITLE }}
@@ -94,3 +95,14 @@ jobs:
           fail_on_unmatched_files: false
           discussion_category_name: "PRs"
           make_latest: true
+
+      - name: Add release URL to summary
+        run: |
+          {
+            echo "## Release Summary"
+            echo ""
+            echo "- View Release on GitHub: [#${{ env.FORGEJO_PR_NUMBER }}](${{ steps.release.outputs.url }})"
+            echo ""
+          } > RELEASE_GITHUB_SUMMARY.md
+          cat "$GITHUB_SUMMARY" > OLD_GITHUB_SUMMARY.md
+          cat RELEASE_GITHUB_SUMMARY.md OLD_GITHUB_SUMMARY.md > "$GITHUB_SUMMARY"
