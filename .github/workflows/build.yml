@@ -73,7 +73,8 @@ jobs:
           git -C eden apply ../${TEMP_PATCH}.patch
           rm ${TEMP_PATCH}.patch
 
-      # TODO: properly pass FORGEJO_PR_MERGE_BASE
+      # TODO: wait for properly fix FORGEJO_PR_MERGE_BASE
+      # <https://codeberg.org/forgejo/forgejo/issues/9601>
       - name: ReLoad payload environment
         shell: bash
         run: |
