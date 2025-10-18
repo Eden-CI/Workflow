@@ -135,11 +135,6 @@ jobs:
       - name: Confirm concurrency group
         run: |
           echo "Using concurrency group: ${{ needs.clone.outputs.concurrency_group }}"
-          if [[ "${{ needs.clone.outputs.concurrency_group }}" == "branch-master-master" ]]; then
-            echo "This build cant be auto-cancelled (master branch build)."
-          else
-            echo "Concurrent runs of this group will be cancelled if a new one starts."
-          fi
 
   source:
     name: "Source Pack"
@@ -225,10 +220,10 @@ jobs:
       devel: ${{ inputs.devel }}
     secrets: inherit
 
-  status:
+  status-if-cancelled:
     name: "Send Commit Status to Forgejo"
     needs: [source, deb, linux, windows, android, macos, unix]
-    if: ${{ always() && ((inputs.build-id || '') == 'master' || (inputs.build-id || '') == 'pull_request') }}
+    if: ${{ cancelled() && ((inputs.build-id || '') == 'master' || (inputs.build-id || '') == 'pull_request') }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -241,18 +236,40 @@ jobs:
       - name: Load payload environment
         run: |
           ./.ci/forgejo.sh --load-payload-env
+          python3 ./.ci/common/status.py cancelled
 
-      - name: Send cancelled status
-        if: ${{ cancelled() }}
-        shell: bash
-        run: python3 ./.ci/common/status.py cancelled
+  status-if-failure:
+    name: "Send Commit Status to Forgejo"
+    needs: [source, deb, linux, windows, android, macos, unix]
+    if: ${{ failure() && ((inputs.build-id || '') == 'master' || (inputs.build-id || '') == 'pull_request') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
 
-      - name: Send failure status
-        if: ${{ failure() }}
-        shell: bash
-        run: python3 ./.ci/common/status.py failure
+      - name: Download payload environment
+        uses: actions/download-artifact@v4
+        with:
+          name: forgejo-env
 
-      - name: Send success status
-        if: ${{ success() }}
-        shell: bash
-        run: python3 ./.ci/common/status.py success
+      - name: Load payload environment
+        run: |
+          ./.ci/forgejo.sh --load-payload-env
+          python3 ./.ci/common/status.py failure
+
+  status-if-success:
+    name: "Send Commit Status to Forgejo"
+    needs: [source, deb, linux, windows, android, macos, unix]
+    if: ${{ success() && ((inputs.build-id || '') == 'master' || (inputs.build-id || '') == 'pull_request') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Download payload environment
+        uses: actions/download-artifact@v4
+        with:
+          name: forgejo-env
+
+      - name: Load payload environment
+        run: |
+          ./.ci/forgejo.sh --load-payload-env
+          python3 ./.ci/common/status.py success
