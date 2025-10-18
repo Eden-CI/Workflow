@@ -42,7 +42,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5.0.0
 
       - name: Disable man-db updates
         run: sudo rm /var/lib/man-db/auto-update
@@ -54,7 +54,7 @@ jobs:
           version: ${{ inputs.cpm-cache-version }}
 
       - name: Configure sccache
-        uses: actions/github-script@v8
+        uses: actions/github-script@v8.0.0
         with:
           script: |
             core.exportVariable('ACTIONS_RESULTS_URL', process.env.ACTIONS_RESULTS_URL || '');
@@ -63,7 +63,7 @@ jobs:
 
       - name: Build (FreeBSD)
         if: matrix.os.platform == 'freebsd'
-        uses: vmactions/freebsd-vm@v1
+        uses: vmactions/freebsd-vm@v1.2.4
         with:
           arch: ${{ matrix.os.vm-arch }}
           usesh: true
@@ -99,7 +99,7 @@ jobs:
             tar --owner root --group root --zstd -cf Eden-FreeBSD.tar.zst *
 
       - name: Upload Binary
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v4.6.2
         with:
           name: ${{ matrix.os.platform }}-binary-${{ matrix.os.arch }}-${{ matrix.compiler }}
           path: install/Eden-${{ matrix.os.name }}.tar.zst
