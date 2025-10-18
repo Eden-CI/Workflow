@@ -6,25 +6,8 @@
 # Unified CI helper for Forgejo > GitHub integration
 # Supports: --parse, --summary, --clone
 
-# shellcheck disable=SC1090
-
 FORGEJO_LENV=${FORGEJO_LENV:-"forgejo.env"}
 touch "$FORGEJO_LENV"
-
-load_payload_env() {
-	if [ -f "$FORGEJO_LENV" ]; then
-		if [ "$CI" = "true" ]; then
-			# Safe export to GITHUB_ENV
-			while IFS= read -r line; do
-				echo "$line" >> "$GITHUB_ENV"
-			done <"$FORGEJO_LENV"
-		else
-			set -a
-			. "$FORGEJO_LENV"
-			set +a
-		fi
-	fi
-}
 
 parse_payload() {
 	DEFAULT_JSON="default.json"

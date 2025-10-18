@@ -72,7 +72,7 @@ jobs:
         shell: bash
         run: |
           export FORGEJO_LENV=forgejo-env/forgejo.env
-          ./.ci/forgejo.sh --load-payload-env
+          . ./.ci/common/load-env.sh --load-payload-env
 
       - name: Set environment variables
         run: |

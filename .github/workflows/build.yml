@@ -45,7 +45,7 @@ jobs:
       - name: Load payload environment
         shell: bash
         run: |
-          ./.ci/forgejo.sh --load-payload-env
+          . ./.ci/common/load-env.sh --load-payload-env
 
       - name: Send Commit Status to Forgejo
         if: ${{ inputs.build-id == 'master' || inputs.build-id == 'pull_request' }}
@@ -77,7 +77,7 @@ jobs:
       - name: ReLoad payload environment
         shell: bash
         run: |
-          ./.ci/forgejo.sh --load-payload-env
+          . ./.ci/common/load-env.sh --load-payload-env
 
       - name: Summary
         shell: bash
@@ -202,7 +202,7 @@ jobs:
 
       - name: Load payload environment
         run: |
-          ./.ci/forgejo.sh --load-payload-env
+          . ./.ci/common/load-env.sh --load-payload-env
           python3 ./.ci/common/status.py cancelled
 
   status-if-failure:
@@ -220,7 +220,7 @@ jobs:
 
       - name: Load payload environment
         run: |
-          ./.ci/forgejo.sh --load-payload-env
+          . ./.ci/common/load-env.sh --load-payload-env
           python3 ./.ci/common/status.py failure
 
   status-if-success:
@@ -238,5 +238,5 @@ jobs:
 
       - name: Load payload environment
         run: |
-          ./.ci/forgejo.sh --load-payload-env
+          . ./.ci/common/load-env.sh --load-payload-env
           python3 ./.ci/common/status.py success
