@@ -188,9 +188,9 @@ jobs:
     secrets: inherit
 
   status-if-cancelled:
-    name: "Send Commit Status to Forgejo"
+    name: "Send Cancelled Commit Status to Forgejo"
     needs: [source, deb, linux, windows, android, macos, unix]
-    if: ${{ cancelled() && ((inputs.build-id || '') == 'master' || (inputs.build-id || '') == 'pull_request') }}
+    if: ${{ always() && cancelled() && ((inputs.build-id || '') == 'master' || (inputs.build-id || '') == 'pull_request') }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -206,9 +206,9 @@ jobs:
           python3 ./.ci/common/status.py cancelled
 
   status-if-failure:
-    name: "Send Commit Status to Forgejo"
+    name: "Send Failure Commit Status to Forgejo"
     needs: [source, deb, linux, windows, android, macos, unix]
-    if: ${{ failure() && ((inputs.build-id || '') == 'master' || (inputs.build-id || '') == 'pull_request') }}
+    if: ${{ always() && failure() && ((inputs.build-id || '') == 'master' || (inputs.build-id || '') == 'pull_request') }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -224,9 +224,9 @@ jobs:
           python3 ./.ci/common/status.py failure
 
   status-if-success:
-    name: "Send Commit Status to Forgejo"
+    name: "Send Success Commit Status to Forgejo"
     needs: [source, deb, linux, windows, android, macos, unix]
-    if: ${{ success() && ((inputs.build-id || '') == 'master' || (inputs.build-id || '') == 'pull_request') }}
+    if: ${{ always() && success() && ((inputs.build-id || '') == 'master' || (inputs.build-id || '') == 'pull_request') }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
