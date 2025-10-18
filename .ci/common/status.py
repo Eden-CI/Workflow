@@ -9,7 +9,7 @@ import os
 import requests
 
 # --- Required Forgejo environment variables ---
-FORGEJO_HOST = os.getenv("FORGEJO_HOST")
+FORGEJO_HOST = os.getenv("FORGEJO_HOST", "git.eden-emu.dev")
 FORGEJO_REPO = os.getenv("FORGEJO_REPO")
 FORGEJO_REF = os.getenv("FORGEJO_REF")
 FORGEJO_TOKEN = os.getenv("FORGEJO_TOKEN")
@@ -45,7 +45,7 @@ def send_commit_status(state):
     """Send build status to the last commit of the PR."""
     if not is_token_valid():
         return
-    if not (FORGEJO_HOST and FORGEJO_REPO and FORGEJO_REF and FORGEJO_TOKEN):
+    if not (FORGEJO_REPO and FORGEJO_REF and FORGEJO_TOKEN):
         print("[WARN] Missing repository or commit info, cannot send commit status.")
         return
     if not WORKFLOW_URL:

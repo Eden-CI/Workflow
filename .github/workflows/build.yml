@@ -187,16 +187,11 @@ jobs:
     if: ${{ always() && cancelled() && ((inputs.build-id || '') == 'master' || (inputs.build-id || '') == 'pull_request') }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-
-      - name: Download payload environment
-        uses: actions/download-artifact@v4
-        with:
-          name: forgejo-env
-
-      - name: Load payload environment
+      - uses: actions/checkout@v5.0.0
+      - name: Load payload env and send status
         run: |
-          . ./.ci/common/load-env.sh --load-payload-env
+          echo FORGEJO_REPO=${{ github.event.client_payload.repository }} >> "$GITHUB_ENV"
+          echo FORGEJO_REF=${{ github.event.client_payload.ref }} >> "$GITHUB_ENV"
           python3 ./.ci/common/status.py error
 
   status-if-failure:
@@ -205,16 +200,11 @@ jobs:
     if: ${{ always() && failure() && ((inputs.build-id || '') == 'master' || (inputs.build-id || '') == 'pull_request') }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-
-      - name: Download payload environment
-        uses: actions/download-artifact@v4
-        with:
-          name: forgejo-env
-
-      - name: Load payload environment
+      - uses: actions/checkout@v5.0.0
+      - name: Load payload env and send status
         run: |
-          . ./.ci/common/load-env.sh --load-payload-env
+          echo FORGEJO_REPO=${{ github.event.client_payload.repository }} >> "$GITHUB_ENV"
+          echo FORGEJO_REF=${{ github.event.client_payload.ref }} >> "$GITHUB_ENV"
           python3 ./.ci/common/status.py failure
 
   status-if-success:
@@ -223,14 +213,9 @@ jobs:
     if: ${{ always() && success() && ((inputs.build-id || '') == 'master' || (inputs.build-id || '') == 'pull_request') }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-
-      - name: Download payload environment
-        uses: actions/download-artifact@v4
-        with:
-          name: forgejo-env
-
-      - name: Load payload environment
+      - uses: actions/checkout@v5.0.0
+      - name: Load payload env and send status
         run: |
-          . ./.ci/common/load-env.sh --load-payload-env
+          echo FORGEJO_REPO=${{ github.event.client_payload.repository }} >> "$GITHUB_ENV"
+          echo FORGEJO_REF=${{ github.event.client_payload.ref }} >> "$GITHUB_ENV"
           python3 ./.ci/common/status.py success
