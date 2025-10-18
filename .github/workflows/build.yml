@@ -94,6 +94,12 @@ jobs:
           git -C eden apply ../${TEMP_PATCH}.patch
           rm ${TEMP_PATCH}.patch
 
+      # TODO: properly pass FORGEJO_PR_MERGE_BASE
+      - name: ReLoad payload environment
+        shell: bash
+        run: |
+          ./.ci/forgejo.sh --load-payload-env
+
       - name: Summary
         shell: bash
         run: |
