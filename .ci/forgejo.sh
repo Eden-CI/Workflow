@@ -184,7 +184,10 @@ clone_repository() {
 	git -C eden describe --tags HEAD --abbrev=0 > eden/GIT-TAG || echo 'v0.0.3' > eden/GIT-TAG
 
 	# slight hack: also add the merge base
-	echo "FORGEJO_PR_MERGE_BASE=$(git -C eden merge-base master HEAD | cut -c1-10)" >> "$FORGEJO_LENV"
+        # <https://codeberg.org/forgejo/forgejo/issues/9601>
+	FORGEJO_PR_MERGE_BASE=$(git -C eden merge-base master HEAD | cut -c1-10)
+	echo "FORGEJO_PR_MERGE_BASE=$FORGEJO_PR_MERGE_BASE" >> "$FORGEJO_LENV"
+	echo "FORGEJO_PR_MERGE_BASE=$FORGEJO_PR_MERGE_BASE" >> "$GITHUB_ENV"
 
 	if [ "$1" = "tag" ]; then
 		cp eden/GIT-TAG eden/GIT-RELEASE

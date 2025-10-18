@@ -73,13 +73,6 @@ jobs:
           git -C eden apply ../${TEMP_PATCH}.patch
           rm ${TEMP_PATCH}.patch
 
-      # TODO: wait for properly fix FORGEJO_PR_MERGE_BASE
-      # <https://codeberg.org/forgejo/forgejo/issues/9601>
-      - name: ReLoad payload environment
-        shell: bash
-        run: |
-          . ./.ci/common/load-env.sh --load-payload-env
-
       - name: Summary
         shell: bash
         run: |
