@@ -56,17 +56,17 @@ def send_commit_status(state):
     api_url = f"https://{FORGEJO_HOST}/api/v1/repos/{FORGEJO_REPO}/statuses/{FORGEJO_REF}"
 
     status_mapping = {
-        "start": "pending",
+        "pending": "pending",
         "success": "success",
         "failure": "failure",
-        "cancelled": "error"
+        "error": "error"
     }
 
     description_mapping = {
-        "start": "Build started",
+        "pending": "Build started",
         "success": "Build succeeded",
         "failure": "Build failed",
-        "cancelled": "Build cancelled"
+        "error": "Build cancelled"
     }
 
     if state not in status_mapping:
@@ -111,10 +111,10 @@ def send_pr_comment(state):
 
     # --- Single message template with variable final word ---
     status_word = {
-        "start": "started",
+        "pending": "started",
         "success": "succeeded",
         "failure": "failed",
-        "cancelled": "cancelled"
+        "error": "error"
     }
 
     if state not in status_word:
@@ -172,7 +172,7 @@ if __name__ == "__main__":
 
     if len(sys.argv) < 2:
         print("Usage: status.py <state> [--pr-comment]")
-        print("States: start, success, failure, cancelled")
+        print("States: pending, success, failure, error")
         print("Optional flag: --pr-comment  # Post PR comment in addition to commit status")
         exit(1)
 
