@@ -1,4 +1,4 @@
-name: "[Auto] Build Pull Request #${{ github.event.client_payload.number }} from Forgejo"
+name: "[Auto] Build on open 'Pull Request' from Forgejo"
 
 on:
   repository_dispatch:
