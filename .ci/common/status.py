@@ -41,7 +41,7 @@ def is_token_valid():
     return True
 
 # --- Send commit status ---
-def send_commit_status(state):
+def send_commit_status(state: str, release_url: str | None = None):
     """Send build status to the last commit of the PR."""
     if not is_token_valid():
         return
@@ -55,6 +55,7 @@ def send_commit_status(state):
     api_url = f"https://{FORGEJO_HOST}/api/v1/repos/{FORGEJO_REPO}/statuses/{FORGEJO_REF}"
 
     description_mapping = {
+        "release": "Build succeeded – Release published",
         "pending": "Build started",
         "success": "Build succeeded",
         "failure": "Build failed",
@@ -65,9 +66,16 @@ def send_commit_status(state):
         print(f"[WARN] Unknown state '{state}', skipping commit status.")
         return
 
+    if state == "release" and release_url:
+        target_url = release_url
+        target_state = "success"
+    else:
+        target_url = WORKFLOW_URL
+        target_state = state
+
     data = {
-        "state": state,
-        "target_url": WORKFLOW_URL,
+        "state": target_state,
+        "target_url": target_url,
         "description": f"[CI] {description_mapping[state]}",
         "context": "GitHub Actions"
     }
@@ -81,7 +89,9 @@ def send_commit_status(state):
             if r.status_code == 401:
                 print("[INFO] Token unauthorized, skipping further requests.")
         else:
-            print(f"[INFO] Commit status sent successfully: {state}")
+            print(f"[INFO] Commit status sent successfully: {target_state}")
+            if state == "release" and release_url:
+                print(f"[INFO] Target URL: {target_url}")
     except Exception as e:
         print(f"[ERROR] Exception while sending commit status: {e}")
 
@@ -89,11 +99,17 @@ if __name__ == "__main__":
     import sys
 
     if len(sys.argv) < 2:
-        print("Usage: status.py <state>")
-        print("States: pending, success, failure, error")
+        print("Usage: status.py <state> [release_url]")
+        print("States: pending, success, failure, error, release")
         exit(1)
 
     state = sys.argv[1].lower()
 
-    send_commit_status(state)
+    release_url = sys.argv[2] if len(sys.argv) > 2 else None
+    if state == "release" and not release_url:
+        print("[ERROR] Missing release_url argument for 'release' state.")
+        print("Usage: status.py release <release_url>")
+        exit(1)
+
+    send_commit_status(state, release_url)
 
