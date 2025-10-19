@@ -10,7 +10,6 @@ env:
 jobs:
   build:
     name: Build
-    needs: [concurrency-check]
     concurrency:
       group: tag-build
       cancel-in-progress: true
