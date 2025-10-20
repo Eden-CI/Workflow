@@ -1,6 +1,23 @@
 # Eden Workflow
 
-## Create a Personal Access Token (PAT)
+## Setup fj2ghook
+
+More info on: [crueter/fj2ghook](https://git.crueter.xyz/crueter/fj2ghook)
+
+## Create a Forgejo Personal Access Token (FORGEJO_TOKEN)
+
+1. Go to your Forgejo applicatiob: https://{your-forgejo}/user/settings/applications
+3. On Access tokens, choose a **Token name**.
+4. Set **Repository and Organization Access** ("Public only" recommended).
+5. Under **Select permissions**, set permissions:
+    - **issue**: `Read and write`
+    - **repository**: `Read and write`
+8. Generate the token and copy it.
+9. Save the token as a secret named `FORGEJO_TOKEN` in the `Workflow` repository:
+    - Go to:
+      `Settings` → `Secrets and variables` → `Actions` → `New repository secret`
+
+## Create a Github Personal Access Token (CUSTOM_GITHUB_TOKEN)
 
 Since these workflows need to push to another repository (see `release.json`), the default `GITHUB_TOKEN` does **not** have cross-repository permissions. You need to create a **Fine-grained Personal Access Token**:
 
@@ -10,6 +27,7 @@ Since these workflows need to push to another repository (see `release.json`), t
 4. Set an expiration date (recommended).
 5. Under **Repository access**, select **Only select repositories**.
 6. Select `{OWNER}/Master`, `{OWNER}/PR` and other repos set on `release.json`.
+    - It's recommended to enable `Discussions` on the `{OWNER}/PR`
 7. Set permissions:
     - **Contents**: `Read and write`
 8. Generate the token and copy it.
