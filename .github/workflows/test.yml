@@ -10,6 +10,7 @@ env:
   DISABLE_ARM: ${{ vars.DISABLE_ARM }}
 
 jobs:
+  # TODO: Create a fake payload to ONLY test all workflows without building packages
   build:
     name: Build
     concurrency:
