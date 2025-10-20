@@ -35,6 +35,14 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Send Commit Status to Forgejo
+        if: ${{ inputs.build-id == 'master' || inputs.build-id == 'pull_request' }}
+        shell: bash
+        run: |
+          export FORGEJO_REPO="${{ github.event.client_payload.repository }}"
+          export FORGEJO_REF="${{ github.event.client_payload.ref }}"
+          python ./.ci/common/status.py pending
+
       - name: Parse Forgejo payload
         shell: bash
         run: |
@@ -46,12 +54,6 @@ jobs:
         shell: bash
         run: |
           . ./.ci/common/load-env.sh --load-payload-env
-
-      - name: Send Commit Status to Forgejo
-        if: ${{ inputs.build-id == 'master' || inputs.build-id == 'pull_request' }}
-        shell: bash
-        run: |
-          python ./.ci/common/status.py pending
 
       # for some amazing reason you can't pass env vars to reusable workflows
       - name: Setup Outputs
@@ -190,8 +192,8 @@ jobs:
       - uses: actions/checkout@v5.0.0
       - name: Load payload env and send status
         run: |
-          echo FORGEJO_REPO=${{ github.event.client_payload.repository }} >> "$GITHUB_ENV"
-          echo FORGEJO_REF=${{ github.event.client_payload.ref }} >> "$GITHUB_ENV"
+          export FORGEJO_REPO="${{ github.event.client_payload.repository }}"
+          export FORGEJO_REF="${{ github.event.client_payload.ref }}"
           python3 ./.ci/common/status.py error
 
   status-if-failure:
@@ -203,8 +205,8 @@ jobs:
       - uses: actions/checkout@v5.0.0
       - name: Load payload env and send status
         run: |
-          echo FORGEJO_REPO=${{ github.event.client_payload.repository }} >> "$GITHUB_ENV"
-          echo FORGEJO_REF=${{ github.event.client_payload.ref }} >> "$GITHUB_ENV"
+          export FORGEJO_REPO="${{ github.event.client_payload.repository }}"
+          export FORGEJO_REF="${{ github.event.client_payload.ref }}"
           python3 ./.ci/common/status.py failure
 
   status-if-success:
@@ -216,6 +218,6 @@ jobs:
       - uses: actions/checkout@v5.0.0
       - name: Load payload env and send status
         run: |
-          echo FORGEJO_REPO=${{ github.event.client_payload.repository }} >> "$GITHUB_ENV"
-          echo FORGEJO_REF=${{ github.event.client_payload.ref }} >> "$GITHUB_ENV"
+          export FORGEJO_REPO="${{ github.event.client_payload.repository }}"
+          export FORGEJO_REF="${{ github.event.client_payload.ref }}"
           python3 ./.ci/common/status.py success

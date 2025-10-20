@@ -111,39 +111,52 @@ parse_payload() {
 
 # TODO: cleanup, cat-eof?
 generate_summary() {
-	echo "## Job Summary" >> "$GITHUB_STEP_SUMMARY"
-	echo "- Triggered by: $1" >> "$GITHUB_STEP_SUMMARY"
-	echo "- Commit: [\`$FORGEJO_REF\`](https://$FORGEJO_HOST/$FORGEJO_REPO/commit/$FORGEJO_REF)" >> "$GITHUB_STEP_SUMMARY"
-	echo >> "$GITHUB_STEP_SUMMARY"
+	{
+	echo "## Job Summary"
+	echo "- Triggered by: $1"
+	echo "- Commit: [\`$FORGEJO_REF\`](https://$FORGEJO_HOST/$FORGEJO_REPO/commit/$FORGEJO_REF)"
+	echo
+	} >> "$GITHUB_STEP_SUMMARY"
 
 	if [ "$FORGEJO_MIRROR" = true ]; then
-		echo "## Using mirror:" >> "$GITHUB_STEP_SUMMARY"
-		echo "- Mirror URL: [\`$FORGEJO_HOST/$FORGEJO_REPO\`]($FORGEJO_CLONE_URL)" >> "$GITHUB_STEP_SUMMARY"
-		echo >> "$GITHUB_STEP_SUMMARY"
+		{
+		echo "## Using mirror:"
+		echo "- Mirror URL: [\`$FORGEJO_HOST/$FORGEJO_REPO\`]($FORGEJO_CLONE_URL)"
+		echo
+		} >> "$GITHUB_STEP_SUMMARY"
 	fi
 
 	case "$1" in
 	master)
-		echo "## Master Build" >> "$GITHUB_STEP_SUMMARY"
-		echo "- Full changelog: [\`$FORGEJO_BEFORE...$FORGEJO_REF\`](https://$FORGEJO_HOST/$FORGEJO_REPO/compare/$FORGEJO_BEFORE...$FORGEJO_REF)" >> "$GITHUB_STEP_SUMMARY"
+		{
+		echo "## Master Build"
+		echo "- Full changelog: [\`$FORGEJO_BEFORE...$FORGEJO_REF\`](https://$FORGEJO_HOST/$FORGEJO_REPO/compare/$FORGEJO_BEFORE...$FORGEJO_REF)"
+		} >> "$GITHUB_STEP_SUMMARY"
+
 		;;
 	pull_request)
-		echo "## Pull Request Summary" >> "$GITHUB_STEP_SUMMARY"
-		echo "- Pull Request: #[${FORGEJO_PR_NUMBER}]($FORGEJO_PR_URL)" >> "$GITHUB_STEP_SUMMARY"
-		echo "- Merge Base Commit: [\`$FORGEJO_PR_MERGE_BASE\`](https://$FORGEJO_HOST/$FORGEJO_REPO/commit/$FORGEJO_PR_MERGE_BASE)" >> "$GITHUB_STEP_SUMMARY"
-		echo >> "$GITHUB_STEP_SUMMARY"
-		echo "## Pull Request Changelog Summary" >> "$GITHUB_STEP_SUMMARY"
-		echo "$FORGEJO_PR_TITLE" >> "$GITHUB_STEP_SUMMARY"
-		echo "" >> "$GITHUB_STEP_SUMMARY"
+		{
+		echo "## Pull Request Summary"
+		echo "- Pull Request: #[${FORGEJO_PR_NUMBER}]($FORGEJO_PR_URL)"
+		echo "- Merge Base Commit: [\`$FORGEJO_PR_MERGE_BASE\`](https://$FORGEJO_HOST/$FORGEJO_REPO/commit/$FORGEJO_PR_MERGE_BASE)"
+		echo
+		echo "## Pull Request Changelog Summary"
+		echo "$FORGEJO_PR_TITLE"
+		echo
+		} >> "$GITHUB_STEP_SUMMARY"
 		.ci/common/field.py field="body" default_msg="No changelog provided" pull_request_number="$FORGEJO_PR_NUMBER" >> "$GITHUB_STEP_SUMMARY"
 		;;
 	push | test)
-		echo "## Continuous Integration Test Build" >> "$GITHUB_STEP_SUMMARY"
-		echo "- This build was triggered for testing purposes." >> "$GITHUB_STEP_SUMMARY"
+		{
+		echo "## Continuous Integration Test Build"
+		echo "- This build was triggered for testing purposes."
+		} >> "$GITHUB_STEP_SUMMARY"
 		;;
 	*)
-		echo "## Unknown Build Type" >> "$GITHUB_STEP_SUMMARY"
-		echo "- Build type '$1' is not recognized." >> "$GITHUB_STEP_SUMMARY"
+		{
+		echo "## Unknown Build Type"
+		echo "- Build type '$1' is not recognized."
+		} >> "$GITHUB_STEP_SUMMARY"
 		;;
 	esac
 

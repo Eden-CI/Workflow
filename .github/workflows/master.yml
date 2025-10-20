@@ -6,6 +6,7 @@ on:
 
 env:
   DISABLE_ARM: ${{ vars.DISABLE_ARM }}
+  FORGEJO_TOKEN: ${{ secrets.FORGEJO_TOKEN }}
 
 jobs:
   build:
@@ -88,9 +89,7 @@ jobs:
             echo ""
             echo "- View Release on GitHub: [Master](${{ steps.release.outputs.url }})"
             echo ""
-          } > RELEASE_GITHUB_STEP_SUMMARY.md
-          cat "$GITHUB_STEP_SUMMARY" > OLD_GITHUB_STEP_SUMMARY.md
-          cat RELEASE_GITHUB_STEP_SUMMARY.md OLD_GITHUB_STEP_SUMMARY.md > "$GITHUB_STEP_SUMMARY"
+          } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Send release URL to status
         run: |
