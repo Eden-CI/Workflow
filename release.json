@@ -2,21 +2,21 @@
   {
     "build-id": "master",
     "host": "github.com",
-    "repository": "Caio99BR/Master",
+    "repository": "Caio99BR/Master"
   },
   {
     "build-id": "pull_request",
     "host": "github.com",
-    "repository": "Caio99BR/PR",
+    "repository": "Caio99BR/PR"
   },
   {
     "build-id": "tag",
     "host": "github.com",
-    "repository": "eden-emulator/Releases",
+    "repository": "eden-emulator/Releases"
   },
   {
     "build-id": "pgo",
     "host": "github.com",
-    "repository": "Caio99BR/PGO",
+    "repository": "Caio99BR/PGO"
   }
 ]
