@@ -134,6 +134,7 @@ generate_summary() {
 		echo >> "$GITHUB_STEP_SUMMARY"
 		echo "## Pull Request Changelog Summary" >> "$GITHUB_STEP_SUMMARY"
 		echo "$FORGEJO_PR_TITLE" >> "$GITHUB_STEP_SUMMARY"
+		echo "" >> "$GITHUB_STEP_SUMMARY"
 		.ci/common/field.py field="body" default_msg="No changelog provided" pull_request_number="$FORGEJO_PR_NUMBER" >> "$GITHUB_STEP_SUMMARY"
 		;;
 	push | test)
