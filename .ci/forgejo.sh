@@ -36,7 +36,7 @@ parse_payload() {
 		RELEASE_MASTER_HOST=$(jq -r --arg id "master" '.[] | select(.["build-id"] == $id) | .host' release.json)
 		RELEASE_MASTER_REPO=$(jq -r --arg id "master" '.[] | select(.["build-id"] == $id) | .repository' release.json)
 		{
-			echo "RELEASE_MASTER_HOST=$RELEASE_MASTER_REPO"
+			echo "RELEASE_MASTER_HOST=$RELEASE_MASTER_HOST"
 			echo "RELEASE_MASTER_REPO=$RELEASE_MASTER_REPO"
 		} >> "$FORGEJO_LENV"
 	fi
