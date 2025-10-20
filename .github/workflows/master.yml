@@ -22,7 +22,6 @@ jobs:
   release:
     name: "Create Release"
     needs: [build]
-    if: ${{ secrets.CUSTOM_GITHUB_TOKEN }}
     permissions:
       actions: read
       security-events: write
@@ -55,6 +54,7 @@ jobs:
           ./pack.sh
 
       - name: Delete Previous Release
+        if: ${{ secrets.CUSTOM_GITHUB_TOKEN }}
         run: |
           gh release delete "continuous" --repo "$RELEASE_MASTER_REPO" --cleanup-tag  -y
           sleep 5
@@ -66,6 +66,7 @@ jobs:
         run: ./.ci/changelog/generate.sh master > changelog.md
 
       - name: Release
+        if: ${{ secrets.CUSTOM_GITHUB_TOKEN }}
         id: release
         uses: softprops/action-gh-release@v2.2.2
         with:

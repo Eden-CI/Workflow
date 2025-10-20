@@ -22,7 +22,6 @@ jobs:
   release:
     name: "Create Release"
     needs: [build]
-    if: ${{ secrets.CUSTOM_GITHUB_TOKEN }}
     permissions:
       actions: read
       security-events: write
@@ -58,6 +57,7 @@ jobs:
           ./.ci/changelog/generate.sh pull_request > changelog.md
 
       - name: Delete Previous Release
+        if: ${{ secrets.CUSTOM_GITHUB_TOKEN }}
         run: |
           gh release delete "$FORGEJO_PR_NUMBER" --repo "$RELEASE_PR_REPO" --cleanup-tag  -y
           sleep 5
@@ -66,6 +66,7 @@ jobs:
         continue-on-error: true
 
       - name: Release (sha)
+        if: ${{ secrets.CUSTOM_GITHUB_TOKEN }}
         uses: softprops/action-gh-release@v2.2.2
         with:
           name: "${{ env.FORGEJO_PR_TITLE }}"
@@ -82,6 +83,7 @@ jobs:
             artifacts/*
 
       - name: Release (PR)
+        if: ${{ secrets.CUSTOM_GITHUB_TOKEN }}
         id: release
         uses: softprops/action-gh-release@v2.2.2
         with:
