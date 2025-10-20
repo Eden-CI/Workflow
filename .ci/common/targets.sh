@@ -81,7 +81,7 @@ if [ "$PLATFORM" = "linux" ] || [ "$COMPILER" = "clang" ]; then
 
 		PROFDATA="$PWD/eden.profdata"
 		[ -f "$PROFDATA" ] && rm -f "$PROFDATA"
-		curl -L https://github.com/Eden-CI/PGO/releases/latest/download/eden.profdata > "$PROFDATA"
+		curl -L https://$RELEASE_PGO_HOST/$RELEASE_PGO_REPO/releases/latest/download/eden.profdata > "$PROFDATA"
 		[ ! -f "$PROFDATA" ] && (echo "PGO data failed to download" ; exit 1)
 		command -v cygpath >/dev/null 2>&1 && PROFDATA="$(cygpath -m "$PROFDATA")"
 		ARCH_FLAGS="${ARCH_FLAGS} -fprofile-use=$PROFDATA -Wno-backend-plugin -Wno-profile-instr-unprofiled -Wno-profile-instr-out-of-date"

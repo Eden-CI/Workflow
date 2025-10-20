@@ -6,18 +6,22 @@ case "$1" in
 master)
 	TAG="v${TIMESTAMP}.${FORGEJO_REF}"
 	REF="${FORGEJO_REF}"
+	BASE_DOWNLOAD_URL="https://$RELEASE_MASTER_HOST/$RELEASE_MASTER_REPO/releases/download"
 	;;
 pull_request)
 	TAG="${FORGEJO_PR_NUMBER}-${FORGEJO_REF}"
 	REF="${FORGEJO_PR_NUMBER}-${FORGEJO_REF}"
+	BASE_DOWNLOAD_URL="https://$RELEASE_PR_HOST/$RELEASE_PR_REPO/releases/download"
 	;;
 tag)
 	TAG="${FORGEJO_REF}"
 	REF="${FORGEJO_REF}"
+	BASE_DOWNLOAD_URL="https://$RELEASE_TAG_HOST/$RELEASE_TAG_REPO/releases/download"
 	;;
 push | test)
 	TAG="v${TIMESTAMP}.${FORGEJO_REF}"
 	REF="${FORGEJO_REF}"
+	BASE_DOWNLOAD_URL="https://$RELEASE_MASTER_HOST/$RELEASE_MASTER_REPO/releases/download"
 	;;
 *)
 	echo "Type: $1"
@@ -26,7 +30,7 @@ push | test)
 	;;
 esac
 
-BASE_DOWNLOAD_URL="https://github.com/$REPO/releases/download"
+COMPARE_RELEASE_URL="https://$RELEASE_MASTER_HOST/$RELEASE_MASTER_REPO/releases"
 
 linux() {
 	ARCH="$1"
@@ -120,7 +124,7 @@ pull_request)
 	echo "- [\`$FORGEJO_PR_MERGE_BASE\`](https://$FORGEJO_HOST/$FORGEJO_REPO/commit/$FORGEJO_PR_MERGE_BASE)"
 	echo
 	echo "Corresponding 'master' build for reference:"
-	echo "- [\`$FORGEJO_REF\`](https://github.com/Eden-CI/Master/releases?q=$FORGEJO_PR_MERGE_BASE&expanded=true)"
+	echo "- [\`$FORGEJO_REF\`]($COMPARE_RELEASE_URL?q=$FORGEJO_PR_MERGE_BASE&expanded=true)"
 	echo
 	echo "## Changelog"
 	.ci/common/field.py field="body" default_msg="No changelog provided" pull_request_number="$FORGEJO_PR_NUMBER"

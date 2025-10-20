@@ -22,6 +22,7 @@ jobs:
   release:
     name: "Create Release"
     needs: [build]
+    if: ${{ secrets.CUSTOM_GITHUB_TOKEN }}
     permissions:
       actions: read
       security-events: write
@@ -45,7 +46,6 @@ jobs:
 
       - name: Set environment variables
         run: |
-          echo "REPO=Eden-CI/PR" >> $GITHUB_ENV
           echo "DEVEL=true" >> $GITHUB_ENV
 
       - name: Package artifacts nicely
@@ -59,7 +59,7 @@ jobs:
 
       - name: Delete Previous Release
         run: |
-          gh release delete "$FORGEJO_PR_NUMBER" --repo "$REPO" --cleanup-tag  -y
+          gh release delete "$FORGEJO_PR_NUMBER" --repo "$RELEASE_PR_REPO" --cleanup-tag  -y
           sleep 5
         env:
           GH_TOKEN: "${{ secrets.CUSTOM_GITHUB_TOKEN }}"
@@ -70,7 +70,7 @@ jobs:
         with:
           name: "${{ env.FORGEJO_PR_TITLE }}"
           tag_name: ${{ env.FORGEJO_PR_NUMBER }}-${{ env.FORGEJO_REF }}
-          repository: ${{ env.REPO }}
+          repository: ${{ env.RELEASE_PR_REPO }}
           body_path: ./changelog.md
           token: ${{ secrets.CUSTOM_GITHUB_TOKEN }}
           prerelease: false
@@ -87,7 +87,7 @@ jobs:
         with:
           name: ${{ env.FORGEJO_PR_TITLE }}
           tag_name: ${{ env.FORGEJO_PR_NUMBER }}
-          repository: ${{ env.REPO }}
+          repository: ${{ env.RELEASE_PR_REPO }}
           body_path: ./changelog.md
           token: ${{ secrets.CUSTOM_GITHUB_TOKEN }}
           prerelease: false

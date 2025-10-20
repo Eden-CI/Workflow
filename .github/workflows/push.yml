@@ -46,7 +46,6 @@ jobs:
 
       - name: Set environment variables
         run: |
-          echo "REPO=Eden-CI/Master" >> $GITHUB_ENV
           echo "DEVEL=true" >> $GITHUB_ENV
           echo "TIMESTAMP=$(date +%s)" >> $GITHUB_ENV
 
@@ -64,7 +63,7 @@ jobs:
         with:
           name: "Eden Continuous Build - ${{ env.FORGEJO_REF }}"
           tag_name: v${{ env.TIMESTAMP }}.${{ env.FORGEJO_REF }}
-          repository: ${{ env.REPO }}
+          repository: ${{ env.RELEASE_MASTER_REPO }}
           body_path: ./changelog.md
           prerelease: false
           draft: false

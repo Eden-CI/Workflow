@@ -22,6 +22,7 @@ jobs:
   release:
     name: "Create Release"
     needs: [build]
+    if: ${{ secrets.CUSTOM_GITHUB_TOKEN }}
     permissions:
       actions: read
       security-events: write
@@ -45,7 +46,6 @@ jobs:
 
       - name: Set environment variables
         run: |
-          echo "REPO=Eden-CI/Master" >> $GITHUB_ENV
           echo "DEVEL=true" >> $GITHUB_ENV
           echo "TIMESTAMP=$(date +%s)" >> $GITHUB_ENV
 
@@ -56,7 +56,7 @@ jobs:
 
       - name: Delete Previous Release
         run: |
-          gh release delete "continuous" --repo "$REPO" --cleanup-tag  -y
+          gh release delete "continuous" --repo "$RELEASE_MASTER_REPO" --cleanup-tag  -y
           sleep 5
         env:
           GH_TOKEN: "${{ secrets.CUSTOM_GITHUB_TOKEN }}"
@@ -71,7 +71,7 @@ jobs:
         with:
           name: "Eden Master - ${{ env.FORGEJO_REF }}"
           tag_name: v${{ env.TIMESTAMP }}.${{ env.FORGEJO_REF }}
-          repository: ${{ env.REPO }}
+          repository: ${{ env.RELEASE_MASTER_REPO }}
           body_path: ./changelog.md
           prerelease: false
           draft: false
