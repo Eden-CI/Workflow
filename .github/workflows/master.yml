@@ -59,9 +59,9 @@ jobs:
           if [ -n "$GH_TOKEN" ]; then
             gh release delete "continuous" --repo "$RELEASE_MASTER_REPO" --cleanup-tag -y
             sleep 5
-         else
+          else
             echo "No CUSTOM_GITHUB_TOKEN provided, skipping release..."
-        fi
+          fi
         continue-on-error: true
 
       - name: Generate changelog
