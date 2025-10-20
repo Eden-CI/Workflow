@@ -124,7 +124,7 @@ parse_payload() {
 		RELEASE_TAG_REPO=$(jq -r --arg id "tag" '.[] | select(.["build-id"] == $id) | .repository' release.json)
 		{
 			echo "RELEASE_TAG_HOST=$RELEASE_TAG_HOST"
-			echo "RELEASE_TAG_HOST=$RELEASE_TAG_HOST"
+			echo "RELEASE_TAG_REPO=$RELEASE_TAG_REPO"
 		} >> "$FORGEJO_LENV"
 		;;
 	push | test)
@@ -144,7 +144,7 @@ parse_payload() {
 		echo "FORGEJO_REF=$FORGEJO_REF"
 		echo "FORGEJO_BRANCH=$FORGEJO_BRANCH"
 		echo "FORGEJO_CLONE_URL=$FORGEJO_CLONE_URL"
-		echo "RELEASE_PGO_HOST=$RELEASE_PGO_REPO"
+		echo "RELEASE_PGO_HOST=$RELEASE_PGO_HOST"
 		echo "RELEASE_PGO_REPO=$RELEASE_PGO_REPO"
 	} >> "$FORGEJO_LENV"
 }
