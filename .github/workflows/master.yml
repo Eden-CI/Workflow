@@ -27,7 +27,8 @@ jobs:
       security-events: write
       contents: write
       discussions: write
-
+    env:
+      GH_TOKEN: "${{ secrets.CUSTOM_GITHUB_TOKEN }}"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5.0.0
@@ -54,19 +55,20 @@ jobs:
           ./pack.sh
 
       - name: Delete Previous Release
-        if: ${{ secrets.CUSTOM_GITHUB_TOKEN }}
         run: |
-          gh release delete "continuous" --repo "$RELEASE_MASTER_REPO" --cleanup-tag  -y
-          sleep 5
-        env:
-          GH_TOKEN: "${{ secrets.CUSTOM_GITHUB_TOKEN }}"
+          if [ -n "$GH_TOKEN" ]; then
+            gh release delete "continuous" --repo "$RELEASE_MASTER_REPO" --cleanup-tag -y
+            sleep 5
+         else
+            echo "No CUSTOM_GITHUB_TOKEN provided, skipping release..."
+        fi
         continue-on-error: true
 
       - name: Generate changelog
         run: ./.ci/changelog/generate.sh master > changelog.md
 
       - name: Release
-        if: ${{ secrets.CUSTOM_GITHUB_TOKEN }}
+        if: ${{ env.GH_TOKEN }}
         id: release
         uses: softprops/action-gh-release@v2.2.2
         with:
@@ -77,7 +79,7 @@ jobs:
           prerelease: false
           draft: false
           generate_release_notes: false
-          token: ${{ secrets.CUSTOM_GITHUB_TOKEN }}
+          token: ${{ env.GH_TOKEN }}
           fail_on_unmatched_files: false
           make_latest: true
           files: |

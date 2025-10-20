@@ -28,7 +28,8 @@ jobs:
       security-events: write
       contents: write
       discussions: write
-
+    env:
+      GH_TOKEN: "${{ secrets.CUSTOM_GITHUB_TOKEN }}"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5.0.0
@@ -58,6 +59,7 @@ jobs:
         run: ./.ci/changelog/generate.sh push > changelog.md
 
       - name: Release
+        if: ${{ env.GH_TOKEN }}
         id: release
         uses: softprops/action-gh-release@v2.2.2
         with:
@@ -68,7 +70,7 @@ jobs:
           prerelease: false
           draft: false
           generate_release_notes: false
-          token: ${{ secrets.CUSTOM_GITHUB_TOKEN }}
+          token: ${{ env.GH_TOKEN }}
           fail_on_unmatched_files: false
           make_latest: true
           files: |

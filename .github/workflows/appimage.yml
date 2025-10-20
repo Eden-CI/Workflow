@@ -85,7 +85,6 @@ jobs:
       TARGET: "${{ matrix.os.arch }}"
       COMPILER: "${{ matrix.compiler.program }}"
       PGO_TARGET: "${{ matrix.compiler.target }}"
-      GITHUB_TOKEN: "${{ secrets.CUSTOM_GITHUB_TOKEN }}"
       FULL_ARCH: ${{ matrix.os.arch }}-${{ matrix.compiler.program }}-${{ matrix.compiler.target }}
 
     steps:
