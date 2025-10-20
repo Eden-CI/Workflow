@@ -60,7 +60,7 @@ jobs:
       - name: Delete Previous Release
         run: |
           if [ -n "$GH_TOKEN" ]; then
-            gh release delete "continuous" --repo "$RELEASE_PR_REPO" --cleanup-tag -y
+            gh release delete "$FORGEJO_PR_NUMBER" --repo "$RELEASE_PR_REPO" --cleanup-tag -y
             sleep 5
           else
             echo "No CUSTOM_GITHUB_TOKEN provided, skipping release..."

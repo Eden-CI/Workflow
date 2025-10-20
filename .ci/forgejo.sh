@@ -43,7 +43,7 @@ parse_payload() {
 
 	# Forcefully set PGO target if not found
 	RELEASE_PGO_HOST=$(jq -r --arg id "pgo" '( .[] | select(.["build-id"] == $id) | .host ) // "github.com"' release.json)
-	RELEASE_PGO_REPO=$(jq -r --arg id "pgo" '( .[] | select(.["build-id"] == $id) | .repository ) // "Caio99BR/PGO"' release.json)
+	RELEASE_PGO_REPO=$(jq -r --arg id "pgo" '( .[] | select(.["build-id"] == $id) | .repository ) // "Eden-CI/PGO"' release.json)
 
 	# Payloads do not define host
 	# This is just for verbosity
@@ -144,8 +144,8 @@ parse_payload() {
 		echo "FORGEJO_REF=$FORGEJO_REF"
 		echo "FORGEJO_BRANCH=$FORGEJO_BRANCH"
 		echo "FORGEJO_CLONE_URL=$FORGEJO_CLONE_URL"
-		echo "RELEASE_PGO_HOST=$RELEASE_MASTER_REPO"
-		echo "RELEASE_PGO_REPO=$RELEASE_MASTER_REPO"
+		echo "RELEASE_PGO_HOST=$RELEASE_PGO_REPO"
+		echo "RELEASE_PGO_REPO=$RELEASE_PGO_REPO"
 	} >> "$FORGEJO_LENV"
 }
 

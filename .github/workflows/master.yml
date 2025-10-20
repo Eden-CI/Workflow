@@ -54,16 +54,6 @@ jobs:
           export ID=${FORGEJO_REF}
           ./pack.sh
 
-      - name: Delete Previous Release
-        run: |
-          if [ -n "$GH_TOKEN" ]; then
-            gh release delete "continuous" --repo "$RELEASE_MASTER_REPO" --cleanup-tag -y
-            sleep 5
-          else
-            echo "No CUSTOM_GITHUB_TOKEN provided, skipping release..."
-          fi
-        continue-on-error: true
-
       - name: Generate changelog
         run: ./.ci/changelog/generate.sh master > changelog.md
 
