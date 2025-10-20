@@ -2,12 +2,12 @@
   {
     "build-id": "master",
     "host": "github.com",
-    "repository": "Caio99BR/Master"
+    "repository": "Eden-CI/Master"
   },
   {
     "build-id": "pull_request",
     "host": "github.com",
-    "repository": "Caio99BR/PR"
+    "repository": "Eden-CI/PR"
   },
   {
     "build-id": "tag",
@@ -17,6 +17,6 @@
   {
     "build-id": "pgo",
     "host": "github.com",
-    "repository": "Caio99BR/PGO"
+    "repository": "Eden-CI/PGO"
   }
 ]
