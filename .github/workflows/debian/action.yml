@@ -21,6 +21,8 @@ runs:
   steps:
     - name: Install sccache
       uses: Vee99BR/sccache-action@v0.0.1
+      with:
+        disable_annotations: true
 
     - name: Setup
       uses: ./.github/workflows/setup
