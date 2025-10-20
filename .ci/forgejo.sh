@@ -79,6 +79,11 @@ parse_payload() {
 		echo "Trying again..."
 	done
 
+	# Export those variables to be used by field.py
+	export FORGEJO_HOST
+	export FORGEJO_BRANCH
+	export FORGEJO_REPO
+
 	case "$1" in
 	master)
 		FORGEJO_REF=$(jq -r '.ref' $PAYLOAD_JSON)
