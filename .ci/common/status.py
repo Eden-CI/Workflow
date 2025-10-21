@@ -67,17 +67,21 @@ def send_commit_status(state: str, release_url: str | None = None):
         return
 
     if state == "release" and release_url:
-        target_url = release_url
         target_state = "success"
+        target_url = release_url
+        target_description = "[CD]"
+        target_context = "Releases"
     else:
-        target_url = WORKFLOW_URL
         target_state = state
+        target_url = WORKFLOW_URL
+        target_description = "[CI]"
+        target_context = "Actions"
 
     data = {
         "state": target_state,
         "target_url": target_url,
-        "description": f"[CI] {description_mapping[state]}",
-        "context": "GitHub Actions"
+        "description": f"{target_description} {description_mapping[state]}",
+        "context": f"GitHub {target_context}"
     }
 
     headers = {"Authorization": f"token {FORGEJO_TOKEN}", "Content-Type": "application/json"}
@@ -89,7 +93,7 @@ def send_commit_status(state: str, release_url: str | None = None):
             if r.status_code == 401:
                 print("[INFO] Token unauthorized, skipping further requests.")
         else:
-            print(f"[INFO] Commit status sent successfully: {target_state}")
+            print(f"[INFO] Commit status sent successfully ({data['context']}): {target_state}")
             if state == "release" and release_url:
                 print(f"[INFO] Target URL: {target_url}")
     except Exception as e:
