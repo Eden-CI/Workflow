@@ -11,9 +11,6 @@ env:
 jobs:
   build:
     name: Build
-    concurrency:
-      group: master-build
-      cancel-in-progress: false
     uses: ./.github/workflows/build.yml
     with:
       build-id: 'master'
