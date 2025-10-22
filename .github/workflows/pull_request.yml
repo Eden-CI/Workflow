@@ -51,7 +51,7 @@ jobs:
       - name: Package artifacts nicely
         run: |
           export ID=${FORGEJO_PR_NUMBER}-${FORGEJO_REF}
-          ./pack.sh
+          ./.ci/common/pack.sh
 
       - name: Generate changelog
         run: |

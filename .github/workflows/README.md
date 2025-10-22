@@ -19,14 +19,14 @@ More info on: [crueter/fj2ghook](https://git.crueter.xyz/crueter/fj2ghook)
 
 ## Create a Github Personal Access Token (CUSTOM_GITHUB_TOKEN)
 
-Since these workflows need to push to another repository (see `release.json`), the default `GITHUB_TOKEN` does **not** have cross-repository permissions. You need to create a **Fine-grained Personal Access Token**:
+Since these workflows need to push to another repository (see `.ci/release.json`), the default `GITHUB_TOKEN` does **not** have cross-repository permissions. You need to create a **Fine-grained Personal Access Token**:
 
 1. Go to: [https://github.com/settings/tokens](https://github.com/settings/tokens)
 2. Click **Generate new token** → **Fine-grained, repo-scoped**.
 3. Choose a **Token name** and **Resource owner**.
 4. Set an expiration date (recommended).
 5. Under **Repository access**, select **Only select repositories**.
-6. Select `{OWNER}/Master`, `{OWNER}/PR` and other repos set on `release.json`.
+6. Select `{OWNER}/Master`, `{OWNER}/PR` and other repos set on `.ci/release.json`.
     - It's recommended to enable `Discussions` on the `{OWNER}/PR`
 7. Set permissions:
     - **Contents**: `Read and write`

@@ -10,8 +10,8 @@ FORGEJO_LENV=${FORGEJO_LENV:-"forgejo.env"}
 touch "$FORGEJO_LENV"
 
 parse_payload() {
-	DEFAULT_JSON="default.json"
-	RELEASE_JSON="release.json"
+	DEFAULT_JSON=".ci/default.json"
+	RELEASE_JSON=".ci/release.json"
 	PAYLOAD_JSON="payload.json"
 
 	if [ ! -f "$PAYLOAD_JSON" ]; then
@@ -33,8 +33,8 @@ parse_payload() {
 		echo "You should set: 'build-id', 'host' and 'repository' on $RELEASE_JSON"
 		echo "Skipping releases..."
 	else
-		RELEASE_MASTER_HOST=$(jq -r --arg id "master" '.[] | select(.["build-id"] == $id) | .host' release.json)
-		RELEASE_MASTER_REPO=$(jq -r --arg id "master" '.[] | select(.["build-id"] == $id) | .repository' release.json)
+		RELEASE_MASTER_HOST=$(jq -r --arg id "master" '.[] | select(.["build-id"] == $id) | .host' $RELEASE_JSON)
+		RELEASE_MASTER_REPO=$(jq -r --arg id "master" '.[] | select(.["build-id"] == $id) | .repository' $RELEASE_JSON)
 		{
 			echo "RELEASE_MASTER_HOST=$RELEASE_MASTER_HOST"
 			echo "RELEASE_MASTER_REPO=$RELEASE_MASTER_REPO"
@@ -42,8 +42,8 @@ parse_payload() {
 	fi
 
 	# Forcefully set PGO target if not found
-	RELEASE_PGO_HOST=$(jq -r --arg id "pgo" '( .[] | select(.["build-id"] == $id) | .host ) // "github.com"' release.json)
-	RELEASE_PGO_REPO=$(jq -r --arg id "pgo" '( .[] | select(.["build-id"] == $id) | .repository ) // "Eden-CI/PGO"' release.json)
+	RELEASE_PGO_HOST=$(jq -r --arg id "pgo" '( .[] | select(.["build-id"] == $id) | .host ) // "github.com"' $RELEASE_JSON)
+	RELEASE_PGO_REPO=$(jq -r --arg id "pgo" '( .[] | select(.["build-id"] == $id) | .repository ) // "Eden-CI/PGO"' $RELEASE_JSON)
 
 	# Payloads do not define host
 	# This is just for verbosity
@@ -108,8 +108,8 @@ parse_payload() {
 
 		# Pull Request is dependent of Master for comparassion
 		if [ ! -z "$RELEASE_MASTER_REPO" ]; then
-			RELEASE_PR_HOST=$(jq -r --arg id "pull_request" '.[] | select(.["build-id"] == $id) | .host' release.json)
-			RELEASE_PR_REPO=$(jq -r --arg id "pull_request" '.[] | select(.["build-id"] == $id) | .repository' release.json)
+			RELEASE_PR_HOST=$(jq -r --arg id "pull_request" '.[] | select(.["build-id"] == $id) | .host' $RELEASE_JSON)
+			RELEASE_PR_REPO=$(jq -r --arg id "pull_request" '.[] | select(.["build-id"] == $id) | .repository' $RELEASE_JSON)
 			{
 				echo "RELEASE_PR_HOST=$RELEASE_PR_HOST"
 				echo "RELEASE_PR_REPO=$RELEASE_PR_REPO"
@@ -120,8 +120,8 @@ parse_payload() {
 		FORGEJO_REF=$(jq -r '.tag' $PAYLOAD_JSON)
 		FORGEJO_BRANCH=stable
 
-		RELEASE_TAG_HOST=$(jq -r --arg id "tag" '.[] | select(.["build-id"] == $id) | .host' release.json)
-		RELEASE_TAG_REPO=$(jq -r --arg id "tag" '.[] | select(.["build-id"] == $id) | .repository' release.json)
+		RELEASE_TAG_HOST=$(jq -r --arg id "tag" '.[] | select(.["build-id"] == $id) | .host' $RELEASE_JSON)
+		RELEASE_TAG_REPO=$(jq -r --arg id "tag" '.[] | select(.["build-id"] == $id) | .repository' $RELEASE_JSON)
 		{
 			echo "RELEASE_TAG_HOST=$RELEASE_TAG_HOST"
 			echo "RELEASE_TAG_REPO=$RELEASE_TAG_REPO"
