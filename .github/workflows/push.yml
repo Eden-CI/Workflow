@@ -3,7 +3,7 @@ name: "[Manual] Build on 'master'"
 on:
   push:
     branches:
-      - 'master'
+      - 'test_base/master'
   workflow_dispatch:
 
 env:
