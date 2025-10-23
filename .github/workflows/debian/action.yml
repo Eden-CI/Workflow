@@ -30,13 +30,16 @@ runs:
         key: ${{ inputs.name }}-${{ inputs.arch }}
         version: ${{ inputs.cpm-cache-version }}
 
+    - name: Install dependencies
+      shell: bash
+      run: |
+        chmod a+x ./.ci/deb/deps.sh
+        ./.ci/deb/deps.sh
+
     - name: Build
       shell: bash
       run: |
-        chmod a+x ./.ci/deb/makedeb.sh
-        ./.ci/deb/makedeb.sh
-      env:
-        ARCH: ${{ inputs.arch }}
+        dpkg-buildpackage -us -uc -b
 
     - name: Upload artifacts
       uses: actions/upload-artifact@v4.6.2
