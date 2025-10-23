@@ -1,5 +1,8 @@
 #!/bin/bash -e
 
+# SPDX-FileCopyrightText: Copyright 2025 Eden Emulator Project
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 SDL_FLAGS=(-DYUZU_USE_BUNDLED_SDL2=ON)
 
 # only need targets if on Linux or clang-cl

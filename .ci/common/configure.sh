@@ -1,5 +1,8 @@
 #!/bin/bash -ex
 
+# SPDX-FileCopyrightText: Copyright 2025 Eden Emulator Project
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 # The master CMake configurator.
 # Environment variables:
 # - BUILDDIR: build directory (default build)
