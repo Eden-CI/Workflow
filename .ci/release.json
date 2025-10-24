@@ -2,21 +2,21 @@
   {
     "build-id": "master",
     "host": "github.com",
-    "repository": "Vee99BR/accord-eden"
+    "repository": "Eden-CI/Master"
   },
   {
     "build-id": "pull_request",
     "host": "github.com",
-    "repository": "Vee99BR/accord-eden"
+    "repository": "Eden-CI/PR"
   },
   {
     "build-id": "tag",
     "host": "github.com",
-    "repository": "Vee99BR/accord-eden"
+    "repository": "eden-emulator/Releases"
   },
   {
     "build-id": "pgo",
     "host": "github.com",
-    "repository": "Vee99BR/accord-eden"
+    "repository": "Eden-CI/PGO"
   }
 ]

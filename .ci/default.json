@@ -1,7 +1,7 @@
 [
   {
     "host": "git.eden-emu.dev",
-    "repository": "DraVee/eden",
-    "branch": "test_base/master"
+    "repository": "eden-emu/eden",
+    "branch": "master"
   }
 ]
