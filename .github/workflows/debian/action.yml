@@ -39,8 +39,8 @@ runs:
     - name: Build
       shell: bash
       run: |
-        export TARGET="${{ inputs.arch }}"
-        dpkg-buildpackage -us -uc -b -d
+        export TARGET="package-${{ inputs.arch }}"
+        dpkg-buildpackage -us -uc -b
         cp ../eden*.deb ./
 
     - name: Upload artifacts
