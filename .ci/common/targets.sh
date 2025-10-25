@@ -43,6 +43,8 @@ if [ "$PLATFORM" = "linux" ] || [ "$COMPILER" = "clang" ]; then
 		native)
 			echo "Making native build of Eden"
 			ARCH_FLAGS="-march=native -mtune=native"
+			FFMPEG=OFF
+			OPENSSL=OFF
 			;;
 		# Special target: package-{amd64,aarch64}
 		# In the "package" target we WANT standalone executables
