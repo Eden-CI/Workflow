@@ -93,7 +93,7 @@ jobs:
           arch: ${{ matrix.os.arch }}
 
       - name: Force Clang 20
-        if: matrix.compiler == 'clang'
+        if: matrix.compiler.program == 'clang'
         shell: bash
         run: |
           echo "C:/Program Files/LLVM/bin" >> $GITHUB_PATH
