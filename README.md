@@ -1,6 +1,6 @@
 # Eden CI Workflow
 
-This is the master repository containing the entire CI and build suite for Eden. This repository serves to dispatch successful builds to individual repositories for the master branch, pull requests, and releases.
+This is the master repository containing the entire CI and build suite for Eden. This repository serves to dispatch successful builds to individual repositories for the master branch, pull requests, and releases. Nightlies will come at a later date.
 
 ## Docs
 

@@ -78,7 +78,7 @@ jobs:
       - name: Summary
         shell: bash
         run: |
-          ./.ci/forgejo.sh --summary ${{ inputs.build-id }}
+          ./.ci/fj/summary.sh ${{ inputs.build-id }}
 
       - name: Cleanup
         run: |

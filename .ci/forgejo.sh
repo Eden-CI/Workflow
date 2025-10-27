@@ -3,8 +3,7 @@
 # SPDX-FileCopyrightText: Copyright 2025 Eden Emulator Project
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-# Unified CI helper for Forgejo > GitHub integration
-# Supports: --parse, --summary, --clone
+# payload manager for fj2ghook
 
 FORGEJO_LENV=${FORGEJO_LENV:-"forgejo.env"}
 touch "$FORGEJO_LENV"
@@ -52,7 +51,7 @@ parse_payload() {
 	FORGEJO_CLONE_URL=$(jq -r '.clone_url // empty' $PAYLOAD_JSON)
 	FORGEJO_BRANCH=$(jq -r '.branch // empty' $PAYLOAD_JSON)
 
-	# NB: mirrors do not work for our purposes unless they magically can mirror everything in 10 seconds
+	# NB: mirrors do not (generally) work for our purposes unless they magically can mirror everything in 10 seconds
 	FALLBACK_IDX=0
 	if [ -z "$FORGEJO_HOST" ]; then
 		FORGEJO_HOST=$(jq -r ".[$FALLBACK_IDX].host" $DEFAULT_JSON)
@@ -149,60 +148,6 @@ parse_payload() {
 	} >> "$FORGEJO_LENV"
 }
 
-# TODO: cleanup, cat-eof?
-generate_summary() {
-	{
-	echo "## Job Summary"
-	echo "- Triggered by: $1"
-	echo "- Commit: [\`$FORGEJO_REF\`](https://$FORGEJO_HOST/$FORGEJO_REPO/commit/$FORGEJO_REF)"
-	echo
-	} >> "$GITHUB_STEP_SUMMARY"
-
-	if [ "$FORGEJO_MIRROR" = true ]; then
-		{
-		echo "## Using mirror:"
-		echo "- Mirror URL: [\`$FORGEJO_HOST/$FORGEJO_REPO\`]($FORGEJO_CLONE_URL)"
-		echo
-		} >> "$GITHUB_STEP_SUMMARY"
-	fi
-
-	case "$1" in
-	master)
-		{
-		echo "## Master Build"
-		echo "- Full changelog: [\`$FORGEJO_BEFORE...$FORGEJO_REF\`](https://$FORGEJO_HOST/$FORGEJO_REPO/compare/$FORGEJO_BEFORE...$FORGEJO_REF)"
-		} >> "$GITHUB_STEP_SUMMARY"
-
-		;;
-	pull_request)
-		{
-		echo "## Pull Request Summary"
-		echo "- Pull Request: #[${FORGEJO_PR_NUMBER}]($FORGEJO_PR_URL)"
-		echo "- Merge Base Commit: [\`$FORGEJO_PR_MERGE_BASE\`](https://$FORGEJO_HOST/$FORGEJO_REPO/commit/$FORGEJO_PR_MERGE_BASE)"
-		echo
-		echo "## Pull Request Changelog Summary"
-		echo "$FORGEJO_PR_TITLE"
-		echo
-		} >> "$GITHUB_STEP_SUMMARY"
-		.ci/common/field.py field="body" default_msg="No changelog provided" pull_request_number="$FORGEJO_PR_NUMBER" >> "$GITHUB_STEP_SUMMARY"
-		;;
-	push | test)
-		{
-		echo "## Continuous Integration Test Build"
-		echo "- This build was triggered for testing purposes."
-		} >> "$GITHUB_STEP_SUMMARY"
-		;;
-	*)
-		{
-		echo "## Unknown Build Type"
-		echo "- Build type '$1' is not recognized."
-		} >> "$GITHUB_STEP_SUMMARY"
-		;;
-	esac
-
-	echo >> "$GITHUB_STEP_SUMMARY"
-}
-
 clone_repository() {
 	if ! curl -sSfL "$FORGEJO_CLONE_URL" >/dev/null 2>&1; then
 		echo "Repository $FORGEJO_CLONE_URL is not reachable."
@@ -252,9 +197,6 @@ case "$1" in
 --parse)
 	parse_payload "$2"
 	;;
---summary)
-	generate_summary "$2"
-	;;
 --clone)
 	clone_repository "$2"
 	;;
@@ -263,7 +205,7 @@ case "$1" in
 	;;
 *)
 	cat << EOF
-Usage: $0 [--parse <type> | --summary <type> | --clone <type> | --load-payload-env]
+Usage: $0 [--parse <type> | --clone <type> | --load-payload-env]
 Supported types: master | pull_request | tag | push | test
 
 Commands:
@@ -275,10 +217,6 @@ Commands:
              a Forgejo environment file.
 
         If the payload doesn't exist, uses the latest master of the default host in default.json.
-
-    --summary: Generates a summary for the payload (requires loaded environment).
-
-        Output is placed in GITHUB_STEP_SUMMARY, usually this is for GitHub Actions
 
     --clone: Clones the target repository and checks out the correct reference (requires loaded environment).
 EOF
