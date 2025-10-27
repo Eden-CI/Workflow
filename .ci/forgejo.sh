@@ -192,6 +192,14 @@ generate_summary() {
 		echo "- This build was triggered for testing purposes."
 		} >> "$GITHUB_STEP_SUMMARY"
 		;;
+	tag)
+		{
+		echo "## Tag Build"
+		echo "- Release Tag: [\`$FORGEJO_REF\`](https://$FORGEJO_HOST/$FORGEJO_REPO/releases/tag/$FORGEJO_REF)"
+		echo "- This build was triggered by a new tag creation."
+		echo
+		} >> "$GITHUB_STEP_SUMMARY"
+		;;
 	*)
 		{
 		echo "## Unknown Build Type"
