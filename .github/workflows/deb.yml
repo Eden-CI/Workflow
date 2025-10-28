@@ -24,7 +24,7 @@ env:
   DEVEL: ${{ inputs.devel }}
 
 jobs:
-  ubuntu:
+  ubuntu-24-04:
     name: "Ubuntu 24.04 (${{ matrix.os.arch }})"
     runs-on: ${{ matrix.os.runs-on }}
     strategy:
@@ -44,7 +44,7 @@ jobs:
         uses: ./.github/workflows/debian
         with:
           arch: ${{ matrix.os.arch }}
-          name: ubuntu
+          name: ubuntu-24.04
           cpm-cache-version: ${{ inputs.cpm-cache-version }}
           devel: ${{ inputs.devel }}
 
