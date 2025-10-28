@@ -7,20 +7,23 @@
 . .ci/common/platform.sh
 
 ROOTDIR="$PWD"
+BUILDDIR="$ROOTDIR/${BUILDDIR:-build}"
+ARTIFACTS_DIR="$ROOTDIR/artifacts"
 
-BUILDDIR="${BUILDDIR:-$ROOTDIR/build}"
-BINDIR="${BUILDDIR}/bin"
-
-PKGDIR="${BUILDDIR}/pkg"
+BINDIR="$BUILDDIR/bin"
+PKGDIR="$BUILDDIR/pkg"
+TMP_DIR=$(mktemp -d)
 EXE="eden.exe"
 
 WINDEPLOYQT="${WINDEPLOYQT:-windeployqt6}"
 
-rm -f "${BINDIR}/"*.pdb || true
+rm -f "$BINDIR/"*.pdb || true
 
+mkdir -p "$ARTIFACTS_DIR"
+[ -n "$PKGDIR" ] && rm -rf "$PKGDIR"
 mkdir -p "$PKGDIR"
 
-cp "${BINDIR}/"*.exe "$PKGDIR"
+cp "$BINDIR/"*.exe "$PKGDIR"
 cd "$PKGDIR"
 
 # not needed anymore yay
@@ -64,12 +67,6 @@ cd "$PKGDIR"
 
 # ?ploo
 ZIP_NAME="Eden-Windows-${ARCH}.zip"
-
-ARTIFACTS_DIR="$ROOTDIR/artifacts"
-
-mkdir -p "$ARTIFACTS_DIR"
-
-TMP_DIR=$(mktemp -d)
 
 cp -r "$PKGDIR"/* "$TMP_DIR"/
 cp -r "$ROOTDIR"/LICENSE* "$ROOTDIR"/README* "$TMP_DIR"/

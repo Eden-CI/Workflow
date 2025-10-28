@@ -180,7 +180,7 @@ clone_repository() {
 
 	echo "$FORGEJO_BRANCH" > eden/GIT-REFSPEC
 	git -C eden rev-parse --short=10 HEAD > eden/GIT-COMMIT
-	git -C eden describe --tags HEAD --abbrev=0 > eden/GIT-TAG || echo 'v0.0.3' > eden/GIT-TAG
+	git -C eden describe --tags HEAD --abbrev=0 > eden/GIT-TAG || echo 'v0.0.4-Workflow' > eden/GIT-TAG
 
 	# slight hack: also add the merge base
 	# <https://codeberg.org/forgejo/forgejo/issues/9601>

@@ -5,7 +5,10 @@
 
 # shellcheck disable=SC2043
 
-mkdir -p artifacts
+ROOTDIR="$PWD"
+ARTIFACTS_DIR="$ROOTDIR/artifacts"
+
+mkdir -p "$ARTIFACTS_DIR"
 
 tagged() {
 	[ "$DEVEL" != "true" ]
@@ -22,8 +25,8 @@ for arch in $ARCHES; do
 	for compiler in $COMPILERS; do
 		ARTIFACT="Eden-Linux-${ID}-${arch}-${compiler}"
 
-		cp "linux-$arch-$compiler"/*.AppImage "artifacts/$ARTIFACT.AppImage"
-		tagged && cp "linux-$arch-$compiler"/*.AppImage.zsync "artifacts/$ARTIFACT.AppImage.zsync"
+		cp "$ROOTDIR/linux-$arch-$compiler"/*.AppImage "$ARTIFACTS_DIR/$ARTIFACT.AppImage"
+		tagged && cp "$ROOTDIR/linux-$arch-$compiler"/*.AppImage.zsync "$ARTIFACTS_DIR/$ARTIFACT.AppImage.zsync"
 	done
 done
 
@@ -33,11 +36,11 @@ tagged && ARCHES="$ARCHES aarch64"
 
 for arch in $ARCHES; do
 	for ver in 24.04; do
-		cp "ubuntu-$ver-$arch"/*.deb "artifacts/Eden-Ubuntu-$ver-${ID}-$arch.deb"
+		cp "$ROOTDIR/ubuntu-$ver-$arch"/*.deb "$ARTIFACTS_DIR/Eden-Ubuntu-$ver-${ID}-$arch.deb"
 	done
 
 	for ver in 12 13; do
-		cp "debian-$ver-$arch"/*.deb "artifacts/Eden-Debian-$ver-${ID}-$arch.deb"
+		cp "$ROOTDIR/debian-$ver-$arch"/*.deb "$ARTIFACTS_DIR/Eden-Debian-$ver-${ID}-$arch.deb"
 	done
 done
 
@@ -46,7 +49,7 @@ FLAVORS=standard
 tagged && FLAVORS="$FLAVORS legacy optimized"
 
 for flavor in $FLAVORS; do
-	cp android-"$flavor"/*.apk "artifacts/Eden-Android-${ID}-${flavor}.apk"
+	cp "$ROOTDIR/android-$flavor"/*.apk "$ARTIFACTS_DIR/Eden-Android-${ID}-${flavor}.apk"
 done
 
 ## Windows ##
@@ -55,7 +58,7 @@ tagged && COMPILERS="$COMPILERS clang-pgo"
 
 for arch in amd64 arm64; do
 	for compiler in $COMPILERS; do
-		cp "windows-$arch-$compiler"/*.zip "artifacts/Eden-Windows-${ID}-${arch}-${compiler}.zip"
+		cp "$ROOTDIR/windows-$arch-$compiler"/*.zip "$ARTIFACTS_DIR/Eden-Windows-${ID}-${arch}-${compiler}.zip"
 	done
 done
 
@@ -64,18 +67,18 @@ COMPILERS="amd64-gcc-standard arm64-clang-standard"
 tagged && COMPILERS="$COMPILERS amd64-clang-pgo arm64-clang-pgo"
 
 for compiler in $COMPILERS; do
-    cp "mingw-$compiler"/*.zip "artifacts/Eden-Windows-${ID}-mingw-${compiler}.zip"
+	cp "$ROOTDIR/mingw-$compiler"/*.zip "$ARTIFACTS_DIR/Eden-Windows-${ID}-mingw-${compiler}.zip"
 done
 
 ## Source Pack ##
 if [ -d "source" ]; then
-	cp source/source.tar.zst "artifacts/Eden-Source-${ID}.tar.zst"
+	cp "$ROOTDIR/source/source.tar.zst" "$ARTIFACTS_DIR/Eden-Source-${ID}.tar.zst"
 fi
 
 ## MacOS ##
-cp macos/*.tar.gz "artifacts/Eden-macOS-${ID}.tar.gz"
+cp "$ROOTDIR/macos"/*.tar.gz "$ARTIFACTS_DIR/Eden-macOS-${ID}.tar.gz"
 
 ## FreeBSD and other stuff ##
-cp freebsd-binary-amd64-clang/*.tar.zst "artifacts/Eden-FreeBSD-${ID}-amd64-clang.tar.zst"
+cp "$ROOTDIR/freebsd-binary-amd64-clang"/*.tar.zst "$ARTIFACTS_DIR/Eden-FreeBSD-${ID}-amd64-clang.tar.zst"
 
-ls artifacts
+ls "$ARTIFACTS_DIR"
