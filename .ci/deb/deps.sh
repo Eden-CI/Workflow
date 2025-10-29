@@ -9,4 +9,5 @@ if [ "$CI" = "true" ]; then
 	[ -f "$MANDB" ] && $SUDO rm "$MANDB"
 fi
 
+$SUDO apt update
 $SUDO apt -y build-dep .
