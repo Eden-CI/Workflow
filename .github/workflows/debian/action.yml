@@ -39,9 +39,8 @@ runs:
     - name: Install dependencies
       shell: bash
       run: |
-        sudo rm /var/lib/man-db/auto-update
-        sudo apt install devscripts equivs
-        mk-build-deps -i -r
+        chmod a+x ./.ci/deb/deps.sh
+        ./.ci/deb/deps.sh
 
     - name: Build
       shell: bash
