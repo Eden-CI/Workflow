@@ -13,3 +13,4 @@ Build-Depends:
 	pkg-config,
 	nlohmann-json3-dev,
 	spirv-headers,
+	libfmt-dev,
