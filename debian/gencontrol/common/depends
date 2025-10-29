@@ -29,3 +29,7 @@ Build-Depends:
 	libavfilter-dev,
 	libavutil-dev,
 	libswscale-dev,
+	liblz4-dev,
+	libboost-context-dev,
+	libboost-fiber-dev,
+	libmbedtls-dev,
