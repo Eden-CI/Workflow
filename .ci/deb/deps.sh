@@ -14,4 +14,4 @@ if command -v apt >/dev/null 2>&1 ; then
     $SUDO apt install -y devscripts equivs
 fi
 
-$SUDO mk-build-deps -i
+$SUDO DEBIAN_FRONTEND=noninteractive mk-build-deps -i
