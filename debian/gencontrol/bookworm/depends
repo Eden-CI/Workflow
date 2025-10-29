@@ -1,0 +1,3 @@
+	libasound2,
+	libboost-context1.81-dev,
+	libboost-fiber1.81-dev,

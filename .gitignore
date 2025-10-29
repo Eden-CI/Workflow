@@ -13,3 +13,4 @@ forgejo.env
 *.deb
 /src
 /pkg
+/debian/control
