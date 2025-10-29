@@ -1,6 +1,7 @@
 Build-Depends:
 	debhelper,
 	devscripts,
+	equivs,
 	autoconf,
 	glslang-tools,
 	cmake,

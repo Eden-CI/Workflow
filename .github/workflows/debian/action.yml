@@ -36,6 +36,13 @@ runs:
         chmod a+x ./debian/configure.sh
         ./debian/configure.sh
 
+    - name: Install dependencies
+      shell: bash
+      run: |
+        sudo rm /var/lib/man-db/auto-update
+        sudo apt install devscripts equivs
+        mk-build-deps -i -r
+
     - name: Build
       shell: bash
       run: |
