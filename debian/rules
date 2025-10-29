@@ -3,15 +3,19 @@
 %:
 	dh $@
 
+override_dh_gencontrol:
+	./debian/configure.sh
+	dh_gencontrol
+
 override_dh_auto_configure:
-	.ci/common/configure.sh -DCCACHE_PATH=${SCCACHE_PATH}
+	./.ci/common/configure.sh -DCCACHE_PATH=${SCCACHE_PATH}
 
 override_dh_auto_build:
-	cmake --build build
+	cmake --build build/
 
 override_dh_auto_install:
-	DESTDIR=debian/eden cmake --install build --prefix=/usr
-	chmod +x debian/eden/usr/bin/*
+	DESTDIR=./debian/eden cmake --install build/ --prefix=/usr
+	chmod +x ./debian/eden/usr/bin/*
 
 override_dh_shlibdeps:
 	dh_shlibdeps --dpkg-shlibdeps-params=--ignore-missing-info

@@ -46,13 +46,13 @@ else
     VER="unknown"
 fi
 
-GCC_VER=$(gcc -dumpversion | cut -d. -f1,2)
-
 case "$VER" in
     bookworm) VARIANT="bookworm" ;;
     trixie)   VARIANT="trixie" ;;
     *)        VARIANT="noble" ;;
 esac
+
+GCC_VER=$(gcc -dumpversion | cut -d. -f1,2)
 
 echo "Detected variant: $VARIANT (GCC $GCC_VER, DIST $DIST $VER)"
 
