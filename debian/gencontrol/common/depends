@@ -33,3 +33,4 @@ Build-Depends:
 	libboost-context-dev,
 	libboost-fiber-dev,
 	libmbedtls-dev,
+	qt6-base-private-dev,
