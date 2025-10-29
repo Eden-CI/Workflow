@@ -13,6 +13,9 @@ case "$VERSION_CODENAME" in
 	bookworm|trixie|noble)
 		echo "Distro: $NAME $VERSION_ID ($VERSION_CODENAME)"
 		;;
+	plucky)
+		VERSION_CODENAME=noble
+		;;
 	*)
 		echo "Unknown distro: $NAME $VERSION_ID ($VERSION_CODENAME)"
 		exit 1
