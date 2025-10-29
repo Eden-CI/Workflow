@@ -3,12 +3,8 @@
 %:
 	dh $@
 
-override_dh_gencontrol:
-	./debian/configure.sh
-	dh_gencontrol
-
 override_dh_auto_configure:
-	./.ci/common/configure.sh -DCCACHE_PATH=${SCCACHE_PATH}
+	./.ci/common/configure.sh
 
 override_dh_auto_build:
 	cmake --build build/

@@ -30,11 +30,11 @@ runs:
         key: ${{ inputs.name }}-${{ inputs.arch }}
         version: ${{ inputs.cpm-cache-version }}
 
-    - name: Install dependencies
+    - name: Generate debian/control
       shell: bash
       run: |
-        chmod a+x ./.ci/deb/deps.sh
-        ./.ci/deb/deps.sh
+        chmod a+x ./debian/configure.sh
+        ./debian/configure.sh
 
     - name: Build
       shell: bash

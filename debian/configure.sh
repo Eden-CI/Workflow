@@ -29,9 +29,9 @@ for gencontrol in "$DEBIAN_BUILD" "$DEBIAN_DEPENDS"; do
 done
 
 rm -rf "$ROOTDIR/debian/control"
+cat "$ROOTDIR/debian/gencontrol/common/head" >> "$ROOTDIR/debian/control"
+echo "$DEBIAN_VERSION" >> "$ROOTDIR/debian/control"
 cat \
-	"$ROOTDIR/debian/gencontrol/common/head" \
-	"$DEBIAN_VERSION" \
 	"$ROOTDIR/debian/gencontrol/common/depends" \
 	"$DEBIAN_BUILD" \
 	"$ROOTDIR/debian/gencontrol/common/body" \
