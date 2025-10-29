@@ -9,9 +9,4 @@ if [ "$CI" = "true" ]; then
 	[ -f "$MANDB" ] && $SUDO rm "$MANDB"
 fi
 
-if command -v apt >/dev/null 2>&1 ; then
-    $SUDO apt update
-    $SUDO apt install -y devscripts equivs
-fi
-
-$SUDO DEBIAN_FRONTEND=noninteractive mk-build-deps -i
+$SUDO apt -y build-dep .
