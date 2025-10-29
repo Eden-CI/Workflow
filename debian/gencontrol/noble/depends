@@ -1,3 +1,4 @@
 	libasound2t64,
+	libdiscord-rpc-dev,
 	libboost-context-dev,
 	libboost-fiber-dev,
