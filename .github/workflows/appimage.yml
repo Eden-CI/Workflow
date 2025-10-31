@@ -56,7 +56,7 @@ jobs:
           GCC='{"program": "gcc", "target": "standard"}'
 
           if [ "${{ inputs.build-id }}" = "tag" ]; then
-            COMPILER="[${GCC},${CLANG},${PGO}]"
+            COMPILER="[${GCC},${PGO}]"
           else
             COMPILER="[${GCC}]"
           fi

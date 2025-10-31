@@ -1,4 +1,4 @@
-name: "[Auto] Build on create 'tag'"
+name: "[Auto] Tagged Release"
 
 on:
   repository_dispatch:

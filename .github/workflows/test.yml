@@ -1,4 +1,4 @@
-name: "[Manual] Build for 'branches'"
+name: "[Manual] Workflow PR"
 
 on:
   pull_request:

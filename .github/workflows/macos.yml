@@ -1,4 +1,4 @@
-name: "[Internal CI] macOS"
+name: "macOS"
 
 on:
   workflow_call:

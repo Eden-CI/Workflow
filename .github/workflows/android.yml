@@ -1,4 +1,4 @@
-name: "[Internal CI] Android"
+name: "Android"
 
 on:
   workflow_call:

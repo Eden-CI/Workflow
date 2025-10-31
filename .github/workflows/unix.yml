@@ -1,4 +1,5 @@
-name: "[Internal CI] UNIX"
+# change this when more targets are added
+name: "FreeBSD"
 
 on:
   workflow_call:

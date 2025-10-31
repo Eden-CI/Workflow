@@ -1,4 +1,4 @@
-name: "[Auto] Build on open 'Pull Request' from Forgejo"
+name: "[Auto] Forgejo Pull Request"
 
 on:
   repository_dispatch:

@@ -37,7 +37,7 @@ jobs:
           MSVC='{"program": "msvc", "target": "standard"}'
 
           if [ "${{ inputs.build-id }}" = "tag" ]; then
-            COMPILER="[${MSVC},${CLANG},${PGO}]"
+            COMPILER="[${MSVC},${PGO}]"
           else
             COMPILER="[${MSVC},${CLANG}]"
           fi
