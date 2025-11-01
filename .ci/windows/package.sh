@@ -13,6 +13,13 @@ set -e
 "${WINDEPLOYQT}" --release --no-compiler-runtime --no-opengl-sw --no-system-dxc-compiler --no-system-d3d-compiler --dir "${BUILDDIR}/pkg" "${BUILDDIR}/bin/eden.exe"
 cp "${BUILDDIR}/bin/"* "${BUILDDIR}/pkg"
 
+if [ "$PLATFORM" = "msys" ]; then
+	# TODO: variable?
+	curl -o bundle https://github.com/eden-emulator/mingw-bundledlls/raw/refs/heads/master/mingw-bundledlls
+	chmod a+x bundle
+	./bundle --copy "${BUILDDIR}/pkg/eden.exe"
+fi
+
 GITDATE=$(git show -s --date=short --format='%ad' | tr -d "-")
 GITREV=$(git show -s --format='%h')
 
