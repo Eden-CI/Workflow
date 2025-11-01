@@ -102,6 +102,17 @@ jobs:
             boost:p fmt:p lz4:p nlohmann-json:p zlib:p zstd:p enet:p
             opus:p mbedtls:p libusb:p unordered_dense:p
 
+      - name: ploo
+        shell: msys2 {0}
+        run: |
+          ls
+          echo
+          ls /
+          echo
+          ls /c/
+          echo
+          ls /mingw64/bin/libgcc*
+
       - name: Configure
         shell: msys2 {0}
         run: |
