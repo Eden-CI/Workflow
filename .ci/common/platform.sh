@@ -7,16 +7,17 @@
 
 uname -s
 
-# special case for MSYS2
-if [ ! -z "$MSYSTEM" ]; then
-	PLATFORM=msys
+# special case for Windows (FU microsoft)
+if [ ! -z "$VisualStudioVersion" ]; then
+	PLATFORM=win
 	STANDALONE=ON
-	OPENSSL=OFF
+	OPENSSL=ON
 	FFMPEG=ON
-	BUNDLED=OFF
-	SUPPORTS_TARGETS=ON
-else
+	[ "$COMPILER" = "clang" ] && SUPPORTS_TARGETS=ON
 
+	# LTO is completely broken on MSVC
+	LTO=off
+else
 	case "$(uname -s)" in
 	Linux*)
 		PLATFORM=linux
@@ -33,14 +34,12 @@ else
 		export LIBVULKAN_PATH="/opt/homebrew/lib/libvulkan.1.dylib"
 		;;
 	CYGWIN* | MINGW* | MSYS*)
-		PLATFORM=win
+		PLATFORM=msys
 		STANDALONE=ON
-		OPENSSL=ON
+		OPENSSL=OFF
 		FFMPEG=ON
-		[ "$COMPILER" = "clang" ] && SUPPORTS_TARGETS=ON
-
-		# LTO is completely broken on MSVC
-		LTO=off
+		BUNDLED=OFF
+		SUPPORTS_TARGETS=ON
 		;;
 	FreeBSD*)
 		PLATFORM=freebsd

@@ -96,7 +96,7 @@ jobs:
             git make autoconf libtool automake-wrapper patch jq
           pacboy: >-
             qt6-base:p qt6-tools:p qt6-translations:p
-            cmake:p clang:p toolchain:p python-pip:p openssl:p
+            cmake:p clang:p toolchain:p python-pip:p openssl:p sccache:p
             vulkan-memory-allocator:p vulkan-devel:p glslang:p
             boost:p fmt:p lz4:p nlohmann-json:p zlib:p zstd:p enet:p
             opus:p mbedtls:p libusb:p unordered_dense:p
@@ -104,7 +104,7 @@ jobs:
       - name: Configure
         shell: msys2 {0}
         run: |
-          .ci/common/configure.sh -DCCACHE_PATH=${SCCACHE_PATH}
+          .ci/common/configure.sh -DCCACHE_PATH=sccache
 
       - name: Build
         shell: msys2 {0}
