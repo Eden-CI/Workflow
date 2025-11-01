@@ -92,10 +92,14 @@ jobs:
         with:
           msystem: ${{ matrix.os.msystem }}
           update: true
-
-      - name: Install Dependencies
-        shell: msys2 {0}
-        run: ./.ci/windows/deps.sh
+          install: >-
+            git make autoconf libtool automake-wrapper patch jq
+          pacboy: >-
+            qt6-base:p qt6-tools:p qt6-translations:p
+            cmake:p clang:p toolchain:p python-pip:p
+            vulkan-memory-allocator:p vulkan-devel:p glslang:p
+            boost:p fmt:p lz4:p nlohmann-json:p zlib:p zstd:p enet:p
+            opus:p mbedtls:p libusb:p unordered_dense:p
 
       - name: Configure
         shell: msys2 {0}
