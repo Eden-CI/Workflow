@@ -40,6 +40,8 @@ else
 		FFMPEG=ON
 		BUNDLED=OFF
 		SUPPORTS_TARGETS=ON
+
+		# TODO: wtf is LTO doing
 		;;
 	FreeBSD*)
 		PLATFORM=freebsd

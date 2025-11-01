@@ -77,6 +77,7 @@ if [ ! -z "$SUPPORTS_TARGETS" ]; then
 
 	ARCH_FLAGS="${ARCH_FLAGS} -O3"
 	[ "$PLATFORM" = "linux" ] && ARCH_FLAGS="${ARCH_FLAGS} -pipe"
+	[ "$PLATFORM" != "win" ] && ARCH_CMAKE+=(-DYUZU_USE_FASTER_LD=ON)
 
 	# For PGO, we fetch profdata and add it to our flags
 	if [ "$PGO_TARGET" = "pgo" ]; then
@@ -113,7 +114,7 @@ if [ "$PACKAGE" = "true" ]; then
 	SDL_FLAGS=(-DYUZU_USE_BUNDLED_SDL2=OFF)
 fi
 
-[ -n "$ARCH_FLAGS" ] && ARCH_CMAKE=(-DCMAKE_C_FLAGS="${ARCH_FLAGS}" -DCMAKE_CXX_FLAGS="${ARCH_FLAGS}")
+[ -n "$ARCH_FLAGS" ] && ARCH_CMAKE+=(-DCMAKE_C_FLAGS="${ARCH_FLAGS}" -DCMAKE_CXX_FLAGS="${ARCH_FLAGS}")
 
 export ARCH_CMAKE
 export SDL_FLAGS
