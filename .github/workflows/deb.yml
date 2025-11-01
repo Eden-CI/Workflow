@@ -54,11 +54,12 @@ jobs:
       # matrix:
       #   os: ${{ fromJson(needs.set-matrix.outputs.matrix) }}
       matrix:
-        os: ${{ fromJson(
-          format('[{"runs-on": "ubuntu-24.04", "arch": "amd64"}{0}]',
-            (github.ref_type == 'tag') && ',{"runs-on": "ubuntu-24.04-arm", "arch": "aarch64"}' || '')
-          )
-        ) }}
+        os: >-
+          ${{ fromJson(format(
+            '[{"runs-on": "ubuntu-24.04", "arch": "amd64"}{0}]',
+            (github.ref_type == 'tag' && ',{"runs-on": "ubuntu-24.04-arm", "arch": "aarch64"}') || ''
+          )) }}
+
 
     steps:
       - name: Checkout
@@ -79,10 +80,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: ${{ fromJson(
-          format(
-            '[{{"runs-on": "ubuntu-24.04", "arch": "amd64"}}{0}]',
-            (github.ref_type == 'tag') && ',{"runs-on": "ubuntu-24.04-arm", "arch": "aarch64"}' || ''
+        os: >-
+          ${{ fromJson(format(
+            '[{"runs-on": "ubuntu-24.04", "arch": "amd64"}{0}]',
+            (github.ref_type == 'tag' && ',{"runs-on": "ubuntu-24.04-arm", "arch": "aarch64"}') || ''
           )) }}
 
     steps:
@@ -104,10 +105,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: ${{ fromJson(
-          format(
-            '[{{"runs-on": "ubuntu-24.04", "arch": "amd64"}}{0}]',
-            (github.ref_type == 'tag') && ',{"runs-on": "ubuntu-24.04-arm", "arch": "aarch64"}' || ''
+        os: >-
+          ${{ fromJson(format(
+            '[{"runs-on": "ubuntu-24.04", "arch": "amd64"}{0}]',
+            (github.ref_type == 'tag' && ',{"runs-on": "ubuntu-24.04-arm", "arch": "aarch64"}') || ''
           )) }}
 
     steps:
