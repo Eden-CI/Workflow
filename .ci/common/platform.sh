@@ -41,6 +41,8 @@ else
 		BUNDLED=OFF
 		SUPPORTS_TARGETS=ON
 
+		export PATH="$PATH:/mingw64/bin"
+
 		# TODO: wtf is LTO doing
 		;;
 	FreeBSD*)
