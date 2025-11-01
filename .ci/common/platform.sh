@@ -44,6 +44,7 @@ else
 		export PATH="$PATH:/mingw64/bin"
 
 		# TODO: wtf is LTO doing
+		LTO=off
 		;;
 	FreeBSD*)
 		PLATFORM=freebsd
