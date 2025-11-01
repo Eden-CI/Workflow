@@ -1,7 +1,7 @@
 #!/bin/sh -e
 
 BASE="git make autoconf libtool automake-wrapper patch jq"
-MINGW="SDL2 cmake python-pip qt6-base qt6-tools qt6-translations toolchain boost catch fmt lz4 nlohmann-json zlib zstd enet opus mbedtls vulkan-devel libusb vulkan-memory-allocator unordered_dense clang ccache"
+MINGW="cmake python-pip qt6-base qt6-tools qt6-translations toolchain boost fmt lz4 nlohmann-json zlib zstd enet opus mbedtls vulkan-devel libusb vulkan-memory-allocator unordered_dense clang"
 
 PACKAGES="$BASE"
 
