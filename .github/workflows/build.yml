@@ -195,7 +195,7 @@ jobs:
 
   status-if-cancelled:
     name: "Send Cancelled Commit Status to Forgejo"
-    needs: [source, deb, linux, windows, android, macos, unix]
+    needs: [source, deb, linux, windows, android, macos, unix, msys]
     if: ${{ always() && cancelled() && ((inputs.build-id || '') == 'master' || (inputs.build-id || '') == 'pull_request') }}
     runs-on: ubuntu-latest
     steps:
@@ -208,7 +208,7 @@ jobs:
 
   status-if-failure:
     name: "Send Failure Commit Status to Forgejo"
-    needs: [source, deb, linux, windows, android, macos, unix]
+    needs: [source, deb, linux, windows, android, macos, unix, msys]
     if: ${{ always() && failure() && ((inputs.build-id || '') == 'master' || (inputs.build-id || '') == 'pull_request') }}
     runs-on: ubuntu-latest
     steps:
@@ -221,7 +221,8 @@ jobs:
 
   status-if-success:
     name: "Send Success Commit Status to Forgejo"
-    needs: [source, deb, linux, windows, android, macos, unix]
+    # TODO: ?ploo this
+    needs: [source, deb, linux, windows, android, macos, unix, msys]
     if: ${{ always() && success() && ((inputs.build-id || '') == 'master' || (inputs.build-id || '') == 'pull_request') }}
     runs-on: ubuntu-latest
     steps:

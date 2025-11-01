@@ -24,17 +24,41 @@ env:
   DEVEL: ${{ inputs.devel }}
 
 jobs:
+  # set-matrix:
+  #   name: "Generate Debian Matrix"
+  #   runs-on: ubuntu-latest
+  #   outputs:
+  #     matrix: ${{ steps.set.outputs.matrix }}
+  #     compiler: ${{ steps.set.outputs.compiler }}
+  #   steps:
+  #     - id: set
+  #       run: |
+  #         BASE='[{"runs-on": "ubuntu-24.04", "arch": "amd64"}'
+  #         ARM=',{"runs-on": "ubuntu-24.04-arm", "arch": "aarch64"}]'
+
+  #         if [ "${{ inputs.build-id }}" = "tag" ]; then
+  #           MATRIX="${BASE}${ARM}"
+  #         else
+  #           MATRIX="${BASE}]"
+  #         fi
+
+  #         echo $MATRIX
+  #         echo "matrix=${MATRIX}" >> $GITHUB_OUTPUT
+
   ubuntu:
     name: "Ubuntu 24.04 (${{ matrix.os.arch }})"
     runs-on: ${{ matrix.os.runs-on }}
+    # needs: [set-matrix]
     strategy:
       fail-fast: false
+      # matrix:
+      #   os: ${{ fromJson(needs.set-matrix.outputs.matrix) }}
       matrix:
-        os:
-          - arch: aarch64
-            runs-on: ubuntu-24.04-arm
-          - arch: amd64
-            runs-on: ubuntu-24.04
+        os: ${{ fromJson(
+          format(
+            '[{{"runs-on": "ubuntu-24.04", "arch": "amd64"}}{0}]',
+            (github.ref_type == 'tag') && ',{"runs-on": "ubuntu-24.04-arm", "arch": "aarch64"}' || ''
+          )) }}
 
     steps:
       - name: Checkout
@@ -44,7 +68,7 @@ jobs:
         uses: ./.github/workflows/debian
         with:
           arch: ${{ matrix.os.arch }}
-          name: ubuntu
+          name: ubuntu-24.04
           cpm-cache-version: ${{ inputs.cpm-cache-version }}
           devel: ${{ inputs.devel }}
 
@@ -55,11 +79,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os:
-          - arch: aarch64
-            runs-on: ubuntu-24.04-arm
-          - arch: amd64
-            runs-on: ubuntu-24.04
+        os: ${{ fromJson(
+          format(
+            '[{{"runs-on": "ubuntu-24.04", "arch": "amd64"}}{0}]',
+            (github.ref_type == 'tag') && ',{"runs-on": "ubuntu-24.04-arm", "arch": "aarch64"}' || ''
+          )) }}
 
     steps:
       - name: Checkout
@@ -80,11 +104,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os:
-          - arch: aarch64
-            runs-on: ubuntu-24.04-arm
-          - arch: amd64
-            runs-on: ubuntu-24.04
+        os: ${{ fromJson(
+          format(
+            '[{{"runs-on": "ubuntu-24.04", "arch": "amd64"}}{0}]',
+            (github.ref_type == 'tag') && ',{"runs-on": "ubuntu-24.04-arm", "arch": "aarch64"}' || ''
+          )) }}
 
     steps:
       - name: Checkout

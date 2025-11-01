@@ -1,69 +1,85 @@
-#!/bin/sh -x
+#!/bin/sh
 
 # SPDX-FileCopyrightText: Copyright 2025 Eden Emulator Project
 # SPDX-License-Identifier: GPL-3.0-or-later
 
+# shellcheck disable=SC2043
+
 mkdir -p artifacts
 
-ARCHES="amd64 steamdeck"
+tagged() {
+	[ "$DEVEL" != "true" ]
+}
 
+cp() {
+	echo "$2"
+}
+
+## AppImage ##
+ARCHES="amd64 steamdeck"
 [ "$DISABLE_ARM" != "true" ] && ARCHES="$ARCHES aarch64"
-COMPILERS="gcc"
-if [ "$DEVEL" = "false" ]; then
-	ARCHES="$ARCHES legacy rog-ally"
-	COMPILERS="$COMPILERS clang"
-fi
+COMPILERS=gcc-standard
+
+tagged && ARCHES="$ARCHES legacy rog-ally" && COMPILERS="$COMPILERS clang-pgo"
 
 for arch in $ARCHES; do
 	for compiler in $COMPILERS; do
-		ARTIFACT="Eden-Linux-${ID}-${arch}-${compiler}-standard"
+		ARTIFACT="Eden-Linux-${ID}-${arch}-${compiler}"
 
-		cp "linux-$arch-$compiler-standard"/*.AppImage "artifacts/$ARTIFACT.AppImage"
-		if [ "$DEVEL" = "false" ]; then
-			cp "linux-$arch-$compiler-standard"/*.AppImage.zsync "artifacts/$ARTIFACT.AppImage.zsync"
-		fi
+		cp "linux-$arch-$compiler"/*.AppImage "artifacts/$ARTIFACT.AppImage"
+		tagged && cp "linux-$arch-$compiler-standard"/*.AppImage.zsync "artifacts/$ARTIFACT.AppImage.zsync"
 	done
-
-	if [ "$DEVEL" != "true" ]; then
-		ARTIFACT="Eden-Linux-${ID}-${arch}-clang-pgo"
-
-		cp "linux-$arch-clang-pgo"/*.AppImage.zsync "artifacts/$ARTIFACT.AppImage.zsync"
-		cp "linux-$arch-clang-pgo"/*.AppImage "artifacts/$ARTIFACT.AppImage"
-	fi
 done
 
+## Debian ##
+ARCHES=amd64
+tagged && ARCHES="$ARCHES aarch64"
+
+for arch in $ARCHES; do
+	for ver in 24.04; do
+		cp "ubuntu-$ver-$arch"/*.deb "artifacts/Eden-Ubuntu-$ver-${ID}-$arch.deb"
+	done
+
+	for ver in 12 13; do
+		cp "debian-$ver-$arch"/*.deb "artifacts/Eden-Debian-$ver-${ID}-$arch.deb"
+	done
+done
+
+## Android ##
 FLAVORS=standard
-if [ "$DEVEL" = "false" ]; then
-	FLAVORS="standard legacy optimized"
-fi
+tagged && FLAVORS="$FLAVORS legacy optimized"
 
 for flavor in $FLAVORS; do
 	cp android-"$flavor"/*.apk "artifacts/Eden-Android-${ID}-${flavor}.apk"
 done
 
-for arch in amd64 arm64; do
-	for compiler in clang msvc; do
-		cp "windows-$arch-${compiler}-standard"/*.zip "artifacts/Eden-Windows-${ID}-${arch}-${compiler}-standard.zip"
-	done
+## Windows ##
+COMPILERS="msvc-standard mingw-gcc-standard"
+tagged && COMPILERS="$COMPILERS clang-pgo mingw-clang-pgo"
 
-	if [ "$DEVEL" != "true" ]; then
-		cp "windows-$arch-clang-pgo"/*.zip "artifacts/Eden-Windows-${ID}-${arch}-clang-pgo.zip"
-	fi
+for arch in amd64 arm64; do
+	for compiler in $COMPILERS; do
+		cp "windows-$arch-compiler"/*.zip "artifacts/Eden-Windows-${ID}-${arch}-${compiler}.zip"
+	done
 done
 
+## MinGW ##
+COMPILERS="gcc-standard"
+tagged && COMPILERS="$COMPILERS clang-pgo"
+
+for arch in amd64; do
+	for compiler in $COMPILERS; do
+		cp "mingw-$arch-$compiler"/*.zip "artifacts/Eden-Windows-${ID}-${arch}-mingw-${compiler}.zip"
+	done
+done
+
+## Source Pack ##
 if [ -d "source" ]; then
 	cp source/source.tar.zst "artifacts/Eden-Source-${ID}.tar.zst"
 fi
 
-cp -r macos/*.tar.gz "artifacts/Eden-macOS-${ID}.tar.gz"
+## MacOS ##
+cp macos/*.tar.gz "artifacts/Eden-macOS-${ID}.tar.gz"
 
-# TODO
-cp -r freebsd-binary-amd64-clang/*.tar.zst "artifacts/Eden-FreeBSD-${ID}-amd64-clang.tar.zst"
-
-for arch in aarch64 amd64; do
-	cp ubuntu-$arch/*.deb "artifacts/Eden-Ubuntu-24.04-${ID}-$arch.deb"
-
-	for ver in 12 13; do
-		cp debian-$ver-$arch/*.deb "artifacts/Eden-Debian-$ver-${ID}-$arch.deb"
-	done
-done
+## FreeBSD and other stuff ##
+cp freebsd-binary-amd64-clang/*.tar.zst "artifacts/Eden-FreeBSD-${ID}-amd64-clang.tar.zst"
