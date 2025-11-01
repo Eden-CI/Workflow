@@ -24,42 +24,35 @@ env:
   DEVEL: ${{ inputs.devel }}
 
 jobs:
-  # set-matrix:
-  #   name: "Generate Debian Matrix"
-  #   runs-on: ubuntu-latest
-  #   outputs:
-  #     matrix: ${{ steps.set.outputs.matrix }}
-  #     compiler: ${{ steps.set.outputs.compiler }}
-  #   steps:
-  #     - id: set
-  #       run: |
-  #         BASE='[{"runs-on": "ubuntu-24.04", "arch": "amd64"}'
-  #         ARM=',{"runs-on": "ubuntu-24.04-arm", "arch": "aarch64"}]'
+  set-matrix:
+    name: "Generate Debian Matrix"
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set.outputs.matrix }}
+      compiler: ${{ steps.set.outputs.compiler }}
+    steps:
+      - id: set
+        run: |
+          BASE='[{"runs-on": "ubuntu-24.04", "arch": "amd64"}'
+          ARM=',{"runs-on": "ubuntu-24.04-arm", "arch": "aarch64"}]'
 
-  #         if [ "${{ inputs.build-id }}" = "tag" ]; then
-  #           MATRIX="${BASE}${ARM}"
-  #         else
-  #           MATRIX="${BASE}]"
-  #         fi
+          if [ "${{ inputs.build-id }}" = "tag" ]; then
+            MATRIX="${BASE}${ARM}"
+          else
+            MATRIX="${BASE}]"
+          fi
 
-  #         echo $MATRIX
-  #         echo "matrix=${MATRIX}" >> $GITHUB_OUTPUT
+          echo $MATRIX
+          echo "matrix=${MATRIX}" >> $GITHUB_OUTPUT
 
   ubuntu:
     name: "Ubuntu 24.04 (${{ matrix.os.arch }})"
     runs-on: ${{ matrix.os.runs-on }}
-    # needs: [set-matrix]
+    needs: [set-matrix]
     strategy:
       fail-fast: false
-      # matrix:
-      #   os: ${{ fromJson(needs.set-matrix.outputs.matrix) }}
       matrix:
-        os: >-
-          ${{ fromJson(format(
-            '[{"runs-on": "ubuntu-24.04", "arch": "amd64"}{0}]',
-            (github.ref_type == 'tag' && ',{"runs-on": "ubuntu-24.04-arm", "arch": "aarch64"}') || ''
-          )) }}
-
+        os: ${{ fromJson(needs.set-matrix.outputs.matrix) }}
 
     steps:
       - name: Checkout
@@ -76,15 +69,12 @@ jobs:
   debian-13:
     name: "Debian 13 (${{ matrix.os.arch }})"
     runs-on: ${{ matrix.os.runs-on }}
+    needs: [set-matrix]
     container: ghcr.io/nilcons/debian:latest
     strategy:
       fail-fast: false
       matrix:
-        os: >-
-          ${{ fromJson(format(
-            '[{"runs-on": "ubuntu-24.04", "arch": "amd64"}{0}]',
-            (github.ref_type == 'tag' && ',{"runs-on": "ubuntu-24.04-arm", "arch": "aarch64"}') || ''
-          )) }}
+        os: ${{ fromJson(needs.set-matrix.outputs.matrix) }}
 
     steps:
       - name: Checkout
@@ -101,15 +91,12 @@ jobs:
   debian-12:
     name: "Debian 12 (${{ matrix.os.arch }})"
     runs-on: ${{ matrix.os.runs-on }}
+    needs: [set-matrix]
     container: ghcr.io/xrplf/ci/debian-bookworm:gcc-12
     strategy:
       fail-fast: false
       matrix:
-        os: >-
-          ${{ fromJson(format(
-            '[{"runs-on": "ubuntu-24.04", "arch": "amd64"}{0}]',
-            (github.ref_type == 'tag' && ',{"runs-on": "ubuntu-24.04-arm", "arch": "aarch64"}') || ''
-          )) }}
+        os: ${{ fromJson(needs.set-matrix.outputs.matrix) }}
 
     steps:
       - name: Checkout
