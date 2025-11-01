@@ -88,6 +88,17 @@ win() {
 	echo
 }
 
+msys() {
+	ARCH="$1"
+	PRETTY_ARCH="$2"
+	DESCRIPTION="$3"
+
+	echo -n "| "
+	echo -n "[$PRETTY_ARCH](${BASE_DOWNLOAD_URL}/${TAG}/Eden-Windows-MinGW-${REF}-${ARCH}.zip) | "
+	echo -n "$DESCRIPTION |"
+	echo
+}
+
 android() {
 	TYPE="$1"
 	FLAVOR="$2"
@@ -181,8 +192,6 @@ if [ "$DEVEL" != "true" ]; then
 	echo
 	echo "We are additionally providing experimental PGO packages. These should have improved performance, but may be unstable or have bugs."
 	echo
-	echo "| Build | Description |"
-	echo "| ----- | ----------- |"
 
 	COMPILER=clang-pgo
 	linux_builds "PGO"
@@ -230,6 +239,13 @@ if [ "$DEVEL" != "true" ]; then
 	echo
 fi
 
+echo "### MinGW"
+echo
+echo "MinGW is an alternative building method for Windows. Theoretically, it provides improved code generation and thus better performance,"
+echo "but its effects on graphics or the like is currently unknown."
+
+# TODO(crueter): finish this and PLEASE make it all one table or something man
+
 echo "### Android"
 echo
 echo "| Build  | Description |"
@@ -257,3 +273,17 @@ echo "| File | Description |"
 echo "| ---- | ----------- |"
 src "tar.zst" "Source as a zstd-compressed tarball (Windows requires 7zip)"
 echo
+
+cat << EOF
+
+### Architectures
+
+Each build is optimized for a specific architecture. Windows only packages amd64/arm64, while Linux has many more targets.
+
+- **aarch64/arm64**: 
+
+### Linux
+
+Linux packages are distributed via AppImage.
+
+EOF

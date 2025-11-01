@@ -1,4 +1,4 @@
-name: "Windows"
+name: "MSYS2"
 
 on:
   workflow_call:
@@ -24,8 +24,8 @@ env:
   DEVEL: ${{ inputs.devel }}
 
 jobs:
-  win-matrix:
-    name: "Generate Windows compilers"
+  msys-matrix:
+    name: "Generate MSYS compilers"
     runs-on: ubuntu-latest
     outputs:
       compiler: ${{ steps.set.outputs.compiler }}
@@ -34,30 +34,36 @@ jobs:
         run: |
           PGO='{"program": "clang", "target": "pgo"}'
           CLANG='{"program": "clang", "target": "standard"}'
-          MSVC='{"program": "msvc", "target": "standard"}'
+          GCC='{"program": "gcc", "target": "standard"}'
 
           if [ "${{ inputs.build-id }}" = "tag" ]; then
-            COMPILER="[${MSVC},${PGO}]"
+            COMPILER="[${GCC},${PGO}]"
           else
-            COMPILER="[${MSVC},${CLANG}]"
+            COMPILER="[${GCC}]"
           fi
 
           echo $COMPILER
           echo "compiler=${COMPILER}" >> $GITHUB_OUTPUT
 
-  windows:
-    name: "Windows ${{ matrix.os.arch }} ${{ matrix.compiler.program }} ${{ matrix.compiler.target }}"
-    needs: [win-matrix]
+  # TODO: setup
+  # TODO: once arm64 builds work, combine this with windows.yml
+  msys:
+    name: "MSYS2-MinGW64 ${{ matrix.os.arch }} ${{ matrix.compiler.program }} ${{ matrix.compiler.target }}"
+    needs: [msys-matrix]
     runs-on: ${{ matrix.os.runs-on }}
     strategy:
       fail-fast: false
       matrix:
         os:
-          - runs-on: windows-latest
+          - runs-on: ubuntu-latest
             arch: amd64
-          - runs-on: windows-11-arm
-            arch: arm64
-        compiler: ${{ fromJson(needs.win-matrix.outputs.compiler) }}
+            msystem: mingw64
+
+          # TODO: this requires some cross-comp stuff
+          # - runs-on: ubuntu-24.04-arm
+          #   arch: arm64
+
+        compiler: ${{ fromJson(needs.msys-matrix.outputs.compiler) }}
 
     env:
       QT_VERSION: 6.9.1
@@ -73,42 +79,26 @@ jobs:
       - name: Setup
         uses: ./.github/workflows/setup
         with:
-          key: ${{ runner.os }}-${{ matrix.os.arch }}-${{ matrix.compiler.program }}
+          key: MSYS2-${{ matrix.os.msystem }}-${{ matrix.os.arch }}-${{ matrix.compiler.program }}
           version: ${{ inputs.cpm-cache-version }}
-
-      - name: Install Qt
-        uses: jurplel/install-qt-action@v4.3.0
-        with:
-          version: ${{ env.QT_VERSION }}
-          cache: 'true'
 
       - name: Load payload environment
         shell: bash
         run: |
           . ./.ci/fj/load-env.sh
 
-      - name: Set up MSVC
-        uses: ilammy/msvc-dev-cmd@v1.13.0
+      - name: Setup MSYS2
+        uses: msys2/setup-msys2@v2
         with:
-          arch: ${{ matrix.os.arch }}
+          msystem: ${{ matrix.msystem }}
+          update: true
 
-      - name: Force Clang 20
-        if: matrix.compiler.program == 'clang'
-        shell: bash
-        run: |
-          echo "C:/Program Files/LLVM/bin" >> $GITHUB_PATH
-          clang-cl --version
-
-      - name: Install Vulkan SDK
-        shell: powershell
-        run: |
-          ./.ci/windows/install-vulkan-sdk.ps1
+      - name: Install Dependencies
+        run: ./.ci/windows/deps.sh
 
       - name: Configure
         shell: bash
         run: |
-          git config --global core.autocrlf off
-          dos2unix .patch/boost/*
           .ci/common/configure.sh -DCCACHE_PATH=${SCCACHE_PATH}
 
       - name: Build
@@ -122,6 +112,6 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v4.6.2
         with:
-          name: windows-${{ env.ARCH }}
+          name: msys-${{ env.ARCH }}
           path: artifacts/*
 
