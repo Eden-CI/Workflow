@@ -3,8 +3,6 @@
 # SPDX-FileCopyrightText: Copyright 2025 Eden Emulator Project
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-# shellcheck disable=SC1091
-
 case "$1" in
 master)
 	TAG="v${TIMESTAMP}.${FORGEJO_REF}"
@@ -35,46 +33,8 @@ esac
 
 COMPARE_RELEASE_URL="https://$RELEASE_MASTER_HOST/$RELEASE_MASTER_REPO/releases"
 
-linux() {
-	ARCH="$1"
-	PRETTY_ARCH="$2"
-	DESCRIPTION="$3"
-
-	echo -n "| "
-	echo -n "[$PRETTY_ARCH ($LABEL)](${BASE_DOWNLOAD_URL}/${TAG}/Eden-Linux-${REF}-${ARCH}-${COMPILER}.AppImage) | "
-	if [ "$DEVEL" != "true" ]; then
-		echo -n "([zsync](${BASE_DOWNLOAD_URL}/${TAG}/Eden-Linux-${REF}-${ARCH}-${COMPILER}.AppImage.zsync)) | "
-	fi
-	echo -n "$DESCRIPTION ($LABEL build) |"
-	echo
-}
-
-linux_builds() {
-	LABEL="$1"
-
-	echo "| Build | Description |"
-	echo "| ----- | ----------- |"
-	linux amd64 "amd64" "For any modern AMD or Intel CPU"
-	linux steamdeck "Steam Deck" "For Steam Deck and other >= Zen 2 AMD CPUs"
-	[ "$DISABLE_ARM" != "true" ] && linux aarch64 "armv8-a" "For ARM CPUs made in mid-2021 or earlier"
-
-	if [ "$DEVEL" != "true" ]; then
-		linux legacy "amd64 (legacy)" "For CPUs older than 2013 or so"
-		linux rog-ally "ROG Ally X" "For ROG Ally X and other >= Zen 4 AMD CPUs"
-	fi
-
-}
-
-deb() {
-	BUILD="$1"
-	NAME="${BUILD//-/ }"
-
-	for ARCH in amd64 aarch64; do
-		echo -n "| "
-		echo -n "[$NAME ($ARCH)](${BASE_DOWNLOAD_URL}/${TAG}/Eden-$BUILD-${REF}-${ARCH}.deb) | "
-		echo -n "Pre-packaged \`.deb\` file for $NAME on $ARCH |"
-		echo
-	done
+tagged() {
+	[ "$DEVEL" != "true" ]
 }
 
 win() {
@@ -151,139 +111,171 @@ push | test)
 esac
 echo
 
-echo "## Packages"
-echo
-echo "Desktop builds will automatically put data in \`~/.local/share/eden\` on Linux, or "
-echo "\`%APPDATA%/eden\` on Windows. You may optionally create a \`user\` directory in the "
-echo "same directory as the executable/AppImage to store data there instead."
-echo
+linux_field() {
+	ARCH="$1"
+	PRETTY_ARCH="$2"
+	NOTES="${3}"
 
-if [ "$DEVEL" = "true" ]; then
-	echo ">[!WARNING]"
-	echo ">These builds are provided **as-is**. They are intended for testers and developers ONLY."
-	echo ">They are made available to the public in the interest of maximizing user freedom, but you"
-	echo ">**will NOT receive support** while using these builds, *unless* you have useful debug/testing"
-	echo ">info to share."
-	echo "> "
-	echo ">Furthermore, sharing these builds and claiming they are the \"official\" or \"release\""
-	echo ">builds is **STRICTLY FORBIDDEN** and may result in further action from the Eden development team."
+	echo -n "| $PRETTY_ARCH | "
+	echo -n "[GCC](${BASE_DOWNLOAD_URL}/${TAG}/Eden-Linux-${REF}-${ARCH}-gcc-standard.AppImage) "
+	if tagged; then
+		echo -n "([zsync](${BASE_DOWNLOAD_URL}/${TAG}/Eden-Linux-${REF}-${ARCH}-gcc-standard.AppImage.zsync)) | "
+		echo -n "[PGO](${BASE_DOWNLOAD_URL}/${TAG}/Eden-Linux-${REF}-${ARCH}-clang-pgo.AppImage) "
+		echo -n "([zsync](${BASE_DOWNLOAD_URL}/${TAG}/Eden-Linux-${REF}-${ARCH}-clang-pgo.AppImage.zsync))"
+	fi
+
+	echo "| $NOTES |"
+}
+
+linux_matrix() {
+	linux_field amd64 "amd64"
+	tagged && linux_field legacy "Legacy amd64" "Pre-Ryzen or Haswell CPUs (expect sadness)"
+	linux_field steamdeck "Steam Deck" "Zen 2, with additional patches for SteamOS"
+	tagged && linux_field rog-ally "ROG Ally X" "Zen 4"
+	[ "$DISABLE_ARM" != "true" ] && linux_field aarch64 "aarch64"
+}
+
+deb_field() {
+	BUILD="$1"
+	NOTES="${2}"
+	NAME="${BUILD//-/ }"
+
+	echo -n "| $NAME | "
+	for ARCH in amd64 aarch64; do
+		echo -n "[$ARCH](${BASE_DOWNLOAD_URL}/${TAG}/Eden-$BUILD-${REF}-${ARCH}.deb) | "
+	done
+
+	echo "$NOTES |"
+}
+
+deb_matrix() {
+    deb_field Ubuntu-24.04 "Not compatible with Ubuntu 25.04 or later"
+	deb_field Debian-12 "Drivers may be old"
+	deb_field Debian-13
+}
+
+win_field() {
+	LABEL="$1"
+	COMPILER="$2"
+	NOTES="$3"
+
+	echo -n "| $LABEL | "
+	echo -n "[amd64](${BASE_DOWNLOAD_URL}/${TAG}/Eden-Windows-${REF}-amd64-${COMPILER}.zip) | "
+	[ "$MINGW" != "true" ] && echo -n "[arm64](${BASE_DOWNLOAD_URL}/${TAG}/Eden-Windows-${REF}-arm64-${COMPILER}.zip)"
+
+	echo " | $NOTES |"
+}
+
+win_matrix() {
+	MINGW=false
+	win_field MSVC msvc-standard
+	tagged && win_field PGO clang-pgo
+
+	MINGW=true
+	win_field "MinGW GCC" mingw-gcc-standard "May have additional bugs/glitches"
+	tagged && win_field "MinGW PGO" mingw-clang-pgo || true
+}
+
+cat << EOF
+
+## Targets
+
+Each build is optimized for a specific architecture and uses a specific compiler.
+
+- **aarch64/arm64**: For devices that use the armv8-a instruction set; e.g. Snapdragon X, all Android devices, and Apple Silicon Macs.
+- **amd64**: For devices that use the amd64 (aka x86_64) instruction set; this is exclusively used by Intel and AMD CPUs and is only found on desktops.
+
+**Compilers**
+
+- **MSVC**: The default compiler for Windows. This is the most stable experience, but may lack in performance compared to any of the following alternatives.
+- **Clang**: An alternative compiler that provides theoretically higher performance, but may have additional graphical glitches.
+- **GCC**: The standard GNU compiler; this is the default for Linux and will provide the most stable experience.
+- **PGO**: These are built with Clang, and use PGO:
+
+PGO (profile-guided optimization) uses data from prior compilations to determine the "hotspots" found within the codebase. Using these hotspots,
+it can allocate more resources towards these heavily-used areas, and thus generally see improved performance to the tune of ~10-50%,
+depending on the specific game, hardware, and platform. Do note that additional instabilities may occur.
+
+### Linux
+
+Linux packages are distributed via AppImage.
+EOF
+
+if tagged; then
+cat << EOF
+[zsync](https://zsync.moria.org.uk/) files are provided for easier updating.
+
+| Build Type | GCC | PGO | Notes |
+|------------|-----|-----|-------|
+EOF
+else
+cat << EOF
+
+| Build Type | GCC | Notes |
+|------------|-----|-------|
+EOF
 fi
-echo
 
-# TODO(crueter): let's make this all one table
-echo "### Linux"
-echo
-echo "Linux packages are distributed via AppImage. Each build is optimized for a specific architecture."
-echo "See the *Description* column for more info. Note that legacy builds will always work on newer systems."
-echo
+linux_matrix
 
-COMPILER=gcc-standard
-linux_builds "GCC"
+cat << EOF
 
-if [ "$DEVEL" != "true" ]; then
-	echo
-	echo "We are additionally providing experimental packages built with Clang, rather than GCC. These builds should be identical, if not faster,"
-	echo "but how it affects the overall experience is currently unknown. In the future, these builds will be made with PGO to increase speed."
-	echo
+### Debian/Ubuntu
 
-	COMPILER=clang-standard
-	linux_builds "Clang"
+Debian/Ubuntu targets are \`.deb\` files, which can be installed via \`sudo dpkg -i <package>.deb\`.
 
-	echo
-	echo "We are additionally providing experimental PGO packages. These should have improved performance, but may be unstable or have bugs."
-	echo
+| Target | amd64 | aarch64 | Notes |
+|--------|-------|---------|-------|
+EOF
 
-	COMPILER=clang-pgo
-	linux_builds "PGO"
-fi
-echo
+deb_matrix
 
-echo "### Debian/Ubuntu"
-echo
-echo "These are prebuilt \`.deb\` packages for Ubuntu and Debian. To install them, run \`sudo dpkg -i Eden-<platform>-<version>.deb\`."
-echo "Note that these use system drivers, and so you may have some graphical bugs with these builds as opposed to the appimage."
-echo
-echo "| Build | Description |"
-echo "| ----- | ----------- |"
-deb Ubuntu-24.04
-deb Debian-12
-deb Debian-13
-echo
+cat << EOF
 
-echo "### Windows"
-echo
-echo "Windows packages are in-place zip files."
-echo
-echo "| Build | Description |"
-echo "| ----- | ----------- |"
-win amd64-msvc-standard amd64 "For any Windows machine running an AMD or Intel CPU"
-win arm64-msvc-standard aarch64 "For any Windows machine running a Qualcomm or other ARM-based SoC"
-echo
+### Windows
 
-echo "We are additionally providing experimental packages built with Clang, rather than MSVC. These builds should be identical, if not faster,"
-echo "but how it affects the overall experience is currently unknown."
-echo
-echo "| Build | Description |"
-echo "| ----- | ----------- |"
-win amd64-clang-standard "amd64 (clang)" "For any Windows machine running an AMD or Intel CPU (clang-cl build)"
-win arm64-clang-standard "aarch64 (clang)" "For any Windows machine running a Qualcomm or other ARM-based SoC (clang-cl build)"
-echo
+Windows packages are in-place zip files. Setup files are soon to come.
+Note that arm64 builds are extremely experimental and are unlikely to work at all.
 
-if [ "$DEVEL" != "true" ]; then
-	echo "We are additionally providing experimental PGO packages. These should have improved performance, but may be unstable or have bugs."
-	echo
-	echo "| Build | Description |"
-	echo "| ----- | ----------- |"
-	win amd64-clang-pgo "amd64 (PGO)" "For any Windows machine running an AMD or Intel CPU (PGO build)"
-	win arm64-clang-pgo "aarch64 (PGO)" "For any Windows machine running a Qualcomm or other ARM-based SoC (PGO build)"
-	echo
-fi
+| Compiler | amd64 | arm64 | Notes |
+|----------|-------|-------|-------|
+EOF
 
-echo "### MinGW"
-echo
-echo "MinGW is an alternative building method for Windows. Theoretically, it provides improved code generation and thus better performance,"
-echo "but its effects on graphics or the like is currently unknown."
+win_matrix
 
-# TODO(crueter): finish this and PLEASE make it all one table or something man
+cat << EOF
 
-echo "### Android"
-echo
-echo "| Build  | Description |"
-echo "|--------|-------------|"
+### Android
+
+| Build  | Description |
+|--------|-------------|
+EOF
+
 android Standard "standard" "Single APK for all supported Android devices (most users should use this)"
 if [ "$DEVEL" != true ]; then
 	android Optimized "optimized" "For any Android device that has Frame Generation or any other per-device feature"
 	android Legacy "legacy" "For Adreno A6xx and other older GPUs"
 fi
-echo
 
-echo "### macOS"
-echo
-echo "macOS comes in a tarballed app. These builds are currently experimental, and you should expect major graphical glitches and crashes."
-echo "In order to run the app, you *may* need to go to System Settings -> Privacy & Security -> Security -> Allow untrusted app."
-echo "| File | Description |"
-echo "| ---- | ----------- |"
-echo "| [macOS](${BASE_DOWNLOAD_URL}/${TAG}/Eden-macOS-${REF}.tar.gz) | For Apple Silicon (M1, M2, etc) computers running macOS"
-echo
-echo "### Source"
-echo
-echo "Contains all source code, submodules, and CPM cache at the time of release."
-echo
-echo "| File | Description |"
-echo "| ---- | ----------- |"
-src "tar.zst" "Source as a zstd-compressed tarball (Windows requires 7zip)"
-echo
 
 cat << EOF
 
-### Architectures
+### macOS
 
-Each build is optimized for a specific architecture. Windows only packages amd64/arm64, while Linux has many more targets.
+macOS comes in a tarballed app. These builds are currently experimental, and you should expect major graphical glitches and crashes.
+In order to run the app, you *may* need to go to System Settings -> Privacy & Security -> Security -> Allow untrusted app.
 
-- **aarch64/arm64**: 
+| File | Description |
+| ---- | ----------- |
+| [macOS](${BASE_DOWNLOAD_URL}/${TAG}/Eden-macOS-${REF}.tar.gz) | For Apple Silicon (M1, M2, etc)|
 
-### Linux
+### Source
 
-Linux packages are distributed via AppImage.
+Contains all source code, submodules, and CPM cache at the time of release.
+This can be extracted with \`tar xf Eden-Source-${REF}.tar.zst\`.
+
+| File | Description |
+| ---- | ----------- |
+| [tar.zst](${BASE_DOWNLOAD_URL}/${TAG}/Eden-Source-${REF}.tar.zst) | Source as a zstd-compressed tarball (Windows: use Git Bash or MSYS2) |
 
 EOF

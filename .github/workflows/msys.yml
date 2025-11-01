@@ -94,24 +94,25 @@ jobs:
           update: true
 
       - name: Install Dependencies
+        shell: msys2 {0}
         run: ./.ci/windows/deps.sh
 
       - name: Configure
-        shell: bash
+        shell: msys2 {0}
         run: |
           .ci/common/configure.sh -DCCACHE_PATH=${SCCACHE_PATH}
 
       - name: Build
-        shell: bash
+        shell: msys2 {0}
         run: cmake --build build
 
       - name: Package
-        shell: bash
+        shell: msys2 {0}
         run: ./.ci/windows/package.sh
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4.6.2
         with:
-          name: msys-${{ env.ARCH }}
+          name: mingw-${{ env.ARCH }}
           path: artifacts/*
 

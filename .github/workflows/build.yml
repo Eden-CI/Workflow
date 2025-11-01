@@ -153,6 +153,16 @@ jobs:
       devel: ${{ inputs.devel }}
     secrets: inherit
 
+  msys:
+    name: "MinGW"
+    needs: [clone]
+    uses: ./.github/workflows/msys.yml
+    with:
+      build-id: '${{ inputs.build-id }}'
+      cpm-cache-version: '${{ needs.clone.outputs.cachever }}'
+      devel: ${{ inputs.devel }}
+    secrets: inherit
+
   android:
     name: "Android"
     needs: [clone]
