@@ -76,7 +76,7 @@ if [ ! -z "$SUPPORTS_TARGETS" ]; then
 	esac
 
 	ARCH_FLAGS="${ARCH_FLAGS} -O3"
-	[ "$PLATFORM" = "linux" ] && ARCH_FLAGS="${ARCH_FLAGS} -pipe" && ARCH_CMAKE+=(-DYUZU_USE_FASTER_LD=ON)
+	[ "$PLATFORM" = "linux" ] && ARCH_FLAGS="${ARCH_FLAGS} -pipe"
 
 	# For PGO, we fetch profdata and add it to our flags
 	if [ "$PGO_TARGET" = "pgo" ]; then
