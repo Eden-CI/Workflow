@@ -9,4 +9,4 @@ for pkg in $MINGW; do
     PACKAGES="$PACKAGES mingw-w64-x86_64-$pkg"
 done
 
-pacman -Syu $PACKAGES
+pacman -Syu --noconfirm --needed $PACKAGES
