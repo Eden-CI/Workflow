@@ -11,10 +11,6 @@ tagged() {
 	[ "$DEVEL" != "true" ]
 }
 
-cp() {
-	echo "$2"
-}
-
 ## AppImage ##
 ARCHES="amd64 steamdeck"
 [ "$DISABLE_ARM" != "true" ] && ARCHES="$ARCHES aarch64"
@@ -54,8 +50,8 @@ for flavor in $FLAVORS; do
 done
 
 ## Windows ##
-COMPILERS="msvc-standard mingw-gcc-standard"
-tagged && COMPILERS="$COMPILERS clang-pgo mingw-clang-pgo"
+COMPILERS="msvc-standard"
+tagged && COMPILERS="$COMPILERS clang-pgo"
 
 for arch in amd64 arm64; do
 	for compiler in $COMPILERS; do
@@ -83,3 +79,5 @@ cp macos/*.tar.gz "artifacts/Eden-macOS-${ID}.tar.gz"
 
 ## FreeBSD and other stuff ##
 cp freebsd-binary-amd64-clang/*.tar.zst "artifacts/Eden-FreeBSD-${ID}-amd64-clang.tar.zst"
+
+ls artifacts

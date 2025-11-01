@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh -e
 
 # SPDX-FileCopyrightText: Copyright 2025 Eden Emulator Project
 # SPDX-License-Identifier: GPL-3.0-or-later
@@ -17,8 +17,9 @@ set -e
 cp "${BUILDDIR}/bin/"* "${BUILDDIR}/pkg"
 
 if [ "$PLATFORM" = "msys" ]; then
+	echo "-- On MSYS, bundling MinGW DLLs..."
 	# TODO: variable?
-	curl -o bundle https://github.com/eden-emulator/mingw-bundledlls/raw/refs/heads/master/mingw-bundledlls
+	curl -L -o bundle https://github.com/eden-emulator/mingw-bundledlls/raw/refs/heads/master/mingw-bundledlls
 	chmod a+x bundle
 	./bundle --copy "${BUILDDIR}/pkg/eden.exe"
 fi

@@ -65,9 +65,8 @@ android() {
 	DESCRIPTION="$3"
 
 	echo -n "| "
-	echo -n "[Android $TYPE](${BASE_DOWNLOAD_URL}/${TAG}/Eden-Android-${REF}-${FLAVOR}.apk) |"
-	echo -n "$DESCRIPTION |"
-	echo
+	echo -n "[Android $TYPE](${BASE_DOWNLOAD_URL}/${TAG}/Eden-Android-${REF}-${FLAVOR}.apk) | "
+	echo "$DESCRIPTION |"
 }
 
 src() {
