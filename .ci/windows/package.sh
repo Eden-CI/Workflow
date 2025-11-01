@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 BUILDDIR="${BUILDDIR:-build}"
-WINDEPLOYQT="${WINDEPLOYQT:-windeployqt}"
+WINDEPLOYQT="${WINDEPLOYQT:-windeployqt6}"
 
 set +e
 rm -f "${BUILDDIR}/bin/"*.pdb
