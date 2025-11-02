@@ -33,7 +33,7 @@ jobs:
       - id: set
         run: |
           AMD64='"runs-on": "windows-latest", "arch": "amd64", "msystem": "mingw64"'
-          ARM64='"runs-on": "windows-11-arm", "arch": "amd64", "msystem": "clangarm64"'
+          ARM64='"runs-on": "windows-11-arm", "arch": "arm64", "msystem": "clangarm64"'
 
           PGO='"program": "clang", "target": "pgo"'
           CLANG='"program": "clang", "target": "standard"'
@@ -63,7 +63,7 @@ jobs:
   # TODO: setup
   # TODO: can we combine this with windows.yml?
   msys:
-    name: "MSYS2-MinGW64 ${{ matrix.os.arch }} ${{ matrix.os.program }} ${{ matrix.os.target }}"
+    name: "MSYS2 ${{ matrix.os.arch }} ${{ matrix.os.program }} ${{ matrix.os.target }}"
     needs: [msys-matrix]
     runs-on: ${{ matrix.os.runs-on }}
     strategy:
