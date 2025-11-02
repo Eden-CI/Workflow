@@ -98,6 +98,8 @@ jobs:
         run: |
           chmod a+x ./.ci/linux/deps.sh
           ./.ci/linux/deps.sh
+        env:
+          GITHUB_TOKEN: ${{ secrets.CUSTOM_GITHUB_TOKEN }}
 
       - name: Configure
         shell: bash

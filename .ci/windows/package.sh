@@ -8,7 +8,7 @@
 
 ROOTDIR="$PWD"
 
-BUILDDIR="${BUILDDIR:-build}"
+BUILDDIR="${BUILDDIR:-$ROOTDIR/build}"
 BINDIR="${BUILDDIR}/bin"
 
 PKGDIR="${BUILDDIR}/pkg"
@@ -25,6 +25,7 @@ cd "$PKGDIR"
 
 if [ "$PLATFORM" = "msys" ]; then
 	echo "-- On MSYS, bundling MinGW DLLs..."
+
 	MSYS_TOOLCHAIN="${MSYS_TOOLCHAIN:-$MSYSTEM}"
 	export PATH="/${MSYS_TOOLCHAIN}/bin:$PATH"
 
@@ -55,8 +56,10 @@ fi
 # qt
 ${WINDEPLOYQT} --release --no-compiler-runtime --no-opengl-sw --no-system-dxc-compiler --no-system-d3d-compiler "$EXE"
 
-# grab deps for Qt plugins
-find ./*/ -name "*.dll" | while read -r dll; do deps "$dll"; done
+if [ "$PLATFORM" = "msys" ]; then
+	# grab deps for Qt plugins
+	find ./*/ -name "*.dll" | while read -r dll; do deps "$dll"; done
+fi
 
 # ?ploo
 ZIP_NAME="Eden-Windows-${ARCH}.zip"
