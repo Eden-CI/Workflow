@@ -95,6 +95,7 @@ jobs:
           update: true
           install: >-
             git make autoconf libtool automake-wrapper patch jq
+            pactoys ninja
           pacboy: >-
             qt6-base:p qt6-tools:p qt6-translations:p qt6-svg:p
 

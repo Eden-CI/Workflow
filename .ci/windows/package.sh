@@ -31,7 +31,7 @@ if [ "$PLATFORM" = "msys" ]; then
 
 	# grab deps of a dll or exe and place them in the current dir
 	deps() {
-		objdump -p "$1" | grep -e ".DLL Name:" | cut -d" " -f3 | while read -r dll; do
+		objdump -p "$1" | awk '/DLL Name:/ {print $3}' | while read -r dll; do
 			[ -z "$dll" ] && continue
 
 			dllpath=$(command -v "$dll" 2>/dev/null || true)
@@ -54,7 +54,7 @@ if [ "$PLATFORM" = "msys" ]; then
 fi
 
 # qt
-${WINDEPLOYQT} --release --no-compiler-runtime --no-opengl-sw --no-system-dxc-compiler --no-system-d3d-compiler "$EXE"
+${WINDEPLOYQT} --no-compiler-runtime --no-opengl-sw --no-system-dxc-compiler --no-system-d3d-compiler "$EXE"
 
 if [ "$PLATFORM" = "msys" ]; then
 	# grab deps for Qt plugins
