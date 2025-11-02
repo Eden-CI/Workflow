@@ -6,28 +6,58 @@
 # shellcheck disable=SC1091
 . .ci/common/platform.sh
 
+ROOTDIR="$PWD"
+
 BUILDDIR="${BUILDDIR:-build}"
+BINDIR="${BUILDDIR}/bin"
+
+PKGDIR="${BUILDDIR}/pkg"
+EXE="eden.exe"
+
 WINDEPLOYQT="${WINDEPLOYQT:-windeployqt6}"
 
-set +e
-rm -f "${BUILDDIR}/bin/"*.pdb
-set -e
+rm -f "${BUILDDIR}/bin/"*.pdb || true
 
-"${WINDEPLOYQT}" --release --no-compiler-runtime --no-opengl-sw --no-system-dxc-compiler --no-system-d3d-compiler --dir "${BUILDDIR}/pkg" "${BUILDDIR}/bin/eden.exe"
-cp "${BUILDDIR}/bin/"* "${BUILDDIR}/pkg"
+cp "${BUILDDIR}/bin/"*.exe "$PKGDIR"
+cd "$PKGDIR"
 
 if [ "$PLATFORM" = "msys" ]; then
 	echo "-- On MSYS, bundling MinGW DLLs..."
-	# TODO: variable?
-	curl -L -o bundle https://github.com/eden-emulator/mingw-bundledlls/raw/refs/heads/master/mingw-bundledlls
-	chmod a+x bundle
-	./bundle --copy "${BUILDDIR}/pkg/eden.exe"
+	MSYS_TOOLCHAIN="${MSYS_TOOLCHAIN:-$MSYSTEM}"
+	export PATH="/${MSYS_TOOLCHAIN}/bin:$PATH"
+
+	# grab deps of a dll or exe and place them in the current dir
+	deps() {
+		objdump -p "$1" | grep -e ".DLL Name:" | cut -d" " -f3 | while read -r dll; do
+			[ -z "$dll" ] && continue
+
+			dllpath=$(command -v "$dll" 2>/dev/null || true)
+
+			[ -z "$dllpath" ] && continue
+
+			case "$dllpath" in
+				*System32* | *SysWOW64*) continue ;;
+			esac
+
+			if [ ! -f "$dll" ]; then
+				echo "$dllpath"
+				cp "$dllpath" "$dll"
+				deps "$dllpath"
+			fi
+		done
+	}
+
+	deps "$EXE"
 fi
 
-GITDATE=$(git show -s --date=short --format='%ad' | tr -d "-")
-GITREV=$(git show -s --format='%h')
+# qt
+${WINDEPLOYQT} --release --no-compiler-runtime --no-opengl-sw --no-system-dxc-compiler --no-system-d3d-compiler "$EXE"
 
-ZIP_NAME="Eden-Windows-${ARCH}-${GITDATE}-${GITREV}.zip"
+# grab deps for Qt plugins
+find ./*/ -name "*.dll" | while read -r dll; do deps "$dll"; done
+
+# ?ploo
+ZIP_NAME="Eden-Windows-${ARCH}.zip"
 
 ARTIFACTS_DIR="artifacts"
 PKG_DIR="${BUILDDIR}/pkg"

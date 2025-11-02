@@ -92,12 +92,13 @@ jobs:
         with:
           arch: ${{ matrix.os.arch }}
 
-      - name: Force Clang 20
+      - name: Update clang
         if: matrix.compiler.program == 'clang'
         shell: bash
         run: |
+          choco upgrade llvm --no-progress
           echo "C:/Program Files/LLVM/bin" >> $GITHUB_PATH
-          clang-cl --version
+          C:/Program Files/LLVM/bin/clang-cl --version
 
       - name: Install Vulkan SDK
         shell: powershell

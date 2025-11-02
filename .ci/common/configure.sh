@@ -1,4 +1,4 @@
-#!/bin/bash -ex
+#!/bin/bash -e
 
 # SPDX-FileCopyrightText: Copyright 2025 Eden Emulator Project
 # SPDX-License-Identifier: GPL-3.0-or-later
@@ -91,5 +91,7 @@ CMAKE_FLAGS=(
 	"${PLATFORM_FLAGS[@]}"
 	"${EXTRA_ARGS[@]}"
 )
+
+echo "-- Configure flags: ${CMAKE_FLAGS[*]}"
 
 cmake -S . -B "${BUILDDIR}" -G Ninja "${CMAKE_FLAGS[@]}"

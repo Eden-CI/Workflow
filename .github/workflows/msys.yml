@@ -97,11 +97,11 @@ jobs:
             git make autoconf libtool automake-wrapper patch jq
           pacboy: >-
             qt6-base:p qt6-tools:p qt6-translations:p qt6-svg:p
-            7zip:p sccache:p cmake:p toolchain:p
-            clang:p python-pip:p openssl:p
+
+            7zip:p sccache:p cmake:p toolchain:p clang:p python-pip:p
+            openssl:p boost:p fmt:p lz4:p nlohmann-json:p zlib:p zstd:p
             vulkan-memory-allocator:p vulkan-devel:p glslang:p
-            boost:p fmt:p lz4:p nlohmann-json:p zlib:p zstd:p enet:p
-            opus:p mbedtls:p libusb:p unordered_dense:p
+            enet:p opus:p mbedtls:p libusb:p unordered_dense:p
 
       - name: Configure
         shell: msys2 {0}
@@ -116,7 +116,7 @@ jobs:
         shell: msys2 {0}
         run: ./.ci/windows/package.sh
         env:
-          MINGW_BUNDLEDLLS_SEARCH_PATH: ${{ steps.msys2.outputs.msys2-location }}/mingw64/bin
+          MSYS_TOOLCHAIN: ${{ env.msystem }}
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4.6.2
