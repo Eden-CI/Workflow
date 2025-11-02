@@ -52,9 +52,9 @@ jobs:
           arm_pgo="$(target "$ARM64" "$PGO")"
 
           if [ "${{ inputs.devel }}" != "true" ]; then
-            INCLUDE="[${amd_gcc}, ${arm_clang}, ${amd_pgo}, ${arm_pgo}]"
+            INCLUDE="[${amd_gcc}, ${amd_pgo}] # ${arm_clang}, ${amd_pgo}, ${arm_pgo}]"
           else
-            INCLUDE="[${amd_gcc}, ${arm_clang}]"
+            INCLUDE="[${amd_gcc}]" #, ${arm_clang}]"
           fi
 
           echo $INCLUDE

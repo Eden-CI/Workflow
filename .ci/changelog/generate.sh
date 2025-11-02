@@ -152,7 +152,8 @@ msys() {
 
 	echo -n "| $LABEL | "
 	echo -n "[amd64](${BASE_DOWNLOAD_URL}/${TAG}/Eden-Windows-${REF}-mingw-amd64-${AMD}-${TARGET}.zip) | "
-	echo -n "[arm64](${BASE_DOWNLOAD_URL}/${TAG}/Eden-Windows-${REF}-mingw-arm64-${ARM}-${TARGET}.zip) | "
+	# echo -n "[arm64](${BASE_DOWNLOAD_URL}/${TAG}/Eden-Windows-${REF}-mingw-arm64-${ARM}-${TARGET}.zip) | "
+    echo -n " | "
 
 	echo "$NOTES"
 }
