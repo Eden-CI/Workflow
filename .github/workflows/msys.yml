@@ -25,52 +25,58 @@ env:
 
 jobs:
   msys-matrix:
-    name: "Generate MSYS compilers"
+    name: "Generate MSYS Matrix"
     runs-on: ubuntu-latest
     outputs:
-      compiler: ${{ steps.set.outputs.compiler }}
+      include: ${{ steps.set.outputs.include }}
     steps:
       - id: set
         run: |
-          PGO='{"program": "clang", "target": "pgo"}'
-          CLANG='{"program": "clang", "target": "standard"}'
-          GCC='{"program": "gcc", "target": "standard"}'
+          AMD64='"runs-on": "windows-latest", "arch": "amd64", "msystem": "mingw64"'
+          ARM64='"runs-on": "windows-11-arm", "arch": "amd64", "msystem": "clangarm64"'
 
-          if [ "${{ inputs.build-id }}" = "tag" ]; then
-            COMPILER="[${GCC},${PGO}]"
+          PGO='"program": "clang", "target": "pgo"'
+          CLANG='"program": "clang", "target": "standard"'
+          GCC='"program": "gcc", "target": "standard"'
+
+          target() {
+            arch="$1"
+            compiler="$2"
+
+            echo "{${arch}, ${compiler}}"
+          }
+
+          amd_gcc="$(target "$AMD64" "$GCC")"
+          amd_pgo="$(target "$AMD64" "$PGO")"
+          arm_clang="$(target "$ARM64" "$CLANG")"
+          arm_pgo="$(target "$ARM64" "$PGO")"
+
+          if [ "${{ inputs.devel }}" != "true" ]; then
+            INCLUDE="[${amd_gcc}, ${arm_clang}, ${amd_pgo}, ${arm_pgo}]"
           else
-            COMPILER="[${GCC}]"
+            INCLUDE="[${amd_gcc}, ${arm_clang}]"
           fi
 
-          echo $COMPILER
-          echo "compiler=${COMPILER}" >> $GITHUB_OUTPUT
+          echo $INCLUDE
+          echo "include=${INCLUDE}" >> $GITHUB_OUTPUT
 
   # TODO: setup
-  # TODO: once arm64 builds work, combine this with windows.yml
+  # TODO: can we combine this with windows.yml?
   msys:
-    name: "MSYS2-MinGW64 ${{ matrix.os.arch }} ${{ matrix.compiler.program }} ${{ matrix.compiler.target }}"
+    name: "MSYS2-MinGW64 ${{ matrix.arch }} ${{ matrix.program }} ${{ matrix.target }}"
     needs: [msys-matrix]
     runs-on: ${{ matrix.os.runs-on }}
     strategy:
       fail-fast: false
       matrix:
-        os:
-          - runs-on: windows-latest
-            arch: amd64
-            msystem: mingw64
-
-          # TODO: this requires some cross-comp stuff
-          # - runs-on: ubuntu-24.04-arm
-          #   arch: arm64
-
-        compiler: ${{ fromJson(needs.msys-matrix.outputs.compiler) }}
+        include: ${{ fromJson(needs.msys-matrix.outputs.include) }}
 
     env:
       QT_VERSION: 6.9.1
       TARGET: ${{ matrix.os.arch }}
-      COMPILER: "${{ matrix.compiler.program }}"
-      PGO_TARGET: "${{ matrix.compiler.target }}"
-      ARCH: ${{ matrix.os.arch }}-${{ matrix.compiler.program }}-${{ matrix.compiler.target }}
+      COMPILER: "${{ matrix.program }}"
+      PGO_TARGET: "${{ matrix.target }}"
+      ARCH: ${{ matrix.arch }}-${{ matrix.program }}-${{ matrix.target }}
 
     steps:
       - name: Checkout
@@ -79,7 +85,7 @@ jobs:
       - name: Setup
         uses: ./.github/workflows/setup
         with:
-          key: MSYS2-${{ matrix.os.msystem }}-${{ matrix.os.arch }}-${{ matrix.compiler.program }}
+          key: MSYS2-${{ matrix.msystem }}-${{ matrix.arch }}-${{ matrix.program }}
           version: ${{ inputs.cpm-cache-version }}
 
       - name: Load payload environment
@@ -91,7 +97,7 @@ jobs:
         id: msys2
         uses: msys2/setup-msys2@v2
         with:
-          msystem: ${{ matrix.os.msystem }}
+          msystem: ${{ matrix.msystem }}
           update: true
           install: >-
             git make autoconf libtool automake-wrapper patch jq

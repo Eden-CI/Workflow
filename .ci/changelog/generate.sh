@@ -37,48 +37,6 @@ tagged() {
 	[ "$DEVEL" != "true" ]
 }
 
-win() {
-	ARCH="$1"
-	PRETTY_ARCH="$2"
-	DESCRIPTION="$3"
-
-	echo -n "| "
-	echo -n "[$PRETTY_ARCH](${BASE_DOWNLOAD_URL}/${TAG}/Eden-Windows-${REF}-${ARCH}.zip) | "
-	echo -n "$DESCRIPTION |"
-	echo
-}
-
-msys() {
-	ARCH="$1"
-	PRETTY_ARCH="$2"
-	DESCRIPTION="$3"
-
-	echo -n "| "
-	echo -n "[$PRETTY_ARCH](${BASE_DOWNLOAD_URL}/${TAG}/Eden-Windows-MinGW-${REF}-${ARCH}.zip) | "
-	echo -n "$DESCRIPTION |"
-	echo
-}
-
-android() {
-	TYPE="$1"
-	FLAVOR="$2"
-	DESCRIPTION="$3"
-
-	echo -n "| "
-	echo -n "[Android $TYPE](${BASE_DOWNLOAD_URL}/${TAG}/Eden-Android-${REF}-${FLAVOR}.apk) | "
-	echo "$DESCRIPTION |"
-}
-
-src() {
-	EXT="$1"
-	DESCRIPTION="$2"
-
-	echo -n "| "
-	echo -n "[$EXT](${BASE_DOWNLOAD_URL}/${TAG}/Eden-Source-${REF}.${EXT}) | "
-	echo -n "$DESCRIPTION |"
-	echo
-}
-
 case "$1" in
 master)
 	echo "Eden's 'master' branch build, commit for reference:"
@@ -110,6 +68,26 @@ push | test)
 esac
 echo
 
+android() {
+	TYPE="$1"
+	FLAVOR="$2"
+	DESCRIPTION="$3"
+
+	echo -n "| "
+	echo -n "[Android $TYPE](${BASE_DOWNLOAD_URL}/${TAG}/Eden-Android-${REF}-${FLAVOR}.apk) | "
+	echo "$DESCRIPTION |"
+}
+
+src() {
+	EXT="$1"
+	DESCRIPTION="$2"
+
+	echo -n "| "
+	echo -n "[$EXT](${BASE_DOWNLOAD_URL}/${TAG}/Eden-Source-${REF}.${EXT}) | "
+	echo -n "$DESCRIPTION |"
+	echo
+}
+
 linux_field() {
 	ARCH="$1"
 	PRETTY_ARCH="$2"
@@ -123,7 +101,7 @@ linux_field() {
 		echo -n "([zsync](${BASE_DOWNLOAD_URL}/${TAG}/Eden-Linux-${REF}-${ARCH}-clang-pgo.AppImage.zsync))"
 	fi
 
-	echo "| $NOTES |"
+	echo "| $NOTES"
 }
 
 linux_matrix() {
@@ -144,7 +122,7 @@ deb_field() {
 		echo -n "[$ARCH](${BASE_DOWNLOAD_URL}/${TAG}/Eden-$BUILD-${REF}-${ARCH}.deb) | "
 	done
 
-	echo "$NOTES |"
+	echo "$NOTES"
 }
 
 deb_matrix() {
@@ -160,19 +138,31 @@ win_field() {
 
 	echo -n "| $LABEL | "
 	echo -n "[amd64](${BASE_DOWNLOAD_URL}/${TAG}/Eden-Windows-${REF}-amd64-${COMPILER}.zip) | "
-	[ "$MINGW" != "true" ] && echo -n "[arm64](${BASE_DOWNLOAD_URL}/${TAG}/Eden-Windows-${REF}-arm64-${COMPILER}.zip)"
+	echo -n "[arm64](${BASE_DOWNLOAD_URL}/${TAG}/Eden-Windows-${REF}-arm64-${COMPILER}.zip) | "
 
-	echo " | $NOTES |"
+	echo "$NOTES"
+}
+
+msys() {
+	LABEL="$1"
+	AMD="$2"
+    ARM="$3"
+    TARGET="$4"
+	NOTES="$5"
+
+	echo -n "| $LABEL | "
+	echo -n "[amd64](${BASE_DOWNLOAD_URL}/${TAG}/Eden-Windows-${REF}-mingw-amd64-${AMD}-${TARGET}.zip) | "
+	echo -n "[arm64](${BASE_DOWNLOAD_URL}/${TAG}/Eden-Windows-${REF}-mingw-arm64-${ARM}-${TARGET}.zip) | "
+
+	echo "$NOTES"
 }
 
 win_matrix() {
-	MINGW=false
 	win_field MSVC msvc-standard
 	tagged && win_field PGO clang-pgo
 
-	MINGW=true
-	win_field "MinGW GCC" mingw-gcc-standard "May have additional bugs/glitches"
-	tagged && win_field "MinGW PGO" mingw-clang-pgo || true
+	msys "MinGW" gcc clang standard "May have additional bugs/glitches"
+	tagged && msys "MinGW PGO" clang clang pgo
 }
 
 cat << EOF

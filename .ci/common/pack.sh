@@ -60,13 +60,11 @@ for arch in amd64 arm64; do
 done
 
 ## MinGW ##
-COMPILERS="gcc-standard"
-tagged && COMPILERS="$COMPILERS clang-pgo"
+COMPILERS="amd64-gcc-standard arm64-clang-standard"
+tagged && COMPILERS="$COMPILERS amd64-clang-pgo arm64-clang-pgo"
 
-for arch in amd64; do
-	for compiler in $COMPILERS; do
-		cp "mingw-$arch-$compiler"/*.zip "artifacts/Eden-Windows-${ID}-${arch}-mingw-${compiler}.zip"
-	done
+for compiler in $COMPILERS; do
+    cp "mingw-$compiler"/*.zip "artifacts/Eden-Windows-${ID}-mingw-${compiler}.zip"
 done
 
 ## Source Pack ##
