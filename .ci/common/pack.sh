@@ -55,7 +55,7 @@ tagged && COMPILERS="$COMPILERS clang-pgo"
 
 for arch in amd64 arm64; do
 	for compiler in $COMPILERS; do
-		cp "windows-$arch-compiler"/*.zip "artifacts/Eden-Windows-${ID}-${arch}-${compiler}.zip"
+		cp "windows-$arch-$compiler"/*.zip "artifacts/Eden-Windows-${ID}-${arch}-${compiler}.zip"
 	done
 done
 
