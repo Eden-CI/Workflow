@@ -18,6 +18,8 @@ WINDEPLOYQT="${WINDEPLOYQT:-windeployqt6}"
 
 rm -f "${BINDIR}/"*.pdb || true
 
+mkdir -p "$PKGDIR"
+
 cp "${BINDIR}/"*.exe "$PKGDIR"
 cd "$PKGDIR"
 
@@ -57,17 +59,15 @@ ${WINDEPLOYQT} --release --no-compiler-runtime --no-opengl-sw --no-system-dxc-co
 find ./*/ -name "*.dll" | while read -r dll; do deps "$dll"; done
 
 # ?ploo
-cd "$ROOTDIR"
 ZIP_NAME="Eden-Windows-${ARCH}.zip"
 
-ARTIFACTS_DIR="artifacts"
-PKG_DIR="${BUILDDIR}/pkg"
+ARTIFACTS_DIR="$ROOTDIR/artifacts"
 
 mkdir -p "$ARTIFACTS_DIR"
 
 TMP_DIR=$(mktemp -d)
 
-cp -r "$PKG_DIR"/* "$TMP_DIR"/
+cp -r "$PKGDIR"/* "$TMP_DIR"/
 cp -r LICENSE* README* "$TMP_DIR"/
 
 7z a -tzip "$ARTIFACTS_DIR/$ZIP_NAME" "$TMP_DIR"/*
