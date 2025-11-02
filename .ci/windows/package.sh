@@ -16,9 +16,9 @@ EXE="eden.exe"
 
 WINDEPLOYQT="${WINDEPLOYQT:-windeployqt6}"
 
-rm -f "${BUILDDIR}/bin/"*.pdb || true
+rm -f "${BINDIR}/"*.pdb || true
 
-cp "${BUILDDIR}/bin/"*.exe "$PKGDIR"
+cp "${BINDIR}/"*.exe "$PKGDIR"
 cd "$PKGDIR"
 
 if [ "$PLATFORM" = "msys" ]; then
@@ -57,6 +57,7 @@ ${WINDEPLOYQT} --release --no-compiler-runtime --no-opengl-sw --no-system-dxc-co
 find ./*/ -name "*.dll" | while read -r dll; do deps "$dll"; done
 
 # ?ploo
+cd "$ROOTDIR"
 ZIP_NAME="Eden-Windows-${ARCH}.zip"
 
 ARTIFACTS_DIR="artifacts"
