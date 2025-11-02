@@ -160,10 +160,10 @@ msys() {
 
 win_matrix() {
 	win_field MSVC msvc-standard
-	tagged && win_field PGO clang-pgo
+	tagged && win_field PGO clang-pgo || true
 
 	msys "MinGW" gcc clang standard "May have additional bugs/glitches"
-	tagged && msys "MinGW PGO" clang clang pgo
+	tagged && msys "MinGW PGO" clang clang pgo || true
 }
 
 cat << EOF
