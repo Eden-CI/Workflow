@@ -63,20 +63,20 @@ jobs:
   # TODO: setup
   # TODO: can we combine this with windows.yml?
   msys:
-    name: "MSYS2-MinGW64 ${{ matrix.arch }} ${{ matrix.program }} ${{ matrix.target }}"
+    name: "MSYS2-MinGW64 ${{ matrix.os.arch }} ${{ matrix.os.program }} ${{ matrix.os.target }}"
     needs: [msys-matrix]
     runs-on: ${{ matrix.os.runs-on }}
     strategy:
       fail-fast: false
       matrix:
-        include: ${{ fromJson(needs.msys-matrix.outputs.include) }}
+        os: ${{ fromJson(needs.msys-matrix.outputs.include) }}
 
     env:
       QT_VERSION: 6.9.1
       TARGET: ${{ matrix.os.arch }}
-      COMPILER: "${{ matrix.program }}"
-      PGO_TARGET: "${{ matrix.target }}"
-      ARCH: ${{ matrix.arch }}-${{ matrix.program }}-${{ matrix.target }}
+      COMPILER: "${{ matrix.os.program }}"
+      PGO_TARGET: "${{ matrix.os.target }}"
+      ARCH: ${{ matrix.os.arch }}-${{ matrix.os.program }}-${{ matrix.os.target }}
 
     steps:
       - name: Checkout
@@ -85,7 +85,7 @@ jobs:
       - name: Setup
         uses: ./.github/workflows/setup
         with:
-          key: MSYS2-${{ matrix.msystem }}-${{ matrix.arch }}-${{ matrix.program }}
+          key: MSYS2-${{ matrix.os.msystem }}-${{ matrix.os.arch }}-${{ matrix.os.program }}
           version: ${{ inputs.cpm-cache-version }}
 
       - name: Load payload environment
@@ -97,7 +97,7 @@ jobs:
         id: msys2
         uses: msys2/setup-msys2@v2
         with:
-          msystem: ${{ matrix.msystem }}
+          msystem: ${{ matrix.os.msystem }}
           update: true
           install: >-
             git make autoconf libtool automake-wrapper patch jq
