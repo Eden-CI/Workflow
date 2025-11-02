@@ -59,10 +59,6 @@ download "$SHARUN" ./quick-sharun
 chmod +x ./quick-sharun
 env LC_ALL=C ./quick-sharun "$BUILDDIR/bin/eden"
 
-# Wayland is mankind's worst invention, perhaps only behind war
-mkdir -p AppDir
-echo 'QT_QPA_PLATFORM=xcb' >> AppDir/.env
-
 # MAKE APPIMAGE WITH URUNTIME
 echo "Generating AppImage..."
 download "$URUNTIME" ./uruntime2appimage
