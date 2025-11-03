@@ -36,9 +36,9 @@ else
 	CYGWIN* | MINGW* | MSYS*)
 		PLATFORM=msys
 		STANDALONE=ON
-		OPENSSL=OFF
+		OPENSSL=ON
 		FFMPEG=ON
-		BUNDLED=OFF
+		SIRIT=OFF
 		SUPPORTS_TARGETS=ON
 
 		export PATH="$PATH:/mingw64/bin"
@@ -66,6 +66,6 @@ export LTO
 export FFMPEG
 export OPENSSL
 export SUPPORTS_TARGETS
-export BUNDLED
+export SIRIT
 
 # TODO(crueter): document outputs n such

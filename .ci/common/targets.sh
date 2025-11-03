@@ -101,13 +101,6 @@ if [ "$STEAMDECK" = "true" ]; then
 	)
 fi
 
-# MinGW uses external SDL2
-if [ "$PLATFORM" = "msys" ]; then
-	SDL_FLAGS=(
-		-DYUZU_USE_EXTERNAL_SDL2=ON
-	)
-fi
-
 # Package targets use system sdl2
 if [ "$PACKAGE" = "true" ]; then
 	SDL_FLAGS=(-DYUZU_USE_BUNDLED_SDL2=OFF)

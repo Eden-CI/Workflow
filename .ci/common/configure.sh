@@ -61,7 +61,7 @@ COMMON_FLAGS=(
 	-DYUZU_ENABLE_LTO="${LTO:-ON}"
 
 	# many distros do not package sirit, so let's bundle it anyways
-	-DYUZU_USE_BUNDLED_SIRIT="${BUNDLED:-ON}"
+	-DYUZU_USE_BUNDLED_SIRIT="${SIRIT:-ON}"
 
 	# Bundled stuff (only if not building for a pkg)
 	-DYUZU_USE_BUNDLED_FFMPEG="${FFMPEG:-ON}"
