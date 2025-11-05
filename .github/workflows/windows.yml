@@ -92,11 +92,17 @@ jobs:
         with:
           arch: ${{ matrix.os.arch }}
 
-      - name: Update clang
+      - name: Install LLVM/Clang
+        if: matrix.compiler.program == 'clang'
+        uses: Vee99BR/install-llvm-action@v1
+        with:
+          version: "21.1.4"
+          env: true
+
+      - name: Check LLVM/Clang
         if: matrix.compiler.program == 'clang'
         shell: bash
         run: |
-          choco upgrade llvm --no-progress
           echo "C:/Program Files/LLVM/bin" >> $GITHUB_PATH
           "C:/Program Files/LLVM/bin/clang-cl" --version
 
