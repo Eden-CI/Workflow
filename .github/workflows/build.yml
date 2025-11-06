@@ -21,7 +21,7 @@ env:
   DEVEL: ${{ inputs.devel }}
   TEMP_PATCH_STATUS: "false"
   TEMP_PATCH: "2946"
-  FORCE_PGO: "true"
+  FORCE_PGO: "false"
 
 jobs:
   clone:
