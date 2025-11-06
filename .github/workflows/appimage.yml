@@ -15,6 +15,10 @@ on:
         description: 'development build'
         type: string
         required: true
+      force_pgo:
+        description: 'test PGO builds'
+        type: string
+        required: true
 
 env:
   DISABLE_ARM: ${{ vars.DISABLE_ARM }}
@@ -42,7 +46,7 @@ jobs:
 
           EXTRA=',{"runs-on": "ubuntu-latest", "arch": "legacy"},{"runs-on": "ubuntu-latest", "arch": "rog-ally"}'
 
-          if [ "${{ inputs.build-id }}" = "tag" ]; then
+          if [ "${{ inputs.devel }}" != "true" ]; then
             MATRIX="${BASE}${EXTRA}]"
           else
             MATRIX="${BASE}]"
@@ -55,7 +59,7 @@ jobs:
           CLANG='{"program": "clang", "target": "standard"}'
           GCC='{"program": "gcc", "target": "standard"}'
 
-          if [ "${{ inputs.build-id }}" = "tag" ]; then
+          if [ "${{ inputs.devel }}" != "true" ] || [ "${{ inputs.force_pgo }}" = "true" ]; then
             COMPILER="[${GCC},${PGO}]"
           else
             COMPILER="[${GCC}]"

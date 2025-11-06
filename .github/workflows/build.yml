@@ -16,16 +16,18 @@ env:
   DISABLE_ARM: ${{ vars.DISABLE_ARM }}
   SCCACHE_GHA_ENABLED: "true"
   CCACHE: "true"
-  CPM_CACHE_VERSION: "v0"
+  CPM_CACHE_VERSION: "v14"
   FORGEJO_TOKEN: ${{ secrets.FORGEJO_TOKEN }}
   DEVEL: ${{ inputs.devel }}
   TEMP_PATCH_STATUS: "false"
   TEMP_PATCH: "2946"
+  FORCE_PGO: "true"
 
 jobs:
   clone:
     outputs:
       cachever: ${{ steps.out.outputs.cachever }}
+      pgo: ${{ steps.out.outputs.pgo }}
     name: "Parse and Clone"
     runs-on: ubuntu-latest
 
@@ -61,6 +63,7 @@ jobs:
         shell: bash
         run: |
           echo "cachever=${CPM_CACHE_VERSION}" >> "$GITHUB_OUTPUT"
+          echo "pgo=${FORCE_PGO}" >> "$GITHUB_OUTPUT"
 
       - name: Clone
         shell: bash
@@ -141,6 +144,7 @@ jobs:
       build-id: '${{ inputs.build-id }}'
       cpm-cache-version: '${{ needs.clone.outputs.cachever }}'
       devel: ${{ inputs.devel }}
+      force_pgo: ${{ needs.clone.outputs.pgo }}
     secrets: inherit
 
   windows:
@@ -151,6 +155,7 @@ jobs:
       build-id: '${{ inputs.build-id }}'
       cpm-cache-version: '${{ needs.clone.outputs.cachever }}'
       devel: ${{ inputs.devel }}
+      force_pgo: ${{ needs.clone.outputs.pgo }}
     secrets: inherit
 
   msys:
@@ -161,6 +166,7 @@ jobs:
       build-id: '${{ inputs.build-id }}'
       cpm-cache-version: '${{ needs.clone.outputs.cachever }}'
       devel: ${{ inputs.devel }}
+      force_pgo: ${{ needs.clone.outputs.pgo }}
     secrets: inherit
 
   android:

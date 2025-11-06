@@ -15,6 +15,10 @@ on:
         description: 'development build'
         type: string
         required: true
+      force_pgo:
+        description: 'test PGO builds'
+        type: string
+        required: true
 
 env:
   DISABLE_ARM: ${{ vars.DISABLE_ARM }}
@@ -36,7 +40,7 @@ jobs:
           CLANG='{"program": "clang", "target": "standard"}'
           MSVC='{"program": "msvc", "target": "standard"}'
 
-          if [ "${{ inputs.build-id }}" = "tag" ]; then
+          if [ "${{ inputs.devel }}" != "true" ] || [ "${{ inputs.force_pgo }}" = "true" ]; then
             COMPILER="[${MSVC},${PGO}]"
           else
             COMPILER="[${MSVC}]"
