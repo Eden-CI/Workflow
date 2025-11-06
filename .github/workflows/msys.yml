@@ -54,7 +54,7 @@ jobs:
           if [ "${{ inputs.devel }}" != "true" ]; then
             INCLUDE="[${amd_gcc}, ${amd_pgo}] # ${arm_clang}, ${amd_pgo}, ${arm_pgo}]"
           else
-            INCLUDE="[${amd_gcc}]" #, ${arm_clang}]"
+            INCLUDE="[${amd_gcc}, ${amd_pgo}]" #, ${arm_clang}]"
           fi
 
           echo $INCLUDE
