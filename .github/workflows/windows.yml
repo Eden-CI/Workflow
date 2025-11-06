@@ -98,7 +98,7 @@ jobs:
 
       - name: Install LLVM/Clang
         if: matrix.compiler.program == 'clang'
-        uses: Vee99BR/install-llvm-action@v1
+        uses: Eden-CI/install-llvm-action@v1
         with:
           version: "21.1.4"
           env: true

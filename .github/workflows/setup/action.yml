@@ -12,7 +12,7 @@ runs:
   using: composite
   steps:
     - name: Install sccache
-      uses: Vee99BR/sccache-action@v0.0.1
+      uses: Eden-CI/sccache-action@v0.0.1
       with:
         disable_annotations: true
 
