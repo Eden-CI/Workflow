@@ -105,7 +105,7 @@ jobs:
           pacboy: >-
             qt6-base:p qt6-tools:p qt6-translations:p qt6-svg:p
 
-            7zip:p sccache:p cmake:p toolchain:p clang:p python-pip:p
+            7zip:p sccache:p cmake:p toolchain:p clang:p python-pip:p lld:p
             openssl:p boost:p fmt:p lz4:p nlohmann-json:p zlib:p zstd:p
             vulkan-memory-allocator:p vulkan-devel:p glslang:p
             enet:p opus:p mbedtls:p libusb:p unordered_dense:p
