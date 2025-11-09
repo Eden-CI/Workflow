@@ -23,7 +23,7 @@ for arch in $ARCHES; do
 		ARTIFACT="Eden-Linux-${ID}-${arch}-${compiler}"
 
 		cp "linux-$arch-$compiler"/*.AppImage "artifacts/$ARTIFACT.AppImage"
-		tagged && cp "linux-$arch-$compiler-standard"/*.AppImage.zsync "artifacts/$ARTIFACT.AppImage.zsync"
+		tagged && cp "linux-$arch-$compiler"/*.AppImage.zsync "artifacts/$ARTIFACT.AppImage.zsync"
 	done
 done
 
