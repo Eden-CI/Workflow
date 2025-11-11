@@ -11,7 +11,6 @@ brew install --formula --quiet \
   cmake \
   cubeb \
   enet \
-  ffmpeg \
   fmt \
   glslang \
   hidapi \
@@ -25,7 +24,6 @@ brew install --formula --quiet \
   openssl \
   opus \
   pkg-config \
-  sdl2 \
   speexdsp \
   spirv-headers \
   spirv-tools \
@@ -33,5 +31,4 @@ brew install --formula --quiet \
   vulkan-loader \
   vulkan-utility-libraries \
   zlib \
-  zstd \
-  qt@6
+  zstd
