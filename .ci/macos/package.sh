@@ -11,7 +11,6 @@ APP=eden.app
 
 cd "$BUILDDIR/bin"
 
-macdeployqt "$APP" -verbose=2
 codesign --deep --force --verbose --sign - "$APP"
 
 mkdir -p "$ROOTDIR"/artifacts
