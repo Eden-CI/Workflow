@@ -33,4 +33,5 @@ brew install --formula --quiet \
   vulkan-loader \
   vulkan-utility-libraries \
   zlib \
-  zstd
+  zstd \
+  qt@6
