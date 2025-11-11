@@ -57,7 +57,7 @@ jobs:
           rm qt.tar.gz
 
       - name: Configure
-        run: .ci/common/configure.sh -DCCACHE_PATH=${SCCACHE_PATH} -DQt6_DIR=${{ github.workspace }}/Qt/6.7.3/lib/cmake/Qt6 -DYUZU_STATIC_BUILD=ON
+        run: .ci/common/configure.sh -DCCACHE_PATH=${SCCACHE_PATH} -DCMAKE_PREFIX_PATH=${{ github.workspace }}/Qt/6.7.3/lib/cmake -DYUZU_STATIC_BUILD=ON
 
       - name: Build
         run: cmake --build build
