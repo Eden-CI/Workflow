@@ -3,12 +3,10 @@
 # SPDX-FileCopyrightText: Copyright 2025 Eden Emulator Project
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-# shellcheck disable=SC1091
-. .ci/common/platform.sh
-
 ROOTDIR="$PWD"
 BUILDDIR="$ROOTDIR/${BUILDDIR:-build}"
 ARTIFACTS_DIR="$ROOTDIR/artifacts"
+WORKFLOW_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 
 BINDIR="$BUILDDIR/bin"
 PKGDIR="$BUILDDIR/pkg"
@@ -16,6 +14,15 @@ TMP_DIR=$(mktemp -d)
 EXE="eden.exe"
 
 WINDEPLOYQT="${WINDEPLOYQT:-windeployqt6}"
+
+# check if common script folder is on Workflow
+if [ ! -d "$WORKFLOW_DIR/.ci/common" ]; then
+	echo "error: could not find .ci/common in Workflow at $WORKFLOW_DIR"
+	exit 1
+fi
+
+# shellcheck disable=SC1091
+. "$WORKFLOW_DIR"/.ci/common/platform.sh
 
 rm -f "$BINDIR/"*.pdb || true
 
@@ -27,43 +34,43 @@ cp "$BINDIR/"*.exe "$PKGDIR"
 cd "$PKGDIR"
 
 # not needed anymore yay
-# if [ "$PLATFORM" = "msys" ]; then
-# 	echo "-- On MSYS, bundling MinGW DLLs..."
+if [ "$PLATFORM" = "msys" ] && [ "$STATIC" != "true" ]; then
+	echo "-- On MSYS, bundling MinGW DLLs..."
 
-# 	MSYS_TOOLCHAIN="${MSYS_TOOLCHAIN:-$MSYSTEM}"
-# 	export PATH="/${MSYS_TOOLCHAIN}/bin:$PATH"
+	MSYS_TOOLCHAIN="${MSYS_TOOLCHAIN:-$MSYSTEM}"
+	export PATH="/${MSYS_TOOLCHAIN}/bin:$PATH"
 
-# 	# grab deps of a dll or exe and place them in the current dir
-# 	deps() {
-# 		objdump -p "$1" | awk '/DLL Name:/ {print $3}' | while read -r dll; do
-# 			[ -z "$dll" ] && continue
+	# grab deps of a dll or exe and place them in the current dir
+	deps() {
+		objdump -p "$1" | awk '/DLL Name:/ {print $3}' | while read -r dll; do
+			[ -z "$dll" ] && continue
 
-# 			dllpath=$(command -v "$dll" 2>/dev/null || true)
+			dllpath=$(command -v "$dll" 2>/dev/null || true)
 
-# 			[ -z "$dllpath" ] && continue
+			[ -z "$dllpath" ] && continue
 
-# 			case "$dllpath" in
-# 				*System32* | *SysWOW64*) continue ;;
-# 			esac
+			case "$dllpath" in
+				*System32* | *SysWOW64*) continue ;;
+			esac
 
-# 			if [ ! -f "$dll" ]; then
-# 				echo "$dllpath"
-# 				cp "$dllpath" "$dll"
-# 				deps "$dllpath"
-# 			fi
-# 		done
-# 	}
+			if [ ! -f "$dll" ]; then
+				echo "$dllpath"
+				cp "$dllpath" "$dll"
+				deps "$dllpath"
+			fi
+		done
+	}
 
-# 	deps "$EXE"
-# fi
+	deps "$EXE"
+fi
 
 # qt
 [ "$PLATFORM" != "msys" ] && ${WINDEPLOYQT} --no-compiler-runtime --no-opengl-sw --no-system-dxc-compiler --no-system-d3d-compiler "$EXE"
 
-# if [ "$PLATFORM" = "msys" ]; then
-# 	# grab deps for Qt plugins
-# 	find ./*/ -name "*.dll" | while read -r dll; do deps "$dll"; done
-# fi
+if [ "$PLATFORM" = "msys" ] && [ "$STATIC" != "true" ]; then
+	# grab deps for Qt plugins
+	find ./*/ -name "*.dll" | while read -r dll; do deps "$dll"; done
+fi
 
 # ?ploo
 ZIP_NAME="Eden-Windows-${ARCH}.zip"
