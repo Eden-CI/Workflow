@@ -31,6 +31,7 @@ else
 		STANDALONE=OFF
 		FFMPEG=OFF
 		OPENSSL=OFF
+		STATIC=ON
 		export LIBVULKAN_PATH="/opt/homebrew/lib/libvulkan.1.dylib"
 		;;
 	CYGWIN* | MINGW* | MSYS*)
@@ -39,6 +40,7 @@ else
 		OPENSSL=ON
 		FFMPEG=ON
 		SIRIT=OFF
+		STATIC=ON
 		SUPPORTS_TARGETS=ON
 
 		export PATH="$PATH:/mingw64/bin"
@@ -67,5 +69,6 @@ export FFMPEG
 export OPENSSL
 export SUPPORTS_TARGETS
 export SIRIT
+export STATIC
 
 # TODO(crueter): document outputs n such

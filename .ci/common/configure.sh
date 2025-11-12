@@ -87,6 +87,9 @@ COMMON_FLAGS=(
 	# We do NOT want to bundle LLVM
 	-DYUZU_DISABLE_LLVM=ON
 
+	# Static Linking
+	-DYUZU_STATIC_BUILD="${STATIC:-OFF}"
+
 	# packaging stuff
 	-DCMAKE_INSTALL_PREFIX=/usr
 	-DYUZU_CMD="${STANDALONE:-OFF}"

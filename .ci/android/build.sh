@@ -13,10 +13,12 @@ else
     fi
 fi
 
+ROOTDIR="$PWD"
+
 SHA1SUM=$(keytool -list -v -storepass "${ANDROID_KEYSTORE_PASS}" -keystore "${ANDROID_KEYSTORE_FILE}" | grep SHA1 | cut -d " " -f3)
 echo "Keystore SHA1 is ${SHA1SUM}"
 
-cd src/android
+cd "$ROOTDIR/src/android"
 chmod +x ./gradlew
 
 CCACHE="${CCACHE:-false}"

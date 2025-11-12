@@ -4,6 +4,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 export ROOTDIR="$PWD"
+WORKFLOW_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 
 GITHUB_WORKSPACE="$ROOTDIR"
 
@@ -23,7 +24,7 @@ export PATH="$ROOTDIR/makedeb/usr/bin:$PATH"
 echo "-- Building..."
 cd "$ROOTDIR"
 
-SRC=.ci/deb/PKGBUILD.in
+SRC="$WORKFLOW_DIR/.ci/deb/PKGBUILD.in"
 DEST=PKGBUILD
 
 TAG=$(cat "$GITHUB_WORKSPACE"/GIT-TAG | sed 's/.git//' | sed 's/v//' | sed 's/[-_]/./g' | tr -d '\n')

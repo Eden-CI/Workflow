@@ -120,7 +120,7 @@ jobs:
       - name: Configure
         shell: msys2 {0}
         run: |
-          .ci/common/configure.sh -DCCACHE_PATH=sccache -DYUZU_STATIC_BUILD=ON -DQt6_DIR="${{ steps.msys2.outputs.msys2-location }}/${{ matrix.os.msystem }}/qt6-static/lib/cmake/Qt6"
+          .ci/common/configure.sh -DCCACHE_PATH=sccache -DQt6_DIR="${{ steps.msys2.outputs.msys2-location }}/${{ matrix.os.msystem }}/qt6-static/lib/cmake/Qt6"
         env:
           MSYS2_LOCATION: ${{ steps.msys2.outputs.msys2-location }}
 
