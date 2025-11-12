@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 export ROOTDIR="$PWD"
-WORKFLOW_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+WORKFLOW_DIR="$(cd "$(dirname "$0")/../.." && pwd)"
 
 GITHUB_WORKSPACE="$ROOTDIR"
 

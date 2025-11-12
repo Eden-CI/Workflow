@@ -6,7 +6,7 @@
 ROOTDIR="$PWD"
 BUILDDIR="$ROOTDIR/${BUILDDIR:-build}"
 ARTIFACTS_DIR="$ROOTDIR/artifacts"
-WORKFLOW_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+WORKFLOW_DIR="$(cd "$(dirname "$0")/../.." && pwd)"
 
 BINDIR="$BUILDDIR/bin"
 PKGDIR="$BUILDDIR/pkg"
