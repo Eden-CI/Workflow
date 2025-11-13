@@ -36,10 +36,10 @@ jobs:
     steps:
       - id: set
         run: |
-          AMD64='"runs-on": "windows-latest", "arch": "amd64", "msystem": "mingw64"'
-          UCRT64='"runs-on": "windows-latest", "arch": "amd64", "msystem": "ucrt64"'
-          AMDCLANG64='"runs-on": "windows-latest", "arch": "amd64", "msystem": "clang64"'
-          ARM64='"runs-on": "windows-11-arm", "arch": "arm64", "msystem": "clangarm64"'
+          AMD64='"runs-on": "windows-latest", "arch": "amd64", "msystem": "MINGW64"'
+          UCRT64='"runs-on": "windows-latest", "arch": "amd64", "msystem": "UCRT64"'
+          AMDCLANG64='"runs-on": "windows-latest", "arch": "amd64", "msystem": "CLANG64"'
+          ARM64='"runs-on": "windows-11-arm", "arch": "arm64", "msystem": "CLANGARM64"'
 
           PGO='"program": "clang", "target": "pgo"'
           CLANG='"program": "clang", "target": "standard"'
@@ -71,7 +71,7 @@ jobs:
   # TODO: setup
   # TODO: can we combine this with windows.yml?
   msys:
-    name: "MSYS2 ${{ matrix.os.arch }} ${{ matrix.os.program }} ${{ matrix.os.target }}"
+    name: "${{ matrix.os.msystem }} ${{ matrix.os.arch }} ${{ matrix.os.program }} ${{ matrix.os.target }}"
     needs: [msys-matrix]
     runs-on: ${{ matrix.os.runs-on }}
     strategy:
