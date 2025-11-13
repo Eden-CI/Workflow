@@ -34,7 +34,7 @@ cp "$BINDIR/"*.exe "$PKGDIR"
 cd "$PKGDIR"
 
 # not needed anymore yay
-if [ "$PLATFORM" = "msys" ] && [ "$STATIC" != "true" ]; then
+if [ "$PLATFORM" = "msys" ] && [ "$STATIC" != "ON" ]; then
 	echo "-- On MSYS, bundling MinGW DLLs..."
 
 	MSYS_TOOLCHAIN="${MSYS_TOOLCHAIN:-$MSYSTEM}"
@@ -67,7 +67,7 @@ fi
 # qt
 [ "$PLATFORM" != "msys" ] && ${WINDEPLOYQT} --no-compiler-runtime --no-opengl-sw --no-system-dxc-compiler --no-system-d3d-compiler "$EXE"
 
-if [ "$PLATFORM" = "msys" ] && [ "$STATIC" != "true" ]; then
+if [ "$PLATFORM" = "msys" ] && [ "$STATIC" != "ON" ]; then
 	# grab deps for Qt plugins
 	find ./*/ -name "*.dll" | while read -r dll; do deps "$dll"; done
 fi
