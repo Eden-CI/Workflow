@@ -44,6 +44,7 @@ jobs:
           PGO='"program": "clang", "target": "pgo"'
           CLANG='"program": "clang", "target": "standard"'
           GCC='"program": "gcc", "target": "standard"'
+          UCRT='"program": "gcc", "target": "ucrt"'
 
           target() {
             arch="$1"
@@ -53,7 +54,7 @@ jobs:
           }
 
           amd_gcc="$(target "$AMD64" "$GCC")"
-          ucrt_gcc="$(target "$UCRT64" "$GCC")"
+          ucrt_gcc="$(target "$UCRT64" "$UCRT")"
           amd_clang="$(target "$AMDCLANG64" "$CLANG")"
           amd_pgo="$(target "$AMD64" "$PGO")"
           arm_clang="$(target "$ARM64" "$CLANG")"
