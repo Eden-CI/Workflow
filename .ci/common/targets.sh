@@ -6,7 +6,7 @@
 SDL_FLAGS=(-DYUZU_USE_BUNDLED_SDL2=ON)
 
 # only clang and gcc support this
-if [ ! -z "$SUPPORTS_TARGETS" ]; then
+if [ -n "$SUPPORTS_TARGETS" ]; then
 	case "$TARGET" in
 		amd64)
 			echo "Making amd64-v3 optimized build of Eden"
@@ -86,7 +86,7 @@ if [ ! -z "$SUPPORTS_TARGETS" ]; then
 
 		PROFDATA="$PWD/eden.profdata"
 		[ -f "$PROFDATA" ] && rm -f "$PROFDATA"
-		curl -L https://$RELEASE_PGO_HOST/$RELEASE_PGO_REPO/releases/latest/download/eden.profdata > "$PROFDATA"
+		curl -L https://"$RELEASE_PGO_HOST"/"$RELEASE_PGO_REPO"/releases/latest/download/eden.profdata > "$PROFDATA"
 		[ ! -f "$PROFDATA" ] && (echo "PGO data failed to download" ; exit 1)
 		command -v cygpath >/dev/null 2>&1 && PROFDATA="$(cygpath -m "$PROFDATA")"
 		ARCH_FLAGS="${ARCH_FLAGS} -fprofile-use=$PROFDATA -Wno-backend-plugin -Wno-profile-instr-unprofiled -Wno-profile-instr-out-of-date"

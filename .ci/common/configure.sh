@@ -18,8 +18,22 @@
 
 # shellcheck disable=SC1091
 
+ROOTDIR="$PWD"
 BUILDDIR="${BUILDDIR:-build}"
-ROOTDIR="${ROOTDIR:-$PWD}"
+WORKFLOW_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+
+# check if it's called eden dir
+if [ ! -f "$ROOTDIR/CMakeLists.txt" ]; then
+	echo "error: no CMakeLists.txt found in ROOTDIR ($ROOTDIR)."
+	echo "Make sure you are running this script from the root of the Eden repository."
+	exit 1
+fi
+
+# check if common script folder is on Workflow
+if [ ! -d "$WORKFLOW_DIR/.ci/common" ]; then
+	echo "error: could not find .ci/common in Workflow at $WORKFLOW_DIR"
+	exit 1
+fi
 
 # annoying
 if [ "$DEVEL" = "true" ]; then
@@ -29,13 +43,13 @@ else
 fi
 
 # platform handling
-. "$ROOTDIR"/.ci/common/platform.sh
+. "$WORKFLOW_DIR"/.ci/common/platform.sh
 
 # sdl/arch handling (targets)
-. "$ROOTDIR"/.ci/common/targets.sh
+. "$WORKFLOW_DIR"/.ci/common/targets.sh
 
 # compiler handling
-. "$ROOTDIR"/.ci/common/compiler.sh
+. "$WORKFLOW_DIR"/.ci/common/compiler.sh
 
 # Flags all targets use
 COMMON_FLAGS=(
@@ -73,6 +87,9 @@ COMMON_FLAGS=(
 	# We do NOT want to bundle LLVM
 	-DYUZU_DISABLE_LLVM=ON
 
+	# Static Linking
+	-DYUZU_STATIC_BUILD="${STATIC:-OFF}"
+
 	# packaging stuff
 	-DCMAKE_INSTALL_PREFIX=/usr
 	-DYUZU_CMD="${STANDALONE:-OFF}"
@@ -94,4 +111,4 @@ CMAKE_FLAGS=(
 
 echo "-- Configure flags: ${CMAKE_FLAGS[*]}"
 
-cmake -S . -B "${BUILDDIR}" -G Ninja "${CMAKE_FLAGS[@]}"
+cmake -S "$ROOTDIR" -B "$BUILDDIR" -G "Ninja" "${CMAKE_FLAGS[@]}"

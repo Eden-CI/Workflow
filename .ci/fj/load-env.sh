@@ -5,6 +5,10 @@
 
 FORGEJO_LENV=${FORGEJO_LENV:-"forgejo.env"}
 
+if [ ! -f "$FORGEJO_LENV" ]; then
+    echo "error: environment file '$FORGEJO_LENV' not found."
+    exit 1
+fi
 if [ "$CI" = "true" ]; then
     # Safe export to GITHUB_ENV
     while IFS= read -r line; do

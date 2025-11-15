@@ -5,13 +5,15 @@
 
 # credit: escary and hauntek
 
-ROOTDIR=$PWD
-BUILDDIR=${BUILDDIR:-build}
-APP=eden.app
+BUILDDIR="${BUILDDIR:-build}"
+ARTIFACTS_DIR="artifacts"
+APP="eden.app"
 
 cd "$BUILDDIR/bin"
 
 codesign --deep --force --verbose --sign - "$APP"
 
-mkdir -p "$ROOTDIR"/artifacts
-tar czf "$ROOTDIR"/artifacts/eden.tar.gz "$APP"
+mkdir -p "$ARTIFACTS_DIR"
+tar czf "$ARTIFACTS_DIR/eden.tar.gz" "$APP"
+
+echo "MacOS package created at $ARTIFACTS_DIR/eden.tar.gz"

@@ -106,7 +106,7 @@ parse_payload() {
 		} >> "$FORGEJO_LENV"
 
 		# Pull Request is dependent of Master for comparassion
-		if [ ! -z "$RELEASE_MASTER_REPO" ]; then
+		if [ -n "$RELEASE_MASTER_REPO" ]; then
 			RELEASE_PR_HOST=$(jq -r --arg id "pull_request" '.[] | select(.["build-id"] == $id) | .host' $RELEASE_JSON)
 			RELEASE_PR_REPO=$(jq -r --arg id "pull_request" '.[] | select(.["build-id"] == $id) | .repository' $RELEASE_JSON)
 			{
@@ -180,7 +180,7 @@ clone_repository() {
 
 	echo "$FORGEJO_BRANCH" > eden/GIT-REFSPEC
 	git -C eden rev-parse --short=10 HEAD > eden/GIT-COMMIT
-	git -C eden describe --tags HEAD --abbrev=0 > eden/GIT-TAG || echo 'v0.0.3' > eden/GIT-TAG
+	git -C eden describe --tags HEAD --abbrev=0 > eden/GIT-TAG || echo 'v0.0.4-Workflow' > eden/GIT-TAG
 
 	# slight hack: also add the merge base
 	# <https://codeberg.org/forgejo/forgejo/issues/9601>
