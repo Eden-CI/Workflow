@@ -35,7 +35,7 @@ else
 	PKGVER="$TAG.$REF"
 fi
 
-sed "s/%PKGVER%/$PKGVER/" $SRC    > $DEST.1
+sed "s/%PKGVER%/$PKGVER/" "$SRC"  > $DEST.1
 sed "s/%ARCH%/$ARCH/"     $DEST.1 > $DEST
 
 rm $DEST.*
