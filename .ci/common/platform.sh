@@ -8,7 +8,7 @@
 uname -s
 
 # special case for Windows (FU microsoft)
-if [ ! -z "$VisualStudioVersion" ]; then
+if [ -n "$VCINSTALLDIR" ]; then
 	PLATFORM=win
 	STANDALONE=ON
 	OPENSSL=ON

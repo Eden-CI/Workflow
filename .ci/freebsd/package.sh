@@ -6,8 +6,8 @@
 # This script assumes you're in the source directory
 
 ROOTDIR="$PWD"
-BUILDDIR="$ROOTDIR/${BUILDDIR:-build}"
-ARTIFACTS_DIR="$ROOTDIR/artifacts"
+BUILDDIR="${BUILDDIR:-build}"
+ARTIFACTS_DIR="artifacts"
 
 VERSION=$(cat "$ROOTDIR/GIT-TAG" 2>/dev/null || echo 'v0.0.4-Workflow')
 PKG_NAME="Eden-${VERSION}-${ARCH}"
