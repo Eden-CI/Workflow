@@ -106,7 +106,7 @@ parse_payload() {
 		} >> "$FORGEJO_LENV"
 
 		# Pull Request is dependent of Master for comparassion
-		if [ ! -z "$RELEASE_MASTER_REPO" ]; then
+		if [ -n "$RELEASE_MASTER_REPO" ]; then
 			RELEASE_PR_HOST=$(jq -r --arg id "pull_request" '.[] | select(.["build-id"] == $id) | .host' $RELEASE_JSON)
 			RELEASE_PR_REPO=$(jq -r --arg id "pull_request" '.[] | select(.["build-id"] == $id) | .repository' $RELEASE_JSON)
 			{
