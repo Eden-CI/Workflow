@@ -6,7 +6,7 @@
 GITDATE="$(git show -s --date=short --format='%ad' | sed 's/-//g')"
 GITREV="$(git show -s --format='%h')"
 ROOTDIR="$PWD"
-ARTIFACTS_DIR="$ROOTDIR/artifacts"
+ARTIFACTS_DIR="artifacts"
 
 mkdir -p "$ARTIFACTS_DIR/"
 

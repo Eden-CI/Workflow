@@ -19,7 +19,7 @@
 # shellcheck disable=SC1091
 
 ROOTDIR="$PWD"
-BUILDDIR="$ROOTDIR/${BUILDDIR:-build}"
+BUILDDIR="${BUILDDIR:-build}"
 WORKFLOW_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 
 # check if it's called eden dir

@@ -4,8 +4,8 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 ROOTDIR="$PWD"
-BUILDDIR="$ROOTDIR/${BUILDDIR:-build}"
-ARTIFACTS_DIR="$ROOTDIR/artifacts"
+BUILDDIR="${BUILDDIR:-build}"
+ARTIFACTS_DIR="artifacts"
 WORKFLOW_DIR="$(cd "$(dirname "$0")/../.." && pwd)"
 
 BINDIR="$BUILDDIR/bin"

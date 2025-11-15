@@ -8,7 +8,7 @@
 # shellcheck disable=SC1091
 
 ROOTDIR="$PWD"
-BUILDDIR="$ROOTDIR/${BUILDDIR:-build}"
+BUILDDIR="${BUILDDIR:-build}"
 
 download() {
     url="$1"; out="$2"

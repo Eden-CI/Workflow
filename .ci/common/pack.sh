@@ -6,7 +6,7 @@
 # shellcheck disable=SC2043
 
 ROOTDIR="$PWD"
-ARTIFACTS_DIR="$ROOTDIR/artifacts"
+ARTIFACTS_DIR="artifacts"
 
 mkdir -p "$ARTIFACTS_DIR"
 
