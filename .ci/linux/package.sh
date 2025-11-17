@@ -49,7 +49,7 @@ UPINFO="gh-releases-zsync|eden-emulator|Releases|latest|*-$FULL_ARCH.AppImage.zs
 if [ "$DEVEL" = 'true' ]; then
     case "$(uname)" in
         FreeBSD|Darwin) sed -i '' "s|Name=${PROJECT_PRETTYNAME}|Name=${PROJECT_PRETTYNAME} Nightly|" "$DESKTOP" ;;
-        *) sed -i"'s|Name=${PROJECT_PRETTYNAME}|Name=${PROJECT_PRETTYNAME} Nightly|" "$DESKTOP" ;;
+        *) sed -i "s|Name=${PROJECT_PRETTYNAME}|Name=${PROJECT_PRETTYNAME} Nightly|" "$DESKTOP" ;;
     esac
     UPINFO="$(echo "$UPINFO" | sed 's|Releases|nightly|')"
 fi
