@@ -9,7 +9,7 @@
 
 ROOTDIR="$PWD"
 BUILDDIR="${BUILDDIR:-build}"
-. "$ROOTDIR"/ci/common/project.sh
+. "$ROOTDIR"/.ci/common/project.sh
 
 download() {
     url="$1"; out="$2"

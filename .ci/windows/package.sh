@@ -9,7 +9,7 @@ ARTIFACTS_DIR="$ROOTDIR/artifacts"
 WORKFLOW_DIR="$(cd "$(dirname "$0")/../.." && pwd)"
 
 # shellcheck disable=SC1091
-. "$ROOTDIR"/ci/common/project.sh
+. "$ROOTDIR"/.ci/common/project.sh
 
 BINDIR="$BUILDDIR/bin"
 PKGDIR="$BUILDDIR/pkg"

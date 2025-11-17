@@ -6,7 +6,7 @@
 # shellcheck disable=SC1091
 
 ROOTDIR="$PWD"
-. "$ROOTDIR"/ci/common/project.sh
+. "$ROOTDIR"/.ci/common/project.sh
 
 cd "${PROJECT_REPO}"
 

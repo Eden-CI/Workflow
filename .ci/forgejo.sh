@@ -8,7 +8,7 @@
 # shellcheck disable=SC1091
 
 ROOTDIR="$PWD"
-. "$ROOTDIR"/ci/common/project.sh
+. "$ROOTDIR"/.ci/common/project.sh
 
 FORGEJO_LENV=${FORGEJO_LENV:-"forgejo.env"}
 touch "$FORGEJO_LENV"

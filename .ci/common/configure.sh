@@ -35,7 +35,7 @@ if [ ! -d "$WORKFLOW_DIR/.ci/common" ]; then
 	exit 1
 fi
 
-. "$WORKFLOW_DIR"/ci/common/project.sh
+. "$WORKFLOW_DIR"/.ci/common/project.sh
 
 # annoying
 if [ "$DEVEL" = "true" ]; then

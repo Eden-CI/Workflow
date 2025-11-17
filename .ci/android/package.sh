@@ -10,7 +10,7 @@ GITREV="$(git show -s --format='%h')"
 ROOTDIR="$PWD"
 ARTIFACTS_DIR="artifacts"
 
-. "$ROOTDIR"/ci/common/project.sh
+. "$ROOTDIR"/.ci/common/project.sh
 
 mkdir -p "$ARTIFACTS_DIR/"
 

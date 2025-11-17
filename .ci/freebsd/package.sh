@@ -10,7 +10,7 @@ BUILDDIR="${BUILDDIR:-build}"
 ARTIFACTS_DIR="artifacts"
 
 # shellcheck disable=SC1091
-. "$ROOTDIR"/ci/common/project.sh
+. "$ROOTDIR"/.ci/common/project.sh
 
 VERSION=$(cat "$ROOTDIR/GIT-TAG" 2>/dev/null || echo 'v0.0.4-Workflow')
 PKG_NAME="${PROJECT_PRETTYNAME}-${VERSION}-${ARCH}"

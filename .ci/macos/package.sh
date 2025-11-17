@@ -8,7 +8,7 @@
 ROOTDIR="$PWD"
 
 # shellcheck disable=SC1091
-. "$ROOTDIR"/ci/common/project.sh
+. "$ROOTDIR"/.ci/common/project.sh
 
 BUILDDIR="${BUILDDIR:-build}"
 ARTIFACTS_DIR="$ROOTDIR/artifacts"
