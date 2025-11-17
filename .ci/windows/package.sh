@@ -3,6 +3,8 @@
 # SPDX-FileCopyrightText: Copyright 2025 Eden Emulator Project
 # SPDX-License-Identifier: GPL-3.0-or-later
 
+set -x
+
 ROOTDIR="$PWD"
 BUILDDIR="${BUILDDIR:-build}"
 ARTIFACTS_DIR="artifacts"
@@ -12,6 +14,8 @@ BINDIR="$BUILDDIR/bin"
 PKGDIR="$BUILDDIR/pkg"
 TMP_DIR=$(mktemp -d)
 EXE="eden.exe"
+
+find "$BINDIR"
 
 WINDEPLOYQT="${WINDEPLOYQT:-windeployqt6}"
 
@@ -33,7 +37,6 @@ mkdir -p "$PKGDIR"
 cp "$BINDIR/"*.exe "$PKGDIR"
 cd "$PKGDIR"
 
-# not needed anymore yay
 if [ "$PLATFORM" = "msys" ] && [ "$STATIC" != "ON" ]; then
 	echo "-- On MSYS, bundling MinGW DLLs..."
 
@@ -65,7 +68,7 @@ if [ "$PLATFORM" = "msys" ] && [ "$STATIC" != "ON" ]; then
 fi
 
 # qt
-[ "$PLATFORM" != "msys" ] && ${WINDEPLOYQT} --no-compiler-runtime --no-opengl-sw --no-system-dxc-compiler --no-system-d3d-compiler "$EXE"
+[ "$PLATFORM" != "msys" ] && [ "$STATIC" != "ON" ] && ${WINDEPLOYQT} --no-compiler-runtime --no-opengl-sw --no-system-dxc-compiler --no-system-d3d-compiler "$EXE"
 
 if [ "$PLATFORM" = "msys" ] && [ "$STATIC" != "ON" ]; then
 	# grab deps for Qt plugins
