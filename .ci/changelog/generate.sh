@@ -40,7 +40,7 @@ COMPARE_RELEASE_URL="https://$RELEASE_MASTER_HOST/$RELEASE_MASTER_REPO/releases"
 
 truthy() {
 	LOWER=$(echo "$1" | tr '[:upper:]' '[:lower:]')
-	[ "$LOWER" = "true" ] || [ "$1" = "on" ] || [ "$LOWER" = "1" ] || [ "$LOWER" = "t" ] || [ "$LOWER" = "yes" ] || [ "$LOWER" = "y" ]
+	[ "$LOWER" = "true" ] || [ "$LOWER" = "on" ] || [ "$LOWER" = "1" ] || [ "$LOWER" = "t" ] || [ "$LOWER" = "yes" ] || [ "$LOWER" = "y" ]
 }
 
 falsy() {
@@ -136,7 +136,10 @@ deb_field() {
 	NAME="${BUILD//-/ }"
 
 	echo -n "| $NAME | "
-	for ARCH in amd64 aarch64; do
+
+	ARCHES=amd64
+	tagged && ARCHES="$ARCHES aarch64"
+	for ARCH in $ARCHES; do
 		echo -n "[$ARCH](${BASE_DOWNLOAD_URL}/${TAG}/${PROJECT_PRETTYNAME}-$BUILD-${REF}-${ARCH}.deb) | "
 	done
 
@@ -156,7 +159,7 @@ win_field() {
 
 	echo -n "| $LABEL | "
 	echo -n "[amd64](${BASE_DOWNLOAD_URL}/${TAG}/${PROJECT_PRETTYNAME}-Windows-${REF}-amd64-${COMPILER}.zip) | "
-	falsy "$DISABLE_MSVC_ARM" && echo -n "[amd64](${BASE_DOWNLOAD_URL}/${TAG}/${PROJECT_PRETTYNAME}-Windows-${REF}-amd64-${COMPILER}.zip)"
+	falsy "$DISABLE_MSVC_ARM" && echo -n "[arm64](${BASE_DOWNLOAD_URL}/${TAG}/${PROJECT_PRETTYNAME}-Windows-${REF}-arm64-${COMPILER}.zip)"
 
 	echo " | $NOTES"
 }
@@ -236,9 +239,15 @@ cat << EOF
 
 Debian/Ubuntu targets are \`.deb\` files, which can be installed via \`sudo dpkg -i <package>.deb\`.
 
-| Target | amd64 | aarch64 | Notes |
-|--------|-------|---------|-------|
 EOF
+
+if tagged; then
+	echo "| Target | amd64 | aarch64 | Notes |"
+else
+	echo "| Target | amd64 | Notes |"
+fi
+
+echo "|--------|-------|---------|-------|"
 
 deb_matrix
 
