@@ -59,7 +59,7 @@ done
 COMPILERS="msvc-standard"
 tagged && COMPILERS="$COMPILERS clang-pgo"
 
-for arch in amd64 arm64; do
+for arch in amd64; do
 	for compiler in $COMPILERS; do
 		cp "$ROOTDIR/windows-$arch-$compiler"/*.zip "$ARTIFACTS_DIR/${PROJECT_PRETTYNAME}-Windows-${ID}-${arch}-${compiler}.zip"
 	done
