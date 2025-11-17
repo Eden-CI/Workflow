@@ -5,6 +5,11 @@
 
 # payload manager for fj2ghook
 
+# shellcheck disable=SC1091
+
+ROOTDIR="$PWD"
+. "$ROOTDIR"/ci/common/project.sh
+
 FORGEJO_LENV=${FORGEJO_LENV:-"forgejo.env"}
 touch "$FORGEJO_LENV"
 
@@ -157,7 +162,7 @@ clone_repository() {
 	fi
 
 	TRIES=0
-	while ! git clone "$FORGEJO_CLONE_URL" eden; do
+	while ! git clone "$FORGEJO_CLONE_URL" ${PROJECT_REPO}; do
 		echo "Repository $FORGEJO_CLONE_URL is not reachable."
 		echo "Check URL or authentication."
 
@@ -169,27 +174,27 @@ clone_repository() {
 
 		sleep 5
 		echo "Trying clone again..."
-		rm -rf ./eden || true
+		rm -rf "./${PROJECT_REPO}" || true
 	done
 
-	if ! git -C eden checkout "$FORGEJO_REF"; then
+	if ! git -C "${PROJECT_REPO}" checkout "$FORGEJO_REF"; then
 		echo "Ref $FORGEJO_REF not found locally, trying to fetch..."
-		git -C eden fetch --all
-		git -C eden checkout "$FORGEJO_REF"
+		git -C "${PROJECT_REPO}" fetch --all
+		git -C "${PROJECT_REPO}" checkout "$FORGEJO_REF"
 	fi
 
-	echo "$FORGEJO_BRANCH" > eden/GIT-REFSPEC
-	git -C eden rev-parse --short=10 HEAD > eden/GIT-COMMIT
-	git -C eden describe --tags HEAD --abbrev=0 > eden/GIT-TAG || echo 'v0.0.4-Workflow' > eden/GIT-TAG
+	echo "$FORGEJO_BRANCH" > "${PROJECT_REPO}"/GIT-REFSPEC
+	git -C "${PROJECT_REPO}" rev-parse --short=10 HEAD > "${PROJECT_REPO}"/GIT-COMMIT
+	git -C "${PROJECT_REPO}" describe --tags HEAD --abbrev=0 > "${PROJECT_REPO}"/GIT-TAG || echo 'v0.0.4-Workflow' > ${PROJECT_REPO}/GIT-TAG
 
 	# slight hack: also add the merge base
 	# <https://codeberg.org/forgejo/forgejo/issues/9601>
-	FORGEJO_PR_MERGE_BASE=$(git -C eden merge-base master HEAD | cut -c1-10)
+	FORGEJO_PR_MERGE_BASE=$(git -C "${PROJECT_REPO}" merge-base master HEAD | cut -c1-10)
 	echo "FORGEJO_PR_MERGE_BASE=$FORGEJO_PR_MERGE_BASE" >> "$FORGEJO_LENV"
 	echo "FORGEJO_PR_MERGE_BASE=$FORGEJO_PR_MERGE_BASE" >> "$GITHUB_ENV"
 
 	if [ "$1" = "tag" ]; then
-		cp eden/GIT-TAG eden/GIT-RELEASE
+		cp "${PROJECT_REPO}"/GIT-TAG "${PROJECT_REPO}"/GIT-RELEASE
 	fi
 }
 

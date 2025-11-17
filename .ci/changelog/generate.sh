@@ -3,6 +3,11 @@
 # SPDX-FileCopyrightText: Copyright 2025 Eden Emulator Project
 # SPDX-License-Identifier: GPL-3.0-or-later
 
+# shellcheck disable=SC1091
+
+ROOTDIR="$PWD"
+. "$ROOTDIR"/ci/common/project.sh
+
 case "$1" in
 master)
 	TAG="v${TIMESTAMP}.${FORGEJO_REF}"
@@ -33,28 +38,36 @@ esac
 
 COMPARE_RELEASE_URL="https://$RELEASE_MASTER_HOST/$RELEASE_MASTER_REPO/releases"
 
+truthy() {
+	LOWER=$(echo "$1" | tr '[:upper:]' '[:lower:]')
+	[ "$LOWER" = "true" ] || [ "$1" = "on" ] || [ "$LOWER" = "1" ] || [ "$LOWER" = "t" ] || [ "$LOWER" = "yes" ] || [ "$LOWER" = "y" ]
+}
+
+falsy() {
+	! truthy "$1"
+}
+
 tagged() {
-	[ "$DEVEL" != "true" ]
+	falsy "$DEVEL"
+}
+
+opts() {
+	truthy "$DISABLE_OPTS"
 }
 
 case "$1" in
 master)
-	echo "Eden's 'master' branch build, commit for reference:"
-	echo "- [\`$FORGEJO_REF\`](https://$FORGEJO_HOST/$FORGEJO_REPO/commit/$FORGEJO_REF)"
+	echo "Master branch build for [\`$FORGEJO_REF\`](https://$FORGEJO_HOST/$FORGEJO_REPO/commit/$FORGEJO_REF)"
 	echo
 	echo "Full changelog: [\`$FORGEJO_BEFORE...$FORGEJO_REF\`](https://$FORGEJO_HOST/$FORGEJO_REPO/compare/$FORGEJO_BEFORE...$FORGEJO_REF)"
 	;;
 pull_request)
-	echo "Eden's Pull Request Number #[$FORGEJO_PR_NUMBER]($FORGEJO_PR_URL)"
+	echo "Pull request build #[$FORGEJO_PR_NUMBER]($FORGEJO_PR_URL)"
 	echo
-	echo "Commit for reference:"
-	echo "- [\`$FORGEJO_REF\`](https://$FORGEJO_HOST/$FORGEJO_REPO/commit/$FORGEJO_REF)"
+	echo "Commit: [\`$FORGEJO_REF\`](https://$FORGEJO_HOST/$FORGEJO_REPO/commit/$FORGEJO_REF)"
 	echo
-	echo "Commit used as the merge base for this Pull Request:"
-	echo "- [\`$FORGEJO_PR_MERGE_BASE\`](https://$FORGEJO_HOST/$FORGEJO_REPO/commit/$FORGEJO_PR_MERGE_BASE)"
-	echo
-	echo "Corresponding 'master' build for reference:"
-	echo "- [\`$FORGEJO_REF\`]($COMPARE_RELEASE_URL?q=$FORGEJO_PR_MERGE_BASE&expanded=true)"
+	echo "Merge base: [\`$FORGEJO_PR_MERGE_BASE\`](https://$FORGEJO_HOST/$FORGEJO_REPO/commit/$FORGEJO_PR_MERGE_BASE)"
+	echo "([Master Build]($COMPARE_RELEASE_URL?q=$FORGEJO_PR_MERGE_BASE&expanded=true))"
 	echo
 	echo "## Changelog"
 	.ci/common/field.py field="body" default_msg="No changelog provided" pull_request_number="$FORGEJO_PR_NUMBER"
@@ -63,7 +76,7 @@ tag)
 	echo "## Changelog"
 	;;
 push | test)
-	echo "Eden's Continuous Integration Test Build"
+	echo "CI test build"
 	;;
 esac
 echo
@@ -74,7 +87,7 @@ android() {
 	DESCRIPTION="$3"
 
 	echo -n "| "
-	echo -n "[Android $TYPE](${BASE_DOWNLOAD_URL}/${TAG}/Eden-Android-${REF}-${FLAVOR}.apk) | "
+	echo -n "[Android $TYPE](${BASE_DOWNLOAD_URL}/${TAG}/${PROJECT_PRETTYNAME}-Android-${REF}-${FLAVOR}.apk) | "
 	echo "$DESCRIPTION |"
 }
 
@@ -83,7 +96,7 @@ src() {
 	DESCRIPTION="$2"
 
 	echo -n "| "
-	echo -n "[$EXT](${BASE_DOWNLOAD_URL}/${TAG}/Eden-Source-${REF}.${EXT}) | "
+	echo -n "[$EXT](${BASE_DOWNLOAD_URL}/${TAG}/${PROJECT_PRETTYNAME}-Source-${REF}.${EXT}) | "
 	echo -n "$DESCRIPTION |"
 	echo
 }
@@ -94,11 +107,13 @@ linux_field() {
 	NOTES="${3}"
 
 	echo -n "| $PRETTY_ARCH | "
-	echo -n "[GCC](${BASE_DOWNLOAD_URL}/${TAG}/Eden-Linux-${REF}-${ARCH}-gcc-standard.AppImage) "
+	echo -n "[GCC](${BASE_DOWNLOAD_URL}/${TAG}/${PROJECT_PRETTYNAME}-Linux-${REF}-${ARCH}-gcc-standard.AppImage) "
 	if tagged; then
-		echo -n "([zsync](${BASE_DOWNLOAD_URL}/${TAG}/Eden-Linux-${REF}-${ARCH}-gcc-standard.AppImage.zsync)) | "
-		echo -n "[PGO](${BASE_DOWNLOAD_URL}/${TAG}/Eden-Linux-${REF}-${ARCH}-clang-pgo.AppImage) "
-		echo -n "([zsync](${BASE_DOWNLOAD_URL}/${TAG}/Eden-Linux-${REF}-${ARCH}-clang-pgo.AppImage.zsync))"
+		echo -n "([zsync](${BASE_DOWNLOAD_URL}/${TAG}/${PROJECT_PRETTYNAME}-Linux-${REF}-${ARCH}-gcc-standard.AppImage.zsync)) | "
+		if opts; then
+			echo -n "[PGO](${BASE_DOWNLOAD_URL}/${TAG}/${PROJECT_PRETTYNAME}-Linux-${REF}-${ARCH}-clang-pgo.AppImage) "
+			echo -n "([zsync](${BASE_DOWNLOAD_URL}/${TAG}/${PROJECT_PRETTYNAME}-Linux-${REF}-${ARCH}-clang-pgo.AppImage.zsync))"
+		fi
 	fi
 
 	echo "| $NOTES"
@@ -106,10 +121,13 @@ linux_field() {
 
 linux_matrix() {
 	linux_field amd64 "amd64"
-	tagged && linux_field legacy "Legacy amd64" "Pre-Ryzen or Haswell CPUs (expect sadness)"
-	linux_field steamdeck "Steam Deck" "Zen 2, with additional patches for SteamOS"
-	tagged && linux_field rog-ally "ROG Ally X" "Zen 4"
-	[ "$DISABLE_ARM" != "true" ] && linux_field aarch64 "aarch64"
+	if opts; then
+		tagged && linux_field legacy "Legacy amd64" "Pre-Ryzen or Haswell CPUs (expect sadness)"
+		linux_field steamdeck "Steam Deck" "Zen 2, with additional patches for SteamOS"
+		tagged && linux_field rog-ally "ROG Ally X" "Zen 4"
+	fi
+
+	falsy "$DISABLE_ARM" && linux_field aarch64 "aarch64"
 }
 
 deb_field() {
@@ -119,7 +137,7 @@ deb_field() {
 
 	echo -n "| $NAME | "
 	for ARCH in amd64 aarch64; do
-		echo -n "[$ARCH](${BASE_DOWNLOAD_URL}/${TAG}/Eden-$BUILD-${REF}-${ARCH}.deb) | "
+		echo -n "[$ARCH](${BASE_DOWNLOAD_URL}/${TAG}/${PROJECT_PRETTYNAME}-$BUILD-${REF}-${ARCH}.deb) | "
 	done
 
 	echo "$NOTES"
@@ -137,10 +155,10 @@ win_field() {
 	NOTES="$3"
 
 	echo -n "| $LABEL | "
-	echo -n "[amd64](${BASE_DOWNLOAD_URL}/${TAG}/Eden-Windows-${REF}-amd64-${COMPILER}.zip) | "
-	echo -n "[arm64](${BASE_DOWNLOAD_URL}/${TAG}/Eden-Windows-${REF}-arm64-${COMPILER}.zip) | "
+	echo -n "[amd64](${BASE_DOWNLOAD_URL}/${TAG}/${PROJECT_PRETTYNAME}-Windows-${REF}-amd64-${COMPILER}.zip) | "
+	falsy "$DISABLE_MSVC_ARM" && echo -n "[amd64](${BASE_DOWNLOAD_URL}/${TAG}/${PROJECT_PRETTYNAME}-Windows-${REF}-amd64-${COMPILER}.zip)"
 
-	echo "$NOTES"
+	echo " | $NOTES"
 }
 
 msys() {
@@ -151,21 +169,23 @@ msys() {
 	NOTES="$5"
 
 	echo -n "| $LABEL | "
-	echo -n "[amd64](${BASE_DOWNLOAD_URL}/${TAG}/Eden-Windows-${REF}-mingw-amd64-${AMD}-${TARGET}.zip) | "
-	echo -n "[arm64](${BASE_DOWNLOAD_URL}/${TAG}/Eden-Windows-${REF}-mingw-arm64-${ARM}-${TARGET}.zip) | "
-    # echo -n " | "
+	echo -n "[amd64](${BASE_DOWNLOAD_URL}/${TAG}/${PROJECT_PRETTYNAME}-Windows-${REF}-mingw-amd64-${AMD}-${TARGET}.zip) | "
+	echo -n "[arm64](${BASE_DOWNLOAD_URL}/${TAG}/${PROJECT_PRETTYNAME}-Windows-${REF}-mingw-arm64-${ARM}-${TARGET}.zip) | "
 
 	echo "$NOTES"
 }
 
 win_matrix() {
 	win_field MSVC msvc-standard
-	tagged && win_field PGO clang-pgo || true
+	opts && tagged && win_field PGO clang-pgo || true
 
-	msys "MinGW" gcc clang standard "May have additional bugs/glitches"
-	tagged && msys "MinGW PGO" clang clang pgo || true
+	if falsy "$DISABLE_MINGW"; then
+		msys "MinGW" gcc clang standard "May have additional bugs/glitches"
+		opts && tagged && msys "MinGW PGO" clang clang pgo || true
+	fi
 }
 
+if truthy EXPLAIN_TARGETS; then
 cat << EOF
 
 ## Targets
@@ -178,22 +198,24 @@ Each build is optimized for a specific architecture and uses a specific compiler
 **Compilers**
 
 - **MSVC**: The default compiler for Windows. This is the most stable experience, but may lack in performance compared to any of the following alternatives.
-- **Clang**: An alternative compiler that provides theoretically higher performance, but may have additional graphical glitches.
 - **GCC**: The standard GNU compiler; this is the default for Linux and will provide the most stable experience.
-- **PGO**: These are built with Clang, and use PGO:
+- **PGO**: These are built with Clang, and use PGO. PGO (profile-guided optimization) uses data from prior compilations
+	to determine the "hotspots" found within the codebase. Using these hotspots,
+	it can allocate more resources towards these heavily-used areas, and thus generally see improved performance to the tune of ~10-50%,
+	depending on the specific game, hardware, and platform. Do note that additional instabilities may occur.
+EOF
+fi
 
-PGO (profile-guided optimization) uses data from prior compilations to determine the "hotspots" found within the codebase. Using these hotspots,
-it can allocate more resources towards these heavily-used areas, and thus generally see improved performance to the tune of ~10-50%,
-depending on the specific game, hardware, and platform. Do note that additional instabilities may occur.
-
+cat << EOF
 ### Linux
 
 Linux packages are distributed via AppImage.
 EOF
 
-if tagged; then
+if opts && tagged; then
 cat << EOF
-[zsync](https://zsync.moria.org.uk/) files are provided for easier updating.
+[zsync](https://zsync.moria.org.uk/) files are provided for easier updating, such as via
+[AM](https://github.com/ivan-hc/AM).
 
 | Build Type | GCC | PGO | Notes |
 |------------|-----|-----|-------|
@@ -220,12 +242,13 @@ EOF
 
 deb_matrix
 
+# TODO: setup files
 cat << EOF
 
 ### Windows
 
 Windows packages are in-place zip files. Setup files are soon to come.
-Note that arm64 builds are extremely experimental and are unlikely to work at all.
+Note that arm64 builds are experimental.
 
 | Compiler | amd64 | arm64 | Notes |
 |----------|-------|-------|-------|
@@ -233,7 +256,8 @@ EOF
 
 win_matrix
 
-cat << EOF
+if falsy "$DISABLE_ANDROID"; then
+	cat << EOF
 
 ### Android
 
@@ -241,12 +265,12 @@ cat << EOF
 |--------|-------------|
 EOF
 
-android Standard "standard" "Single APK for all supported Android devices (most users should use this)"
-if [ "$DEVEL" != true ]; then
-	android Optimized "optimized" "For any Android device that has Frame Generation or any other per-device feature"
-	android Legacy "legacy" "For Adreno A6xx and other older GPUs"
+	android Standard "standard" "Single APK for all supported Android devices (most users should use this)"
+	if tagged; then
+		android Optimized "optimized" "For any Android device that has Frame Generation or any other per-device feature"
+		android Legacy "legacy" "For Adreno A6xx and other older GPUs"
+	fi
 fi
-
 
 cat << EOF
 
@@ -257,15 +281,15 @@ In order to run the app, you *may* need to go to System Settings -> Privacy & Se
 
 | File | Description |
 | ---- | ----------- |
-| [macOS](${BASE_DOWNLOAD_URL}/${TAG}/Eden-macOS-${REF}.tar.gz) | For Apple Silicon (M1, M2, etc)|
+| [macOS](${BASE_DOWNLOAD_URL}/${TAG}/${PROJECT_PRETTYNAME}-macOS-${REF}.tar.gz) | For Apple Silicon (M1, M2, etc)|
 
 ### Source
 
 Contains all source code, submodules, and CPM cache at the time of release.
-This can be extracted with \`tar xf Eden-Source-${REF}.tar.zst\`.
+This can be extracted with \`tar xf ${PROJECT_PRETTYNAME}-Source-${REF}.tar.zst\`.
 
 | File | Description |
 | ---- | ----------- |
-| [tar.zst](${BASE_DOWNLOAD_URL}/${TAG}/Eden-Source-${REF}.tar.zst) | Source as a zstd-compressed tarball (Windows: use Git Bash or MSYS2) |
+| [tar.zst](${BASE_DOWNLOAD_URL}/${TAG}/${PROJECT_PRETTYNAME}-Source-${REF}.tar.zst) | Source as a zstd-compressed tarball (Windows: use Git Bash or MSYS2) |
 
 EOF

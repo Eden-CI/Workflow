@@ -8,10 +8,13 @@ BUILDDIR="${BUILDDIR:-build}"
 ARTIFACTS_DIR="$ROOTDIR/artifacts"
 WORKFLOW_DIR="$(cd "$(dirname "$0")/../.." && pwd)"
 
+# shellcheck disable=SC1091
+. "$ROOTDIR"/ci/common/project.sh
+
 BINDIR="$BUILDDIR/bin"
 PKGDIR="$BUILDDIR/pkg"
 TMP_DIR=$(mktemp -d)
-EXE="eden.exe"
+EXE="${PROJECT_REPO}.exe"
 
 WINDEPLOYQT="${WINDEPLOYQT:-windeployqt6}"
 
@@ -72,7 +75,7 @@ if [ "$PLATFORM" = "msys" ] && [ "$STATIC" != "ON" ]; then
 fi
 
 # ?ploo
-ZIP_NAME="Eden-Windows-${ARCH}.zip"
+ZIP_NAME="${PROJECT_PRETTYNAME}-Windows-${ARCH}.zip"
 
 cp -r ./* "$TMP_DIR"/
 cp -r "$ROOTDIR"/LICENSE* "$ROOTDIR"/README* "$TMP_DIR"/

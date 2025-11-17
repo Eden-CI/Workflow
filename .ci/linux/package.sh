@@ -9,6 +9,7 @@
 
 ROOTDIR="$PWD"
 BUILDDIR="${BUILDDIR:-build}"
+. "$ROOTDIR"/ci/common/project.sh
 
 download() {
     url="$1"; out="$2"
@@ -42,13 +43,13 @@ fi
 VERSION=$(cat "$ROOTDIR/GIT-TAG" 2>/dev/null || echo 'v0.0.4-Workflow')
 echo "Making \"$VERSION\" build"
 
-export OUTNAME="Eden-$VERSION-$FULL_ARCH.AppImage"
+export OUTNAME="$PROJECT_PRETTYNAME-$VERSION-$FULL_ARCH.AppImage"
 UPINFO="gh-releases-zsync|eden-emulator|Releases|latest|*-$FULL_ARCH.AppImage.zsync"
 
 if [ "$DEVEL" = 'true' ]; then
     case "$(uname)" in
-        FreeBSD|Darwin) sed -i '' 's|Name=Eden|Name=Eden Nightly|' "$DESKTOP" ;;
-        *) sed -i 's|Name=Eden|Name=Eden Nightly|' "$DESKTOP" ;;
+        FreeBSD|Darwin) sed -i '' "s|Name=${PROJECT_PRETTYNAME}|Name=${PROJECT_PRETTYNAME} Nightly|" "$DESKTOP" ;;
+        *) sed -i"'s|Name=${PROJECT_PRETTYNAME}|Name=${PROJECT_PRETTYNAME} Nightly|" "$DESKTOP" ;;
     esac
     UPINFO="$(echo "$UPINFO" | sed 's|Releases|nightly|')"
 fi
@@ -58,7 +59,7 @@ export UPINFO
 # deploy
 download "$SHARUN" "$ROOTDIR/quick-sharun"
 chmod +x "$ROOTDIR/quick-sharun"
-env LC_ALL=C "$ROOTDIR/quick-sharun" "$BUILDDIR/bin/eden"
+env LC_ALL=C "$ROOTDIR/quick-sharun" "$BUILDDIR/bin/${PROJECT_REPO}"
 
 # Wayland is mankind's worst invention, perhaps only behind war
 mkdir -p "$ROOTDIR/AppDir"

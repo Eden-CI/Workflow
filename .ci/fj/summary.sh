@@ -45,7 +45,7 @@ test() {
 	cat << EOF
 ## Test Build
 
-This is a testing build, either for a pull request or a different branch.
+This was triggered by a pull request to the Workflow repository.
 EOF
 }
 

@@ -103,3 +103,25 @@ jobs:
             echo "- View Release on GitHub: [${{ env.FORGEJO_REF }}](${{ steps.release.outputs.url }})"
             echo ""
           } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Forgejo Release
+        if: ${{ env.FORGEJO_TOKEN }}
+        id: fjrelease
+        run: |
+          sed -i 's|github.com/eden-emulator/Releases|git.eden-emu.dev/eden-emu/eden|g' changelog.md
+          git clone https://git.crueter.xyz/scripts/fj.git
+
+          alias release='fj/fj.sh -k "${{ env.FORGEJO_TOKEN }}" -r "eden-emu/eden" -u "git.eden-emu.dev" release -t "${{ env.FORGEJO_REF }}"'
+
+          release create -b changelog.md -n "Eden ${{ env.FORGEJO_REF }}" -d > url
+
+          release upload -g artifacts/*
+
+      - name: Add release URL to summary
+        run: |
+          {
+            echo "## Release Summary"
+            echo ""
+            echo "- View Release on Forgejo: [${{ env.FORGEJO_REF }}]($(cat url))"
+            echo ""
+          } >> "$GITHUB_STEP_SUMMARY"

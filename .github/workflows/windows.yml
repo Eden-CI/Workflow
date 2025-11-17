@@ -59,8 +59,6 @@ jobs:
         os:
           - runs-on: windows-latest
             arch: amd64
-          - runs-on: windows-11-arm
-            arch: arm64
         compiler: ${{ fromJson(needs.win-matrix.outputs.compiler) }}
 
     env:

@@ -9,39 +9,39 @@ SDL_FLAGS=(-DYUZU_USE_BUNDLED_SDL2=ON)
 if [ -n "$SUPPORTS_TARGETS" ]; then
 	case "$TARGET" in
 		amd64)
-			echo "Making amd64-v3 optimized build of Eden"
+			echo "Making amd64-v3 optimized build of ${PROJECT_PRETTYNAME}"
 			ARCH_FLAGS="-march=x86-64-v3 -mtune=generic"
 			ARCH="amd64"
 			;;
 		steamdeck|zen2)
-			echo "Making Steam Deck (Zen 2) optimized build of Eden"
+			echo "Making Steam Deck (Zen 2) optimized build of ${PROJECT_PRETTYNAME}"
 			ARCH_FLAGS="-march=znver2 -mtune=znver2"
 			ARCH="steamdeck"
 			STEAMDECK=true
 			;;
 		rog-ally|allyx|zen4)
-			echo "Making ROG Ally X (Zen 4) optimized build of Eden"
+			echo "Making ROG Ally X (Zen 4) optimized build of ${PROJECT_PRETTYNAME}"
 			ARCH_FLAGS="-march=znver4 -mtune=znver4"
 			ARCH="rog-ally-x"
 			STEAMDECK=true
 			;;
 		legacy)
-			echo "Making amd64 generic build of Eden"
+			echo "Making amd64 generic build of ${PROJECT_PRETTYNAME}"
 			ARCH_FLAGS="-march=x86-64 -mtune=generic"
 			ARCH=legacy
 			;;
 		aarch64|arm64)
-			echo "Making armv8-a build of Eden"
+			echo "Making armv8-a build of ${PROJECT_PRETTYNAME}"
 			ARCH_FLAGS="-march=armv8-a -mtune=generic"
 			ARCH=aarch64
 			;;
 		armv9)
-			echo "Making armv9-a build of Eden"
+			echo "Making armv9-a build of ${PROJECT_PRETTYNAME}"
 			ARCH_FLAGS="-march=armv9-a -mtune=generic"
 			ARCH=armv9
 			;;
 		native)
-			echo "Making native build of Eden"
+			echo "Making native build of ${PROJECT_PRETTYNAME}"
 			ARCH_FLAGS="-march=native -mtune=native"
 			FFMPEG=OFF
 			OPENSSL=OFF
@@ -50,7 +50,7 @@ if [ -n "$SUPPORTS_TARGETS" ]; then
 		# In the "package" target we WANT standalone executables
 		# and want to target generic architectures
 		package-amd64)
-			echo "Making package-friendly amd64 build of Eden"
+			echo "Making package-friendly amd64 build of ${PROJECT_PRETTYNAME}"
 			ARCH_FLAGS="-march=x86-64 -mtune=generic"
 			STANDALONE=ON
 			PACKAGE=true
@@ -59,7 +59,7 @@ if [ -n "$SUPPORTS_TARGETS" ]; then
 
 			;;
 		package-aarch64)
-			echo "Making package-friendly aarch64 build of Eden"
+			echo "Making package-friendly aarch64 build of ${PROJECT_PRETTYNAME}"
 			ARCH_FLAGS="-march=armv8-a -mtune=generic"
 			STANDALONE=ON
 			PACKAGE=true
@@ -84,9 +84,9 @@ if [ -n "$SUPPORTS_TARGETS" ]; then
 
 		CCACHE=OFF
 
-		PROFDATA="$PWD/eden.profdata"
+		PROFDATA="$PWD/${PROJECT_REPO}.profdata"
 		[ -f "$PROFDATA" ] && rm -f "$PROFDATA"
-		curl -L https://"$RELEASE_PGO_HOST"/"$RELEASE_PGO_REPO"/releases/latest/download/eden.profdata > "$PROFDATA"
+		curl -L https://"$RELEASE_PGO_HOST"/"$RELEASE_PGO_REPO/releases/latest/download/${PROJECT_REPO}.profdata" > "$PROFDATA"
 		[ ! -f "$PROFDATA" ] && (echo "PGO data failed to download" ; exit 1)
 		command -v cygpath >/dev/null 2>&1 && PROFDATA="$(cygpath -m "$PROFDATA")"
 		ARCH_FLAGS="${ARCH_FLAGS} -fprofile-use=$PROFDATA -Wno-backend-plugin -Wno-profile-instr-unprofiled -Wno-profile-instr-out-of-date"
