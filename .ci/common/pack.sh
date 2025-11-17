@@ -14,15 +14,20 @@ ARTIFACTS_DIR="artifacts"
 mkdir -p "$ARTIFACTS_DIR"
 
 tagged() {
-	[ "$DEVEL" != "true" ]
+	falsy "$DEVEL"
+}
+
+opts() {
+	falsy "$DISABLE_OPTS"
 }
 
 ## AppImage ##
-ARCHES="amd64 steamdeck"
+ARCHES="amd64"
+opts && ARCHES="$ARCHES steamdeck"
 [ "$DISABLE_ARM" != "true" ] && ARCHES="$ARCHES aarch64"
 COMPILERS=gcc-standard
 
-tagged && ARCHES="$ARCHES legacy rog-ally" && COMPILERS="$COMPILERS clang-pgo"
+opts && tagged && ARCHES="$ARCHES legacy rog-ally" && COMPILERS="$COMPILERS clang-pgo"
 
 for arch in $ARCHES; do
 	for compiler in $COMPILERS; do
@@ -35,7 +40,7 @@ done
 
 ## Debian ##
 ARCHES=amd64
-tagged && ARCHES="$ARCHES aarch64"
+opts && tagged && ARCHES="$ARCHES aarch64"
 
 for arch in $ARCHES; do
 	for ver in 24.04; do
@@ -48,30 +53,37 @@ for arch in $ARCHES; do
 done
 
 ## Android ##
-FLAVORS=standard
-tagged && FLAVORS="$FLAVORS legacy optimized"
+if falsy "$DISABLE_ANDROID"; then
+	FLAVORS=standard
+	opts && tagged && FLAVORS="$FLAVORS legacy optimized"
 
-for flavor in $FLAVORS; do
-	cp "$ROOTDIR/android-$flavor"/*.apk "$ARTIFACTS_DIR/${PROJECT_PRETTYNAME}-Android-${ID}-${flavor}.apk"
-done
+	for flavor in $FLAVORS; do
+		cp "$ROOTDIR/android-$flavor"/*.apk "$ARTIFACTS_DIR/${PROJECT_PRETTYNAME}-Android-${ID}-${flavor}.apk"
+	done
+fi
 
 ## Windows ##
 COMPILERS="msvc-standard"
-tagged && COMPILERS="$COMPILERS clang-pgo"
+opts && tagged && COMPILERS="$COMPILERS clang-pgo"
 
-for arch in amd64; do
+ARCHES=amd64
+falsy "$DISABLE_MSVC_ARM" && ARCHES="$ARCHES arm64"
+
+for arch in $ARCHES; do
 	for compiler in $COMPILERS; do
 		cp "$ROOTDIR/windows-$arch-$compiler"/*.zip "$ARTIFACTS_DIR/${PROJECT_PRETTYNAME}-Windows-${ID}-${arch}-${compiler}.zip"
 	done
 done
 
 ## MinGW ##
-COMPILERS="amd64-gcc-standard arm64-clang-standard"
-tagged && COMPILERS="$COMPILERS amd64-clang-pgo arm64-clang-pgo"
+if falsy "$DISABLE_MINGW"; then
+	COMPILERS="amd64-gcc-standard arm64-clang-standard"
+	opts && tagged && COMPILERS="$COMPILERS amd64-clang-pgo arm64-clang-pgo"
 
-for compiler in $COMPILERS; do
-	cp "$ROOTDIR/mingw-$compiler"/*.zip "$ARTIFACTS_DIR/${PROJECT_PRETTYNAME}-Windows-${ID}-mingw-${compiler}.zip"
-done
+	for compiler in $COMPILERS; do
+		cp "$ROOTDIR/mingw-$compiler"/*.zip "$ARTIFACTS_DIR/${PROJECT_PRETTYNAME}-Windows-${ID}-mingw-${compiler}.zip"
+	done
+fi
 
 ## Source Pack ##
 if [ -d "source" ]; then

@@ -52,7 +52,7 @@ tagged() {
 }
 
 opts() {
-	truthy "$DISABLE_OPTS"
+	falsy "$DISABLE_OPTS"
 }
 
 case "$1" in
