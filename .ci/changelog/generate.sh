@@ -243,11 +243,12 @@ EOF
 
 if tagged; then
 	echo "| Target | amd64 | aarch64 | Notes |"
+	echo "|--------|-------|---------|-------|"
 else
 	echo "| Target | amd64 | Notes |"
+	echo "|--------|-------|-------|"
 fi
 
-echo "|--------|-------|---------|-------|"
 
 deb_matrix
 
