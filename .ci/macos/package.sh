@@ -5,8 +5,9 @@
 
 # credit: escary and hauntek
 
+ROOTDIR="$PWD"
 BUILDDIR="${BUILDDIR:-build}"
-ARTIFACTS_DIR="artifacts"
+ARTIFACTS_DIR="$ROOTDIR/artifacts"
 APP="eden.app"
 
 cd "$BUILDDIR/bin"
