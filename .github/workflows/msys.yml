@@ -63,7 +63,7 @@ jobs:
           if [ "${{ inputs.devel }}" != "true" ] || [ "${{ inputs.force_pgo }}" = "true" ]; then
             INCLUDE="[${amd_gcc}, ${arm_clang}, ${amd_pgo}, ${arm_pgo}]"
           else
-            INCLUDE="[${amd_gcc}, ${ucrt_gcc}, ${amd_clang}, ${arm_clang}]"
+            INCLUDE="[${amd_gcc}, ${arm_clang}]"
           fi
 
           echo $INCLUDE

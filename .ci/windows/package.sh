@@ -3,19 +3,15 @@
 # SPDX-FileCopyrightText: Copyright 2025 Eden Emulator Project
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-set -x
-
 ROOTDIR="$PWD"
 BUILDDIR="${BUILDDIR:-build}"
-ARTIFACTS_DIR="artifacts"
+ARTIFACTS_DIR="$ROOTDIR/artifacts"
 WORKFLOW_DIR="$(cd "$(dirname "$0")/../.." && pwd)"
 
 BINDIR="$BUILDDIR/bin"
 PKGDIR="$BUILDDIR/pkg"
 TMP_DIR=$(mktemp -d)
 EXE="eden.exe"
-
-find "$BINDIR"
 
 WINDEPLOYQT="${WINDEPLOYQT:-windeployqt6}"
 
@@ -78,7 +74,7 @@ fi
 # ?ploo
 ZIP_NAME="Eden-Windows-${ARCH}.zip"
 
-cp -r "$PKGDIR"/* "$TMP_DIR"/
+cp -r ./* "$TMP_DIR"/
 cp -r "$ROOTDIR"/LICENSE* "$ROOTDIR"/README* "$TMP_DIR"/
 
 7z a -tzip "$ARTIFACTS_DIR/$ZIP_NAME" "$TMP_DIR"/*
