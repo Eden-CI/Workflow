@@ -269,6 +269,7 @@ EOF
 	if tagged; then
 		android Optimized "optimized" "For any Android device that has Frame Generation or any other per-device feature"
 		android Legacy "legacy" "For Adreno A6xx and other older GPUs"
+        android x86_64 "chromeos" "For devices running Chrome/FydeOS, or certain Intel Atom Android devices."
 	fi
 fi
 

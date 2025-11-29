@@ -37,11 +37,12 @@ jobs:
           OPT='{"flavor": "optimized"}'
           LEG='{"flavor": "legacy"}'
           STD='{"flavor": "standard"}'
+          CHR='{"flavor": "chromeos"}'
 
           if [ "${{ inputs.build-id }}" = "tag" ]; then
-            TARGETS="[$OPT, $LEG, $STD]"
+            TARGETS="[$OPT, $LEG, $STD, $CHR]"
           else
-            TARGETS="[$STD]"
+            TARGETS="[$STD, $CHR]"
           fi
 
           echo $TARGETS
@@ -123,9 +124,6 @@ jobs:
       - name: Build
         run: |
           JAVA_HOME=$JAVA_HOME_17_X64 ./.ci/android/build.sh -DCCACHE_PATH=${SCCACHE_PATH}
-
-      - name: Package
-        run: ./.ci/android/package.sh
 
       - name: Upload APK
         uses: actions/upload-artifact@v4.6.2

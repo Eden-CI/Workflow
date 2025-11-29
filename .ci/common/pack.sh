@@ -55,7 +55,7 @@ done
 ## Android ##
 if falsy "$DISABLE_ANDROID"; then
 	FLAVORS=standard
-	opts && tagged && FLAVORS="$FLAVORS legacy optimized"
+	opts && tagged && FLAVORS="$FLAVORS legacy optimized chromeos"
 
 	for flavor in $FLAVORS; do
 		cp "$ROOTDIR/android-$flavor"/*.apk "$ARTIFACTS_DIR/${PROJECT_PRETTYNAME}-Android-${ID}-${flavor}.apk"
