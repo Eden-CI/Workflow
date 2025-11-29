@@ -20,8 +20,8 @@ env:
   FORGEJO_TOKEN: ${{ secrets.FORGEJO_TOKEN }}
   DEVEL: ${{ inputs.devel }}
   TEMP_PATCH_STATUS: "false"
-  TEMP_PATCH: "2994"
-  FORCE_PGO: "false"
+  TEMP_PATCH: "3117"
+  FORCE_PGO: "true"
 
 jobs:
   clone:
