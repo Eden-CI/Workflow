@@ -12,7 +12,7 @@ RETURN=0
 
 usage() {
     cat <<EOF
-Usage: $0 [-c|--chromeos] [-t|--target FLAVOR] [-b|--build-type BUILD_TYPE]
+Usage: $0 [-t|--target FLAVOR] [-b|--build-type BUILD_TYPE]
        [-h|--help] [-r|--release] [extra options]
 
 Build script for Android.
@@ -21,12 +21,10 @@ and will apply both to this script and the packaging script.
 bool values are "true" or "false"
 
 Options:
-    -c, --chromeos        	Build for ChromeOS (x86_64) (variable: CHROMEOS, bool)
-                          	Default: false
     -r, --release        	Enable update checker. If set, sets the DEVEL bool variable to false.
                          	By default, DEVEL is true.
     -t, --target <FLAVOR> 	Build flavor (variable: TARGET)
-                          	Valid values are: legacy, optimized, standard
+                          	Valid values are: legacy, optimized, standard, chromeos
                           	Default: standard
     -b, --build-type <TYPE>	Build type (variable: TYPE)
                           	Valid values are: Release, RelWithDebInfo, Debug
@@ -60,7 +58,6 @@ type() {
 
 while true; do
 	case "$1" in
-		-c|--chromeos) CHROMEOS=true ;;
 		-r|--release) DEVEL=false ;;
 		-t|--target) target "$2"; shift ;;
 		-b|--build-type) type "$2"; shift ;;
@@ -71,16 +68,17 @@ while true; do
 	shift
 done
 
-: "${CHROMEOS:=false}"
 : "${TARGET:=standard}"
 : "${TYPE:=Release}"
 : "${DEVEL:=true}"
 
-case "$TARGET" in
+TARGET_LOWER=$(echo "$TARGET" | tr '[:upper:]' '[:lower:]')
+
+case "$TARGET_LOWER" in
 	legacy) FLAVOR=Legacy ;;
 	optimized) FLAVOR=GenshinSpoof ;;
 	standard) FLAVOR=Mainline ;;
-    chromeos) FLAVOR=Mainline; CHROMEOS=true ;;
+    chromeos) FLAVOR=ChromeOS ;;
 	*) die "Invalid build flavor $TARGET."
 esac
 
@@ -104,28 +102,15 @@ chmod +x ./gradlew
 
 set -- "$@" -DUSE_CCACHE="${CCACHE}"
 [ "$DEVEL" != "true" ] && set -- "$@" -DENABLE_UPDATE_CHECKER=ON
-[ "$CHROMEOS" = "true" ] && ABI=x86_64
-: "${ABI:=arm64-v8a}"
 
-echo "-- packaging APK"
-./gradlew copy${FLAVOR}"${TYPE}Output" \
+echo "-- building..."
+
+./gradlew "copy${FLAVOR}${TYPE}Outputs" \
     -Dorg.gradle.caching="${CCACHE}" \
     -Dorg.gradle.parallel="${CCACHE}" \
     -Dorg.gradle.workers.max="${NUM_JOBS}" \
-	-Pandroid.injected.build.abi="${ABI}" \
-    -PYUZU_ANDROID_ARGS="$*"
-
-echo "-- building AAB"
-./gradlew bundle${FLAVOR}"${TYPE}" \
-    -Dorg.gradle.caching="${CCACHE}" \
-    -Dorg.gradle.parallel="${CCACHE}" \
-    -Dorg.gradle.workers.max="${NUM_JOBS}" \
-	-Pandroid.injected.build.abi="${ABI}" \
-    -PYUZU_ANDROID_ARGS="$*"
-
-echo "-- packaging AAB"
-cp app/build/outputs/bundle/"${LOWER_FLAVOR}${TYPE}/app-${LOWER_FLAVOR}-${LOWER_TYPE}.aab" \
-	"${ARTIFACTS_DIR}/app-${LOWER_FLAVOR}-${ABI}-${LOWER_TYPE}.aab" || echo "AAB not found"
+    -PYUZU_ANDROID_ARGS="$*" \
+    --info
 
 if [ -n "${ANDROID_KEYSTORE_B64}" ]; then
     rm "${ANDROID_KEYSTORE_FILE}"
