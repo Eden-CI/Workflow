@@ -111,16 +111,6 @@ jobs:
         run: |
           ./.ci/android/deps.sh
 
-      - name: Install gradle-cache
-        uses: burrunan/gradle-cache-action@v3.0.1
-        with:
-          job-id: android
-          gradle-version: wrapper
-          save-local-build-cache: true
-          save-gradle-dependencies-cache: true
-          remote-build-cache-proxy-enabled: true
-          build-root-directory: src/android
-
       - name: Build
         run: |
           JAVA_HOME=$JAVA_HOME_17_X64 ./.ci/android/build.sh -DCCACHE_PATH=${SCCACHE_PATH}
