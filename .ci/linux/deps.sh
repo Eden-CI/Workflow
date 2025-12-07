@@ -29,7 +29,6 @@ pacman -Syu --noconfirm --overwrite "*" \
 	lld \
 	llvm \
 	mbedtls \
-	mold \
 	nasm \
 	ninja \
 	nlohmann-json \
@@ -39,12 +38,10 @@ pacman -Syu --noconfirm --overwrite "*" \
 	python-requests \
 	qt6ct \
 	qt6-tools \
-	qt6-wayland \
 	spirv-headers \
 	spirv-tools \
 	strace \
 	unzip \
-	ffnvcodec-headers \
 	vulkan-headers \
 	vulkan-mesa-layers \
 	vulkan-utility-libraries \
