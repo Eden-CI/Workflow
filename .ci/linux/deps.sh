@@ -29,6 +29,7 @@ pacman -Syu --noconfirm --overwrite "*" \
 	lld \
 	llvm \
 	mbedtls \
+	mold \
 	nasm \
 	ninja \
 	nlohmann-json \
