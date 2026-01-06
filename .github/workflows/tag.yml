@@ -32,12 +32,12 @@ jobs:
       FJ_TOKEN: "${{ secrets.FORGEJO_TOKEN }}"
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5.0.0
+      - uses: actions/checkout@v6.0.1
         with:
           persist-credentials: false
 
       - name: Download artifacts
-        uses: actions/download-artifact@v5.0.0
+        uses: actions/download-artifact@v7.0.0
 
       - name: Load payload environment
         shell: bash
@@ -81,7 +81,7 @@ jobs:
       - name: Release
         if: ${{ env.GH_TOKEN }}
         id: release
-        uses: softprops/action-gh-release@v2.2.2
+        uses: softprops/action-gh-release@v2.5.0
         with:
           name: "Eden ${{ env.FORGEJO_REF }}"
           tag_name: ${{ env.FORGEJO_REF }}

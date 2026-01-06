@@ -99,7 +99,7 @@ jobs:
           fi
 
       - name: Checkout
-        uses: actions/checkout@v5.0.0
+        uses: actions/checkout@v6.0.1
 
       - name: Setup
         uses: ./.github/workflows/setup
@@ -116,13 +116,13 @@ jobs:
           JAVA_HOME=$JAVA_HOME_17_X64 ./.ci/android/build.sh -DCCACHE_PATH=${SCCACHE_PATH}
 
       - name: Upload APK
-        uses: actions/upload-artifact@v4.6.2
+        uses: actions/upload-artifact@v6.0.0
         with:
           name: android-${{ matrix.target.flavor }}
           path: artifacts/*.apk
 
       - name: Upload AAB
-        uses: actions/upload-artifact@v4.6.2
+        uses: actions/upload-artifact@v6.0.0
         with:
           name: android-aab-${{ matrix.target.flavor }}
           path: artifacts/*.aab

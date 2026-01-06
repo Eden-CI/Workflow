@@ -17,7 +17,7 @@ runs:
         disable_annotations: true
 
     - name: Download Forgejo environment
-      uses: actions/download-artifact@v5.0.0
+      uses: actions/download-artifact@v7.0.0
       with:
         name: forgejo-env
 
@@ -27,12 +27,12 @@ runs:
         . ./.ci/fj/load-env.sh
 
     - name: Clone
-      uses: actions/download-artifact@v5.0.0
+      uses: actions/download-artifact@v7.0.0
       with:
         name: eden
 
     - name: Set up CPM cache
-      uses: actions/cache@v4.3.0
+      uses: actions/cache@v5.0.1
       with:
         path: |
           ${{ github.workspace }}/.cache

@@ -28,12 +28,12 @@ jobs:
       GH_TOKEN: "${{ secrets.CUSTOM_GITHUB_TOKEN }}"
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5.0.0
+      - uses: actions/checkout@v6.0.1
         with:
           persist-credentials: false
 
       - name: Download artifacts
-        uses: actions/download-artifact@v5.0.0
+        uses: actions/download-artifact@v7.0.0
 
       - name: Load payload environment
         shell: bash
@@ -57,7 +57,7 @@ jobs:
       - name: Release
         if: ${{ env.GH_TOKEN }}
         id: release
-        uses: softprops/action-gh-release@v2.2.2
+        uses: softprops/action-gh-release@v2.5.0
         with:
           name: "Eden Master - ${{ env.FORGEJO_REF }}"
           tag_name: v${{ env.TIMESTAMP }}.${{ env.FORGEJO_REF }}

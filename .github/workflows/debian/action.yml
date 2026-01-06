@@ -39,7 +39,7 @@ runs:
         ARCH: ${{ inputs.arch }}
 
     - name: Upload artifacts
-      uses: actions/upload-artifact@v4.6.2
+      uses: actions/upload-artifact@v6.0.0
       with:
         name: ${{ inputs.name }}-${{ inputs.arch }}
         path: ./eden*.deb

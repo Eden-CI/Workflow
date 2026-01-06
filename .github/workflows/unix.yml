@@ -44,7 +44,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v5.0.0
+        uses: actions/checkout@v6.0.1
 
       - name: Setup
         uses: ./.github/workflows/setup
@@ -62,7 +62,7 @@ jobs:
 
       - name: Build (FreeBSD)
         if: matrix.os.platform == 'freebsd'
-        uses: vmactions/freebsd-vm@v1.2.4
+        uses: vmactions/freebsd-vm@v1.3.6
         with:
           arch: ${{ matrix.os.vm-arch }}
           usesh: true
@@ -93,7 +93,7 @@ jobs:
             tar --owner root --group root --zstd -cf Eden-FreeBSD.tar.zst *
 
       - name: Upload Binary
-        uses: actions/upload-artifact@v4.6.2
+        uses: actions/upload-artifact@v6.0.0
         with:
           name: ${{ matrix.os.platform }}-binary-${{ matrix.os.arch }}-${{ matrix.compiler }}
           path: install/Eden-${{ matrix.os.name }}.tar.zst
