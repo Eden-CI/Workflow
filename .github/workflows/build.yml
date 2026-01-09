@@ -19,8 +19,8 @@ env:
   CPM_CACHE_VERSION: "v15"
   FORGEJO_TOKEN: ${{ secrets.FORGEJO_TOKEN }}
   DEVEL: ${{ inputs.devel }}
-  TEMP_PATCH_STATUS: "false"
-  TEMP_PATCH: "3086"
+  TEMP_PATCH_STATUS: "true"
+  TEMP_PATCH: "3289"
   FORCE_PGO: "false"
 
 jobs:
