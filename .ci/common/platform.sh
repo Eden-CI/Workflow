@@ -5,6 +5,9 @@
 
 # platform handling
 
+QT=OFF
+STATIC=OFF
+
 uname -s
 
 # special case for Windows (FU microsoft)
@@ -13,6 +16,7 @@ if [ -n "$VCINSTALLDIR" ]; then
 	STANDALONE=ON
 	OPENSSL=ON
 	FFMPEG=ON
+	QT=ON
 	[ "$COMPILER" = "clang" ] && SUPPORTS_TARGETS=ON
 
 	# LTO is completely broken on MSVC
@@ -24,6 +28,7 @@ else
 		STANDALONE=OFF
 		FFMPEG=ON
 		OPENSSL=ON
+		SIRIT=ON
 		SUPPORTS_TARGETS=ON
 		;;
 	Darwin*)
@@ -31,7 +36,9 @@ else
 		STANDALONE=OFF
 		FFMPEG=OFF
 		OPENSSL=OFF
+		SIRIT=ON
 		STATIC=ON
+		QT=ON
 		export LIBVULKAN_PATH="/opt/homebrew/lib/libvulkan.1.dylib"
 		;;
 	CYGWIN* | MINGW* | MSYS*)
@@ -39,8 +46,9 @@ else
 		STANDALONE=ON
 		OPENSSL=ON
 		FFMPEG=ON
-		SIRIT=OFF
+		SIRIT=ON
 		STATIC=ON
+		QT=ON
 		SUPPORTS_TARGETS=ON
 
 		export PATH="$PATH:/mingw64/bin"
@@ -70,5 +78,6 @@ export OPENSSL
 export SUPPORTS_TARGETS
 export SIRIT
 export STATIC
+export QT
 
 # TODO(crueter): document outputs n such

@@ -112,7 +112,7 @@ jobs:
             git make autoconf libtool automake-wrapper patch jq
             pactoys ninja
           pacboy: >-
-            qt6-static:p qt6-tools:p qt6-translations:p qt6-svg:p
+            qt6-tools:p qt6-translations:p qt6-svg:p
 
             7zip:p sccache:p cmake:p toolchain:p clang:p python-pip:p lld:p
             openssl:p boost:p fmt:p lz4:p nlohmann-json:p zlib:p zstd:p
@@ -125,7 +125,7 @@ jobs:
       - name: Configure
         shell: msys2 {0}
         run: |
-          .ci/common/configure.sh -DCCACHE_PATH=sccache -DQt6_DIR="${{ steps.msys2.outputs.msys2-location }}/${{ matrix.os.msystem }}/qt6-static/lib/cmake/Qt6"
+          .ci/common/configure.sh -DCCACHE_PATH=sccache
         env:
           MSYS2_LOCATION: ${{ steps.msys2.outputs.msys2-location }}
 
