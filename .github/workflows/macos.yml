@@ -49,7 +49,7 @@ jobs:
         run: ./.ci/macos/deps.sh
 
       - name: Configure
-        run: .ci/common/configure.sh -DCCACHE_PATH=${SCCACHE_PATH}
+        run: .ci/common/configure.sh -DCCACHE_PATH=${SCCACHE_PATH} --debug-find-pkg=WrapOpenSSL --debug-find-pkg=WrapOpenSSLHeaders
 
       - name: Build
         run: cmake --build build
