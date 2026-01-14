@@ -67,7 +67,9 @@ if [ "$PLATFORM" = "msys" ] && [ "$STATIC" != "ON" ]; then
 fi
 
 # qt
-[ "$PLATFORM" != "msys" ] && [ "$STATIC" != "ON" ] && ${WINDEPLOYQT} --no-compiler-runtime --no-opengl-sw --no-system-dxc-compiler --no-system-d3d-compiler "$EXE"
+if [ "$STATIC" != "ON" ]; then
+	${WINDEPLOYQT} --no-compiler-runtime --no-opengl-sw --no-system-dxc-compiler --no-system-d3d-compiler "$EXE"
+fi
 
 if [ "$PLATFORM" = "msys" ] && [ "$STATIC" != "ON" ]; then
 	# grab deps for Qt plugins

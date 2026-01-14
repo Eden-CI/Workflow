@@ -17,6 +17,7 @@ if [ -n "$VCINSTALLDIR" ]; then
 	OPENSSL=ON
 	FFMPEG=ON
 	QT=ON
+	STATIC=ON
 	[ "$COMPILER" = "clang" ] && SUPPORTS_TARGETS=ON
 
 	# LTO is completely broken on MSVC
