@@ -73,7 +73,6 @@ COMMON_FLAGS=(
 	-DUSE_DISCORD_PRESENCE=ON
 
 	# LTO
-	-DDYNARMIC_ENABLE_LTO="${LTO:-ON}"
 	-DENABLE_LTO="${LTO:-ON}"
 
 	# many distros do not package sirit, so let's bundle it anyways

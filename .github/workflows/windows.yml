@@ -78,12 +78,6 @@ jobs:
           key: ${{ runner.os }}-${{ matrix.os.arch }}-${{ matrix.compiler.program }}
           version: ${{ inputs.cpm-cache-version }}
 
-      - name: Install Qt
-        uses: jurplel/install-qt-action@v4.3.0
-        with:
-          version: ${{ env.QT_VERSION }}
-          cache: 'true'
-
       - name: Load payload environment
         shell: bash
         run: |
