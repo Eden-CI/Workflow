@@ -19,6 +19,10 @@ on:
         description: 'test PGO builds'
         type: string
         required: true
+      matrix_platform:
+        description: 'matrix platform'
+        type: string
+        required: true
 
 env:
   DISABLE_ARM: ${{ vars.DISABLE_ARM }}
@@ -29,44 +33,19 @@ env:
   BUILD_ID: ${{ inputs.build-id }}
 
 jobs:
-  win-matrix:
-    name: "Generate Windows compilers"
-    runs-on: ubuntu-latest
-    outputs:
-      compiler: ${{ steps.set.outputs.compiler }}
-    steps:
-      - id: set
-        run: |
-          PGO='{"program": "clang", "target": "pgo"}'
-          CLANG='{"program": "clang", "target": "standard"}'
-          MSVC='{"program": "msvc", "target": "standard"}'
-
-          if [ "${{ inputs.devel }}" != "true" ] || [ "${{ inputs.force_pgo }}" = "true" ]; then
-            COMPILER="[${MSVC}]"
-          else
-            COMPILER="[${MSVC}]"
-          fi
-
-          echo $COMPILER
-          echo "compiler=${COMPILER}" >> $GITHUB_OUTPUT
-
   windows:
-    name: "Windows ${{ matrix.os.arch }} ${{ matrix.compiler.program }} ${{ matrix.compiler.target }}"
-    needs: [win-matrix]
-    runs-on: ${{ matrix.os.runs-on }}
+    name: "Windows ${{ matrix.compiler.arch }} ${{ matrix.compiler.program }} ${{ matrix.compiler.target }}"
+    runs-on: ${{ matrix.compiler.runs-on }}
     strategy:
       fail-fast: false
       matrix:
-        os:
-          - runs-on: windows-latest
-            arch: amd64
-        compiler: ${{ fromJson(needs.win-matrix.outputs.compiler) }}
+        compiler: ${{ fromJson(inputs.matrix_platform) }}
 
     env:
-      TARGET: ${{ matrix.os.arch }}
+      TARGET: ${{ matrix.compiler.arch }}
       COMPILER: "${{ matrix.compiler.program }}"
       PGO_TARGET: "${{ matrix.compiler.target }}"
-      ARCH: ${{ matrix.os.arch }}-${{ matrix.compiler.program }}-${{ matrix.compiler.target }}
+      ARCH: ${{ matrix.compiler.arch }}-${{ matrix.compiler.program }}-${{ matrix.compiler.target }}
 
     steps:
       - name: Checkout
@@ -75,7 +54,7 @@ jobs:
       - name: Setup
         uses: ./.github/workflows/setup
         with:
-          key: ${{ runner.os }}-${{ matrix.os.arch }}-${{ matrix.compiler.program }}
+          key: ${{ runner.os }}-${{ matrix.compiler.arch }}-${{ matrix.compiler.program }}
           version: ${{ inputs.cpm-cache-version }}
 
       - name: Load payload environment
@@ -85,7 +64,7 @@ jobs:
       - name: Set up MSVC
         uses: ilammy/msvc-dev-cmd@v1.13.0
         with:
-          arch: ${{ matrix.os.arch }}
+          arch: ${{ matrix.compiler.arch }}
 
       - name: Install LLVM/Clang
         if: matrix.compiler.program == 'clang'

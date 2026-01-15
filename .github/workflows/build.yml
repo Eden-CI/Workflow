@@ -24,6 +24,128 @@ env:
   FORCE_PGO: "false"
 
 jobs:
+  generate-platform:
+    name: Central Platform Generation
+    runs-on: ubuntu-latest
+    outputs:
+      windows-matrix: ${{ steps.windows-matrix.outputs.compiler }}
+      android-matrix: ${{ steps.android-matrix.outputs.targets }}
+      debian-matrix: ${{ steps.debian-matrix.outputs.matrix }}
+      msys-matrix: ${{ steps.msys-matrix.outputs.include }}
+      appimage-matrix: ${{ steps.appimage-matrix.outputs.matrix }}
+      appimage-compiler:  ${{ steps.appimage-matrix.outputs.compiler }}
+    steps:
+      - id: windows-matrix
+        run: |
+          PGO='{  "runs-on": "windows-latest", "arch": "amd64", "program": "clang", "target": "pgo"}'
+          CLANG='{"runs-on": "windows-latest", "arch": "amd64", "program": "clang", "target": "standard"}'
+          MSVC='{ "runs-on": "windows-latest", "arch": "amd64", "program": "msvc",  "target": "standard"}'
+
+          if [ "${{ inputs.devel }}" != "true" ] || [ "${{ inputs.force_pgo }}" = "true" ]; then
+            COMPILER="[${MSVC}]"
+          else
+            COMPILER="[${MSVC}]"
+          fi
+
+          echo $COMPILER
+          echo "compiler=${COMPILER}" >> $GITHUB_OUTPUT
+      - id: android-matrix
+        run: |
+          OPT='{"flavor": "optimized"}'
+          LEG='{"flavor": "legacy"}'
+          STD='{"flavor": "standard"}'
+          CHR='{"flavor": "chromeos"}'
+
+          if [ "${{ inputs.build-id }}" = "tag" ]; then
+            TARGETS="[$OPT, $LEG, $STD, $CHR]"
+          else
+            TARGETS="[$STD, $CHR]"
+          fi
+
+          echo $TARGETS
+          echo "targets=${TARGETS}" >> $GITHUB_OUTPUT
+      - id: debian-matrix
+        run: |
+          BASE='{"runs-on": "ubuntu-24.04",     "arch": "amd64"}'
+          ARM=' {"runs-on": "ubuntu-24.04-arm", "arch": "aarch64"}'
+
+          if [ "${{ inputs.build-id }}" = "tag" ]; then
+            MATRIX="[${BASE}, ${ARM}]"
+          else
+            MATRIX="[${BASE}]"
+          fi
+
+          echo $MATRIX
+          echo "matrix=${MATRIX}" >> $GITHUB_OUTPUT
+
+      - id: msys-matrix
+        run: |
+          AMD64='"runs-on": "windows-latest", "arch": "amd64", "msystem": "MINGW64"'
+          UCRT64='"runs-on": "windows-latest", "arch": "amd64", "msystem": "UCRT64"'
+          AMDCLANG64='"runs-on": "windows-latest", "arch": "amd64", "msystem": "CLANG64"'
+          ARM64='"runs-on": "windows-11-arm", "arch": "arm64", "msystem": "CLANGARM64"'
+
+          PGO='"program": "clang", "target": "pgo"'
+          CLANG='"program": "clang", "target": "standard"'
+          GCC='"program": "gcc", "target": "standard"'
+          UCRT='"program": "gcc", "target": "ucrt"'
+
+          target() {
+            arch="$1"
+            compiler="$2"
+
+            echo "{${arch}, ${compiler}}"
+          }
+
+          amd_gcc="$(target "$AMD64" "$GCC")"
+          ucrt_gcc="$(target "$UCRT64" "$UCRT")"
+          amd_clang="$(target "$AMDCLANG64" "$CLANG")"
+          amd_pgo="$(target "$AMD64" "$PGO")"
+          arm_clang="$(target "$ARM64" "$CLANG")"
+          arm_pgo="$(target "$ARM64" "$PGO")"
+
+          if [ "${{ inputs.devel }}" != "true" ] || [ "${{ inputs.force_pgo }}" = "true" ]; then
+            INCLUDE="[${amd_gcc}, ${arm_clang}, ${amd_pgo}, ${arm_pgo}]"
+          else
+            INCLUDE="[${amd_gcc}, ${arm_clang}]"
+          fi
+
+          echo $INCLUDE
+          echo "include=${INCLUDE}" >> $GITHUB_OUTPUT
+
+      - id: appimage-matrix
+        run: |
+          BASE='[{"runs-on": "ubuntu-latest", "arch": "amd64"},{"runs-on": "ubuntu-latest", "arch": "steamdeck"}'
+          ARM=',{"runs-on": "ubuntu-24.04-arm", "arch": "aarch64"}'
+
+          if [ "${{ env.DISABLE_ARM }}" != true ]; then
+            BASE="${BASE}${ARM}"
+          fi
+
+          EXTRA=',{"runs-on": "ubuntu-latest", "arch": "legacy"},{"runs-on": "ubuntu-latest", "arch": "rog-ally"}'
+
+          if [ "${{ inputs.devel }}" != "true" ]; then
+            MATRIX="${BASE}${EXTRA}]"
+          else
+            MATRIX="${BASE}]"
+          fi
+
+          echo $MATRIX
+          echo "matrix=${MATRIX}" >> $GITHUB_OUTPUT
+
+          PGO='{"program": "clang", "target": "pgo"}'
+          CLANG='{"program": "clang", "target": "standard"}'
+          GCC='{"program": "gcc", "target": "standard"}'
+
+          if [ "${{ inputs.devel }}" != "true" ] || [ "${{ inputs.force_pgo }}" = "true" ]; then
+            COMPILER="[${GCC},${PGO}]"
+          else
+            COMPILER="[${GCC}]"
+          fi
+
+          echo $COMPILER
+          echo "compiler=${COMPILER}" >> $GITHUB_OUTPUT
+
   clone:
     outputs:
       cachever: ${{ steps.out.outputs.cachever }}
@@ -119,55 +241,61 @@ jobs:
 
   deb:
     name: ".deb builds"
-    needs: [clone]
+    needs: [clone, generate-platform]
     uses: ./.github/workflows/deb.yml
     with:
       build-id: '${{ inputs.build-id }}'
       cpm-cache-version: '${{ needs.clone.outputs.cachever }}'
       devel: ${{ inputs.devel }}
+      matrix_platform: ${{ needs.generate-platform.outputs.debian-matrix }}
     secrets: inherit
 
   linux:
     name: "AppImage"
-    needs: [clone]
+    needs: [clone, generate-platform]
     uses: ./.github/workflows/appimage.yml
     with:
       build-id: '${{ inputs.build-id }}'
       cpm-cache-version: '${{ needs.clone.outputs.cachever }}'
       devel: ${{ inputs.devel }}
       force_pgo: ${{ needs.clone.outputs.pgo }}
+      matrix: ${{ needs.generate-platform.outputs.appimage-matrix }}
+      compiler: ${{ needs.generate-platform.outputs.appimage-compiler }}
     secrets: inherit
 
   windows:
     name: "Windows"
-    needs: [clone]
+    needs: [clone, generate-platform]
     uses: ./.github/workflows/windows.yml
     with:
       build-id: '${{ inputs.build-id }}'
       cpm-cache-version: '${{ needs.clone.outputs.cachever }}'
       devel: ${{ inputs.devel }}
       force_pgo: ${{ needs.clone.outputs.pgo }}
+      matrix_platform: ${{ needs.generate-platform.outputs.windows-matrix }}
     secrets: inherit
 
   msys:
     name: "MinGW"
-    needs: [clone]
+    needs: [clone, generate-platform]
     uses: ./.github/workflows/msys.yml
     with:
       build-id: '${{ inputs.build-id }}'
       cpm-cache-version: '${{ needs.clone.outputs.cachever }}'
       devel: ${{ inputs.devel }}
       force_pgo: ${{ needs.clone.outputs.pgo }}
+      matrix_platform: ${{ needs.generate-platform.outputs.msys-matrix }}
     secrets: inherit
 
   android:
     name: "Android"
-    needs: [clone]
+    needs: [clone, generate-platform]
     uses: ./.github/workflows/android.yml
     with:
       build-id: '${{ inputs.build-id }}'
       cpm-cache-version: '${{ needs.clone.outputs.cachever }}'
       devel: ${{ inputs.devel }}
+      matrix_platform: ${{ needs.generate-platform.outputs.android-matrix }}
     secrets: inherit
 
   macos:
