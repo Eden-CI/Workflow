@@ -11,7 +11,8 @@ STATIC=OFF
 uname -s
 
 # special case for Windows (FU microsoft)
-if [ -n "$VCINSTALLDIR" ]; then
+# ultra special case for Windows (fall off you horse and die microslop)
+if [ -n "$VCINSTALLDIR" ] || [ "$PLATFORM" = "win" ]; then
 	PLATFORM=win
 	STANDALONE=ON
 	OPENSSL=ON

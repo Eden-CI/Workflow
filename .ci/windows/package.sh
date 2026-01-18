@@ -4,12 +4,12 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 ROOTDIR="$PWD"
-BUILDDIR="${BUILDDIR:-build}"
+BUILDDIR="${BUILDDIR:-$ROOTDIR/build}"
 ARTIFACTS_DIR="$ROOTDIR/artifacts"
 WORKFLOW_DIR="$(cd "$(dirname "$0")/../.." && pwd)"
 
 # shellcheck disable=SC1091
-. "$ROOTDIR"/.ci/common/project.sh
+. "$WORKFLOW_DIR"/.ci/common/project.sh
 
 BINDIR="$BUILDDIR/bin"
 PKGDIR="$BUILDDIR/pkg"
@@ -69,6 +69,10 @@ fi
 # qt
 if [ "$STATIC" != "ON" ]; then
 	${WINDEPLOYQT} --no-compiler-runtime --no-opengl-sw --no-system-dxc-compiler --no-system-d3d-compiler "$EXE"
+fi
+
+if [ "$PLATFORM" = "win" ]; then
+    find "$BINDIR/" -name "*.dll" | while read -r dll; do cp "$dll" "$PKGDIR"; done
 fi
 
 if [ "$PLATFORM" = "msys" ] && [ "$STATIC" != "ON" ]; then
