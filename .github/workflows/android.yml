@@ -48,56 +48,18 @@ jobs:
           echo $TARGETS
           echo "targets=${TARGETS}" >> $GITHUB_OUTPUT
 
-  check-android-secrets:
-    name: Check Android Secrets
-    runs-on: ubuntu-latest
-    outputs:
-      CI_SECRETS_STATUS: ${{ steps.check.outputs.CI_SECRETS_STATUS }}
-      CI_PR_FORK: ${{ steps.check.outputs.CI_PR_FORK }}
-    steps:
-      - id: check
-        run: |
-          if [ "${{ github.event_name }}" = "pull_request" ] && \
-             [ "${{ github.event.pull_request.head.repo.full_name }}" != "${{ github.repository }}" ]; then
-            echo "CI_PR_FORK=true" >> $GITHUB_OUTPUT
-          else
-            echo "CI_PR_FORK=false" >> $GITHUB_OUTPUT
-          fi
-
-          if [ -z "${ANDROID_KEYSTORE_B64}" ] || \
-             [ -z "${ANDROID_KEY_ALIAS}" ] || \
-             [ -z "${ANDROID_KEYSTORE_PASS}" ]; then
-            echo "Android secrets missing, skipping Android-dependent jobs."
-            echo "CI_SECRETS_STATUS=false" >> $GITHUB_OUTPUT
-          else
-            echo "All Android secrets are present."
-            echo "CI_SECRETS_STATUS=true" >> $GITHUB_OUTPUT
-          fi
-
   android:
     name: "Android"
-    needs: [check-android-secrets, and-matrix]
+    needs: [and-matrix]
     runs-on: ubuntu-latest
 
     strategy:
       fail-fast: false
       matrix:
         target: ${{ fromJson(needs.and-matrix.outputs.targets) }}
-
     env:
       TARGET: "${{ matrix.target.flavor }}"
-
-    if: |
-      needs.check-android-secrets.outputs.CI_SECRETS_STATUS == 'true' ||
-      needs.check-android-secrets.outputs.CI_PR_FORK == 'true'
     steps:
-      - name: Check Android secrets
-        run: |
-          if [ "${{ needs.check-android-secrets.outputs.CI_PR_FORK }}" = "true" ]; then
-            echo "This is a pull request, skipping sensitive Android steps"
-            echo "CI_PR_FORK=true" >> $GITHUB_ENV
-          fi
-
       - name: Checkout
         uses: actions/checkout@v6.0.1
 

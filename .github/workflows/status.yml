@@ -1,0 +1,37 @@
+name: "Forgejo Status"
+
+on:
+  workflow_call:
+    inputs:
+      build-id:
+        description: 'Identifier for workflows and caching'
+        type: string
+        required: true
+      status:
+        description: 'Last build status outcome to send to Forgejo'
+        type: string
+        required: true
+
+env:
+  FORGEJO_TOKEN: ${{ secrets.FORGEJO_TOKEN }}
+
+jobs:
+  status-to-forgejo:
+    name: Send Status
+    if: ${{ ((inputs.build-id) == 'master' || (inputs.build-id) == 'pull_request') }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Workflow
+        uses: actions/checkout@v6.0.1
+
+      - name: Download Forgejo environment
+        uses: actions/download-artifact@v7.0.0
+        with:
+          name: forgejo-env
+
+      - name: Send status
+        shell: bash
+        run: |
+          export FORGEJO_LENV=forgejo.env
+          . ./.ci/fj/load-env.sh
+          python3 ./.ci/common/status.py --${{ inputs.status }}

@@ -1,0 +1,173 @@
+name: "Release"
+
+on:
+  workflow_call:
+    inputs:
+      devel:
+        description: 'Development mode (disables update checker, adds nightly qualifier)'
+        type: boolean
+        required: true
+      build-id:
+        description: 'Identifier for workflows and caching'
+        type: string
+        required: true
+
+env:
+  DISABLE_ARM: ${{ vars.DISABLE_ARM }}
+  FORGEJO_TOKEN: ${{ secrets.FORGEJO_TOKEN }}
+  DEVEL: ${{ inputs.devel }}
+
+jobs:
+  release-status:
+    name: "Create Release"
+    env:
+      GH_TOKEN: "${{ secrets.CUSTOM_GITHUB_TOKEN }}"
+      FJ_TOKEN: "${{ secrets.FORGEJO_TOKEN }}"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6.0.1
+        with:
+          persist-credentials: false
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v7.0.0
+
+      - name: Load payload environment
+        shell: bash
+        run: |
+          export FORGEJO_LENV=forgejo-env/forgejo.env
+          . ./.ci/fj/load-env.sh
+
+      - name: Set environment variables for master/test/pull_request/push
+        if: ${{ (inputs.build-id) != 'tag' }}
+        run: |
+          echo "DEVEL=true" >> $GITHUB_ENV
+          echo "TIMESTAMP=$(date +%s)" >> $GITHUB_ENV
+
+      - name: Set environment variables
+        if: ${{ (inputs.build-id) == 'tag' }}
+        run: |
+          echo "DEVEL=false" >> $GITHUB_ENV
+
+          case "${{ env.FORGEJO_REF }}" in
+            (*rc*|*alpha*|*beta*)
+              echo "TRACK=beta" >> $GITHUB_ENV
+              ;;
+            (*)
+              echo "TRACK=production" >> $GITHUB_ENV
+              ;;
+          esac
+
+      - name: Package artifacts nicely
+        run: |
+          export ID=${FORGEJO_REF}
+          ./.ci/common/pack.sh
+
+      - name: Generate changelog
+        run: ./.ci/changelog/generate.sh "${{ inputs.build-id }}" > changelog.md
+
+      - name: Set Actions Release variables
+        run: |
+          case "${{ inputs.build-id }}" in
+            ('master')
+              printf 'ACTIONS_GH_PRETTYNAME=%s\n' "Master" >> $GITHUB_ENV
+              printf 'ACTIONS_GH_RELEASE_NAME=%s\n' "Eden Master - ${{ env.FORGEJO_REF }}" >> $GITHUB_ENV
+              printf 'ACTIONS_GH_TAG_NAME=%s\n' "v${{ env.TIMESTAMP }}.${{ env.FORGEJO_REF }}" >> $GITHUB_ENV
+              printf 'ACTIONS_GH_REPOSITORY=%s\n' "${{ env.RELEASE_MASTER_REPO }}" >> $GITHUB_ENV
+              ;;
+            ('pull_request')
+              printf 'ACTIONS_GH_PRETTYNAME=%s\n' "#${{ env.FORGEJO_PR_NUMBER }}" >> $GITHUB_ENV
+              printf 'ACTIONS_GH_RELEASE_NAME=%s\n' "${{ env.FORGEJO_PR_TITLE }}" >> $GITHUB_ENV
+              printf 'ACTIONS_GH_TAG_NAME=%s\n' "${{ env.FORGEJO_PR_NUMBER }}-${{ env.FORGEJO_REF }}" >> $GITHUB_ENV
+              printf 'ACTIONS_GH_REPOSITORY=%s\n' "${{ env.RELEASE_PR_REPO }}" >> $GITHUB_ENV
+              ;;
+            ('tag')
+              printf 'ACTIONS_GH_PRETTYNAME=%s\n' "${{ env.FORGEJO_REF }}" >> $GITHUB_ENV
+              printf 'ACTIONS_GH_RELEASE_NAME=%s\n' "Eden ${{ env.FORGEJO_REF }}" >> $GITHUB_ENV
+              printf 'ACTIONS_GH_TAG_NAME=%s\n' "${{ env.FORGEJO_REF }}" >> $GITHUB_ENV
+              printf 'ACTIONS_GH_REPOSITORY=%s\n' "${{ env.RELEASE_TAG_REPO }}" >> $GITHUB_ENV
+              ;;
+            ('push')
+              printf 'ACTIONS_GH_PRETTYNAME=%s\n' "Continuous Build" >> $GITHUB_ENV
+              printf 'ACTIONS_GH_RELEASE_NAME=%s\n' "Eden Continuous Build - ${{ env.FORGEJO_REF }}" >> $GITHUB_ENV
+              printf 'ACTIONS_GH_TAG_NAME=%s\n' "v${{ env.TIMESTAMP }}.${{ env.FORGEJO_REF }}" >> $GITHUB_ENV
+              printf 'ACTIONS_GH_REPOSITORY=%s\n' "${{ env.RELEASE_MASTER_REPO }}" >> $GITHUB_ENV
+              ;;
+            ('test')
+              ;;
+            (*)
+              echo "Aborting! Invalid Option!"
+              exit 1
+              ;;
+          esac
+
+      - name: Send Release to Github
+        if: ${{ env.GH_TOKEN && (inputs.build-id) != 'test' }}
+        id: release
+        uses: softprops/action-gh-release@v2.5.0
+        with:
+          name: "${{ env.ACTIONS_GH_RELEASE_NAME }}"
+          tag_name: "${{ env.ACTIONS_GH_RELEASE_NAME }}"
+          repository: "${{ env.ACTIONS_GH_REPOSITORY }}"
+          body_path: ./changelog.md
+          prerelease: false
+          draft: false
+          generate_release_notes: false
+          token: ${{ env.GH_TOKEN }}
+          fail_on_unmatched_files: false
+          make_latest: true
+          files: |
+            artifacts/*
+
+      - name: Add Release URL to Summary
+        if: ${{ env.GH_TOKEN && (inputs.build-id) != 'test' }}
+        run: |
+          {
+            echo "## Release Summary"
+            echo ""
+            echo "- View Release on GitHub: [${{ env.ACTIONS_GH_PRETTYNAME }}](${{ steps.release-master.outputs.url }})"
+            echo ""
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Send release URL to status only for master/pull_request
+        if: ${{ env.FORGEJO_TOKEN && (inputs.build-id) == 'master' || (inputs.build-id) == 'pull_request' }}
+        run: |
+          python3 ./.ci/common/status.py --release ${{ steps.release.outputs.url }}
+
+      - name: Delete previous pull_request number
+        if: ${{ env.GH_TOKEN && (inputs.build-id) == 'pull_request' }}
+        run: |
+          gh release delete "$FORGEJO_PR_NUMBER" --repo "$RELEASE_PR_REPO" --cleanup-tag -y
+          sleep 5
+        continue-on-error: true
+
+      - name: Send specific pull_request number to Github
+        if: ${{ env.GH_TOKEN && (inputs.build-id) == 'pull_request' }}
+        uses: softprops/action-gh-release@v2.5.0
+        with:
+          name: "${{ env.ACTIONS_GH_RELEASE_NAME }}"
+          tag_name: "${{ env.ACTIONS_GH_RELEASE_NAME }}"
+          repository: "${{ env.ACTIONS_GH_REPOSITORY }}"
+          body_path: ./changelog.md
+          prerelease: false
+          draft: false
+          generate_release_notes: false
+          token: ${{ env.GH_TOKEN }}
+          fail_on_unmatched_files: false
+          discussion_category_name: "PRs"
+          make_latest: true
+          files: |
+            artifacts/*
+
+      - name: Send Release to Forgejo only on tags
+        if: ${{ env.FORGEJO_TOKEN && (inputs.build-id) == 'tag' }}
+        run: |
+          ./.ci/fj/release.sh
+          echo "- View Release on Forgejo: [${{ env.FORGEJO_REF }}]($(cat url))" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload changelog artifact only for test
+        if: ${{ (inputs.build-id) == 'test' }}
+        uses: actions/upload-artifact@v6.0.0
+        with:
+          name: changelog
+          path: changelog.md

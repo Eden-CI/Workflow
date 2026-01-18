@@ -10,6 +10,7 @@ if [ ! -f "$FORGEJO_LENV" ]; then
     exit 1
 fi
 if [ "$CI" = "true" ]; then
+    echo "load-env.sh: Exporting to GITHUB_ENV"
     # Safe export to GITHUB_ENV
     while IFS= read -r line; do
         echo "$line" >> "$GITHUB_ENV"
@@ -21,6 +22,7 @@ else
         exit 1
     fi
 fi
+echo "load-env.sh: Exporting to environment"
 while IFS= read -r line || [ -n "$line" ]; do
     case "$line" in
         (""|\#*) continue ;;

@@ -1,4 +1,4 @@
-#!/bin/sh -ex
+#!/bin/sh -e
 
 # SPDX-FileCopyrightText: Copyright 2025 Eden Emulator Project
 # SPDX-License-Identifier: GPL-3.0-or-later
@@ -12,6 +12,39 @@ ROOTDIR="$PWD"
 
 FORGEJO_LENV=${FORGEJO_LENV:-"forgejo.env"}
 touch "$FORGEJO_LENV"
+
+clone_helper() {
+    HELPER_URL=$1
+    [ -n "$2" ] && HELPER_FOLDER=$2
+
+    # DraVee: If we can't reach it instatly, wait a bit more
+    MAX_TRIES=7
+    TIMEOUT=4
+    TRIES=0
+    while :; do
+        if ! curl -fsSL "$HELPER_URL" >/dev/null 2>&1; then
+            echo "Warning: '$HELPER_URL' is not reachable."
+        else
+            [ -z "$HELPER_FOLDER" ] && return 0
+            if git clone "$HELPER_URL" "$HELPER_FOLDER"; then
+                return 0
+            fi
+
+            echo "Warning: Failed to clone '$HELPER_URL'."
+            rm -rf "./$HELPER_FOLDER" || true
+        fi
+
+        TRIES=$((TRIES + 1))
+        if [ "$TRIES" -ge "$MAX_TRIES" ]; then
+            echo "Error: Failed after $TRIES tries."
+            exit 1
+        fi
+
+        echo "Warning: Trying again in ${TIMEOUT}s..."
+        sleep "$TIMEOUT"
+        TIMEOUT=$((TIMEOUT * 2))
+    done
+}
 
 parse_payload() {
 	DEFAULT_JSON=".ci/default.json"
@@ -69,20 +102,7 @@ parse_payload() {
 
 	[ -z "$FORGEJO_CLONE_URL" ] && FORGEJO_CLONE_URL="https://$FORGEJO_HOST/$FORGEJO_REPO.git"
 
-	TRIES=0
-	while ! curl -sSfL "$FORGEJO_CLONE_URL" >/dev/null 2>&1; do
-		echo "Repository $FORGEJO_CLONE_URL is unreachable."
-		echo "Check URL or authentication."
-
-		TRIES=$((TRIES + 1))
-		if [ "$TRIES" = 10 ]; then
-			echo "Failed to reach $FORGEJO_CLONE_URL after ten tries. Exiting."
-			exit 1
-		fi
-
-		sleep 5
-		echo "Trying again..."
-	done
+	clone_helper "$FORGEJO_CLONE_URL"
 
 	# Export those variables to be used by field.py
 	export FORGEJO_HOST
@@ -94,7 +114,8 @@ parse_payload() {
 		FORGEJO_REF=$(jq -r '.ref' $PAYLOAD_JSON)
 		FORGEJO_BRANCH=master
 
-		FORGEJO_BEFORE=$(jq -r '.before' $PAYLOAD_JSON)
+		FORGEJO_BEFORE=$(jq -r '.before // empty' $PAYLOAD_JSON)
+		[ -z "$FORGEJO_BEFORE" ] && FORGEJO_BEFORE=$FORGEJO_REF
 		echo "FORGEJO_BEFORE=$FORGEJO_BEFORE" >> "$FORGEJO_LENV"
 		;;
 	pull_request)
@@ -155,28 +176,7 @@ parse_payload() {
 }
 
 clone_repository() {
-	if ! curl -sSfL "$FORGEJO_CLONE_URL" >/dev/null 2>&1; then
-		echo "Repository $FORGEJO_CLONE_URL is not reachable."
-		echo "Check URL or authentication."
-		echo
-		exit 1
-	fi
-
-	TRIES=0
-	while ! git clone "$FORGEJO_CLONE_URL" ${PROJECT_REPO}; do
-		echo "Repository $FORGEJO_CLONE_URL is not reachable."
-		echo "Check URL or authentication."
-
-		TRIES=$((TRIES + 1))
-		if [ "$TRIES" = 10 ]; then
-			echo "Failed to clone $FORGEJO_CLONE_URL after ten tries. Exiting."
-			exit 1
-		fi
-
-		sleep 5
-		echo "Trying clone again..."
-		rm -rf "./${PROJECT_REPO}" || true
-	done
+	clone_helper "$FORGEJO_CLONE_URL" "${PROJECT_REPO}"
 
 	if ! git -C "${PROJECT_REPO}" checkout "$FORGEJO_REF"; then
 		echo "Ref $FORGEJO_REF not found locally, trying to fetch..."
