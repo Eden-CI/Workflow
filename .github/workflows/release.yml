@@ -37,29 +37,9 @@ jobs:
         run: |
           FORGEJO_LENV=forgejo-env/forgejo.env . ./.ci/fj/load-env.sh
 
-      - name: Set environment variables for master/test/pull_request/push
-        if: ${{ (inputs.build-id) != 'tag' }}
-        run: |
-          echo "DEVEL=true" >> $GITHUB_ENV
-          echo "TIMESTAMP=$(date +%s)" >> $GITHUB_ENV
-
-      - name: Set environment variables
-        if: ${{ (inputs.build-id) == 'tag' }}
-        run: |
-          echo "DEVEL=false" >> $GITHUB_ENV
-
-          case "${{ env.FORGEJO_REF }}" in
-            (*rc*|*alpha*|*beta*)
-              echo "TRACK=beta" >> $GITHUB_ENV
-              ;;
-            (*)
-              echo "TRACK=production" >> $GITHUB_ENV
-              ;;
-          esac
-
       - name: Package artifacts nicely
         run: |
-          export ID=${FORGEJO_REF}
+          echo "TIMESTAMP=$(date +%s)" >> $GITHUB_ENV
           ./.ci/common/pack.sh
 
       - name: Generate changelog
