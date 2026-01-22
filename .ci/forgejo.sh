@@ -13,39 +13,6 @@ ROOTDIR="$PWD"
 FORGEJO_LENV=${FORGEJO_LENV:-"forgejo.env"}
 touch "$FORGEJO_LENV"
 
-clone_helper() {
-    HELPER_URL=$1
-    [ -n "$2" ] && HELPER_FOLDER=$2
-
-    # DraVee: If we can't reach it instatly, wait a bit more
-    MAX_TRIES=7
-    TIMEOUT=4
-    TRIES=0
-    while :; do
-        if ! curl -fsSL "$HELPER_URL" >/dev/null 2>&1; then
-            echo "Warning: '$HELPER_URL' is not reachable."
-        else
-            [ -z "$HELPER_FOLDER" ] && return 0
-            if git clone "$HELPER_URL" "$HELPER_FOLDER"; then
-                return 0
-            fi
-
-            echo "Warning: Failed to clone '$HELPER_URL'."
-            rm -rf "./$HELPER_FOLDER" || true
-        fi
-
-        TRIES=$((TRIES + 1))
-        if [ "$TRIES" -ge "$MAX_TRIES" ]; then
-            echo "Error: Failed after $TRIES tries."
-            exit 1
-        fi
-
-        echo "Warning: Trying again in ${TIMEOUT}s..."
-        sleep "$TIMEOUT"
-        TIMEOUT=$((TIMEOUT * 2))
-    done
-}
-
 parse_payload() {
 	DEFAULT_JSON=".ci/default.json"
 	RELEASE_JSON=".ci/release.json"
@@ -102,7 +69,22 @@ parse_payload() {
 
 	[ -z "$FORGEJO_CLONE_URL" ] && FORGEJO_CLONE_URL="https://$FORGEJO_HOST/$FORGEJO_REPO.git"
 
-	clone_helper "$FORGEJO_CLONE_URL"
+	MAX_TRIES=7
+	TIMEOUT=4
+	TRIES=0
+	while ! curl -sSfL "$FORGEJO_CLONE_URL" >/dev/null 2>&1; do
+		echo "Warning: '$FORGEJO_CLONE_URL' is unreachable."
+
+		TRIES=$((TRIES + 1))
+		if [ "$TRIES" -ge "$MAX_TRIES" ]; then
+			echo "Error: Failed after $TRIES tries."
+			exit 1
+		fi
+
+		echo "Warning: Trying again in ${TIMEOUT}s..."
+		sleep ${TIMEOUT}
+		TIMEOUT=$((TIMEOUT * 2))
+	done
 
 	# Export those variables to be used by field.py
 	export FORGEJO_HOST
@@ -176,7 +158,23 @@ parse_payload() {
 }
 
 clone_repository() {
-	clone_helper "$FORGEJO_CLONE_URL" "${PROJECT_REPO}"
+	MAX_TRIES=7
+	TIMEOUT=4
+	TRIES=0
+	while ! git clone "$FORGEJO_CLONE_URL" ${PROJECT_REPO}; do
+		echo "Warning: '$FORGEJO_CLONE_URL' is unreachable."
+
+		TRIES=$((TRIES + 1))
+		if [ "$TRIES" -ge "$MAX_TRIES" ]; then
+			echo "Error: Failed after $TRIES tries."
+			exit 1
+		fi
+
+		echo "Warning: Trying to clone again in ${TIMEOUT}s..."
+		rm -rf "./${PROJECT_REPO}" || true
+		sleep ${TIMEOUT}
+		TIMEOUT=$((TIMEOUT * 2))
+	done
 
 	if ! git -C "${PROJECT_REPO}" checkout "$FORGEJO_REF"; then
 		echo "Ref $FORGEJO_REF not found locally, trying to fetch..."
