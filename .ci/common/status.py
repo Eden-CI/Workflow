@@ -1,87 +1,80 @@
 #!/usr/bin/env python3
 
-# SPDX-FileCopyrightText: Copyright 2025 Eden Emulator Project
+# SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 # SPDX-License-Identifier: GPL-3.0-or-later
-#
-# Description: Sends CI/CD build status to Forgejo commit
 
 import os
 import requests
+import sys
+import argparse
 
-# --- Required Forgejo environment variables ---
-FORGEJO_HOST = os.getenv("FORGEJO_HOST", "git.eden-emu.dev")
+# Required Forgejo environment variables
+FORGEJO_HOST = os.getenv("FORGEJO_HOST")
 FORGEJO_REPO = os.getenv("FORGEJO_REPO")
 FORGEJO_REF = os.getenv("FORGEJO_REF")
 FORGEJO_TOKEN = os.getenv("FORGEJO_TOKEN")
-FORGEJO_TOKEN_INVALID_STATUS = os.getenv("FORGEJO_TOKEN_INVALID_STATUS", "")
 
-# --- GitHub Actions environment for workflow URL ---
+# GitHub Actions environment for workflow URL
 GITHUB_SERVER_URL = os.getenv("GITHUB_SERVER_URL", "https://github.com")
 GITHUB_REPOSITORY = os.getenv("GITHUB_REPOSITORY")
 GITHUB_RUN_ID = os.getenv("GITHUB_RUN_ID")
 GITHUB_RUN_ATTEMPT = os.getenv("GITHUB_RUN_ATTEMPT", "1")
 
-def build_workflow_url():
-    """Construct workflow run URL from GitHub Actions env."""
-    if GITHUB_REPOSITORY and GITHUB_RUN_ID:
-        return f"{GITHUB_SERVER_URL}/{GITHUB_REPOSITORY}/actions/runs/{GITHUB_RUN_ID}/attempts/{GITHUB_RUN_ATTEMPT}"
-    return None
+# References:
+# <https://git.eden-emu.dev/api/swagger#/repository/repoListStatusesByRef>
+# <https://docs.github.com/en/actions/reference/workflows-and-actions/contexts#needs-context>
+# <https://docs.github.com/pt/pull-requests/collaborating-with-pull-requests/collaborating-on-repositories-with-code-quality-features/about-status-checks#check-statuses-and-conclusions>
+ACTIONS_DESCRIPTION_MAPPING = {
+    "release": "[CD] Build succeeded – Release published", # release -> success
+    "pending": "[CI] Build started",
+    "success": "[CI] Build succeeded",
+    "failure": "[CI] Build failed",
+    "error": "[CI] Build cancelled", # (forgejo only)
+    "cancelled": "[CI] Build cancelled" # (github only)
+}
 
-WORKFLOW_URL = build_workflow_url()
-
-# --- Validate token ---
-def is_token_valid():
-    """Check if Forgejo token is valid before sending requests."""
-    if not FORGEJO_TOKEN:
-        print("[WARN] FORGEJO_TOKEN not set, skipping requests.")
-        return False
-    if FORGEJO_TOKEN == FORGEJO_TOKEN_INVALID_STATUS:
-        print("[WARN] FORGEJO_TOKEN previously marked invalid, skipping requests.")
-        return False
-    return True
-
-# --- Send commit status ---
+# Send commit status
 def send_commit_status(state: str, release_url: str | None = None):
     """Send build status to the last commit of the PR."""
-    if not is_token_valid():
+    if not (FORGEJO_TOKEN):
+        print("[ERROR] FORGEJO_TOKEN not set, skipping requests.")
+        return False
+    if not (FORGEJO_REPO and FORGEJO_REPO and FORGEJO_REF and FORGEJO_TOKEN):
+        print("[ERROR] Missing Forgejo repository or commit info, cannot send commit status.")
         return
-    if not (FORGEJO_REPO and FORGEJO_REF and FORGEJO_TOKEN):
-        print("[WARN] Missing repository or commit info, cannot send commit status.")
+    if not (GITHUB_REPOSITORY and GITHUB_RUN_ID):
+        print("[ERROR] Missing GitHub repository, cannot build workflow link, skipping status.")
         return
-    if not WORKFLOW_URL:
-        print("[WARN] Missing GITHUB_RUN_ID, cannot build workflow link, skipping status.")
+    if state not in ACTIONS_DESCRIPTION_MAPPING:
+        print(f"[ERROR] Unknown state '{state}', skipping commit status.")
+        return
+    if state == "release" and not release_url:
+        print("[ERROR] Missing release_url, skipping commit status.")
         return
 
+    # Construct *_url's
     api_url = f"https://{FORGEJO_HOST}/api/v1/repos/{FORGEJO_REPO}/statuses/{FORGEJO_REF}"
+    workflow_url = f"{GITHUB_SERVER_URL}/{GITHUB_REPOSITORY}/actions/runs/{GITHUB_RUN_ID}/attempts/{GITHUB_RUN_ATTEMPT}"
 
-    description_mapping = {
-        "release": "Build succeeded – Release published",
-        "pending": "Build started",
-        "success": "Build succeeded",
-        "failure": "Build failed",
-        "error": "Build cancelled"
-    }
+    # TODO: Make it only when from Github -> Forgejo
+    # DraVee: Forgejo dont have cancelled, switch to error
+    if state == "cancelled":
+        state = "error"
 
-    if state not in description_mapping:
-        print(f"[WARN] Unknown state '{state}', skipping commit status.")
-        return
-
-    if state == "release" and release_url:
+    if state == "release":
         target_state = "success"
         target_url = release_url
-        target_description = "[CD]"
-        target_context = "Releases"
+        target_context = "GitHub Releases"
     else:
         target_state = state
-        target_url = WORKFLOW_URL
-        target_description = "[CI]"
-        target_context = "Actions"
+        target_url = workflow_url
+        target_context = "GitHub Actions"
 
     data = {
         "state": target_state,
         "target_url": target_url,
-        "description": f"{target_description} {description_mapping[state]}",
-        "context": f"GitHub {target_context}"
+        "description": ACTIONS_DESCRIPTION_MAPPING[state],
+        "context": target_context
     }
 
     headers = {"Authorization": f"token {FORGEJO_TOKEN}", "Content-Type": "application/json"}
@@ -99,21 +92,24 @@ def send_commit_status(state: str, release_url: str | None = None):
     except Exception as e:
         print(f"[ERROR] Exception while sending commit status: {e}")
 
+def parse_args():
+    parser = argparse.ArgumentParser(description="Send CI/CD build status to Forgejo commit")
+    group = parser.add_mutually_exclusive_group(required=True)
+    for state, description in ACTIONS_DESCRIPTION_MAPPING.items():
+        if state == "release":
+            group.add_argument("release", metavar="URL", nargs=1, help=f"Send '{description}' and release link to Forgejo")
+        else:
+            group.add_argument(f"{state}", action="store_true", help=f"Send status '{description}' to Forgejo")
+
+    args = parser.parse_args()
+    for state in ACTIONS_DESCRIPTION_MAPPING:
+        value = getattr(args, state)
+        if value:
+            return state, value[0] if state == "release" else None
+
+    parser.error("No status selected")
+
 if __name__ == "__main__":
-    import sys
-
-    if len(sys.argv) < 2:
-        print("Usage: status.py <state> [release_url]")
-        print("States: pending, success, failure, error, release")
-        exit(1)
-
-    state = sys.argv[1].lower()
-
-    release_url = sys.argv[2] if len(sys.argv) > 2 else None
-    if state == "release" and not release_url:
-        print("[ERROR] Missing release_url argument for 'release' state.")
-        print("Usage: status.py release <release_url>")
-        exit(1)
-
+    state, release_url = parse_args()
     send_commit_status(state, release_url)
 
