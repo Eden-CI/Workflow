@@ -35,8 +35,7 @@ jobs:
       - name: Load payload environment
         shell: bash
         run: |
-          export FORGEJO_LENV=forgejo-env/forgejo.env
-          . ./.ci/fj/load-env.sh
+          FORGEJO_LENV=forgejo-env/forgejo.env . ./.ci/fj/load-env.sh
 
       - name: Set environment variables for master/test/pull_request/push
         if: ${{ (inputs.build-id) != 'tag' }}

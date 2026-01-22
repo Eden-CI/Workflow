@@ -32,6 +32,5 @@ jobs:
       - name: Send status
         shell: bash
         run: |
-          export FORGEJO_LENV=forgejo.env
-          . ./.ci/fj/load-env.sh
+          FORGEJO_LENV=forgejo.env . ./.ci/fj/load-env.sh
           python3 ./.ci/common/status.py ${{ inputs.status }}
