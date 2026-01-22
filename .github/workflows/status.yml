@@ -34,4 +34,4 @@ jobs:
         run: |
           export FORGEJO_LENV=forgejo.env
           . ./.ci/fj/load-env.sh
-          python3 ./.ci/common/status.py --${{ inputs.status }}
+          python3 ./.ci/common/status.py ${{ inputs.status }}

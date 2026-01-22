@@ -56,7 +56,7 @@ jobs:
         if: ${{ env.FORGEJO_TOKEN && (inputs.build-id) == 'master' || (inputs.build-id) == 'pull_request' }}
         shell: bash
         run: |
-          python ./.ci/common/status.py --pending
+          python ./.ci/common/status.py pending
 
       # for some amazing reason you can't pass env vars to reusable workflows
       - name: Setup Outputs
