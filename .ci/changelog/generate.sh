@@ -53,12 +53,13 @@ master)
 	echo "Full changelog: [\`$FORGEJO_BEFORE...$FORGEJO_REF\`](https://$FORGEJO_HOST/$FORGEJO_REPO/compare/$FORGEJO_BEFORE...$FORGEJO_REF)"
 	;;
 pull_request)
-	echo "Pull request build #[$FORGEJO_PR_NUMBER]($FORGEJO_PR_URL)"
-	echo
-	echo "Commit: [\`$FORGEJO_REF\`](https://$FORGEJO_HOST/$FORGEJO_REPO/commit/$FORGEJO_REF)"
-	echo
-	echo "Merge base: [\`$FORGEJO_PR_MERGE_BASE\`](https://$FORGEJO_HOST/$FORGEJO_REPO/commit/$FORGEJO_PR_MERGE_BASE)"
-	echo "([Master Build]($COMPARE_RELEASE_URL?q=$FORGEJO_PR_MERGE_BASE&expanded=true))"
+	echo "| Commit Build | PR Git Page | | Based on Master Commit | Master Release Build |"
+	echo "| --- | --- | --- | --- | --- |"
+	echo -n "| [\`$FORGEJO_REF\`](https://$FORGEJO_HOST/$FORGEJO_REPO/commit/$FORGEJO_REF) | "
+	echo -n "| #[$FORGEJO_PR_NUMBER]($FORGEJO_PR_URL) | "
+	echo -n "| | "
+	echo -n "| [\`$FORGEJO_PR_MERGE_BASE\`](https://$FORGEJO_HOST/$FORGEJO_REPO/commit/$FORGEJO_PR_MERGE_BASE) | "
+	echo -n "| ([Master CI Release]($COMPARE_RELEASE_URL?q=$FORGEJO_PR_MERGE_BASE&expanded=true)) |"
 	echo
 	echo "## Changelog"
 	.ci/common/field.py field="body" default_msg="No changelog provided" pull_request_number="$FORGEJO_PR_NUMBER"
