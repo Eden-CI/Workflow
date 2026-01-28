@@ -43,8 +43,8 @@ jobs:
               mkdir -p artifacts
               BINARY="eden-room-$ARCH-unknown-linux-musl"
 
-              mkdir -p "$ARTIFACTS_DIR"
-              mv "$BUILDDIR"/bin/eden-room "$ARTIFACTS_DIR"/"$BINARY"
+              mkdir -p "artifacts"
+              mv build/bin/eden-room "artifacts"/"$BINARY"
             '
 
       - name: Upload artifacts
