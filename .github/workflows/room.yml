@@ -36,15 +36,18 @@ jobs:
             -e GITHUB_SHA \
             -e ARCH \
             alpine:3.23 sh -c '
-              apk add --no-cache bash cmake g++ gcc git ninja patch
+              apk add --no-cache bash cmake g++ gcc git ninja patch boost1.84-dev boost1.84-static \
+                mbedtls-dev mbedtls-static
               cmake -S . -B build -GNinja -DYUZU_STATIC_ROOM=ON
               cmake --build build
 
               mkdir -p artifacts
-              BINARY="eden-room-$ARCH-unknown-linux-musl"
 
-              mkdir -p "artifacts"
-              mv build/bin/eden-room "artifacts"/"$BINARY"
+              src=build/bin/eden-room
+              dst=artifacts/"eden-room-$ARCH-unknown-linux-musl"
+              mv "$src" "$dst"
+
+              strip "$dst"
             '
 
       - name: Upload artifacts
