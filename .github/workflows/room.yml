@@ -1,0 +1,46 @@
+name: "eden-room"
+
+on:
+  workflow_call:
+
+jobs:
+  alpine:
+    name: "Alpine (${{ matrix.arch }})"
+    runs-on: ${{ matrix.runs-on }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: aarch64
+            runs-on: ubuntu-22.04-arm
+          - arch: x86_64
+            runs-on: ubuntu-22.04
+    container:
+      image: ghcr.io/linuxcontainers/alpine:latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6.0.1
+
+      - name: Clone
+        uses: actions/download-artifact@v7.0.0
+        with:
+          name: eden
+
+      - name: Deps
+        run: apk add --no-cache bash cmake g++ gcc git ninja
+
+      - name: Configure
+        run: .ci/room/configure.sh
+
+      - name: Build
+        run: cmake --build build
+
+      - name: Package
+        run: ./.ci/room/package.sh
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v6.0.0
+        with:
+          name: room-${{ matrix.arch }}
+          path: artifacts/*

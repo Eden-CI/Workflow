@@ -19,8 +19,8 @@ env:
   CPM_CACHE_VERSION: "v15"
   FORGEJO_TOKEN: ${{ secrets.FORGEJO_TOKEN }}
   DEVEL: ${{ inputs.devel }}
-  TEMP_PATCH_STATUS: "false"
-  TEMP_PATCH: "3289"
+  TEMP_PATCH_STATUS: "true"
+  TEMP_PATCH: "3411"
   FORCE_PGO: "false"
 
 jobs:
@@ -198,6 +198,11 @@ jobs:
       cpm-cache-version: '${{ needs.clone.outputs.cachever }}'
       devel: ${{ inputs.devel }}
     secrets: inherit
+
+  unix:
+    name: "musl room"
+    needs: [clone]
+    uses: ./.github/workflows/room.yml
 
   status-if-cancelled:
     name: "Send Cancelled Commit Status to Forgejo"

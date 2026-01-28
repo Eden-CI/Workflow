@@ -143,6 +143,12 @@ deb_matrix() {
 	deb_field Debian-13
 }
 
+room_matrix() {
+	for arch in aarch64 x86_64; do
+		echo "- [$arch](${BASE_DOWNLOAD_URL}/${TAG}/eden-room-$arch-unknown-linux-musl)"
+	done
+}
+
 win_field() {
 	LABEL="$1"
 	COMPILER="$2"
@@ -228,7 +234,7 @@ linux_matrix
 
 cat << EOF
 
-## Debian/Ubuntu
+### Debian/Ubuntu
 
 Debian/Ubuntu targets are \`.deb\` files, which can be installed via \`sudo dpkg -i <package>.deb\`.
 
@@ -242,8 +248,17 @@ else
 	echo "|--------|-------|-------|"
 fi
 
-
 deb_matrix
+
+cat <<EOF
+
+### Room Executables
+
+These are statically linked Linux executables for the \`eden-room\` binary.
+
+EOF
+
+room_matrix
 
 # TODO: setup files
 cat << EOF

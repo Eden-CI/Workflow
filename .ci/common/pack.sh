@@ -95,4 +95,9 @@ cp "$ROOTDIR/macos"/*.tar.gz "$ARTIFACTS_DIR/${PROJECT_PRETTYNAME}-macOS-${ID}.t
 ## FreeBSD and other stuff ##
 cp "$ROOTDIR/freebsd-binary-amd64-clang"/*.tar.zst "$ARTIFACTS_DIR/${PROJECT_PRETTYNAME}-FreeBSD-${ID}-amd64-clang.tar.zst"
 
+## musl room ##
+for arch in aarch64 x86_64; do
+	cp room-$arch/* "$ARTIFACTS_DIR"
+done
+
 ls "$ARTIFACTS_DIR"
