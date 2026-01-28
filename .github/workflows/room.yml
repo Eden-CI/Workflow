@@ -28,9 +28,6 @@ jobs:
         with:
           name: eden
 
-      - name: Deps
-        run: apk add --no-cache bash cmake g++ gcc git ninja
-
       - name: Build
         run: |
           docker run --rm -v "$PWD:/work" -w /work \
