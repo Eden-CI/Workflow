@@ -15,8 +15,9 @@ jobs:
             runs-on: ubuntu-22.04-arm
           - arch: x86_64
             runs-on: ubuntu-22.04
-    container:
-      image: ghcr.io/linuxcontainers/alpine:latest
+
+    env:
+      ARCH: ${{ matrix.arch }}
 
     steps:
       - name: Checkout
@@ -30,14 +31,24 @@ jobs:
       - name: Deps
         run: apk add --no-cache bash cmake g++ gcc git ninja
 
-      - name: Configure
-        run: .ci/room/configure.sh
-
       - name: Build
-        run: cmake --build build
+        run: |
+          docker run --rm -v "$PWD:/work" -w /work \
+            -e GITHUB_REF \
+            -e GITHUB_REF_NAME \
+            -e GITHUB_SHA \
+            -e ARCH \
+            alpine:3.23 sh -c '
+              apk add --no-cache bash cmake g++ gcc git ninja
+              cmake -S . -B build -GNinja -DYUZU_STATIC_ROOM=ON
+              cmake --build build
 
-      - name: Package
-        run: ./.ci/room/package.sh
+              mkdir -p artifacts
+              BINARY="eden-room-$ARCH-unknown-linux-musl"
+
+              mkdir -p "$ARTIFACTS_DIR"
+              mv "$BUILDDIR"/bin/eden-room "$ARTIFACTS_DIR"/"$BINARY"
+            '
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v6.0.0
