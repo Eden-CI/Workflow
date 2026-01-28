@@ -199,7 +199,7 @@ jobs:
       devel: ${{ inputs.devel }}
     secrets: inherit
 
-  unix:
+  room:
     name: "musl room"
     needs: [clone]
     uses: ./.github/workflows/room.yml
