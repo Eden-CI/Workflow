@@ -112,4 +112,4 @@ jobs:
 
       - name: Send release URL to status
         run: |
-          python3 ./.ci/common/status.py release ${{ steps.release.outputs.url }}
+          python3 ./.ci/common/status.py --release ${{ steps.release.outputs.url }}

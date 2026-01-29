@@ -43,7 +43,7 @@ jobs:
         run: |
           export FORGEJO_REPO="${{ github.event.client_payload.repository }}"
           export FORGEJO_REF="${{ github.event.client_payload.ref }}"
-          python ./.ci/common/status.py pending
+          python ./.ci/common/status.py --pending
 
       - name: Parse Forgejo payload
         shell: bash
@@ -215,7 +215,7 @@ jobs:
         run: |
           export FORGEJO_REPO="${{ github.event.client_payload.repository }}"
           export FORGEJO_REF="${{ github.event.client_payload.ref }}"
-          python3 ./.ci/common/status.py error
+          python3 ./.ci/common/status.py --error
 
   status-if-failure:
     name: "Send Failure Commit Status to Forgejo"
@@ -228,7 +228,7 @@ jobs:
         run: |
           export FORGEJO_REPO="${{ github.event.client_payload.repository }}"
           export FORGEJO_REF="${{ github.event.client_payload.ref }}"
-          python3 ./.ci/common/status.py failure
+          python3 ./.ci/common/status.py --failure
 
   status-if-success:
     name: "Send Success Commit Status to Forgejo"
@@ -242,4 +242,4 @@ jobs:
         run: |
           export FORGEJO_REPO="${{ github.event.client_payload.repository }}"
           export FORGEJO_REF="${{ github.event.client_payload.ref }}"
-          python3 ./.ci/common/status.py success
+          python3 ./.ci/common/status.py --success

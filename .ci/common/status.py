@@ -38,7 +38,7 @@ def send_commit_status(state: str, release_url: str | None = None):
     if not (FORGEJO_TOKEN):
         print("[ERROR] FORGEJO_TOKEN not set, skipping requests.")
         return False
-    if not (FORGEJO_REPO and FORGEJO_REPO and FORGEJO_REF and FORGEJO_TOKEN):
+    if not (FORGEJO_REPO and FORGEJO_REF and FORGEJO_TOKEN):
         print("[ERROR] Missing Forgejo repository or commit info, cannot send commit status.")
         return
     if not (GITHUB_REPOSITORY and GITHUB_RUN_ID):
@@ -96,9 +96,9 @@ def parse_args():
     group = parser.add_mutually_exclusive_group(required=True)
     for state, description in ACTIONS_DESCRIPTION_MAPPING.items():
         if state == "release":
-            group.add_argument("release", metavar="URL", nargs=1, help=f"Send '{description}' and release link to Forgejo")
+            group.add_argument("--release", metavar="URL", nargs=1, help=f"Send '{description}' and release link to Forgejo")
         else:
-            group.add_argument(f"{state}", action="store_true", help=f"Send status '{description}' to Forgejo")
+            group.add_argument(f"--{state}", action="store_true", help=f"Send status '{description}' to Forgejo")
 
     args = parser.parse_args()
     for state in ACTIONS_DESCRIPTION_MAPPING:
