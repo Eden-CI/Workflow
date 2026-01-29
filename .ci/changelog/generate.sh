@@ -8,36 +8,6 @@
 ROOTDIR="$PWD"
 . "$ROOTDIR"/.ci/common/project.sh
 
-case "$1" in
-master)
-	TAG="v${TIMESTAMP}.${FORGEJO_REF}"
-	REF="${FORGEJO_REF}"
-	BASE_DOWNLOAD_URL="https://$RELEASE_MASTER_HOST/$RELEASE_MASTER_REPO/releases/download"
-	;;
-pull_request)
-	TAG="${FORGEJO_PR_NUMBER}-${FORGEJO_REF}"
-	REF="${FORGEJO_PR_NUMBER}-${FORGEJO_REF}"
-	BASE_DOWNLOAD_URL="https://$RELEASE_PR_HOST/$RELEASE_PR_REPO/releases/download"
-	;;
-tag)
-	TAG="${FORGEJO_REF}"
-	REF="${FORGEJO_REF}"
-	BASE_DOWNLOAD_URL="https://$RELEASE_TAG_HOST/$RELEASE_TAG_REPO/releases/download"
-	;;
-push | test)
-	TAG="v${TIMESTAMP}.${FORGEJO_REF}"
-	REF="${FORGEJO_REF}"
-	BASE_DOWNLOAD_URL="https://$RELEASE_MASTER_HOST/$RELEASE_MASTER_REPO/releases/download"
-	;;
-*)
-	echo "Type: $1"
-	echo "Supported types: master | pull_request | tag | push | test"
-	exit 1
-	;;
-esac
-
-COMPARE_RELEASE_URL="https://$RELEASE_MASTER_HOST/$RELEASE_MASTER_REPO/releases"
-
 tagged() {
 	falsy "$DEVEL"
 }
@@ -46,6 +16,7 @@ opts() {
 	falsy "$DISABLE_OPTS"
 }
 
+# FIXME(crueter)
 case "$1" in
 master)
 	echo "Master branch build for [\`$FORGEJO_REF\`](https://$FORGEJO_HOST/$FORGEJO_REPO/commit/$FORGEJO_REF)"
@@ -58,7 +29,7 @@ pull_request)
 	echo "Commit: [\`$FORGEJO_REF\`](https://$FORGEJO_HOST/$FORGEJO_REPO/commit/$FORGEJO_REF)"
 	echo
 	echo "Merge base: [\`$FORGEJO_PR_MERGE_BASE\`](https://$FORGEJO_HOST/$FORGEJO_REPO/commit/$FORGEJO_PR_MERGE_BASE)"
-	echo "([Master Build]($COMPARE_RELEASE_URL?q=$FORGEJO_PR_MERGE_BASE&expanded=true))"
+	echo "([Master Build]($MASTER_RELEASE_URL?q=$FORGEJO_PR_MERGE_BASE&expanded=true))"
 	echo
 	echo "## Changelog"
 	.ci/common/field.py field="body" default_msg="No changelog provided" pull_request_number="$FORGEJO_PR_NUMBER"
@@ -78,7 +49,7 @@ android() {
 	DESCRIPTION="$3"
 
 	echo -n "| "
-	echo -n "[Android $TYPE](${BASE_DOWNLOAD_URL}/${TAG}/${PROJECT_PRETTYNAME}-Android-${REF}-${FLAVOR}.apk) | "
+	echo -n "[Android $TYPE](${GITHUB_DOWNLOAD}/${GITHUB_TAG}/${PROJECT_PRETTYNAME}-Android-${GITHUB_TAG}-${FLAVOR}.apk) | "
 	echo "$DESCRIPTION |"
 }
 
@@ -87,7 +58,7 @@ src() {
 	DESCRIPTION="$2"
 
 	echo -n "| "
-	echo -n "[$EXT](${BASE_DOWNLOAD_URL}/${TAG}/${PROJECT_PRETTYNAME}-Source-${REF}.${EXT}) | "
+	echo -n "[$EXT](${GITHUB_DOWNLOAD}/${GITHUB_TAG}/${PROJECT_PRETTYNAME}-Source-${GITHUB_TAG}.${EXT}) | "
 	echo -n "$DESCRIPTION |"
 	echo
 }
@@ -98,12 +69,12 @@ linux_field() {
 	NOTES="${3}"
 
 	echo -n "| $PRETTY_ARCH | "
-	echo -n "[GCC](${BASE_DOWNLOAD_URL}/${TAG}/${PROJECT_PRETTYNAME}-Linux-${REF}-${ARCH}-gcc-standard.AppImage) "
+	echo -n "[GCC](${GITHUB_DOWNLOAD}/${GITHUB_TAG}/${PROJECT_PRETTYNAME}-Linux-${GITHUB_TAG}-${ARCH}-gcc-standard.AppImage) "
 	if tagged; then
-		echo -n "([zsync](${BASE_DOWNLOAD_URL}/${TAG}/${PROJECT_PRETTYNAME}-Linux-${REF}-${ARCH}-gcc-standard.AppImage.zsync)) | "
+		echo -n "([zsync](${GITHUB_DOWNLOAD}/${GITHUB_TAG}/${PROJECT_PRETTYNAME}-Linux-${GITHUB_TAG}-${ARCH}-gcc-standard.AppImage.zsync)) | "
 		if opts; then
-			echo -n "[PGO](${BASE_DOWNLOAD_URL}/${TAG}/${PROJECT_PRETTYNAME}-Linux-${REF}-${ARCH}-clang-pgo.AppImage) "
-			echo -n "([zsync](${BASE_DOWNLOAD_URL}/${TAG}/${PROJECT_PRETTYNAME}-Linux-${REF}-${ARCH}-clang-pgo.AppImage.zsync))"
+			echo -n "[PGO](${GITHUB_DOWNLOAD}/${GITHUB_TAG}/${PROJECT_PRETTYNAME}-Linux-${GITHUB_TAG}-${ARCH}-clang-pgo.AppImage) "
+			echo -n "([zsync](${GITHUB_DOWNLOAD}/${GITHUB_TAG}/${PROJECT_PRETTYNAME}-Linux-${GITHUB_TAG}-${ARCH}-clang-pgo.AppImage.zsync))"
 		fi
 	fi
 
@@ -131,7 +102,7 @@ deb_field() {
 	ARCHES=amd64
 	tagged && ARCHES="$ARCHES aarch64"
 	for ARCH in $ARCHES; do
-		echo -n "[$ARCH](${BASE_DOWNLOAD_URL}/${TAG}/${PROJECT_PRETTYNAME}-$BUILD-${REF}-${ARCH}.deb) | "
+		echo -n "[$ARCH](${GITHUB_DOWNLOAD}/${GITHUB_TAG}/${PROJECT_PRETTYNAME}-$BUILD-${GITHUB_TAG}-${ARCH}.deb) | "
 	done
 
 	echo "$NOTES"
@@ -145,7 +116,7 @@ deb_matrix() {
 
 room_matrix() {
 	for arch in aarch64 x86_64; do
-		echo "- [$arch](${BASE_DOWNLOAD_URL}/${TAG}/eden-room-$arch-unknown-linux-musl)"
+		echo "- [$arch](${GITHUB_DOWNLOAD}/${GITHUB_TAG}/eden-room-$arch-unknown-linux-musl)"
 	done
 }
 
@@ -155,8 +126,8 @@ win_field() {
 	NOTES="$3"
 
 	echo -n "| $LABEL | "
-	echo -n "[amd64](${BASE_DOWNLOAD_URL}/${TAG}/${PROJECT_PRETTYNAME}-Windows-${REF}-amd64-${COMPILER}.zip) | "
-	falsy "$DISABLE_MSVC_ARM" && echo -n "[arm64](${BASE_DOWNLOAD_URL}/${TAG}/${PROJECT_PRETTYNAME}-Windows-${REF}-arm64-${COMPILER}.zip)"
+	echo -n "[amd64](${GITHUB_DOWNLOAD}/${GITHUB_TAG}/${PROJECT_PRETTYNAME}-Windows-${GITHUB_TAG}-amd64-${COMPILER}.zip) | "
+	falsy "$DISABLE_MSVC_ARM" && echo -n "[arm64](${GITHUB_DOWNLOAD}/${GITHUB_TAG}/${PROJECT_PRETTYNAME}-Windows-${GITHUB_TAG}-arm64-${COMPILER}.zip)"
 
 	echo " | $NOTES"
 }
@@ -169,8 +140,8 @@ msys() {
 	NOTES="$5"
 
 	echo -n "| $LABEL | "
-	echo -n "[amd64](${BASE_DOWNLOAD_URL}/${TAG}/${PROJECT_PRETTYNAME}-Windows-${REF}-mingw-amd64-${AMD}-${TARGET}.zip) | "
-	echo -n "[arm64](${BASE_DOWNLOAD_URL}/${TAG}/${PROJECT_PRETTYNAME}-Windows-${REF}-mingw-arm64-${ARM}-${TARGET}.zip) | "
+	echo -n "[amd64](${GITHUB_DOWNLOAD}/${GITHUB_TAG}/${PROJECT_PRETTYNAME}-Windows-${GITHUB_TAG}-mingw-amd64-${AMD}-${TARGET}.zip) | "
+	echo -n "[arm64](${GITHUB_DOWNLOAD}/${GITHUB_TAG}/${PROJECT_PRETTYNAME}-Windows-${GITHUB_TAG}-mingw-arm64-${ARM}-${TARGET}.zip) | "
 
 	echo "$NOTES"
 }
@@ -300,15 +271,15 @@ In order to run the app, you *may* need to go to System Settings -> Privacy & Se
 
 | File | Description |
 | ---- | ----------- |
-| [macOS](${BASE_DOWNLOAD_URL}/${TAG}/${PROJECT_PRETTYNAME}-macOS-${REF}.tar.gz) | For Apple Silicon (M1, M2, etc)|
+| [macOS](${GITHUB_DOWNLOAD}/${GITHUB_TAG}/${PROJECT_PRETTYNAME}-macOS-${GITHUB_TAG}.tar.gz) | For Apple Silicon (M1, M2, etc)|
 
 ## Source
 
 Contains all source code, submodules, and CPM cache at the time of release.
-This can be extracted with \`tar xf ${PROJECT_PRETTYNAME}-Source-${REF}.tar.zst\`.
+This can be extracted with \`tar xf ${PROJECT_PRETTYNAME}-Source-${GITHUB_TAG}.tar.zst\`.
 
 | File | Description |
 | ---- | ----------- |
-| [tar.zst](${BASE_DOWNLOAD_URL}/${TAG}/${PROJECT_PRETTYNAME}-Source-${REF}.tar.zst) | Source as a zstd-compressed tarball (Windows: use Git Bash or MSYS2) |
+| [tar.zst](${GITHUB_DOWNLOAD}/${GITHUB_TAG}/${PROJECT_PRETTYNAME}-Source-${GITHUB_TAG}.tar.zst) | Source as a zstd-compressed tarball (Windows: use Git Bash or MSYS2) |
 
 EOF

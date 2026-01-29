@@ -9,6 +9,7 @@ if [ ! -f "$FORGEJO_LENV" ]; then
     echo "error: environment file '$FORGEJO_LENV' not found."
     exit 1
 fi
+
 if [ "$CI" = "true" ]; then
     # Safe export to GITHUB_ENV
     while IFS= read -r line; do
@@ -21,6 +22,7 @@ else
         exit 1
     fi
 fi
+
 while IFS= read -r line || [ -n "$line" ]; do
     case "$line" in
         (""|\#*) continue ;;

@@ -13,13 +13,22 @@ ROOTDIR="$PWD"
 FORGEJO_LENV=${FORGEJO_LENV:-"forgejo.env"}
 touch "$FORGEJO_LENV"
 
+_release_field() {
+	build_id="$1"
+	field="$2"
+
+	jq -r --arg id "$build_id" \
+		--arg field "$field" \
+		'.[] | select(.["build-id"] == $id) | .[$field]' "$RELEASE_JSON"
+}
+
 parse_payload() {
 	DEFAULT_JSON=".ci/default.json"
 	RELEASE_JSON=".ci/release.json"
 	PAYLOAD_JSON="payload.json"
 
 	if [ ! -f "$PAYLOAD_JSON" ]; then
-		echo "null" > $PAYLOAD_JSON
+		echo "null" >$PAYLOAD_JSON
 	fi
 
 	# default.json defines mirrors (should rarely be used unless Cloudflare does funny things)
@@ -32,22 +41,27 @@ parse_payload() {
 
 	# release.json defines targets for upload releases
 	if [ ! -f "$RELEASE_JSON" ]; then
-		echo "Warning: $RELEASE_JSON not found!"
+		echo "Error: $RELEASE_JSON not found!"
 		echo
 		echo "You should set: 'build-id', 'host' and 'repository' on $RELEASE_JSON"
-		echo "Skipping releases..."
-	else
-		RELEASE_MASTER_HOST=$(jq -r --arg id "master" '.[] | select(.["build-id"] == $id) | .host' $RELEASE_JSON)
-		RELEASE_MASTER_REPO=$(jq -r --arg id "master" '.[] | select(.["build-id"] == $id) | .repository' $RELEASE_JSON)
-		{
-			echo "RELEASE_MASTER_HOST=$RELEASE_MASTER_HOST"
-			echo "RELEASE_MASTER_REPO=$RELEASE_MASTER_REPO"
-		} >> "$FORGEJO_LENV"
+		exit 1
 	fi
 
-	# Forcefully set PGO target if not found
-	RELEASE_PGO_HOST=$(jq -r --arg id "pgo" '( .[] | select(.["build-id"] == $id) | .host ) // "github.com"' $RELEASE_JSON)
-	RELEASE_PGO_REPO=$(jq -r --arg id "pgo" '( .[] | select(.["build-id"] == $id) | .repository ) // "Eden-CI/PGO"' $RELEASE_JSON)
+	# hosts / repos
+	RELEASE_PGO_HOST=$(_release_field "pgo" "host")
+	RELEASE_PGO_REPO=$(_release_field "pgo" "repository")
+
+	RELEASE_MASTER_HOST=$(_release_field "master" "host")
+	RELEASE_MASTER_REPO=$(_release_field "master" "repository")
+
+	RELEASE_PR_HOST=$(_release_field "pull_request" "host")
+	RELEASE_PR_REPO=$(_release_field "pull_request" "repository")
+
+	RELEASE_TAG_HOST=$(_release_field "tag" "host")
+	RELEASE_TAG_REPO=$(_release_field "tag" "repository")
+
+	RELEASE_NIGHTLY_HOST=$(_release_field "nightly" "host")
+	RELEASE_NIGHTLY_REPO=$(_release_field "nightly" "repository")
 
 	# Payloads do not define host
 	# This is just for verbosity
@@ -70,6 +84,7 @@ parse_payload() {
 	[ -z "$FORGEJO_CLONE_URL" ] && FORGEJO_CLONE_URL="https://$FORGEJO_HOST/$FORGEJO_REPO.git"
 
 	TRIES=0
+	TIMEOUT=5
 	while ! curl -sSfL "$FORGEJO_CLONE_URL" >/dev/null 2>&1; do
 		echo "Repository $FORGEJO_CLONE_URL is unreachable."
 		echo "Check URL or authentication."
@@ -80,8 +95,9 @@ parse_payload() {
 			exit 1
 		fi
 
-		sleep 5
+		sleep "$TIMEOUT"
 		echo "Trying again..."
+		TIMEOUT=$((TIMEOUT * 2))
 	done
 
 	# Export those variables to be used by field.py
@@ -89,13 +105,21 @@ parse_payload() {
 	export FORGEJO_BRANCH
 	export FORGEJO_REPO
 
+	_timestamp=$(date +%s)
+
 	case "$1" in
 	master)
 		FORGEJO_REF=$(jq -r '.ref' $PAYLOAD_JSON)
 		FORGEJO_BRANCH=master
 
 		FORGEJO_BEFORE=$(jq -r '.before' $PAYLOAD_JSON)
-		echo "FORGEJO_BEFORE=$FORGEJO_BEFORE" >> "$FORGEJO_LENV"
+		echo "FORGEJO_BEFORE=$FORGEJO_BEFORE" >>"$FORGEJO_LENV"
+
+		_host="$RELEASE_MASTER_HOST"
+		_repo="$RELEASE_MASTER_REPO"
+
+		_tag="v${_timestamp}.${FORGEJO_REF}"
+		_ref="${FORGEJO_REF}"
 		;;
 	pull_request)
 		FORGEJO_REF=$(jq -r '.ref' $PAYLOAD_JSON)
@@ -109,36 +133,45 @@ parse_payload() {
 			echo "FORGEJO_PR_NUMBER=$FORGEJO_PR_NUMBER"
 			echo "FORGEJO_PR_URL=$FORGEJO_PR_URL"
 			echo "FORGEJO_PR_TITLE=$FORGEJO_PR_TITLE"
-		} >> "$FORGEJO_LENV"
+		} >>"$FORGEJO_LENV"
 
-		# Pull Request is dependent of Master for comparassion
-		if [ -n "$RELEASE_MASTER_REPO" ]; then
-			RELEASE_PR_HOST=$(jq -r --arg id "pull_request" '.[] | select(.["build-id"] == $id) | .host' $RELEASE_JSON)
-			RELEASE_PR_REPO=$(jq -r --arg id "pull_request" '.[] | select(.["build-id"] == $id) | .repository' $RELEASE_JSON)
-			{
-				echo "RELEASE_PR_HOST=$RELEASE_PR_HOST"
-				echo "RELEASE_PR_REPO=$RELEASE_PR_REPO"
-			} >> "$FORGEJO_LENV"
-		fi
+		_host="$RELEASE_PR_HOST"
+		_repo="$RELEASE_PR_REPO"
+
+		_tag="${FORGEJO_PR_NUMBER}-${FORGEJO_REF}"
+		_ref="${FORGEJO_PR_NUMBER}-${FORGEJO_REF}"
 		;;
 	tag)
 		FORGEJO_REF=$(jq -r '.tag' $PAYLOAD_JSON)
 		FORGEJO_BRANCH=stable
 
-		RELEASE_TAG_HOST=$(jq -r --arg id "tag" '.[] | select(.["build-id"] == $id) | .host' $RELEASE_JSON)
-		RELEASE_TAG_REPO=$(jq -r --arg id "tag" '.[] | select(.["build-id"] == $id) | .repository' $RELEASE_JSON)
-		{
-			echo "RELEASE_TAG_HOST=$RELEASE_TAG_HOST"
-			echo "RELEASE_TAG_REPO=$RELEASE_TAG_REPO"
-		} >> "$FORGEJO_LENV"
+		_host="$RELEASE_TAG_HOST"
+		_repo="$RELEASE_TAG_REPO"
+
+		_tag="${FORGEJO_REF}"
+		_ref="${FORGEJO_REF}"
+		;;
+	nightly)
+		# TODO(crueter): date-based referencing
+		FORGEJO_REF=$(jq -r '.ref' $PAYLOAD_JSON)
+		FORGEJO_BRANCH=nightly
+
+		_host="$RELEASE_NIGHTLY_HOST"
+		_repo="$RELEASE_NIGHTLY_REPO"
 		;;
 	push | test)
 		FORGEJO_BRANCH=$(jq -r ".[$FALLBACK_IDX].branch" $DEFAULT_JSON)
 		FORGEJO_REF=$(.ci/common/field.py field="sha")
+
+		_host="$RELEASE_NIGHTLY_HOST"
+		_repo="$RELEASE_NIGHTLY_REPO"
+
+		_tag="v${_timestamp}.${FORGEJO_REF}"
+		_ref="${FORGEJO_REF}"
 		;;
 	*)
 		echo "Type: $1"
-		echo "Supported types: master | pull_request | tag | push | test"
+		echo "Supported types: master | pull_request | tag | push | test | nightly"
 		exit 1
 		;;
 	esac
@@ -149,9 +182,20 @@ parse_payload() {
 		echo "FORGEJO_REF=$FORGEJO_REF"
 		echo "FORGEJO_BRANCH=$FORGEJO_BRANCH"
 		echo "FORGEJO_CLONE_URL=$FORGEJO_CLONE_URL"
+
+		# TODO: get rid of host
+		echo "RELEASE_HOST=$_host"
+		echo "RELEASE_REPO=$_repo"
+
 		echo "RELEASE_PGO_HOST=$RELEASE_PGO_HOST"
 		echo "RELEASE_PGO_REPO=$RELEASE_PGO_REPO"
-	} >> "$FORGEJO_LENV"
+
+		echo "GITHUB_TAG=$_tag"
+		echo "ARTIFACT_REF=$_ref"
+		echo "GITHUB_DOWNLOAD=https://$_host/$_repo/releases/download"
+
+		echo "MASTER_RELEASE_URL=https://$RELEASE_MASTER_HOST/$RELEASE_MASTER_REPO/releases"
+	} >>"$FORGEJO_LENV"
 }
 
 clone_repository() {
@@ -163,7 +207,7 @@ clone_repository() {
 	fi
 
 	TRIES=0
-	while ! git clone "$FORGEJO_CLONE_URL" ${PROJECT_REPO}; do
+	while ! git clone "$FORGEJO_CLONE_URL" "$PROJECT_REPO"; do
 		echo "Repository $FORGEJO_CLONE_URL is not reachable."
 		echo "Check URL or authentication."
 
@@ -178,25 +222,29 @@ clone_repository() {
 		rm -rf "./${PROJECT_REPO}" || true
 	done
 
-	if ! git -C "${PROJECT_REPO}" checkout "$FORGEJO_REF"; then
+	cd "$PROJECT_REPO"
+
+	if ! git checkout "$FORGEJO_REF"; then
 		echo "Ref $FORGEJO_REF not found locally, trying to fetch..."
-		git -C "${PROJECT_REPO}" fetch --all
-		git -C "${PROJECT_REPO}" checkout "$FORGEJO_REF"
+		git fetch --all
+		git checkout "$FORGEJO_REF"
 	fi
 
-	echo "$FORGEJO_BRANCH" > "${PROJECT_REPO}"/GIT-REFSPEC
-	git -C "${PROJECT_REPO}" rev-parse --short=10 HEAD > "${PROJECT_REPO}"/GIT-COMMIT
-	git -C "${PROJECT_REPO}" describe --tags HEAD --abbrev=0 > "${PROJECT_REPO}"/GIT-TAG || echo 'v0.0.4-Workflow' > ${PROJECT_REPO}/GIT-TAG
+	echo "$FORGEJO_BRANCH" > GIT-REFSPEC
+	git rev-parse --short=10 HEAD > GIT-COMMIT
+	{ git describe --tags HEAD --abbrev=0 || echo 'v0.1.0-Workflow'; } > GIT-TAG
 
 	# slight hack: also add the merge base
 	# <https://codeberg.org/forgejo/forgejo/issues/9601>
-	FORGEJO_PR_MERGE_BASE=$(git -C "${PROJECT_REPO}" merge-base master HEAD | cut -c1-10)
-	echo "FORGEJO_PR_MERGE_BASE=$FORGEJO_PR_MERGE_BASE" >> "$FORGEJO_LENV"
-	echo "FORGEJO_PR_MERGE_BASE=$FORGEJO_PR_MERGE_BASE" >> "$GITHUB_ENV"
+	FORGEJO_PR_MERGE_BASE=$(git merge-base master HEAD | cut -c1-10)
+	echo "FORGEJO_PR_MERGE_BASE=$FORGEJO_PR_MERGE_BASE" >>"$FORGEJO_LENV"
+	echo "FORGEJO_PR_MERGE_BASE=$FORGEJO_PR_MERGE_BASE" >>"$GITHUB_ENV"
 
 	if [ "$1" = "tag" ]; then
-		cp "${PROJECT_REPO}"/GIT-TAG "${PROJECT_REPO}"/GIT-RELEASE
+		cp GIT-TAG GIT-RELEASE
 	fi
+
+	cd ..
 }
 
 case "$1" in
@@ -207,7 +255,7 @@ case "$1" in
 	clone_repository "$2"
 	;;
 *)
-	cat << EOF
+	cat <<EOF
 Usage: $0 [--parse <type> | --clone <type>]
 Supported types: master | pull_request | tag | push | test
 
