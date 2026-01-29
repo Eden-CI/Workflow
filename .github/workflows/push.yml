@@ -17,6 +17,7 @@ jobs:
       cancel-in-progress: false
     uses: ./.github/workflows/build.yml
     with:
+      devel: true
       build-id: 'push'
     secrets: inherit
 

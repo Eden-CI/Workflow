@@ -18,6 +18,7 @@ jobs:
       cancel-in-progress: true
     uses: ./.github/workflows/build.yml
     with:
+      devel: true
       build-id: 'test'
     secrets: inherit
 
