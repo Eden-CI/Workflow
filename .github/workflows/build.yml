@@ -37,14 +37,6 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Send Commit Status to Forgejo
-        if: ${{ inputs.build-id == 'master' || inputs.build-id == 'pull_request' }}
-        shell: bash
-        run: |
-          export FORGEJO_REPO="${{ github.event.client_payload.repository }}"
-          export FORGEJO_REF="${{ github.event.client_payload.ref }}"
-          python ./.ci/common/status.py --pending
-
       - name: Parse Forgejo payload
         shell: bash
         run: |
@@ -52,10 +44,22 @@ jobs:
           cat payload.json
           ./.ci/forgejo.sh --parse ${{ inputs.build-id }}
 
+      - name: Upload payload environment
+        uses: actions/upload-artifact@v6.0.0
+        with:
+          name: forgejo-env
+          path: forgejo.env
+
       - name: Load payload environment
         shell: bash
         run: |
           . ./.ci/fj/load-env.sh
+
+      - name: Send Commit Status to Forgejo only on pull_request/master
+        if: ${{ env.FORGEJO_TOKEN && (inputs.build-id) == 'master' || (inputs.build-id) == 'pull_request' }}
+        shell: bash
+        run: |
+          python ./.ci/common/status.py pending
 
       # for some amazing reason you can't pass env vars to reusable workflows
       - name: Setup Outputs
@@ -86,12 +90,6 @@ jobs:
       - name: Cleanup
         run: |
           rm -rf eden/.git* eden/.ci eden/.github
-
-      - name: Upload payload environment
-        uses: actions/upload-artifact@v6.0.0
-        with:
-          name: forgejo-env
-          path: forgejo.env
 
       - name: Upload cloned repo
         uses: actions/upload-artifact@v6.0.0
