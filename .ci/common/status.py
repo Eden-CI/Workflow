@@ -25,12 +25,11 @@ GITHUB_RUN_ATTEMPT = os.getenv("GITHUB_RUN_ATTEMPT", "1")
 # <https://docs.github.com/en/actions/reference/workflows-and-actions/contexts#needs-context>
 # <https://docs.github.com/pt/pull-requests/collaborating-with-pull-requests/collaborating-on-repositories-with-code-quality-features/about-status-checks#check-statuses-and-conclusions>
 ACTIONS_DESCRIPTION_MAPPING = {
-    "release": "[CD] Build succeeded – Release published", # release -> success
+    "release": "[CD] Release published", # release -> success
     "pending": "[CI] Build started",
     "success": "[CI] Build succeeded",
     "failure": "[CI] Build failed",
-    "error": "[CI] Build cancelled", # (forgejo only)
-    "cancelled": "[CI] Build cancelled" # (github only)
+    "error": "[CI] Build cancelled",
 }
 
 # Send commit status
