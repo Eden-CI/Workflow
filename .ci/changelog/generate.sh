@@ -46,6 +46,8 @@ push | test)
 esac
 echo
 
+# TODO(crueter): Don't include fields if their corresponding artifacts aren't found.
+
 android() {
 	TYPE="$1"
 	FLAVOR="$2"

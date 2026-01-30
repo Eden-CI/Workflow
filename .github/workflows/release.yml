@@ -36,7 +36,7 @@ jobs:
         run: FORGEJO_LENV=forgejo-env/forgejo.env . .ci/fj/load-env.sh
 
       - name: Send build status
-        if: ${{ ((inputs.build-id) == 'master' || (inputs.build-id) == 'pull_request') }}
+        if: ${{ always() && ((inputs.build-id) == 'master' || (inputs.build-id) == 'pull_request') }}
         run: python3 ./.ci/common/status.py --${{ inputs.status }}
 
       - name: Package artifacts nicely
@@ -47,7 +47,7 @@ jobs:
 
       - name: Release
         id: release
-        if: ${{ env.GH_TOKEN }}
+        if: ${{ env.GH_TOKEN && (inputs.build-id) != 'test' }}
         uses: softprops/action-gh-release@v2.5.0
         with:
           name: "${{ env.GITHUB_TITLE }}"
