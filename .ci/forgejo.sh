@@ -167,7 +167,7 @@ parse_payload() {
 		_tag="v${_timestamp}.${FORGEJO_REF}"
 		_ref="${FORGEJO_REF}"
 
-		_title="${PROJECT_PRETTYNAME} Nightly $(date +"%b %d %Y")"
+		_title="${PROJECT_PRETTYNAME} Nightly - $(date +"%b %d %Y")"
 		;;
 	push | test)
 		FORGEJO_BRANCH=$(jq -r ".[$FALLBACK_IDX].branch" $DEFAULT_JSON)
