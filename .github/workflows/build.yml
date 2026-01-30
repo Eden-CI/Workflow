@@ -1,4 +1,4 @@
-name: "[Master] Build Workflow"
+name: "Build"
 
 on:
   workflow_call:

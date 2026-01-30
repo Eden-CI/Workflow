@@ -28,89 +28,9 @@ jobs:
       security-events: write
       contents: write
       discussions: write
-    env:
-      GH_TOKEN: "${{ secrets.CUSTOM_GITHUB_TOKEN }}"
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6.0.1
-        with:
-          persist-credentials: false
-
-      - name: Download artifacts
-        uses: actions/download-artifact@v7.0.0
-
-      - name: Load payload environment
-        shell: bash
-        run: |
-          export FORGEJO_LENV=forgejo-env/forgejo.env
-          . ./.ci/fj/load-env.sh
-
-      - name: Set environment variables
-        run: |
-          echo "DEVEL=true" >> $GITHUB_ENV
-
-      - name: Package artifacts nicely
-        run: |
-          export ID=${FORGEJO_PR_NUMBER}-${FORGEJO_REF}
-          ./.ci/common/pack.sh
-
-      - name: Generate changelog
-        run: |
-          ./.ci/changelog/generate.sh pull_request > changelog.md
-
-      - name: Delete Previous Release
-        run: |
-          if [ -n "$GH_TOKEN" ]; then
-            gh release delete "$FORGEJO_PR_NUMBER" --repo "$RELEASE_PR_REPO" --cleanup-tag -y
-            sleep 5
-          else
-            echo "No CUSTOM_GITHUB_TOKEN provided, skipping release..."
-          fi
-        continue-on-error: true
-
-      - name: Release (sha)
-        id: release
-        if: ${{ env.GH_TOKEN }}
-        uses: softprops/action-gh-release@v2.5.0
-        with:
-          name: "${{ env.FORGEJO_PR_TITLE }}"
-          tag_name: ${{ env.FORGEJO_PR_NUMBER }}-${{ env.FORGEJO_REF }}
-          repository: ${{ env.RELEASE_PR_REPO }}
-          body_path: ./changelog.md
-          token: ${{ env.GH_TOKEN }}
-          prerelease: false
-          draft: false
-          generate_release_notes: false
-          fail_on_unmatched_files: false
-          make_latest: true
-          files: |
-            artifacts/*
-
-      - name: Release (PR)
-        if: ${{ env.GH_TOKEN }}
-        uses: softprops/action-gh-release@v2.5.0
-        with:
-          name: ${{ env.FORGEJO_PR_TITLE }}
-          tag_name: ${{ env.FORGEJO_PR_NUMBER }}
-          repository: ${{ env.RELEASE_PR_REPO }}
-          body_path: ./changelog.md
-          token: ${{ env.GH_TOKEN }}
-          prerelease: false
-          draft: false
-          generate_release_notes: false
-          fail_on_unmatched_files: false
-          discussion_category_name: "PRs"
-          make_latest: true
-
-      - name: Add release URL to summary
-        run: |
-          {
-            echo "## Release Summary"
-            echo ""
-            echo "- View Release on GitHub: [#${{ env.FORGEJO_PR_NUMBER }}](${{ steps.release.outputs.url }})"
-            echo ""
-          } >> "$GITHUB_STEP_SUMMARY"
-
-      - name: Send release URL to status
-        run: |
-          python3 ./.ci/common/status.py --release ${{ steps.release.outputs.url }}
+    uses: ./.github/workflows/release.yml
+    with:
+      devel: true
+      build-id: 'pull_request'
+      status: ${{ needs.build.status }}
+    secrets: inherit

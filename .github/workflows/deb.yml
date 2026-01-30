@@ -1,4 +1,4 @@
-name: ".deb builds"
+name: "Debian"
 
 on:
   workflow_call:

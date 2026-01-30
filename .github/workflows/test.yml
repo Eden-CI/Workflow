@@ -10,7 +10,7 @@ env:
   DISABLE_ARM: ${{ vars.DISABLE_ARM }}
 
 jobs:
-  # TODO: Create a fake payload to ONLY test all workflows without building packages
+  # TODO: Create a fake payload to ONLY test all workflows without building packages (?????)
   build:
     name: Build
     concurrency:
@@ -30,39 +30,9 @@ jobs:
       security-events: write
       contents: write
       discussions: write
-
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6.0.1
-        with:
-          persist-credentials: false
-
-      - name: Download artifacts
-        uses: actions/download-artifact@v7.0.0
-
-      - name: Load payload environment
-        shell: bash
-        run: |
-          export FORGEJO_LENV=forgejo-env/forgejo.env
-          . ./.ci/fj/load-env.sh
-
-      - name: Set environment variables
-        run: |
-          echo "DEVEL=true" >> $GITHUB_ENV
-          echo "TIMESTAMP=$(date +%s)" >> $GITHUB_ENV
-
-      - name: Package artifacts nicely
-        run: |
-          export ID=${FORGEJO_REF}
-          ./.ci/common/pack.sh
-
-          ls -lh artifacts
-
-      - name: Generate changelog
-        run: ./.ci/changelog/generate.sh master > changelog.md
-
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v6.0.0
-        with:
-          name: changelog
-          path: changelog.md
+    uses: ./.github/workflows/release.yml
+    with:
+      devel: true
+      build-id: 'test'
+      status: ${{ needs.build.status }}
+    secrets: inherit

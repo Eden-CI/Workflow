@@ -29,59 +29,9 @@ jobs:
       security-events: write
       contents: write
       discussions: write
-    env:
-      GH_TOKEN: "${{ secrets.CUSTOM_GITHUB_TOKEN }}"
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6.0.1
-        with:
-          persist-credentials: false
-
-      - name: Download artifacts
-        uses: actions/download-artifact@v7.0.0
-
-      - name: Load payload environment
-        shell: bash
-        run: |
-          export FORGEJO_LENV=forgejo-env/forgejo.env
-          . ./.ci/fj/load-env.sh
-
-      - name: Set environment variables
-        run: |
-          echo "DEVEL=true" >> $GITHUB_ENV
-          echo "TIMESTAMP=$(date +%s)" >> $GITHUB_ENV
-
-      - name: Package artifacts nicely
-        run: |
-          export ID=${FORGEJO_REF}
-          ./.ci/common/pack.sh
-
-      - name: Generate changelog
-        run: ./.ci/changelog/generate.sh push > changelog.md
-
-      - name: Release
-        if: ${{ env.GH_TOKEN }}
-        id: release
-        uses: softprops/action-gh-release@v2.5.0
-        with:
-          name: "Eden Continuous Build - ${{ env.FORGEJO_REF }}"
-          tag_name: v${{ env.TIMESTAMP }}.${{ env.FORGEJO_REF }}
-          repository: ${{ env.RELEASE_MASTER_REPO }}
-          body_path: ./changelog.md
-          prerelease: false
-          draft: false
-          generate_release_notes: false
-          token: ${{ env.GH_TOKEN }}
-          fail_on_unmatched_files: false
-          make_latest: true
-          files: |
-            artifacts/*
-
-      - name: Add release URL to summary
-        run: |
-          {
-            echo "## Release Summary"
-            echo ""
-            echo "- View Release on GitHub: [Continuous Build](${{ steps.release.outputs.url }})"
-            echo ""
-          } >> "$GITHUB_STEP_SUMMARY"
+    uses: ./.github/workflows/release.yml
+    with:
+      devel: true
+      build-id: 'push'
+      status: ${{ needs.build.status }}
+    secrets: inherit

@@ -120,6 +120,8 @@ parse_payload() {
 
 		_tag="v${_timestamp}.${FORGEJO_REF}"
 		_ref="${FORGEJO_REF}"
+
+		_title="${PROJECT_PRETTYNAME} Master - ${FORGEJO_REF}"
 		;;
 	pull_request)
 		FORGEJO_REF=$(jq -r '.ref' $PAYLOAD_JSON)
@@ -140,6 +142,8 @@ parse_payload() {
 
 		_tag="${FORGEJO_PR_NUMBER}-${FORGEJO_REF}"
 		_ref="${FORGEJO_PR_NUMBER}-${FORGEJO_REF}"
+
+		_title="${FORGEJO_PR_TITLE}"
 		;;
 	tag)
 		FORGEJO_REF=$(jq -r '.tag' $PAYLOAD_JSON)
@@ -150,6 +154,8 @@ parse_payload() {
 
 		_tag="${FORGEJO_REF}"
 		_ref="${FORGEJO_REF}"
+
+		_title="${PROJECT_PRETTYNAME} ${FORGEJO_REF}"
 		;;
 	nightly)
 		# TODO(crueter): date-based referencing
@@ -158,6 +164,11 @@ parse_payload() {
 
 		_host="$RELEASE_NIGHTLY_HOST"
 		_repo="$RELEASE_NIGHTLY_REPO"
+
+		_tag="v${_timestamp}.${FORGEJO_REF}"
+		_ref="${FORGEJO_REF}"
+
+		_title="Nightly Build - ${FORGEJO_REF}"
 		;;
 	push | test)
 		FORGEJO_BRANCH=$(jq -r ".[$FALLBACK_IDX].branch" $DEFAULT_JSON)
@@ -168,6 +179,7 @@ parse_payload() {
 
 		_tag="v${_timestamp}.${FORGEJO_REF}"
 		_ref="${FORGEJO_REF}"
+		_title="Continuous Build - $FORGEJO_REF"
 		;;
 	*)
 		echo "Type: $1"
@@ -191,6 +203,7 @@ parse_payload() {
 		echo "RELEASE_PGO_REPO=$RELEASE_PGO_REPO"
 
 		echo "GITHUB_TAG=$_tag"
+		echo "GITHUB_TITLE=$_title"
 		echo "ARTIFACT_REF=$_ref"
 		echo "GITHUB_DOWNLOAD=https://$_host/$_repo/releases/download"
 

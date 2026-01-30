@@ -10,6 +10,11 @@
     "repository": "Eden-CI/PR"
   },
   {
+    "build-id": "nightly",
+    "host": "github.com",
+    "repository": "Eden-CI/Nightly"
+  },
+  {
     "build-id": "tag",
     "host": "github.com",
     "repository": "eden-emulator/Releases"

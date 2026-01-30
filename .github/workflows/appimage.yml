@@ -1,4 +1,4 @@
-name: "[Internal CI] AppImage"
+name: "AppImage"
 
 on:
   workflow_call:

@@ -27,85 +27,9 @@ jobs:
       security-events: write
       contents: write
       discussions: write
-    env:
-      GH_TOKEN: "${{ secrets.CUSTOM_GITHUB_TOKEN }}"
-      FJ_TOKEN: "${{ secrets.FORGEJO_TOKEN }}"
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6.0.1
-        with:
-          persist-credentials: false
-
-      - name: Download artifacts
-        uses: actions/download-artifact@v7.0.0
-
-      - name: Load payload environment
-        shell: bash
-        run: |
-          export FORGEJO_LENV=forgejo-env/forgejo.env
-          . ./.ci/fj/load-env.sh
-
-      - name: Set environment variables
-        run: |
-          echo "DEVEL=false" >> $GITHUB_ENV
-
-          case "${{ env.FORGEJO_REF }}" in
-            (*rc*|*alpha*|*beta*)
-              echo "TRACK=beta" >> $GITHUB_ENV
-              ;;
-            (*)
-              echo "TRACK=production" >> $GITHUB_ENV
-              ;;
-          esac
-
-      - name: Package artifacts nicely
-        run: |
-          export ID=${FORGEJO_REF}
-          ./.ci/common/pack.sh
-
-      - name: Generate changelog(s)
-        run: |
-          ./.ci/changelog/generate.sh tag > changelog.md
-          mkdir -p whatsnew
-          echo "See the changelog here: https://$RELEASE_TAG_HOST/$RELEASE_TAG_REPO/releases/tag/${{ env.FORGEJO_REF }}" > whatsnew/whatsnew-en-US
-
-      # - uses: r0adkll/upload-google-play@v1.1.3
-      #   with:
-      #     serviceAccountJsonPlainText: ${{ secrets.PLAY_CREDENTIALS }}
-      #     packageName: dev.eden.eden_emulator
-      #     track: ${{ env.TRACK }}
-      #     releaseFiles: android-aab/*.aab
-      #     whatsNewDirectory: whatsnew
-      #     releaseName: ${{ env.FORGEJO_REF }}
-
-      - name: Release
-        if: ${{ env.GH_TOKEN }}
-        id: release
-        uses: softprops/action-gh-release@v2.5.0
-        with:
-          name: "Eden ${{ env.FORGEJO_REF }}"
-          tag_name: ${{ env.FORGEJO_REF }}
-          repository: ${{ env.RELEASE_TAG_REPO }}
-          body_path: ./changelog.md
-          prerelease: false
-          draft: true
-          generate_release_notes: false
-          token: ${{ env.GH_TOKEN }}
-          fail_on_unmatched_files: false
-          make_latest: true
-          files: |
-            artifacts/*
-
-      - name: Add release URL to summary
-        run: |
-          {
-            echo "## Release Summary"
-            echo ""
-            echo "- View Release on GitHub: [${{ env.FORGEJO_REF }}](${{ steps.release.outputs.url }})"
-          } >> "$GITHUB_STEP_SUMMARY"
-
-      - name: Forgejo Release
-        if: ${{ env.FJ_TOKEN }}
-        run: |
-          ./.ci/fj/release.sh
-          echo "- View Release on Forgejo: [${{ env.FORGEJO_REF }}]($(cat url))" >> "$GITHUB_STEP_SUMMARY"
+    uses: ./.github/workflows/release.yml
+    with:
+      devel: true
+      build-id: 'tag'
+      status: ${{ needs.build.status }}
+    secrets: inherit

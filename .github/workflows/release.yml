@@ -1,0 +1,105 @@
+name: "Release"
+
+on:
+  workflow_call:
+    inputs:
+      devel:
+        description: 'Development mode (disables update checker, adds nightly qualifier)'
+        type: boolean
+        required: true
+      build-id:
+        description: 'Identifier for workflows and caching'
+        type: string
+        required: true
+      status:
+        description: 'The result of the prior build step.'
+        type: string
+        required: true
+
+jobs:
+  release:
+    name: "Release"
+
+    env:
+      GH_TOKEN: "${{ secrets.CUSTOM_GITHUB_TOKEN }}"
+      FJ_TOKEN: "${{ secrets.FORGEJO_TOKEN }}"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6.0.1
+        with:
+          persist-credentials: false
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v7.0.0
+
+      - name: Load payload environment
+        run: FORGEJO_LENV=forgejo-env/forgejo.env . .ci/fj/load-env.sh
+
+      - name: Send build status
+        if: ${{ ((inputs.build-id) == 'master' || (inputs.build-id) == 'pull_request') }}
+        run: python3 ./.ci/common/status.py --${{ inputs.status }}
+
+      - name: Package artifacts nicely
+        run: ./.ci/common/pack.sh
+
+      - name: Generate changelog
+        run: ./.ci/changelog/generate.sh "${{ inputs.build-id }}" > changelog.md
+
+      - name: Release
+        id: release
+        if: ${{ env.GH_TOKEN }}
+        uses: softprops/action-gh-release@v2.5.0
+        with:
+          name: "${{ env.GITHUB_TITLE }}"
+          tag_name: ${{ env.GITHUB_TAG }}
+          repository: ${{ env.RELEASE_REPO }}
+          body_path: ./changelog.md
+          token: ${{ env.GH_TOKEN }}
+          prerelease: false
+          draft: ${{ inputs.build-id == 'tag' }}
+          generate_release_notes: false
+          fail_on_unmatched_files: false
+          make_latest: true
+          files: |
+            artifacts/*
+
+      - name: Add Release URL to Summary
+        if: ${{ env.GH_TOKEN && (inputs.build-id) != 'test' }}
+        run: |
+          {
+            echo "## Release Summary"
+            echo "- View Release on GitHub: [${{ env.GITHUB_TITLE }}](${{ steps.release.outputs.url }})"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Send Release Status
+        if: ${{ env.FJ_TOKEN && (inputs.build-id) == 'master' || (inputs.build-id) == 'pull_request' }}
+        run: |
+          python3 ./.ci/common/status.py --release ${{ steps.release.outputs.url }}
+
+      - name: Release (PR Number)
+        if: ${{ env.GH_TOKEN && (inputs.build-id) == 'pull_request' }}
+        uses: softprops/action-gh-release@v2.5.0
+        with:
+          name: "${{ env.GITHUB_TITLE }}"
+          tag_name: ${{ env.FORGEJO_PR_NUMBER }}
+          repository: ${{ env.RELEASE_REPO }}
+          body_path: ./changelog.md
+          prerelease: false
+          draft: false
+          generate_release_notes: false
+          token: ${{ env.GH_TOKEN }}
+          fail_on_unmatched_files: false
+          discussion_category_name: "PRs"
+          make_latest: true
+
+      - name: Release (Forgejo)
+        if: ${{ env.FJ_TOKEN && (inputs.build-id) == 'tag' }}
+        run: |
+          ./.ci/fj/release.sh
+          echo "- View Release on Forgejo: [${{ env.FORGEJO_REF }}]($(cat url))" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload changelog
+        uses: actions/upload-artifact@v6.0.0
+        with:
+          name: changelog
+          path: changelog.md
