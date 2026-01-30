@@ -7,7 +7,9 @@
 
 ROOTDIR="$PWD"
 . "$ROOTDIR"/.ci/common/project.sh
+ARTIFACT_NAME="${ROOTDIR}/${PROJECT_PRETTYNAME}-Source-${ARTIFACT_REF}.tar.zst"
 
 cd "${PROJECT_REPO}"
 
-tar --zstd -cf ../source.tar.zst ./* .cache .patch
+tar --zstd -cf "$ARTIFACT_NAME" ./* .cache .patch
+
