@@ -14,9 +14,7 @@ git clone --depth 1 https://git.crueter.xyz/scripts/fj.git
 
 echo "-- Creating Release"
 fj/fj.sh -k "$FJ_TOKEN" -r "$FJ_REPO" -u "$FJ_HOST" release -t "$FORGEJO_REF" \
-	create -b changelog.md -n "$PROJECT_PRETTYNAME $FORGEJO_REF" -d > url
-
-cat url
+	create -b changelog.md -n "$PROJECT_PRETTYNAME $FORGEJO_REF" -d
 
 echo "-- Uploading Assets"
 
@@ -26,3 +24,5 @@ fj/fj.sh -k "$FJ_TOKEN" -r "$FJ_REPO" -u "$FJ_HOST" release -t "$FORGEJO_REF" \
 
 fj/fj.sh -k "$FJ_TOKEN" -r "$FJ_REPO" -u "$FJ_HOST" release -t "$FORGEJO_REF" \
 	upload -g artifacts/*
+
+export FJ_URL="https://$FJ_HOST/$FJ_REPO/releases/$FORGEJO_REF"
