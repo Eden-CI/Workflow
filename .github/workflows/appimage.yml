@@ -106,15 +106,12 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.CUSTOM_GITHUB_TOKEN }}
 
       - name: Configure
-        shell: bash
         run:  .ci/common/configure.sh -DCCACHE_PATH=${SCCACHE_PATH}
 
       - name: Build
-        shell: bash
         run: cmake --build build
 
       - name: Package
-        shell: bash
         run: ./.ci/linux/package.sh
         env:
           GITHUB_TOKEN: ${{ secrets.CUSTOM_GITHUB_TOKEN }}
