@@ -6,6 +6,7 @@
 NUM_JOBS=$(nproc 2>/dev/null || getconf _NPROCESSORS_ONLN 2>/dev/null || echo 2)
 export CMAKE_BUILD_PARALLEL_LEVEL="${NUM_JOBS}"
 ARTIFACTS_DIR="$PWD/artifacts"
+ROOTDIR="$PWD"
 
 : "${CCACHE:=false}"
 RETURN=0
@@ -87,9 +88,6 @@ case "$TYPE" in
 	*) die "Invalid build type $TYPE."
 esac
 
-LOWER_FLAVOR=$(echo "$FLAVOR" | sed 's/./\L&/')
-LOWER_TYPE=$(echo "$TYPE" | sed 's/./\L&/')
-
 if [ -n "${ANDROID_KEYSTORE_B64}" ]; then
     export ANDROID_KEYSTORE_FILE="${GITHUB_WORKSPACE}/ks.jks"
     echo "${ANDROID_KEYSTORE_B64}" | base64 --decode > "${ANDROID_KEYSTORE_FILE}"
@@ -115,6 +113,13 @@ echo "-- building..."
 if [ -n "${ANDROID_KEYSTORE_B64}" ]; then
     rm "${ANDROID_KEYSTORE_FILE}"
 fi
+
+cd "$ARTIFACTS_DIR"
+
+mv ./*.apk "${PROJECT_PRETTYNAME}-Android-${ARTIFACT_REF}-${FLAVOR}.apk"
+mv ./*.aab "${PROJECT_PRETTYNAME}-Android-${ARTIFACT_REF}-${FLAVOR}.aab"
+
+cd "$ROOTDIR"
 
 echo "-- Done! APK and AAB artifacts are in ${ARTIFACTS_DIR}"
 
