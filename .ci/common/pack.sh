@@ -13,8 +13,6 @@ ARTIFACTS_DIR="artifacts"
 
 mkdir -p "$ARTIFACTS_DIR"
 
-ls "$ROOTDIR"
-
 find "$ROOTDIR" \( \
 	    -name '*.deb' -o \
 		-name '*.AppImage*' -o \
