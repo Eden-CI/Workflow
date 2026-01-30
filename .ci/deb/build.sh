@@ -48,4 +48,7 @@ makedeb --print-srcinfo > .SRCINFO
 makedeb -s --no-confirm
 
 # for some grand reason, makepkg does not exit on errors
-ls *.deb || exit 1
+ls ./*.deb || exit 1
+
+
+mv ./*.dev "${PROJECT_PRETTYNAME}-${DEB_NAME}-${ARTIFACT_REF}-${ARCH}.deb"

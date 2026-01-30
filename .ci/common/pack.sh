@@ -39,18 +39,7 @@ for arch in $ARCHES; do
 done
 
 ## Debian ##
-ARCHES=amd64
-opts && tagged && ARCHES="$ARCHES aarch64"
-
-for arch in $ARCHES; do
-	for ver in 24.04; do
-		cp "$ROOTDIR/ubuntu-$ver-$arch"/*.deb "$ARTIFACTS_DIR/${PROJECT_PRETTYNAME}-Ubuntu-$ver-${ARTIFACT_REF}-$arch.deb"
-	done
-
-	for ver in 12 13; do
-		cp "$ROOTDIR/debian-$ver-$arch"/*.deb "$ARTIFACTS_DIR/${PROJECT_PRETTYNAME}-Debian-$ver-${ARTIFACT_REF}-$arch.deb"
-	done
-done
+find "$ROOTDIR" -name '*.deb' -exec cp {} "$ARTIFACTS_DIR" \;
 
 ## Android ##
 if falsy "$DISABLE_ANDROARTIFACT_REF"; then
@@ -100,4 +89,4 @@ for arch in aarch64 x86_64; do
 	cp room-$arch/* "$ARTIFACTS_DIR"
 done
 
-ls "$ARTIFACTS_DIR"
+ls -lh "$ARTIFACTS_DIR"
