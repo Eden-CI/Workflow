@@ -97,7 +97,10 @@ COMMON_FLAGS=(
 	# packaging stuff
 	-DCMAKE_INSTALL_PREFIX=/usr
 	-DYUZU_CMD="${STANDALONE:-OFF}"
-	-DYUZU_ROOM_STANDALONE="${STANDALONE:-OFF}"
+
+	# The room functionality is bundled in now.
+	# We don't need it standalone
+	-DYUZU_ROOM_STANDALONE=OFF
 )
 
 # cmd line stuff
