@@ -6,7 +6,7 @@ on:
       - 'master'
   schedule:
     # every day at 6 pm
-    cron: '0 18 * * *'
+    - cron: "0 18 * * *"
   workflow_dispatch:
 
 env:
@@ -34,5 +34,5 @@ jobs:
     with:
       devel: true
       build-id: 'nightly'
-      status: ${{ needs.build.status }}
+      status: ${{ needs.build.result }}
     secrets: inherit

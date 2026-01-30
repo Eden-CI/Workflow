@@ -31,5 +31,5 @@ jobs:
     with:
       devel: true
       build-id: 'tag'
-      status: ${{ needs.build.status }}
+      status: ${{ needs.build.result }}
     secrets: inherit

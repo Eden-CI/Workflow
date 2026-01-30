@@ -33,5 +33,5 @@ jobs:
     with:
       devel: true
       build-id: 'pull_request'
-      status: ${{ needs.build.status }}
+      status: ${{ needs.build.result }}
     secrets: inherit
