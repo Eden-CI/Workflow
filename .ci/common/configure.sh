@@ -22,6 +22,9 @@ ROOTDIR="$PWD"
 BUILDDIR="${BUILDDIR:-build}"
 WORKFLOW_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 
+# shellcheck disable=SC2153
+echo "Build ID: $BUILD_ID"
+
 # check if it's called eden dir
 if [ ! -f "$ROOTDIR/CMakeLists.txt" ]; then
 	echo "error: no CMakeLists.txt found in ROOTDIR ($ROOTDIR)."
@@ -42,6 +45,10 @@ if [ "$DEVEL" = "true" ]; then
 	UPDATES=OFF
 else
 	UPDATES=ON
+fi
+
+if [ "$BUILD_ID" = nightly ]; then
+	NIGHTLY=ON
 fi
 
 # platform handling
@@ -101,6 +108,8 @@ COMMON_FLAGS=(
 	# The room functionality is bundled in now.
 	# We don't need it standalone
 	-DYUZU_ROOM_STANDALONE=OFF
+
+	-DNIGHTLY_BUILD="${NIGHTLY:-OFF}"
 )
 
 # cmd line stuff

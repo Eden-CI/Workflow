@@ -22,6 +22,7 @@ env:
   CCACHE: "true"
   FORGEJO_TOKEN: ${{ secrets.FORGEJO_TOKEN }}
   DEVEL: ${{ inputs.devel }}
+  BUILD_ID: ${{ inputs.build-id }}
 
 jobs:
   set-matrix:

@@ -19,6 +19,7 @@ env:
   CPM_CACHE_VERSION: "v15"
   FORGEJO_TOKEN: ${{ secrets.FORGEJO_TOKEN }}
   DEVEL: ${{ inputs.devel }}
+  BUILD_ID: ${{ inputs.build-id }}
   TEMP_PATCH_NUMBER: ""
   FORCE_PGO: "false"
 
