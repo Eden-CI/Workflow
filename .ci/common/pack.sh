@@ -21,25 +21,10 @@ opts() {
 	falsy "$DISABLE_OPTS"
 }
 
-## AppImage ##
-ARCHES="amd64"
-opts && ARCHES="$ARCHES steamdeck"
-[ "$DISABLE_ARM" != "true" ] && ARCHES="$ARCHES aarch64"
-COMPILERS=gcc-standard
-
-opts && tagged && ARCHES="$ARCHES legacy rog-ally" && COMPILERS="$COMPILERS clang-pgo"
-
-for arch in $ARCHES; do
-	for compiler in $COMPILERS; do
-		ARTIFACT="${PROJECT_PRETTYNAME}-Linux-${ARTIFACT_REF}-${arch}-${compiler}"
-
-		cp "$ROOTDIR/linux-$arch-$compiler"/*.AppImage "$ARTIFACTS_DIR/$ARTIFACT.AppImage"
-		tagged && cp "$ROOTDIR/linux-$arch-$compiler"/*.AppImage.zsync "$ARTIFACTS_DIR/$ARTIFACT.AppImage.zsync"
-	done
-done
-
-## Debian ##
-find "$ROOTDIR" -name '*.deb' -exec cp {} "$ARTIFACTS_DIR" \;
+find "$ROOTDIR" \( \
+	    -name '*.deb' -o \
+		-name '*.AppImage*' \
+    \) -exec cp {} "$ARTIFACTS_DIR" \;
 
 ## Android ##
 if falsy "$DISABLE_ANDROARTIFACT_REF"; then

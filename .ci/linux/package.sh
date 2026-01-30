@@ -40,11 +40,8 @@ else
     strip -s "${BUILDDIR}/bin/"*
 fi
 
-VERSION=$(cat "$ROOTDIR/GIT-TAG" 2>/dev/null || echo 'v0.0.4-Workflow')
-echo "Making \"$VERSION\" build"
-
-export OUTNAME="$PROJECT_PRETTYNAME-Linux-$VERSION-$FULL_ARCH.AppImage"
-UPINFO="gh-releases-zsync|eden-emulator|Releases|latest|*-$FULL_ARCH.AppImage.zsync"
+export OUTNAME="${PROJECT_PRETTYNAME}-Linux-${ARTIFACT_REF}-${FULL_ARCH}.AppImage"
+UPINFO="gh-releases-zsync|eden-emulator|Releases|latest|*-${FULL_ARCH}.AppImage.zsync"
 
 if [ "$DEVEL" = 'true' ]; then
     case "$(uname)" in
