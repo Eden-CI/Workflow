@@ -17,6 +17,7 @@ opts() {
 }
 
 # FIXME(crueter)
+# TODO(crueter): field() func that does linking and such
 case "$1" in
 master)
 	echo "Master branch build for [\`$FORGEJO_REF\`](https://$FORGEJO_HOST/$FORGEJO_REPO/commit/$FORGEJO_REF)"
@@ -54,7 +55,7 @@ android() {
 	DESCRIPTION="$3"
 
 	echo -n "| "
-	echo -n "[Android $TYPE](${GITHUB_DOWNLOAD}/${GITHUB_TAG}/${PROJECT_PRETTYNAME}-Android-${GITHUB_TAG}-${FLAVOR}.apk) | "
+	echo -n "[Android $TYPE](${GITHUB_DOWNLOAD}/${GITHUB_TAG}/${PROJECT_PRETTYNAME}-Android-${ARTIFACT_REF}-${FLAVOR}.apk) | "
 	echo "$DESCRIPTION |"
 }
 
@@ -63,7 +64,7 @@ src() {
 	DESCRIPTION="$2"
 
 	echo -n "| "
-	echo -n "[$EXT](${GITHUB_DOWNLOAD}/${GITHUB_TAG}/${PROJECT_PRETTYNAME}-Source-${GITHUB_TAG}.${EXT}) | "
+	echo -n "[$EXT](${GITHUB_DOWNLOAD}/${GITHUB_TAG}/${PROJECT_PRETTYNAME}-Source-${ARTIFACT_REF}.${EXT}) | "
 	echo -n "$DESCRIPTION |"
 	echo
 }
@@ -74,12 +75,12 @@ linux_field() {
 	NOTES="${3}"
 
 	echo -n "| $PRETTY_ARCH | "
-	echo -n "[GCC](${GITHUB_DOWNLOAD}/${GITHUB_TAG}/${PROJECT_PRETTYNAME}-Linux-${GITHUB_TAG}-${ARCH}-gcc-standard.AppImage) "
+	echo -n "[GCC](${GITHUB_DOWNLOAD}/${GITHUB_TAG}/${PROJECT_PRETTYNAME}-Linux-${ARTIFACT_REF}-${ARCH}-gcc-standard.AppImage) "
 	if tagged; then
-		echo -n "([zsync](${GITHUB_DOWNLOAD}/${GITHUB_TAG}/${PROJECT_PRETTYNAME}-Linux-${GITHUB_TAG}-${ARCH}-gcc-standard.AppImage.zsync)) | "
+		echo -n "([zsync](${GITHUB_DOWNLOAD}/${GITHUB_TAG}/${PROJECT_PRETTYNAME}-Linux-${ARTIFACT_REF}-${ARCH}-gcc-standard.AppImage.zsync)) | "
 		if opts; then
-			echo -n "[PGO](${GITHUB_DOWNLOAD}/${GITHUB_TAG}/${PROJECT_PRETTYNAME}-Linux-${GITHUB_TAG}-${ARCH}-clang-pgo.AppImage) "
-			echo -n "([zsync](${GITHUB_DOWNLOAD}/${GITHUB_TAG}/${PROJECT_PRETTYNAME}-Linux-${GITHUB_TAG}-${ARCH}-clang-pgo.AppImage.zsync))"
+			echo -n "[PGO](${GITHUB_DOWNLOAD}/${GITHUB_TAG}/${PROJECT_PRETTYNAME}-Linux-${ARTIFACT_REF}-${ARCH}-clang-pgo.AppImage) "
+			echo -n "([zsync](${GITHUB_DOWNLOAD}/${GITHUB_TAG}/${PROJECT_PRETTYNAME}-Linux-${ARTIFACT_REF}-${ARCH}-clang-pgo.AppImage.zsync))"
 		fi
 	fi
 
@@ -107,7 +108,7 @@ deb_field() {
 	ARCHES=amd64
 	tagged && ARCHES="$ARCHES aarch64"
 	for ARCH in $ARCHES; do
-		echo -n "[$ARCH](${GITHUB_DOWNLOAD}/${GITHUB_TAG}/${PROJECT_PRETTYNAME}-$BUILD-${GITHUB_TAG}-${ARCH}.deb) | "
+		echo -n "[$ARCH](${GITHUB_DOWNLOAD}/${GITHUB_TAG}/${PROJECT_PRETTYNAME}-$BUILD-${ARTIFACT_REF}-${ARCH}.deb) | "
 	done
 
 	echo "$NOTES"
@@ -131,8 +132,8 @@ win_field() {
 	NOTES="$3"
 
 	echo -n "| $LABEL | "
-	echo -n "[amd64](${GITHUB_DOWNLOAD}/${GITHUB_TAG}/${PROJECT_PRETTYNAME}-Windows-${GITHUB_TAG}-amd64-${COMPILER}.zip) | "
-	falsy "$DISABLE_MSVC_ARM" && echo -n "[arm64](${GITHUB_DOWNLOAD}/${GITHUB_TAG}/${PROJECT_PRETTYNAME}-Windows-${GITHUB_TAG}-arm64-${COMPILER}.zip)"
+	echo -n "[amd64](${GITHUB_DOWNLOAD}/${GITHUB_TAG}/${PROJECT_PRETTYNAME}-Windows-${ARTIFACT_REF}-amd64-${COMPILER}.zip) | "
+	falsy "$DISABLE_MSVC_ARM" && echo -n "[arm64](${GITHUB_DOWNLOAD}/${GITHUB_TAG}/${PROJECT_PRETTYNAME}-Windows-${ARTIFACT_REF}-arm64-${COMPILER}.zip)"
 
 	echo " | $NOTES"
 }
@@ -145,8 +146,8 @@ msys() {
 	NOTES="$5"
 
 	echo -n "| $LABEL | "
-	echo -n "[amd64](${GITHUB_DOWNLOAD}/${GITHUB_TAG}/${PROJECT_PRETTYNAME}-Windows-${GITHUB_TAG}-mingw-amd64-${AMD}-${TARGET}.zip) | "
-	echo -n "[arm64](${GITHUB_DOWNLOAD}/${GITHUB_TAG}/${PROJECT_PRETTYNAME}-Windows-${GITHUB_TAG}-mingw-arm64-${ARM}-${TARGET}.zip) | "
+	echo -n "[amd64](${GITHUB_DOWNLOAD}/${GITHUB_TAG}/${PROJECT_PRETTYNAME}-Windows-${ARTIFACT_REF}-mingw-amd64-${AMD}-${TARGET}.zip) | "
+	echo -n "[arm64](${GITHUB_DOWNLOAD}/${GITHUB_TAG}/${PROJECT_PRETTYNAME}-Windows-${ARTIFACT_REF}-mingw-arm64-${ARM}-${TARGET}.zip) | "
 
 	echo "$NOTES"
 }
@@ -276,7 +277,7 @@ In order to run the app, you *may* need to go to System Settings -> Privacy & Se
 
 | File | Description |
 | ---- | ----------- |
-| [macOS](${GITHUB_DOWNLOAD}/${GITHUB_TAG}/${PROJECT_PRETTYNAME}-macOS-${GITHUB_TAG}.tar.gz) | For Apple Silicon (M1, M2, etc)|
+| [macOS](${GITHUB_DOWNLOAD}/${GITHUB_TAG}/${PROJECT_PRETTYNAME}-macOS-${ARTIFACT_REF}.tar.gz) | For Apple Silicon (M1, M2, etc)|
 
 ## Source
 
@@ -285,6 +286,6 @@ This can be extracted with \`tar xf ${PROJECT_PRETTYNAME}-Source-${GITHUB_TAG}.t
 
 | File | Description |
 | ---- | ----------- |
-| [tar.zst](${GITHUB_DOWNLOAD}/${GITHUB_TAG}/${PROJECT_PRETTYNAME}-Source-${GITHUB_TAG}.tar.zst) | Source as a zstd-compressed tarball (Windows: use Git Bash or MSYS2) |
+| [tar.zst](${GITHUB_DOWNLOAD}/${GITHUB_TAG}/${PROJECT_PRETTYNAME}-Source-${ARTIFACT_REF}.tar.zst) | Source as a zstd-compressed tarball (Windows: use Git Bash or MSYS2) |
 
 EOF

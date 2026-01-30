@@ -23,8 +23,7 @@ runs:
 
     - name: Load payload environment
       shell: bash
-      run: |
-        . ./.ci/fj/load-env.sh
+      run: . ./.ci/fj/load-env.sh
 
     - name: Clone
       uses: actions/download-artifact@v7.0.0

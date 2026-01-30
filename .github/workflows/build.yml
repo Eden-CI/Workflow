@@ -37,46 +37,36 @@ jobs:
           fetch-depth: 0
 
       - name: Parse Forgejo payload
-        shell: bash
         run: |
           echo '${{ toJSON(github.event.client_payload) }}' > ./payload.json
           cat payload.json
           ./.ci/forgejo.sh --parse ${{ inputs.build-id }}
 
       - name: Load payload environment
-        shell: bash
-        run: |
-          . ./.ci/fj/load-env.sh
+        run: . ./.ci/fj/load-env.sh
 
-      - name: Send Commit Status to Forgejo only on pull_request/master
+      - name: Send pending status
         if: ${{ (inputs.build-id) == 'master' || (inputs.build-id) == 'pull_request' }}
-        shell: bash
-        run: |
-          python ./.ci/common/status.py --pending
+        run: python3 .ci/common/status.py --pending
 
       # for some amazing reason you can't pass env vars to reusable workflows
       - name: Setup Outputs
         id: out
-        shell: bash
         run: |
           echo "cachever=${CPM_CACHE_VERSION}" >> "$GITHUB_OUTPUT"
           echo "pgo=${FORCE_PGO}" >> "$GITHUB_OUTPUT"
 
       - name: Clone
-        shell: bash
-        run: |
-          ./.ci/forgejo.sh --clone ${{ inputs.build-id }}
+        run: ./.ci/forgejo.sh --clone ${{ inputs.build-id }}
 
       - name: Apply Temporary Patch
         if: ${{ env.TEMP_PATCH_NUMBER != '' }}
-        shell: bash
         run: |
           wget https://git.eden-emu.dev/eden-emu/eden/pulls/${TEMP_PATCH_NUMBER}.patch
           git -C eden apply --3way ../${TEMP_PATCH_NUMBER}.patch
           rm ${TEMP_PATCH_NUMBER}.patch
 
       - name: Summary
-        shell: bash
         run: |
           ./.ci/fj/summary.sh ${{ inputs.build-id }}
 
@@ -110,6 +100,9 @@ jobs:
 
       - name: Clone
         uses: actions/download-artifact@v7.0.0
+
+      - name: Load payload environment
+        run: FORGEJO_LENV=forgejo-env/forgejo.env . .ci/fj/load-env.sh
 
       - name: Build
         run: ./.ci/source/build.sh
