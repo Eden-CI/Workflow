@@ -158,9 +158,8 @@ parse_payload() {
 		_title="${PROJECT_PRETTYNAME} ${FORGEJO_REF}"
 		;;
 	nightly)
-		# TODO(crueter): date-based referencing
-		FORGEJO_REF=$(jq -r '.ref' $PAYLOAD_JSON)
-		FORGEJO_BRANCH=nightly
+		FORGEJO_BRANCH=$(jq -r ".[$FALLBACK_IDX].branch" $DEFAULT_JSON)
+		FORGEJO_REF=$(.ci/common/field.py field="sha")
 
 		_host="$RELEASE_NIGHTLY_HOST"
 		_repo="$RELEASE_NIGHTLY_REPO"
@@ -168,7 +167,7 @@ parse_payload() {
 		_tag="v${_timestamp}.${FORGEJO_REF}"
 		_ref="${FORGEJO_REF}"
 
-		_title="Nightly Build - ${FORGEJO_REF}"
+		_title="${PROJECT_PRETTYNAME} Nightly $(date +"%b %d %Y")"
 		;;
 	push | test)
 		FORGEJO_BRANCH=$(jq -r ".[$FALLBACK_IDX].branch" $DEFAULT_JSON)
