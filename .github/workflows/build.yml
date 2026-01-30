@@ -121,7 +121,7 @@ jobs:
         uses: actions/upload-artifact@v6.0.0
         with:
           name: source
-          path: source.*
+          path: ./*.tar.zst
 
   deb:
     name: ".deb builds"
