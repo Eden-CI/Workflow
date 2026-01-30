@@ -13,6 +13,8 @@ ARTIFACTS_DIR="artifacts"
 
 mkdir -p "$ARTIFACTS_DIR"
 
+ls "$ROOTDIR"
+
 find "$ROOTDIR" \( \
 	    -name '*.deb' -o \
 		-name '*.AppImage*' -o \
@@ -23,10 +25,5 @@ find "$ROOTDIR" \( \
 		-name '*.tar.gz' -o \
 		-name '*unknown-linux-musl*' \
     \) -exec cp {} "$ARTIFACTS_DIR" \;
-
-## musl room ##
-for arch in aarch64 x86_64; do
-	cp room-$arch/* "$ARTIFACTS_DIR"
-done
 
 ls -lh "$ARTIFACTS_DIR"
