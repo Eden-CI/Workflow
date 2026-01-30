@@ -24,6 +24,7 @@ opts() {
 find "$ROOTDIR" \( \
 	    -name '*.deb' -o \
 		-name '*.AppImage*' \
+		-name '*.zip' \
     \) -exec cp {} "$ARTIFACTS_DIR" \;
 
 ## Android ##
@@ -33,28 +34,6 @@ if falsy "$DISABLE_ANDROARTIFACT_REF"; then
 
 	for flavor in $FLAVORS; do
 		cp "$ROOTDIR/android-$flavor"/*.apk "$ARTIFACTS_DIR/${PROJECT_PRETTYNAME}-Android-${ARTIFACT_REF}-${flavor}.apk"
-	done
-fi
-
-## Windows ##
-COMPILERS="msvc-standard"
-
-ARCHES=amd64
-falsy "$DISABLE_MSVC_ARM" && ARCHES="$ARCHES arm64"
-
-for arch in $ARCHES; do
-	for compiler in $COMPILERS; do
-		cp "$ROOTDIR/windows-$arch-$compiler"/*.zip "$ARTIFACTS_DIR/${PROJECT_PRETTYNAME}-Windows-${ARTIFACT_REF}-${arch}-${compiler}.zip"
-	done
-done
-
-## MinGW ##
-if falsy "$DISABLE_MINGW"; then
-	COMPILERS="amd64-gcc-standard arm64-clang-standard"
-	opts && tagged && COMPILERS="$COMPILERS amd64-clang-pgo arm64-clang-pgo"
-
-	for compiler in $COMPILERS; do
-		cp "$ROOTDIR/mingw-$compiler"/*.zip "$ARTIFACTS_DIR/${PROJECT_PRETTYNAME}-Windows-${ARTIFACT_REF}-mingw-${compiler}.zip"
 	done
 fi
 

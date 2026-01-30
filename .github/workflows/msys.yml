@@ -81,7 +81,6 @@ jobs:
         os: ${{ fromJson(needs.msys-matrix.outputs.include) }}
 
     env:
-      QT_VERSION: 6.9.1
       TARGET: ${{ matrix.os.arch }}
       COMPILER: "${{ matrix.os.program }}"
       PGO_TARGET: "${{ matrix.os.target }}"
@@ -138,6 +137,7 @@ jobs:
         run: ./.ci/windows/package.sh
         env:
           MSYS_TOOLCHAIN: ${{ matrix.os.msystem }}
+          ARCH: mingw-${{ env.ARCH }}
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v6.0.0
