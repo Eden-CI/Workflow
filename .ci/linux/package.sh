@@ -58,8 +58,7 @@ download "$SHARUN" "$ROOTDIR/quick-sharun"
 chmod +x "$ROOTDIR/quick-sharun"
 env LC_ALL=C "$ROOTDIR/quick-sharun" \
 	"$BUILDDIR/bin/${PROJECT_REPO}" \
-	"$BUILDDIR/bin/${PROJECT_REPO}-cli" \
-	"$BUILDDIR/bin/${PROJECT_REPO}-room"
+	"$BUILDDIR/bin/${PROJECT_REPO}-cli"
 
 # Wayland is mankind's worst invention, perhaps only behind war
 mkdir -p "$ROOTDIR/AppDir"
