@@ -1,0 +1,39 @@
+name: "[Auto] Nightly Builds"
+
+on:
+  pull_request:
+    branches:
+      - 'master'
+  schedule:
+    cron:
+      # every day at 6 pm
+      - '0 18 * * *'
+  workflow_dispatch:
+
+env:
+  DISABLE_ARM: ${{ vars.DISABLE_ARM }}
+
+jobs:
+  build:
+    name: Build
+    uses: ./.github/workflows/build.yml
+    with:
+      devel: true
+      build-id: 'nightly'
+    secrets: inherit
+
+  release:
+    name: "Create Release"
+    needs: [build]
+    if: ${{ always() }}
+    permissions:
+      actions: read
+      security-events: write
+      contents: write
+      discussions: write
+    uses: ./.github/workflows/release.yml
+    with:
+      devel: true
+      build-id: 'nightly'
+      status: ${{ needs.build.status }}
+    secrets: inherit
