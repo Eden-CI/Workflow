@@ -51,11 +51,11 @@ jobs:
           echo "targets=${TARGETS}" >> $GITHUB_OUTPUT
       - id: windows-matrix
         run: |
-          WINAMD64='  "msystem": "Windows",    "name": "windows"'
-          MINGWAMD64='"msystem": "MINGW64",    "name": "mingw"'
-          UCRT64='    "msystem": "UCRT64",     "name": "mingw"'
-          AMDCLANG64='"msystem": "CLANG64",    "name": "mingw"'
-          ARM64='     "msystem": "CLANGARM64", "name": "mingw"'
+          WINAMD64='  "msystem": "Windows"'
+          MINGWAMD64='"msystem": "MINGW64"'
+          UCRT64='    "msystem": "UCRT64"'
+          AMDCLANG64='"msystem": "CLANG64"'
+          ARM64='     "msystem": "CLANGARM64"'
 
           PGO='  "program": "clang", "target": "pgo"'
           CLANG='"program": "clang", "target": "standard"'
@@ -66,30 +66,37 @@ jobs:
           target() {
             arch="$1"
             system="$2"
-            compiler="$3"
+            msystem="$3"
+            compiler="$4"
+
             if [ "${arch}" == "arm64" ]; then
               target_arch='"runs-on": "windows-11-arm", "arch": "arm64"'
-            fi
-            if [ "${arch}" == "amd64" ]; then
+            elif [ "${arch}" == "amd64" ]; then
               target_arch='"runs-on": "windows-2025", "arch": "amd64"'
             fi
 
-            echo "{${target_arch}, ${system}, ${compiler}}"
+            if [ "${system}" == "mingw" ]; then
+              target_system='"name": "mingw",   "shell": "msys2 {0}"'
+            elif [ "${system}" == "windows" ]; then
+              target_system='"name": "windows", "shell": "bash"'
+            fi
+
+            echo "{${target_arch}, ${target_system}, ${msystem}, ${compiler}}"
           }
 
-          amd_clang="$(target "amd64" "$AMDCLANG64" "$CLANG")"
-          amd_pgo="$(target   "amd64" "$MINGWAMD64" "$PGO")"
+          amd_clang="$(target "amd64" "mingw" "$AMDCLANG64" "$CLANG")"
+          amd_pgo="$(target   "amd64" "mingw" "$MINGWAMD64" "$PGO")"
 
-          win_clang="$(target "amd64" "$WINAMD64"   "$CLANG")"
-          win_pgo="$(target   "amd64" "$WINAMD64"   "$PGO")"
+          win_clang="$(target "amd64" "mingw" "$WINAMD64"   "$CLANG")"
+          win_pgo="$(target   "amd64" "mingw" "$WINAMD64"   "$PGO")"
 
-          amd_gcc="$(target   "amd64" "$MINGWAMD64" "$GCC")"
-          ucrt_gcc="$(target  "amd64" "$UCRT64"     "$UCRT")"
+          amd_gcc="$(target   "amd64" "mingw" "$MINGWAMD64" "$GCC")"
+          ucrt_gcc="$(target  "amd64" "mingw" "$UCRT64"     "$UCRT")"
 
-          win_msvc="$(target  "amd64" "$WINAMD64"   "$MSVC")"
+          win_msvc="$(target  "amd64" "windows" "$WINAMD64" "$MSVC")"
 
-          arm_clang="$(target "arm64" "$ARM64"      "$CLANG")"
-          arm_pgo="$(target   "arm64" "$ARM64"      "$PGO")"
+          arm_clang="$(target "arm64" "mingw" "$ARM64"      "$CLANG")"
+          arm_pgo="$(target   "arm64" "mingw" "$ARM64"      "$PGO")"
 
           if [ "${{ env.DISABLE_ARM }}" != true ]; then
             ARM64=", ${arm_clang}"

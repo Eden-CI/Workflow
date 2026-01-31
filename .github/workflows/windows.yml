@@ -52,7 +52,6 @@ jobs:
         uses: actions/checkout@v6.0.1
 
       - name: Setup
-        if: ${{ matrix.compiler.name == 'windows' }}
         uses: ./.github/workflows/setup
         with:
           key: ${{ matrix.compiler.msystem }}-${{ matrix.compiler.arch }}-${{ matrix.compiler.program }}
@@ -67,7 +66,7 @@ jobs:
         id: msys2
         uses: msys2/setup-msys2@v2
         with:
-          msystem: ${{ matrix.os.msystem }}
+          msystem: ${{ matrix.compiler.msystem }}
           update: true
           install: >-
             git make autoconf libtool automake-wrapper patch jq
@@ -109,58 +108,33 @@ jobs:
         run: |
           ./.ci/windows/install-vulkan-sdk.ps1
 
-      - name: Configure
+      - name: Configure dos2unix
         if: ${{ matrix.compiler.name == 'windows' }}
         shell: bash
         run: |
           git config --global core.autocrlf off
           dos2unix .patch/boost/*
+          echo ${{matrix.compiler.shell}}
 
       - name: Configure
-        if: ${{ matrix.compiler.name == 'windows' }}
         shell: bash
-        run: .ci/common/configure.sh -DCCACHE_PATH=${SCCACHE_PATH}
-
-      - name: Configure
-        if: ${{ matrix.compiler.name == 'mingw' }}
-        shell: msys2 {0}
         env:
           MSYS2_LOCATION: ${{ steps.msys2.outputs.msys2-location }}
         run: .ci/common/configure.sh -DCCACHE_PATH=sccache
 
       - name: Build
-        if: ${{ matrix.compiler.name == 'windows' }}
         shell: bash
         run: cmake --build build
 
-      - name: Build
-        if: ${{ matrix.compiler.name == 'mingw' }}
-        shell: msys2 {0}
-        run: cmake --build build
-
       - name: Package
-        if: ${{ matrix.compiler.name == 'windows' }}
         shell: bash
-        run: ./.ci/windows/package.sh
-
-      - name: Package
-        if: ${{ matrix.compiler.name == 'mingw' }}
-        shell: msys2 {0}
         run: ./.ci/windows/package.sh
         env:
-          MSYS_TOOLCHAIN: ${{ matrix.os.msystem }}
-          ARCH: ${{ matrix.compiler.name }-${{ env.ARCH }}
+          MSYS_TOOLCHAIN: ${{ matrix.compiler.msystem }}
+          ARCH: ${{ matrix.compiler.name }}-${{ env.ARCH }}
 
       - name: Upload artifacts
-        if: ${{ matrix.compiler.name == 'windows' }}
         uses: actions/upload-artifact@v6.0.0
         with:
           name: ${{ matrix.compiler.name }}-${{ env.ARCH }}
-          path: artifacts/*
-
-      - name: Upload artifacts
-        if: ${{ matrix.compiler.name == 'mingw' }}
-        uses: actions/upload-artifact@v6.0.0
-        with:
-          name: ${{ matrix.compiler.name }-${{ env.ARCH }}
           path: artifacts/*
