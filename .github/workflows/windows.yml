@@ -109,7 +109,7 @@ jobs:
         run: |
           ./.ci/windows/install-vulkan-sdk.ps1
 
-      - name: Configure
+      - name: Configure dos2unix
         if: ${{ matrix.compiler.name == 'windows' }}
         shell: bash
         run: |
@@ -117,50 +117,24 @@ jobs:
           dos2unix .patch/boost/*
 
       - name: Configure
-        if: ${{ matrix.compiler.name == 'windows' }}
-        shell: bash
-        run: .ci/common/configure.sh -DCCACHE_PATH=${SCCACHE_PATH}
-
-      - name: Configure
-        if: ${{ matrix.compiler.name == 'mingw' }}
-        shell: msys2 {0}
+        shell: ${{ matrix.compiler.shell }}
         env:
           MSYS2_LOCATION: ${{ steps.msys2.outputs.msys2-location }}
         run: .ci/common/configure.sh -DCCACHE_PATH=sccache
 
       - name: Build
-        if: ${{ matrix.compiler.name == 'windows' }}
-        shell: bash
-        run: cmake --build build
-
-      - name: Build
-        if: ${{ matrix.compiler.name == 'mingw' }}
-        shell: msys2 {0}
+        shell: ${{ matrix.compiler.shell }}
         run: cmake --build build
 
       - name: Package
-        if: ${{ matrix.compiler.name == 'windows' }}
-        shell: bash
-        run: ./.ci/windows/package.sh
-
-      - name: Package
-        if: ${{ matrix.compiler.name == 'mingw' }}
-        shell: msys2 {0}
+        shell: ${{ matrix.compiler.shell }}
         run: ./.ci/windows/package.sh
         env:
           MSYS_TOOLCHAIN: ${{ matrix.os.msystem }}
-          ARCH: ${{ matrix.compiler.name }-${{ env.ARCH }}
+          ARCH: ${{ matrix.compiler.name }}-${{ env.ARCH }}
 
       - name: Upload artifacts
-        if: ${{ matrix.compiler.name == 'windows' }}
         uses: actions/upload-artifact@v6.0.0
         with:
           name: ${{ matrix.compiler.name }}-${{ env.ARCH }}
-          path: artifacts/*
-
-      - name: Upload artifacts
-        if: ${{ matrix.compiler.name == 'mingw' }}
-        uses: actions/upload-artifact@v6.0.0
-        with:
-          name: ${{ matrix.compiler.name }-${{ env.ARCH }}
           path: artifacts/*
