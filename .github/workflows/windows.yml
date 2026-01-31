@@ -46,6 +46,7 @@ jobs:
       COMPILER: "${{ matrix.compiler.program }}"
       PGO_TARGET: "${{ matrix.compiler.target }}"
       ARCH: ${{ matrix.compiler.arch }}-${{ matrix.compiler.program }}-${{ matrix.compiler.target }}
+      SHELL: ${{ matrix.compiler.shell }}
 
     steps:
       - name: Checkout
@@ -67,7 +68,7 @@ jobs:
         id: msys2
         uses: msys2/setup-msys2@v2
         with:
-          msystem: ${{ matrix.os.msystem }}
+          msystem: ${{ matrix.compiler.msystem }}
           update: true
           install: >-
             git make autoconf libtool automake-wrapper patch jq
@@ -117,20 +118,20 @@ jobs:
           dos2unix .patch/boost/*
 
       - name: Configure
-        shell: ${{ matrix.compiler.shell }}
+        shell: ${{ env.SHELL }}
         env:
           MSYS2_LOCATION: ${{ steps.msys2.outputs.msys2-location }}
         run: .ci/common/configure.sh -DCCACHE_PATH=sccache
 
       - name: Build
-        shell: ${{ matrix.compiler.shell }}
+        shell: ${{ env.SHELL }}
         run: cmake --build build
 
       - name: Package
-        shell: ${{ matrix.compiler.shell }}
+        shell: ${{ env.SHELL }}
         run: ./.ci/windows/package.sh
         env:
-          MSYS_TOOLCHAIN: ${{ matrix.os.msystem }}
+          MSYS_TOOLCHAIN: ${{ matrix.compiler.msystem }}
           ARCH: ${{ matrix.compiler.name }}-${{ env.ARCH }}
 
       - name: Upload artifacts
