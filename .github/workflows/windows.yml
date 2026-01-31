@@ -34,7 +34,7 @@ env:
 
 jobs:
   windows:
-    name: "${{ matrix.compiler.prettyname }} ${{ matrix.compiler.arch }} ${{ matrix.compiler.program }} ${{ matrix.compiler.target }}"
+    name: "${{ matrix.compiler.msystem }} ${{ matrix.compiler.arch }} ${{ matrix.compiler.program }} ${{ matrix.compiler.target }}"
     runs-on: ${{ matrix.compiler.runs-on }}
     strategy:
       fail-fast: false
@@ -52,69 +52,115 @@ jobs:
         uses: actions/checkout@v6.0.1
 
       - name: Setup
-        if: ${{ matrix.compiler.prettyname == 'windows' }}
+        if: ${{ matrix.compiler.name == 'windows' }}
         uses: ./.github/workflows/setup
         with:
-          key: ${{ runner.os }}-${{ matrix.compiler.arch }}-${{ matrix.compiler.program }}
+          key: ${{ matrix.compiler.msystem }}-${{ matrix.compiler.arch }}-${{ matrix.compiler.program }}
           version: ${{ inputs.cpm-cache-version }}
 
       - name: Load payload environment
         shell: bash
         run: . ./.ci/fj/load-env.sh
 
+      - name: Setup MSYS2
+        if: ${{ matrix.compiler.name == 'mingw' }}
+        id: msys2
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: ${{ matrix.os.msystem }}
+          update: true
+          install: >-
+            git make autoconf libtool automake-wrapper patch jq
+            pactoys ninja
+          pacboy: >-
+            qt6-tools:p qt6-translations:p qt6-svg:p
+
+            7zip:p sccache:p cmake:p toolchain:p clang:p python-pip:p lld:p
+            openssl:p boost:p fmt:p lz4:p nlohmann-json:p zlib:p zstd:p
+            vulkan-memory-allocator:p vulkan-devel:p glslang:p
+            enet:p opus:p mbedtls:p libusb:p unordered_dense:p
+
+            jbigkit:p xz:p libdeflate:p bzip2:p lerc:p graphite2:p crt-git:p
+            libwebp:p libtiff:p brotli:p
+
       - name: Set up MSVC
-        if: ${{ matrix.compiler.prettyname == 'windows' }}
+        if: ${{ matrix.compiler.name == 'windows' }}
         uses: ilammy/msvc-dev-cmd@v1.13.0
         with:
           arch: ${{ matrix.compiler.arch }}
 
       - name: Install LLVM/Clang
-        if: ${{ matrix.compiler.program == 'clang' && matrix.compiler.prettyname == 'windows' }}
+        if: ${{ matrix.compiler.program == 'clang' && matrix.compiler.name == 'windows' }}
         uses: Eden-CI/install-llvm-action@v1
         with:
           version: "21.1.4"
           env: true
 
       - name: Check LLVM/Clang
-        if: ${{ matrix.compiler.program == 'clang' && matrix.compiler.prettyname == 'windows' }}
+        if: ${{ matrix.compiler.program == 'clang' && matrix.compiler.name == 'windows' }}
         shell: bash
         run: |
           echo "C:/Program Files/LLVM/bin" >> $GITHUB_PATH
           "C:/Program Files/LLVM/bin/clang-cl" --version
 
       - name: Install Vulkan SDK
-        if: ${{ matrix.compiler.prettyname == 'windows' }}
+        if: ${{ matrix.compiler.name == 'windows' }}
         shell: powershell
         run: |
           ./.ci/windows/install-vulkan-sdk.ps1
 
       - name: Configure
-        if: ${{ matrix.compiler.prettyname == 'windows' }}
+        if: ${{ matrix.compiler.name == 'windows' }}
         shell: bash
         run: |
           git config --global core.autocrlf off
           dos2unix .patch/boost/*
 
       - name: Configure
-        if: ${{ matrix.compiler.prettyname == 'windows' }}
+        if: ${{ matrix.compiler.name == 'windows' }}
         shell: bash
-        run: |
-          .ci/common/configure.sh -DCCACHE_PATH=${SCCACHE_PATH}
+        run: .ci/common/configure.sh -DCCACHE_PATH=${SCCACHE_PATH}
+
+      - name: Configure
+        if: ${{ matrix.compiler.name == 'mingw' }}
+        shell: msys2 {0}
+        env:
+          MSYS2_LOCATION: ${{ steps.msys2.outputs.msys2-location }}
+        run: .ci/common/configure.sh -DCCACHE_PATH=sccache
 
       - name: Build
-        if: ${{ matrix.compiler.prettyname == 'windows' }}
+        if: ${{ matrix.compiler.name == 'windows' }}
         shell: bash
         run: cmake --build build
 
+      - name: Build
+        if: ${{ matrix.compiler.name == 'mingw' }}
+        shell: msys2 {0}
+        run: cmake --build build
+
       - name: Package
-        if: ${{ matrix.compiler.prettyname == 'windows' }}
+        if: ${{ matrix.compiler.name == 'windows' }}
         shell: bash
         run: ./.ci/windows/package.sh
 
+      - name: Package
+        if: ${{ matrix.compiler.name == 'mingw' }}
+        shell: msys2 {0}
+        run: ./.ci/windows/package.sh
+        env:
+          MSYS_TOOLCHAIN: ${{ matrix.os.msystem }}
+          ARCH: ${{ matrix.compiler.name }-${{ env.ARCH }}
+
       - name: Upload artifacts
-        if: ${{ matrix.compiler.prettyname == 'windows' }}
+        if: ${{ matrix.compiler.name == 'windows' }}
         uses: actions/upload-artifact@v6.0.0
         with:
-          name: ${{ matrix.compiler.prettyname }}-${{ env.ARCH }}
+          name: ${{ matrix.compiler.name }}-${{ env.ARCH }}
           path: artifacts/*
 
+      - name: Upload artifacts
+        if: ${{ matrix.compiler.name == 'mingw' }}
+        uses: actions/upload-artifact@v6.0.0
+        with:
+          name: ${{ matrix.compiler.name }-${{ env.ARCH }}
+          path: artifacts/*
