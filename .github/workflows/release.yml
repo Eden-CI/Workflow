@@ -37,18 +37,20 @@ jobs:
         run: FORGEJO_LENV=forgejo-env/forgejo.env . .ci/fj/load-env.sh
 
       - name: Send build status
-        if: ${{ always() && ((inputs.build-id) == 'master' || (inputs.build-id) == 'pull_request') }}
+        if: ${{ ((inputs.build-id) == 'master' || (inputs.build-id) == 'pull_request') }}
         run: python3 ./.ci/common/status.py --${{ inputs.status }}
 
       - name: Package artifacts nicely
+        if: ${{ (inputs.status) == 'success' }}
         run: ./.ci/common/pack.sh
 
       - name: Generate changelog
+        if: ${{ (inputs.status) == 'success' }}
         run: ./.ci/changelog/generate.sh "${{ inputs.build-id }}" > changelog.md
 
       - name: Release
         id: release
-        if: ${{ env.GH_TOKEN && (inputs.build-id) != 'test' }}
+        if: ${{ env.GH_TOKEN && (inputs.build-id) != 'test' && (inputs.status) == 'success' }}
         uses: softprops/action-gh-release@v2.5.0
         with:
           name: "${{ env.GITHUB_TITLE }}"
@@ -65,7 +67,7 @@ jobs:
             artifacts/*
 
       - name: Add Release URL to Summary
-        if: ${{ env.GH_TOKEN && (inputs.build-id) != 'test' }}
+        if: ${{ env.GH_TOKEN && (inputs.build-id) != 'test' && (inputs.status) == 'success' }}
         run: |
           {
             echo "## Release Summary"
@@ -73,12 +75,12 @@ jobs:
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Send Release Status
-        if: ${{ env.FJ_TOKEN && (inputs.build-id) == 'master' || (inputs.build-id) == 'pull_request' }}
+        if: ${{ env.FJ_TOKEN && (inputs.build-id) == 'master' || (inputs.build-id) == 'pull_request' && (inputs.status) == 'success' }}
         run: |
           python3 ./.ci/common/status.py --release ${{ steps.release.outputs.url }}
 
       - name: Release (PR Number)
-        if: ${{ env.GH_TOKEN && (inputs.build-id) == 'pull_request' }}
+        if: ${{ env.GH_TOKEN && (inputs.build-id) == 'pull_request' && (inputs.status) == 'success' }}
         uses: softprops/action-gh-release@v2.5.0
         with:
           name: "${{ env.GITHUB_TITLE }}"
@@ -94,12 +96,13 @@ jobs:
           make_latest: true
 
       - name: Release (Forgejo)
-        if: ${{ env.FJ_TOKEN && (inputs.build-id) == 'tag' }}
+        if: ${{ env.FJ_TOKEN && (inputs.build-id) == 'tag' && (inputs.status) == 'success' }}
         run: |
           . .ci/fj/release.sh
           echo "- View Release on Forgejo: [${{ env.FORGEJO_REF }}](${FJ_URL})" >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload changelog
+        if: ${{ (inputs.status) == 'success' }}
         uses: actions/upload-artifact@v6.0.0
         with:
           name: changelog
