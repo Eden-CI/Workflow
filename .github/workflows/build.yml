@@ -37,9 +37,9 @@ jobs:
     steps:
       - id: windows-matrix
         run: |
-          PGO='{  "runs-on": "windows-latest", "arch": "amd64", "program": "clang", "target": "pgo"}'
-          CLANG='{"runs-on": "windows-latest", "arch": "amd64", "program": "clang", "target": "standard"}'
-          MSVC='{ "runs-on": "windows-latest", "arch": "amd64", "program": "msvc",  "target": "standard"}'
+          PGO='{  "runs-on": "windows-latest", "arch": "amd64", "program": "clang", "target": "pgo", "prettyname": "windows"}'
+          CLANG='{"runs-on": "windows-latest", "arch": "amd64", "program": "clang", "target": "standard", "prettyname": "windows"}'
+          MSVC='{ "runs-on": "windows-latest", "arch": "amd64", "program": "msvc",  "target": "standard", "prettyname": "windows"}'
 
           if [ "${{ inputs.devel }}" != "true" ] || [ "${{ inputs.force_pgo }}" = "true" ]; then
             COMPILER="[${MSVC}]"
@@ -51,10 +51,10 @@ jobs:
           echo "compiler=${COMPILER}" >> $GITHUB_OUTPUT
       - id: android-matrix
         run: |
-          OPT='{"flavor": "optimized"}'
-          LEG='{"flavor": "legacy"}'
-          STD='{"flavor": "standard"}'
-          CHR='{"flavor": "chromeos"}'
+          OPT='{"runs-on": "ubuntu-24.04", "flavor": "optimized"}'
+          LEG='{"runs-on": "ubuntu-24.04", "flavor": "legacy"}'
+          STD='{"runs-on": "ubuntu-24.04", "flavor": "standard"}'
+          CHR='{"runs-on": "ubuntu-24.04", "flavor": "chromeos"}'
 
           if [ "${{ inputs.build-id }}" = "tag" ]; then
             TARGETS="[$OPT, $LEG, $STD, $CHR]"
@@ -66,13 +66,13 @@ jobs:
           echo "targets=${TARGETS}" >> $GITHUB_OUTPUT
       - id: debian-matrix
         run: |
-          BASE='{"runs-on": "ubuntu-24.04",     "arch": "amd64"}'
-          ARM=' {"runs-on": "ubuntu-24.04-arm", "arch": "aarch64"}'
+          AMD64='{"runs-on": "ubuntu-24.04",     "arch": "amd64"}'
+          ARM='{  "runs-on": "ubuntu-24.04-arm", "arch": "aarch64"}'
 
           if [ "${{ inputs.build-id }}" = "tag" ]; then
-            MATRIX="[${BASE}, ${ARM}]"
+            MATRIX="[${AMD64}, ${ARM}]"
           else
-            MATRIX="[${BASE}]"
+            MATRIX="[${AMD64}]"
           fi
 
           echo $MATRIX
@@ -80,21 +80,21 @@ jobs:
 
       - id: msys-matrix
         run: |
-          AMD64='"runs-on": "windows-latest", "arch": "amd64", "msystem": "MINGW64"'
-          UCRT64='"runs-on": "windows-latest", "arch": "amd64", "msystem": "UCRT64"'
-          AMDCLANG64='"runs-on": "windows-latest", "arch": "amd64", "msystem": "CLANG64"'
-          ARM64='"runs-on": "windows-11-arm", "arch": "arm64", "msystem": "CLANGARM64"'
+          AMD64='     "runs-on": "windows-latest", "arch": "amd64", "msystem": "MINGW64", "prettyname": "mingw"'
+          UCRT64='    "runs-on": "windows-latest", "arch": "amd64", "msystem": "UCRT64", "prettyname": "mingw"'
+          AMDCLANG64='"runs-on": "windows-latest", "arch": "amd64", "msystem": "CLANG64", "prettyname": "mingw"'
+          ARM64='     "runs-on": "windows-11-arm", "arch": "arm64", "msystem": "CLANGARM64", "prettyname": "mingw"'
 
-          PGO='"program": "clang", "target": "pgo"'
+          PGO='  "program": "clang", "target": "pgo"'
           CLANG='"program": "clang", "target": "standard"'
-          GCC='"program": "gcc", "target": "standard"'
-          UCRT='"program": "gcc", "target": "ucrt"'
+          GCC='  "program": "gcc",   "target": "standard"'
+          UCRT=' "program": "gcc",   "target": "ucrt"'
 
           target() {
             arch="$1"
             compiler="$2"
 
-            echo "{${arch}, ${compiler}}"
+            echo "{, ${arch}, ${compiler}}"
           }
 
           amd_gcc="$(target "$AMD64" "$GCC")"
@@ -115,27 +115,27 @@ jobs:
 
       - id: appimage-matrix
         run: |
-          BASE='[{"runs-on": "ubuntu-latest", "arch": "amd64"},{"runs-on": "ubuntu-latest", "arch": "steamdeck"}'
-          ARM=',{"runs-on": "ubuntu-24.04-arm", "arch": "aarch64"}'
+          AMD64='{    "runs-on": "ubuntu-24.04",     "arch": "amd64"}'
+          ARM='{      "runs-on": "ubuntu-24.04-arm", "arch": "aarch64"}'
+          STEAMDECK='{"runs-on": "ubuntu-24.04",     "arch": "steamdeck"}'
+          LEGACY='{   "runs-on": "ubuntu-24.04",     "arch": "legacy"}'
+          ROG_ALLY='{ "runs-on": "ubuntu-24.04",     "arch": "rog-ally"}'
 
           if [ "${{ env.DISABLE_ARM }}" != true ]; then
-            BASE="${BASE}${ARM}"
+            AMD64="${AMD64}, ${ARM}"
           fi
-
-          EXTRA=',{"runs-on": "ubuntu-latest", "arch": "legacy"},{"runs-on": "ubuntu-latest", "arch": "rog-ally"}'
-
-          if [ "${{ inputs.devel }}" != "true" ]; then
-            MATRIX="${BASE}${EXTRA}]"
+          if [ "${{ inputs.devel }}" == "false" ]; then
+            MATRIX="[${AMD64}, ${STEAMDECK}, ${LEGACY}, ${ROG_ALLY}]"
           else
-            MATRIX="${BASE}]"
+            MATRIX="[${AMD64}]"
           fi
 
           echo $MATRIX
           echo "matrix=${MATRIX}" >> $GITHUB_OUTPUT
 
-          PGO='{"program": "clang", "target": "pgo"}'
+          PGO='{  "program": "clang", "target": "pgo"}'
           CLANG='{"program": "clang", "target": "standard"}'
-          GCC='{"program": "gcc", "target": "standard"}'
+          GCC='{  "program": "gcc",   "target": "standard"}'
 
           if [ "${{ inputs.devel }}" != "true" ] || [ "${{ inputs.force_pgo }}" = "true" ]; then
             COMPILER="[${GCC},${PGO}]"

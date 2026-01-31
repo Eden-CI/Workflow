@@ -99,11 +99,11 @@ jobs:
         run: ./.ci/windows/package.sh
         env:
           MSYS_TOOLCHAIN: ${{ matrix.os.msystem }}
-          ARCH: mingw-${{ env.ARCH }}
+          ARCH: ${{ matrix.compiler.prettyname }-${{ env.ARCH }}
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v6.0.0
         with:
-          name: mingw-${{ env.ARCH }}
+          name: ${{ matrix.compiler.prettyname }-${{ env.ARCH }}
           path: artifacts/*
 
