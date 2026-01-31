@@ -35,20 +35,6 @@ jobs:
       appimage-matrix: ${{ steps.appimage-matrix.outputs.matrix }}
       appimage-compiler:  ${{ steps.appimage-matrix.outputs.compiler }}
     steps:
-      - id: windows-matrix
-        run: |
-          PGO='{  "runs-on": "windows-latest", "arch": "amd64", "program": "clang", "target": "pgo", "prettyname": "windows"}'
-          CLANG='{"runs-on": "windows-latest", "arch": "amd64", "program": "clang", "target": "standard", "prettyname": "windows"}'
-          MSVC='{ "runs-on": "windows-latest", "arch": "amd64", "program": "msvc",  "target": "standard", "prettyname": "windows"}'
-
-          if [ "${{ inputs.devel }}" != "true" ] || [ "${{ inputs.force_pgo }}" = "true" ]; then
-            COMPILER="[${MSVC}]"
-          else
-            COMPILER="[${MSVC}]"
-          fi
-
-          echo $COMPILER
-          echo "compiler=${COMPILER}" >> $GITHUB_OUTPUT
       - id: android-matrix
         run: |
           OPT='{"runs-on": "ubuntu-24.04", "flavor": "optimized"}'
@@ -64,6 +50,20 @@ jobs:
 
           echo $TARGETS
           echo "targets=${TARGETS}" >> $GITHUB_OUTPUT
+      - id: windows-matrix
+        run: |
+          PGO='{  "runs-on": "windows-latest", "arch": "amd64", "program": "clang", "target": "pgo", "prettyname": "windows"}'
+          CLANG='{"runs-on": "windows-latest", "arch": "amd64", "program": "clang", "target": "standard", "prettyname": "windows"}'
+          MSVC='{ "runs-on": "windows-latest", "arch": "amd64", "program": "msvc",  "target": "standard", "prettyname": "windows"}'
+
+          if [ "${{ inputs.devel }}" != "true" ] || [ "${{ inputs.force_pgo }}" = "true" ]; then
+            COMPILER="[${MSVC}]"
+          else
+            COMPILER="[${MSVC}]"
+          fi
+
+          echo $COMPILER
+          echo "compiler=${COMPILER}" >> $GITHUB_OUTPUT
       - id: msys-matrix
         run: |
           AMD64='     "runs-on": "windows-latest", "arch": "amd64", "msystem": "MINGW64", "prettyname": "mingw"'
