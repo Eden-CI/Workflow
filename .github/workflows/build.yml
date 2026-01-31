@@ -30,8 +30,8 @@ jobs:
     outputs:
       windows-matrix: ${{ steps.windows-matrix.outputs.compiler }}
       android-matrix: ${{ steps.android-matrix.outputs.targets }}
-      debian-matrix: ${{ steps.debian-matrix.outputs.matrix }}
       msys-matrix: ${{ steps.msys-matrix.outputs.include }}
+      debian-matrix: ${{ steps.appimage-matrix.outputs.debian }}
       appimage-matrix: ${{ steps.appimage-matrix.outputs.matrix }}
       appimage-compiler:  ${{ steps.appimage-matrix.outputs.compiler }}
     steps:
@@ -64,20 +64,6 @@ jobs:
 
           echo $TARGETS
           echo "targets=${TARGETS}" >> $GITHUB_OUTPUT
-      - id: debian-matrix
-        run: |
-          AMD64='{"runs-on": "ubuntu-24.04",     "arch": "amd64"}'
-          ARM='{  "runs-on": "ubuntu-24.04-arm", "arch": "aarch64"}'
-
-          if [ "${{ inputs.build-id }}" = "tag" ]; then
-            MATRIX="[${AMD64}, ${ARM}]"
-          else
-            MATRIX="[${AMD64}]"
-          fi
-
-          echo $MATRIX
-          echo "matrix=${MATRIX}" >> $GITHUB_OUTPUT
-
       - id: msys-matrix
         run: |
           AMD64='     "runs-on": "windows-latest", "arch": "amd64", "msystem": "MINGW64", "prettyname": "mingw"'
@@ -112,7 +98,6 @@ jobs:
 
           echo $INCLUDE
           echo "include=${INCLUDE}" >> $GITHUB_OUTPUT
-
       - id: appimage-matrix
         run: |
           AMD64='{    "runs-on": "ubuntu-24.04",     "arch": "amd64"}'
@@ -124,6 +109,12 @@ jobs:
           if [ "${{ env.DISABLE_ARM }}" != true ]; then
             AMD64="${AMD64}, ${ARM}"
           fi
+
+          DEBIAN="[${AMD64}]"
+
+          echo $DEBIAN
+          echo "debian=${DEBIAN}" >> $GITHUB_OUTPUT
+
           if [ "${{ inputs.devel }}" == "false" ]; then
             MATRIX="[${AMD64}, ${STEAMDECK}, ${LEGACY}, ${ROG_ALLY}]"
           else
