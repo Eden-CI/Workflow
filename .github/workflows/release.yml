@@ -41,11 +41,9 @@ jobs:
         run: python3 ./.ci/common/status.py --${{ inputs.status }}
 
       - name: Package artifacts nicely
-        if: ${{ (inputs.status) == 'success' }}
         run: ./.ci/common/pack.sh
 
       - name: Generate changelog
-        if: ${{ (inputs.status) == 'success' }}
         run: ./.ci/changelog/generate.sh "${{ inputs.build-id }}" > changelog.md
 
       - name: Release
