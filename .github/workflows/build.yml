@@ -28,9 +28,8 @@ jobs:
     name: Central Platform Generation
     runs-on: ubuntu-latest
     outputs:
-      windows-matrix: ${{ steps.windows-matrix.outputs.compiler }}
+      windows-matrix: ${{ steps.windows-matrix.outputs.include }}
       android-matrix: ${{ steps.android-matrix.outputs.targets }}
-      msys-matrix: ${{ steps.msys-matrix.outputs.include }}
       debian-matrix: ${{ steps.appimage-matrix.outputs.debian }}
       appimage-matrix: ${{ steps.appimage-matrix.outputs.matrix }}
       appimage-compiler:  ${{ steps.appimage-matrix.outputs.compiler }}
@@ -52,48 +51,54 @@ jobs:
           echo "targets=${TARGETS}" >> $GITHUB_OUTPUT
       - id: windows-matrix
         run: |
-          PGO='{  "runs-on": "windows-latest", "arch": "amd64", "program": "clang", "target": "pgo", "prettyname": "windows"}'
-          CLANG='{"runs-on": "windows-latest", "arch": "amd64", "program": "clang", "target": "standard", "prettyname": "windows"}'
-          MSVC='{ "runs-on": "windows-latest", "arch": "amd64", "program": "msvc",  "target": "standard", "prettyname": "windows"}'
-
-          if [ "${{ inputs.devel }}" != "true" ] || [ "${{ inputs.force_pgo }}" = "true" ]; then
-            COMPILER="[${MSVC}]"
-          else
-            COMPILER="[${MSVC}]"
-          fi
-
-          echo $COMPILER
-          echo "compiler=${COMPILER}" >> $GITHUB_OUTPUT
-      - id: msys-matrix
-        run: |
-          AMD64='     "runs-on": "windows-latest", "arch": "amd64", "msystem": "MINGW64", "prettyname": "mingw"'
-          UCRT64='    "runs-on": "windows-latest", "arch": "amd64", "msystem": "UCRT64", "prettyname": "mingw"'
-          AMDCLANG64='"runs-on": "windows-latest", "arch": "amd64", "msystem": "CLANG64", "prettyname": "mingw"'
-          ARM64='     "runs-on": "windows-11-arm", "arch": "arm64", "msystem": "CLANGARM64", "prettyname": "mingw"'
+          WINAMD64='  "msystem": "Windows",    "name": "windows"'
+          MINGWAMD64='"msystem": "MINGW64",    "name": "mingw"'
+          UCRT64='    "msystem": "UCRT64",     "name": "mingw"'
+          AMDCLANG64='"msystem": "CLANG64",    "name": "mingw"'
+          ARM64='     "msystem": "CLANGARM64", "name": "mingw"'
 
           PGO='  "program": "clang", "target": "pgo"'
           CLANG='"program": "clang", "target": "standard"'
           GCC='  "program": "gcc",   "target": "standard"'
           UCRT=' "program": "gcc",   "target": "ucrt"'
+          MSVC=' "program": "msvc",  "target": "standard"'
 
           target() {
             arch="$1"
-            compiler="$2"
+            system="$2"
+            compiler="$3"
+            if [ "${arch}" == "arm64" ]; then
+              target_arch='"runs-on": "windows-11-arm", "arch": "arm64"'
+            fi
+            if [ "${arch}" == "amd64" ]; then
+              target_arch='"runs-on": "windows-2025", "arch": "amd64"'
+            fi
 
-            echo "{, ${arch}, ${compiler}}"
+            echo "{${target_arch}, ${system}, ${compiler}}"
           }
 
-          amd_gcc="$(target "$AMD64" "$GCC")"
-          ucrt_gcc="$(target "$UCRT64" "$UCRT")"
-          amd_clang="$(target "$AMDCLANG64" "$CLANG")"
-          amd_pgo="$(target "$AMD64" "$PGO")"
-          arm_clang="$(target "$ARM64" "$CLANG")"
-          arm_pgo="$(target "$ARM64" "$PGO")"
+          amd_clang="$(target "amd64" "$AMDCLANG64" "$CLANG")"
+          amd_pgo="$(target   "amd64" "$MINGWAMD64" "$PGO")"
+
+          win_clang="$(target "amd64" "$WINAMD64"   "$CLANG")"
+          win_pgo="$(target   "amd64" "$WINAMD64"   "$PGO")"
+
+          amd_gcc="$(target   "amd64" "$MINGWAMD64" "$GCC")"
+          ucrt_gcc="$(target  "amd64" "$UCRT64"     "$UCRT")"
+
+          win_msvc="$(target  "amd64" "$WINAMD64"   "$MSVC")"
+
+          arm_clang="$(target "arm64" "$ARM64"      "$CLANG")"
+          arm_pgo="$(target   "arm64" "$ARM64"      "$PGO")"
+
+          if [ "${{ env.DISABLE_ARM }}" != true ]; then
+            ARM64=", ${arm_clang}"
+          fi
 
           if [ "${{ inputs.devel }}" != "true" ] || [ "${{ inputs.force_pgo }}" = "true" ]; then
-            INCLUDE="[${amd_gcc}, ${arm_clang}, ${amd_pgo}, ${arm_pgo}]"
+            INCLUDE="[${amd_gcc}, ${win_msvc}, ${amd_pgo}, ${arm_pgo} ${ARM64}]"
           else
-            INCLUDE="[${amd_gcc}, ${arm_clang}]"
+            INCLUDE="[${amd_gcc}, ${win_msvc} ${ARM64}]"
           fi
 
           echo $INCLUDE
@@ -264,18 +269,6 @@ jobs:
       devel: ${{ inputs.devel }}
       force_pgo: ${{ needs.clone.outputs.pgo }}
       matrix_platform: ${{ needs.generate-platform.outputs.windows-matrix }}
-    secrets: inherit
-
-  msys:
-    name: "MinGW"
-    needs: [clone, generate-platform]
-    uses: ./.github/workflows/msys.yml
-    with:
-      build-id: '${{ inputs.build-id }}'
-      cpm-cache-version: '${{ needs.clone.outputs.cachever }}'
-      devel: ${{ inputs.devel }}
-      force_pgo: ${{ needs.clone.outputs.pgo }}
-      matrix_platform: ${{ needs.generate-platform.outputs.msys-matrix }}
     secrets: inherit
 
   android:
