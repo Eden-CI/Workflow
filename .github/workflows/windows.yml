@@ -46,7 +46,6 @@ jobs:
       COMPILER: "${{ matrix.compiler.program }}"
       PGO_TARGET: "${{ matrix.compiler.target }}"
       ARCH: ${{ matrix.compiler.arch }}-${{ matrix.compiler.program }}-${{ matrix.compiler.target }}
-      SHELL: ${{ matrix.compiler.shell }}
 
     steps:
       - name: Checkout
@@ -118,17 +117,17 @@ jobs:
           dos2unix .patch/boost/*
 
       - name: Configure
-        shell: ${{ env.SHELL }}
+        shell: matrix.compiler.shell
         env:
           MSYS2_LOCATION: ${{ steps.msys2.outputs.msys2-location }}
         run: .ci/common/configure.sh -DCCACHE_PATH=sccache
 
       - name: Build
-        shell: ${{ env.SHELL }}
+        shell: matrix.compiler.shell
         run: cmake --build build
 
       - name: Package
-        shell: ${{ env.SHELL }}
+        shell: matrix.compiler.shell
         run: ./.ci/windows/package.sh
         env:
           MSYS_TOOLCHAIN: ${{ matrix.compiler.msystem }}
