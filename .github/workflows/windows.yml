@@ -34,7 +34,7 @@ env:
 
 jobs:
   windows:
-    name: "Windows ${{ matrix.compiler.arch }} ${{ matrix.compiler.program }} ${{ matrix.compiler.target }}"
+    name: "${{ matrix.compiler.prettyname }} ${{ matrix.compiler.arch }} ${{ matrix.compiler.program }} ${{ matrix.compiler.target }}"
     runs-on: ${{ matrix.compiler.runs-on }}
     strategy:
       fail-fast: false
@@ -52,6 +52,7 @@ jobs:
         uses: actions/checkout@v6.0.1
 
       - name: Setup
+        if: ${{ matrix.compiler.prettyname == 'windows' }}
         uses: ./.github/workflows/setup
         with:
           key: ${{ runner.os }}-${{ matrix.compiler.arch }}-${{ matrix.compiler.program }}
@@ -62,45 +63,56 @@ jobs:
         run: . ./.ci/fj/load-env.sh
 
       - name: Set up MSVC
+        if: ${{ matrix.compiler.prettyname == 'windows' }}
         uses: ilammy/msvc-dev-cmd@v1.13.0
         with:
           arch: ${{ matrix.compiler.arch }}
 
       - name: Install LLVM/Clang
-        if: matrix.compiler.program == 'clang'
+        if: ${{ matrix.compiler.program == 'clang' && matrix.compiler.prettyname == 'windows' }}
         uses: Eden-CI/install-llvm-action@v1
         with:
           version: "21.1.4"
           env: true
 
       - name: Check LLVM/Clang
-        if: matrix.compiler.program == 'clang'
+        if: ${{ matrix.compiler.program == 'clang' && matrix.compiler.prettyname == 'windows' }}
         shell: bash
         run: |
           echo "C:/Program Files/LLVM/bin" >> $GITHUB_PATH
           "C:/Program Files/LLVM/bin/clang-cl" --version
 
       - name: Install Vulkan SDK
+        if: ${{ matrix.compiler.prettyname == 'windows' }}
         shell: powershell
         run: |
           ./.ci/windows/install-vulkan-sdk.ps1
 
       - name: Configure
+        if: ${{ matrix.compiler.prettyname == 'windows' }}
         shell: bash
         run: |
           git config --global core.autocrlf off
           dos2unix .patch/boost/*
+
+      - name: Configure
+        if: ${{ matrix.compiler.prettyname == 'windows' }}
+        shell: bash
+        run: |
           .ci/common/configure.sh -DCCACHE_PATH=${SCCACHE_PATH}
 
       - name: Build
+        if: ${{ matrix.compiler.prettyname == 'windows' }}
         shell: bash
         run: cmake --build build
 
       - name: Package
+        if: ${{ matrix.compiler.prettyname == 'windows' }}
         shell: bash
         run: ./.ci/windows/package.sh
 
       - name: Upload artifacts
+        if: ${{ matrix.compiler.prettyname == 'windows' }}
         uses: actions/upload-artifact@v6.0.0
         with:
           name: ${{ matrix.compiler.prettyname }}-${{ env.ARCH }}
