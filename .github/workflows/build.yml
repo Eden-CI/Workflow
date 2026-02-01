@@ -28,7 +28,7 @@ jobs:
     outputs:
       cachever: ${{ steps.out.outputs.cachever }}
       pgo: ${{ steps.out.outputs.pgo }}
-      windows-matrix: ${{ steps.windows-matrix.outputs.include }}
+      windows-matrix: ${{ steps.windows-matrix.outputs.matrix }}
       android-matrix: ${{ steps.android-matrix.outputs.targets }}
       debian-matrix: ${{ steps.appimage-matrix.outputs.debian }}
       appimage-matrix: ${{ steps.appimage-matrix.outputs.matrix }}
@@ -94,7 +94,8 @@ jobs:
             eden/*
             eden/.patch
 
-      - id: android-matrix
+      - name: Android Matrix
+        id: android-matrix
         run: |
           OPT='{"runs-on": "ubuntu-24.04", "flavor": "optimized"}'
           LEG='{"runs-on": "ubuntu-24.04", "flavor": "legacy"}'
@@ -110,16 +111,17 @@ jobs:
           echo $TARGETS
           echo "targets=${TARGETS}" >> $GITHUB_OUTPUT
 
-      - id: windows-matrix
+      - name: Windows Matrix
+        id: windows-matrix
         run: |
           WINAMD64='  "msystem": "Windows"'
           MINGWAMD64='"msystem": "MINGW64"'
           UCRT64='    "msystem": "UCRT64"'
-          AMDCLANG64='"msystem": "CLANG64"'
+          CLANGAMD64='"msystem": "CLANG64"'
           ARM64='     "msystem": "CLANGARM64"'
 
-          PGO='  "program": "clang", "target": "pgo"'
           CLANG='"program": "clang", "target": "standard"'
+          PGO='  "program": "clang", "target": "pgo"'
           GCC='  "program": "gcc",   "target": "standard"'
           UCRT=' "program": "gcc",   "target": "ucrt"'
           MSVC=' "program": "msvc",  "target": "standard"'
@@ -137,7 +139,7 @@ jobs:
             fi
 
             if [ "${system}" == "mingw" ]; then
-              target_system='"name": "mingw",   "shell": "msys2 {0}"'
+              target_system='"name": "mingw",   "shell": "msys2"'
             elif [ "${system}" == "windows" ]; then
               target_system='"name": "windows", "shell": "bash"'
             fi
@@ -145,34 +147,37 @@ jobs:
             echo "{${target_arch}, ${target_system}, ${msystem}, ${compiler}}"
           }
 
-          amd_clang="$(target "amd64" "mingw" "$AMDCLANG64" "$CLANG")"
-          amd_pgo="$(target   "amd64" "mingw" "$MINGWAMD64" "$PGO")"
+          # AMD64
+          amd64_clang="$(target "amd64" "mingw"   "$CLANGAMD64" "$CLANG")"
+          amd64_pgo="$(target   "amd64" "mingw"   "$CLANGAMD64" "$PGO")"
+          amd64_gcc="$(target   "amd64" "mingw"   "$MINGWAMD64" "$GCC")"
+          ucrt_gcc="$(target    "amd64" "mingw"   "$UCRT64"     "$UCRT")"
+          win_msvc="$(target    "amd64" "windows" "$WINAMD64"   "$MSVC")"
 
-          win_clang="$(target "amd64" "mingw" "$WINAMD64"   "$CLANG")"
-          win_pgo="$(target   "amd64" "mingw" "$WINAMD64"   "$PGO")"
+          # Msys / ARM64
+          arm64_clang="$(target "arm64" "mingw" "$ARM64" "$CLANG")"
+          arm64_pgo="$(target   "arm64" "mingw" "$ARM64" "$PGO")"
 
-          amd_gcc="$(target   "amd64" "mingw" "$MINGWAMD64" "$GCC")"
-          ucrt_gcc="$(target  "amd64" "mingw" "$UCRT64"     "$UCRT")"
+          INCLUDE="${amd64_gcc}, ${win_msvc}"
 
-          win_msvc="$(target  "amd64" "windows" "$WINAMD64" "$MSVC")"
-
-          arm_clang="$(target "arm64" "mingw" "$ARM64"      "$CLANG")"
-          arm_pgo="$(target   "arm64" "mingw" "$ARM64"      "$PGO")"
-
-          if [ "${{ env.DISABLE_ARM }}" != true ]; then
-            ARM64=", ${arm_clang}"
+          if [ "${{ env.DISABLE_ARM }}" != "true" ]; then
+            INCLUDE="${INCLUDE}, ${arm64_clang}"
           fi
 
           if [ "${{ inputs.devel }}" != "true" ] || [ "${{ inputs.force_pgo }}" = "true" ]; then
-            INCLUDE="[${amd_gcc}, ${win_msvc}, ${amd_pgo}, ${arm_pgo} ${ARM64}]"
-          else
-            INCLUDE="[${amd_gcc}, ${win_msvc} ${ARM64}]"
+            INCLUDE="${INCLUDE}, ${amd64_pgo}"
+
+            if [ "${{ env.DISABLE_ARM }}" != "true" ]; then
+              INCLUDE="${INCLUDE}, ${arm64_pgo}"
+            fi
           fi
 
-          echo $INCLUDE
-          echo "include=${INCLUDE}" >> $GITHUB_OUTPUT
+          MATRIX="[${INCLUDE}]"
+          echo $MATRIX
+          echo "matrix=${MATRIX}" >> $GITHUB_OUTPUT
 
-      - id: appimage-matrix
+      - name: Linux Matrix
+        id: appimage-matrix
         run: |
           AMD64='{    "runs-on": "ubuntu-24.04",     "arch": "amd64"}'
           ARM='{      "runs-on": "ubuntu-24.04-arm", "arch": "aarch64"}'
