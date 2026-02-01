@@ -114,11 +114,11 @@ jobs:
       - name: Windows Matrix
         id: windows-matrix
         run: |
-          WINAMD64='  "msystem": "Windows"'
-          MINGWAMD64='"msystem": "MINGW64"'
-          UCRT64='    "msystem": "UCRT64"'
-          CLANGAMD64='"msystem": "CLANG64"'
-          ARM64='     "msystem": "CLANGARM64"'
+          WINAMD64='  "pretty-name": "Windows"'
+          MINGWAMD64='"pretty-name": "MINGW64"'
+          UCRT64='    "pretty-name": "UCRT64"'
+          CLANGAMD64='"pretty-name": "CLANG64"'
+          ARM64='     "pretty-name": "CLANGARM64"'
 
           CLANG='"program": "clang", "target": "standard"'
           PGO='  "program": "clang", "target": "pgo"'
@@ -129,22 +129,22 @@ jobs:
           target() {
             arch="$1"
             system="$2"
-            msystem="$3"
+            pretty-name="$3"
             compiler="$4"
 
             if [ "${arch}" == "arm64" ]; then
-              target_arch='"runs-on": "windows-11-arm", "arch": "arm64"'
+              target_arch='"arch": "arm64", "runs-on": "windows-11-arm"'
             elif [ "${arch}" == "amd64" ]; then
-              target_arch='"runs-on": "windows-2025", "arch": "amd64"'
+              target_arch='"arch": "amd64", "runs-on": "windows-2025"'
             fi
 
             if [ "${system}" == "mingw" ]; then
-              target_system='"name": "mingw",   "shell": "msys2"'
+              target_system='"system": "mingw",   "shell": "msys2"'
             elif [ "${system}" == "windows" ]; then
-              target_system='"name": "windows", "shell": "bash"'
+              target_system='"system": "windows", "shell": "bash"'
             fi
 
-            echo "{${target_arch}, ${target_system}, ${msystem}, ${compiler}}"
+            echo "{${target_arch}, ${target_system}, ${pretty-name}, ${compiler}}"
           }
 
           # AMD64
