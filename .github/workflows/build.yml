@@ -24,8 +24,11 @@ env:
   FORCE_PGO: "false"
 
 jobs:
-  generate-platform:
-    name: Central Platform Generation
+  clone:
+    outputs:
+      cachever: ${{ steps.out.outputs.cachever }}
+      pgo: ${{ steps.out.outputs.pgo }}
+    name: "Parse and Clone"
     runs-on: ubuntu-latest
     outputs:
       windows-matrix: ${{ steps.windows-matrix.outputs.include }}
@@ -34,6 +37,64 @@ jobs:
       appimage-matrix: ${{ steps.appimage-matrix.outputs.matrix }}
       appimage-compiler:  ${{ steps.appimage-matrix.outputs.compiler }}
     steps:
+      - name: Checkout
+        uses: actions/checkout@v6.0.1
+        with:
+          fetch-depth: 0
+
+      - name: Parse Forgejo payload
+        run: |
+          echo '${{ toJSON(github.event.client_payload) }}' > ./payload.json
+          cat payload.json
+          ./.ci/forgejo.sh --parse ${{ inputs.build-id }}
+
+      - name: Load payload environment
+        run: . ./.ci/fj/load-env.sh
+
+      - name: Send pending status
+        if: ${{ (inputs.build-id) == 'master' || (inputs.build-id) == 'pull_request' }}
+        run: python3 .ci/common/status.py --pending
+
+      # for some amazing reason you can't pass env vars to reusable workflows
+      - name: Setup Outputs
+        id: out
+        run: |
+          echo "cachever=${CPM_CACHE_VERSION}" >> "$GITHUB_OUTPUT"
+          echo "pgo=${FORCE_PGO}" >> "$GITHUB_OUTPUT"
+
+      - name: Clone
+        run: ./.ci/forgejo.sh --clone ${{ inputs.build-id }}
+
+      - name: Apply Temporary Patch
+        if: ${{ env.TEMP_PATCH_NUMBER != '' }}
+        run: |
+          wget https://git.eden-emu.dev/eden-emu/eden/pulls/${TEMP_PATCH_NUMBER}.patch
+          git -C eden apply --3way ../${TEMP_PATCH_NUMBER}.patch
+          rm ${TEMP_PATCH_NUMBER}.patch
+
+      - name: Summary
+        run: |
+          ./.ci/fj/summary.sh ${{ inputs.build-id }}
+
+      - name: Cleanup
+        run: |
+          rm -rf eden/.git* eden/.ci eden/.github
+
+      - name: Upload payload environment
+        uses: actions/upload-artifact@v6.0.0
+        with:
+          name: forgejo-env
+          path: forgejo.env
+
+      - name: Upload cloned repo
+        uses: actions/upload-artifact@v6.0.0
+        with:
+          name: eden
+          include-hidden-files: true
+          path: |
+            eden/*
+            eden/.patch
+
       - id: android-matrix
         run: |
           OPT='{"runs-on": "ubuntu-24.04", "flavor": "optimized"}'
@@ -49,6 +110,7 @@ jobs:
 
           echo $TARGETS
           echo "targets=${TARGETS}" >> $GITHUB_OUTPUT
+
       - id: windows-matrix
         run: |
           WINAMD64='  "msystem": "Windows"'
@@ -110,6 +172,7 @@ jobs:
 
           echo $INCLUDE
           echo "include=${INCLUDE}" >> $GITHUB_OUTPUT
+
       - id: appimage-matrix
         run: |
           AMD64='{    "runs-on": "ubuntu-24.04",     "arch": "amd64"}'
@@ -149,72 +212,6 @@ jobs:
           echo $COMPILER
           echo "compiler=${COMPILER}" >> $GITHUB_OUTPUT
 
-  clone:
-    outputs:
-      cachever: ${{ steps.out.outputs.cachever }}
-      pgo: ${{ steps.out.outputs.pgo }}
-    name: "Parse and Clone"
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v6.0.1
-        with:
-          fetch-depth: 0
-
-      - name: Parse Forgejo payload
-        run: |
-          echo '${{ toJSON(github.event.client_payload) }}' > ./payload.json
-          cat payload.json
-          ./.ci/forgejo.sh --parse ${{ inputs.build-id }}
-
-      - name: Load payload environment
-        run: . ./.ci/fj/load-env.sh
-
-      - name: Send pending status
-        if: ${{ (inputs.build-id) == 'master' || (inputs.build-id) == 'pull_request' }}
-        run: python3 .ci/common/status.py --pending
-
-      # for some amazing reason you can't pass env vars to reusable workflows
-      - name: Setup Outputs
-        id: out
-        run: |
-          echo "cachever=${CPM_CACHE_VERSION}" >> "$GITHUB_OUTPUT"
-          echo "pgo=${FORCE_PGO}" >> "$GITHUB_OUTPUT"
-
-      - name: Clone
-        run: ./.ci/forgejo.sh --clone ${{ inputs.build-id }}
-
-      - name: Apply Temporary Patch
-        if: ${{ env.TEMP_PATCH_NUMBER != '' }}
-        run: |
-          wget https://git.eden-emu.dev/eden-emu/eden/pulls/${TEMP_PATCH_NUMBER}.patch
-          git -C eden apply --3way ../${TEMP_PATCH_NUMBER}.patch
-          rm ${TEMP_PATCH_NUMBER}.patch
-
-      - name: Summary
-        run: |
-          ./.ci/fj/summary.sh ${{ inputs.build-id }}
-
-      - name: Cleanup
-        run: |
-          rm -rf eden/.git* eden/.ci eden/.github
-
-      - name: Upload payload environment
-        uses: actions/upload-artifact@v6.0.0
-        with:
-          name: forgejo-env
-          path: forgejo.env
-
-      - name: Upload cloned repo
-        uses: actions/upload-artifact@v6.0.0
-        with:
-          name: eden
-          include-hidden-files: true
-          path: |
-            eden/*
-            eden/.patch
-
   source:
     name: "Source Pack"
     runs-on: ubuntu-latest
@@ -244,49 +241,49 @@ jobs:
 
   deb:
     name: ".deb builds"
-    needs: [clone, generate-platform]
+    needs: [clone]
     uses: ./.github/workflows/deb.yml
     with:
       build-id: '${{ inputs.build-id }}'
       cpm-cache-version: '${{ needs.clone.outputs.cachever }}'
       devel: ${{ inputs.devel }}
-      matrix_platform: ${{ needs.generate-platform.outputs.debian-matrix }}
+      matrix_platform: ${{ needs.clone.outputs.debian-matrix }}
     secrets: inherit
 
   linux:
     name: "AppImage"
-    needs: [clone, generate-platform]
+    needs: [clone]
     uses: ./.github/workflows/appimage.yml
     with:
       build-id: '${{ inputs.build-id }}'
       cpm-cache-version: '${{ needs.clone.outputs.cachever }}'
       devel: ${{ inputs.devel }}
       force_pgo: ${{ needs.clone.outputs.pgo }}
-      matrix: ${{ needs.generate-platform.outputs.appimage-matrix }}
-      compiler: ${{ needs.generate-platform.outputs.appimage-compiler }}
+      matrix: ${{ needs.clone.outputs.appimage-matrix }}
+      compiler: ${{ needs.clone.outputs.appimage-compiler }}
     secrets: inherit
 
   windows:
     name: "Windows"
-    needs: [clone, generate-platform]
+    needs: [clone]
     uses: ./.github/workflows/windows.yml
     with:
       build-id: '${{ inputs.build-id }}'
       cpm-cache-version: '${{ needs.clone.outputs.cachever }}'
       devel: ${{ inputs.devel }}
       force_pgo: ${{ needs.clone.outputs.pgo }}
-      matrix_platform: ${{ needs.generate-platform.outputs.windows-matrix }}
+      matrix_platform: ${{ needs.clone.outputs.windows-matrix }}
     secrets: inherit
 
   android:
     name: "Android"
-    needs: [clone, generate-platform]
+    needs: [clone]
     uses: ./.github/workflows/android.yml
     with:
       build-id: '${{ inputs.build-id }}'
       cpm-cache-version: '${{ needs.clone.outputs.cachever }}'
       devel: ${{ inputs.devel }}
-      matrix_platform: ${{ needs.generate-platform.outputs.android-matrix }}
+      matrix_platform: ${{ needs.clone.outputs.android-matrix }}
     secrets: inherit
 
   macos:
