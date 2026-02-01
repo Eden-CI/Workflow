@@ -15,6 +15,10 @@ on:
         description: 'Development mode (disables update checker)'
         type: string
         required: true
+      matrix:
+        description: 'Generated Matrix to each platform'
+        type: string
+        required: true
 
 env:
   ANDROID_KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
@@ -27,37 +31,13 @@ env:
   BUILD_ID: ${{ inputs.build-id }}
 
 jobs:
-  and-matrix:
-    name: "Generate Android targets"
-    runs-on: ubuntu-latest
-    outputs:
-      targets: ${{ steps.set.outputs.targets }}
-    steps:
-      - id: set
-        run: |
-          OPT='{"flavor": "optimized"}'
-          LEG='{"flavor": "legacy"}'
-          STD='{"flavor": "standard"}'
-          CHR='{"flavor": "chromeos"}'
-
-          if [ "${{ inputs.devel }}" = "false" ]; then
-            TARGETS="[$OPT, $LEG, $STD, $CHR]"
-          else
-            TARGETS="[$STD, $CHR]"
-          fi
-
-          echo $TARGETS
-          echo "targets=${TARGETS}" >> $GITHUB_OUTPUT
-
   android:
     name: "Android"
-    needs: [and-matrix]
-    runs-on: ubuntu-latest
-
+    runs-on: ${{ matrix.target.runs-on }}
     strategy:
       fail-fast: false
       matrix:
-        target: ${{ fromJson(needs.and-matrix.outputs.targets) }}
+        target: ${{ fromJson(inputs.matrix) }}
     env:
       TARGET: "${{ matrix.target.flavor }}"
     steps:

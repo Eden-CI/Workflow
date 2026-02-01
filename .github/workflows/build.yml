@@ -28,9 +28,11 @@ jobs:
     outputs:
       cachever: ${{ steps.out.outputs.cachever }}
       pgo: ${{ steps.out.outputs.pgo }}
+      android-matrix: ${{ steps.matrix.outputs.android }}
+      linux-matrix: ${{ steps.matrix.outputs.linux }}
+      windows-matrix: ${{ steps.matrix.outputs.windows }}
     name: "Parse and Clone"
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout
         uses: actions/checkout@v6.0.1
@@ -90,6 +92,10 @@ jobs:
             eden/*
             eden/.patch
 
+      - name: Build Matrix
+        id: matrix
+        run: ./.ci/common/build_matrix.sh
+
   source:
     name: "Source Pack"
     runs-on: ubuntu-latest
@@ -117,16 +123,6 @@ jobs:
           name: source
           path: ./*.tar.zst
 
-  deb:
-    name: ".deb builds"
-    needs: [clone]
-    uses: ./.github/workflows/debian.yml
-    with:
-      build-id: '${{ inputs.build-id }}'
-      cpm-cache-version: '${{ needs.clone.outputs.cachever }}'
-      devel: ${{ inputs.devel }}
-    secrets: inherit
-
   linux:
     name: "Linux"
     needs: [clone]
@@ -136,6 +132,7 @@ jobs:
       cpm-cache-version: '${{ needs.clone.outputs.cachever }}'
       devel: ${{ inputs.devel }}
       force_pgo: ${{ needs.clone.outputs.pgo }}
+      matrix: ${{ needs.clone.outputs.linux-matrix }}
     secrets: inherit
 
   windows:
@@ -147,17 +144,7 @@ jobs:
       cpm-cache-version: '${{ needs.clone.outputs.cachever }}'
       devel: ${{ inputs.devel }}
       force_pgo: ${{ needs.clone.outputs.pgo }}
-    secrets: inherit
-
-  msys:
-    name: "MinGW"
-    needs: [clone]
-    uses: ./.github/workflows/msys.yml
-    with:
-      build-id: '${{ inputs.build-id }}'
-      cpm-cache-version: '${{ needs.clone.outputs.cachever }}'
-      devel: ${{ inputs.devel }}
-      force_pgo: ${{ needs.clone.outputs.pgo }}
+      matrix: ${{ needs.clone.outputs.windows-matrix }}
     secrets: inherit
 
   android:
@@ -168,6 +155,7 @@ jobs:
       build-id: '${{ inputs.build-id }}'
       cpm-cache-version: '${{ needs.clone.outputs.cachever }}'
       devel: ${{ inputs.devel }}
+      matrix: ${{ needs.clone.outputs.android-matrix }}
     secrets: inherit
 
   macos:
