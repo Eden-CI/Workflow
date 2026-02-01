@@ -28,7 +28,7 @@ jobs:
     outputs:
       cachever: ${{ steps.out.outputs.cachever }}
       pgo: ${{ steps.out.outputs.pgo }}
-       windows-matrix: ${{ steps.windows-matrix.outputs.include }}
+      windows-matrix: ${{ steps.windows-matrix.outputs.include }}
       android-matrix: ${{ steps.android-matrix.outputs.targets }}
       debian-matrix: ${{ steps.appimage-matrix.outputs.debian }}
       appimage-matrix: ${{ steps.appimage-matrix.outputs.matrix }}
