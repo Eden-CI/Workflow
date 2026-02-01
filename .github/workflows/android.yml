@@ -40,7 +40,7 @@ jobs:
           STD='{"flavor": "standard"}'
           CHR='{"flavor": "chromeos"}'
 
-          if [ "${{ inputs.devel }}" = "false" ]; then
+          if [ "${{ inputs.build-id }}" = "tag" ]; then
             TARGETS="[$OPT, $LEG, $STD, $CHR]"
           else
             TARGETS="[$STD, $CHR]"
