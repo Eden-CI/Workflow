@@ -194,12 +194,12 @@ jobs:
           echo $DEBIAN
           echo "debian=${DEBIAN}" >> $GITHUB_OUTPUT
 
+          INCLUDE="${AMD64}"
           if [ "${{ inputs.devel }}" == "false" ]; then
-            MATRIX="[${AMD64}, ${STEAMDECK}, ${LEGACY}, ${ROG_ALLY}]"
-          else
-            MATRIX="[${AMD64}]"
+            INCLUDE="${INCLUDE}, ${STEAMDECK}, ${LEGACY}, ${ROG_ALLY}"
           fi
 
+          MATRIX="[${INCLUDE}]"
           echo $MATRIX
           echo "matrix=${MATRIX}" >> $GITHUB_OUTPUT
 
@@ -207,14 +207,14 @@ jobs:
           CLANG='{"program": "clang", "target": "standard"}'
           GCC='{  "program": "gcc",   "target": "standard"}'
 
+          INCLUDE="${GCC}"
           if [ "${{ inputs.devel }}" != "true" ] || [ "${{ inputs.force_pgo }}" = "true" ]; then
-            COMPILER="[${GCC},${PGO}]"
-          else
-            COMPILER="[${GCC}]"
+            INCLUDE="${INCLUDE}, ${PGO}"
           fi
 
-          echo $COMPILER
-          echo "compiler=${COMPILER}" >> $GITHUB_OUTPUT
+          MATRIX="[${INCLUDE}]"
+          echo $MATRIX
+          echo "compiler=${MATRIX}" >> $GITHUB_OUTPUT
 
   source:
     name: "Source Pack"
