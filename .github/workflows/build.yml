@@ -114,11 +114,11 @@ jobs:
       - name: Windows Matrix
         id: windows-matrix
         run: |
-          WINAMD64='  "pretty-name": "Windows"'
-          MINGWAMD64='"pretty-name": "MINGW64"'
-          UCRT64='    "pretty-name": "UCRT64"'
-          CLANGAMD64='"pretty-name": "CLANG64"'
-          ARM64='     "pretty-name": "CLANGARM64"'
+          WIN_AMD64='  "pretty-name": "Windows"'
+          MINGW_AMD64='"pretty-name": "MINGW64"'
+          UCRT64='     "pretty-name": "UCRT64"'
+          CLANG_AMD64='"pretty-name": "CLANG64"'
+          ARM64='      "pretty-name": "CLANGARM64"'
 
           CLANG='"program": "clang", "target": "standard"'
           PGO='  "program": "clang", "target": "pgo"'
@@ -132,27 +132,35 @@ jobs:
             pretty-name="$3"
             compiler="$4"
 
+            target_arch='"arch": "${arch}"'
             if [ "${arch}" == "arm64" ]; then
-              target_arch='"arch": "arm64", "runs-on": "windows-11-arm"'
+              runs_on='"runs-on": "windows-11-arm"'
             elif [ "${arch}" == "amd64" ]; then
-              target_arch='"arch": "amd64", "runs-on": "windows-2025"'
+              runs_on='"runs-on": "windows-2025"'
+            else
+              # Unsupported Arch
+              exit 1
             fi
 
+            target_system='"system": "${system}"'
             if [ "${system}" == "mingw" ]; then
-              target_system='"system": "mingw",   "shell": "msys2"'
+              shell='"shell": "msys2"'
             elif [ "${system}" == "windows" ]; then
-              target_system='"system": "windows", "shell": "bash"'
+              shell='"shell": "bash"'
+            else
+              # Should never happen, but just in case of some Birdbrain
+              exit 1
             fi
 
-            echo "{${target_arch}, ${target_system}, ${pretty-name}, ${compiler}}"
+            echo "{${runs_on}, ${target_arch}, ${target_system}, ${shell}, ${pretty-name}, ${compiler}}"
           }
 
           # AMD64
-          amd64_clang="$(target "amd64" "mingw"   "$CLANGAMD64" "$CLANG")"
-          amd64_pgo="$(target   "amd64" "mingw"   "$CLANGAMD64" "$PGO")"
-          amd64_gcc="$(target   "amd64" "mingw"   "$MINGWAMD64" "$GCC")"
-          ucrt_gcc="$(target    "amd64" "mingw"   "$UCRT64"     "$UCRT")"
-          win_msvc="$(target    "amd64" "windows" "$WINAMD64"   "$MSVC")"
+          amd64_clang="$(target "amd64" "mingw"   "$CLANG_AMD64" "$CLANG")"
+          amd64_pgo="$(target   "amd64" "mingw"   "$CLANG_AMD64" "$PGO")"
+          amd64_gcc="$(target   "amd64" "mingw"   "$MINGW_AMD64" "$GCC")"
+          ucrt_gcc="$(target    "amd64" "mingw"   "$UCRT64"      "$UCRT")"
+          win_msvc="$(target    "amd64" "windows" "$WIN_AMD64"   "$MSVC")"
 
           # Msys / ARM64
           arm64_clang="$(target "arm64" "mingw" "$ARM64" "$CLANG")"
