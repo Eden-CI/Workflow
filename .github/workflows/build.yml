@@ -41,7 +41,7 @@ jobs:
           STD='{"runs-on": "ubuntu-24.04", "flavor": "standard"}'
           CHR='{"runs-on": "ubuntu-24.04", "flavor": "chromeos"}'
 
-          if [ "${{ inputs.build-id }}" = "tag" ]; then
+          if [ "${{ inputs.devel }}" = "false" ]; then
             TARGETS="[$OPT, $LEG, $STD, $CHR]"
           else
             TARGETS="[$STD, $CHR]"
