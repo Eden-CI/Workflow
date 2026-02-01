@@ -28,14 +28,13 @@ jobs:
     outputs:
       cachever: ${{ steps.out.outputs.cachever }}
       pgo: ${{ steps.out.outputs.pgo }}
-    name: "Parse and Clone"
-    runs-on: ubuntu-latest
-    outputs:
-      windows-matrix: ${{ steps.windows-matrix.outputs.include }}
+       windows-matrix: ${{ steps.windows-matrix.outputs.include }}
       android-matrix: ${{ steps.android-matrix.outputs.targets }}
       debian-matrix: ${{ steps.appimage-matrix.outputs.debian }}
       appimage-matrix: ${{ steps.appimage-matrix.outputs.matrix }}
       appimage-compiler:  ${{ steps.appimage-matrix.outputs.compiler }}
+    name: "Parse and Clone"
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v6.0.1
