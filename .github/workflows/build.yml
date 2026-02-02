@@ -191,8 +191,6 @@ jobs:
           DEBIAN_12='"pretty-name": "Debian-12",    "id": "debian", "system": "debian-12",    "container": "debian:bookworm"'
           DEBIAN_13='"pretty-name": "Debian-13",    "id": "debian", "system": "debian-13",    "container": "debian:trixie"'
           UBUNTU='   "pretty-name": "Ubuntu-24.04", "id": "debian", "system": "ubuntu-24.04", "container": "ubuntu:noble"'
-          ALPINE='   "pretty-name": "Alpine",       "id": "alpine", "system": "room",         "container": "alpine:3.23.3"'
-          ALPINE_AARCH64='"pretty-name": "Alpine",  "id": "alpine", "system": "room",         "container": "arm64v8/alpine:3.23.3"'
 
           AMD64='    "arch": "amd64"'
           AARCH64='  "arch": "aarch64"'
@@ -239,13 +237,9 @@ jobs:
           aarch64_debian12="$(target "$RUNS_AARCH64" "$AARCH64" "$DEBIAN_12" "$GCC")"
           aarch64_debian13="$(target "$RUNS_AARCH64" "$AARCH64" "$DEBIAN_13" "$GCC")"
 
-          # Room
-          amd64_room="$(target    "$RUNS_AMD64" "$AMD64"   "$ALPINE"         "$GCC")"
-          aarch64_rooom="$(target "$RUNS_AMD64" "$AARCH64" "$ALPINE_AARCH64" "$GCC")"
-
-          INCLUDE="${amd64_appimage}, ${amd64_ubuntu}, ${amd64_debian12}, ${adm64_debian13}, ${amd64_room}"
+          INCLUDE="${amd64_appimage}, ${amd64_ubuntu}, ${amd64_debian12}, ${adm64_debian13}"
           if [ "${{ env.DISABLE_ARM }}" != "true" ]; then
-            INCLUDE="${INCLUDE}, ${aarch64_appimage}, ${aarch64_ubuntu}, ${aarch64_debian12}, ${aarch64_debian13}, ${aarch64_rooom}"
+            INCLUDE="${INCLUDE}, ${aarch64_appimage}, ${aarch64_ubuntu}, ${aarch64_debian12}, ${aarch64_debian13}"
           fi
           if [ "${{ inputs.devel }}" != "true" ]; then
             INCLUDE="${INCLUDE}, ${amd64_steamdeck}, ${amd64_legacy}, ${amd64_rogally}"
@@ -342,3 +336,8 @@ jobs:
       cpm-cache-version: '${{ needs.clone.outputs.cachever }}'
       devel: ${{ inputs.devel }}
     secrets: inherit
+
+  room:
+    name: "musl room"
+    needs: [clone]
+    uses: ./.github/workflows/room.yml

@@ -1,0 +1,57 @@
+name: "eden-room"
+
+on:
+  workflow_call:
+
+jobs:
+  alpine:
+    name: "Alpine (${{ matrix.arch }})"
+    runs-on: ${{ matrix.runs-on }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: aarch64
+            runs-on: ubuntu-22.04-arm
+          - arch: x86_64
+            runs-on: ubuntu-22.04
+
+    env:
+      ARCH: ${{ matrix.arch }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6.0.1
+
+      - name: Clone
+        uses: actions/download-artifact@v7.0.0
+        with:
+          name: eden
+
+      - name: Build
+        run: |
+          docker run --rm -v "$PWD:/work" -w /work \
+            -e GITHUB_REF \
+            -e GITHUB_REF_NAME \
+            -e GITHUB_SHA \
+            -e ARCH \
+            alpine:3.23 sh -c '
+              apk add --no-cache bash cmake g++ gcc git ninja patch boost1.84-dev boost1.84-static \
+                mbedtls-dev mbedtls-static
+              cmake -S . -B build -GNinja -DYUZU_STATIC_ROOM=ON
+              cmake --build build
+
+              mkdir -p artifacts
+
+              src=build/bin/eden-room
+              dst=artifacts/"eden-room-$ARCH-unknown-linux-musl"
+              mv "$src" "$dst"
+
+              strip "$dst"
+            '
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v6.0.0
+        with:
+          name: room-${{ matrix.arch }}
+          path: artifacts/*

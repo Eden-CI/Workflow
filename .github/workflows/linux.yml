@@ -72,23 +72,9 @@ jobs:
         if: ${{ matrix.compiler.system == 'linux' }}
         run:  .ci/common/configure.sh -DCCACHE_PATH=${SCCACHE_PATH}
 
-      - name: Configure Room
-        if: ${{ matrix.compiler.system == 'room' }}
-        run:  cmake -S . -B build -G Ninja -DYUZU_STATIC_ROOM=ON -DCCACHE_PATH=${SCCACHE_PATH}
-
       - name: Build
-        if: ${{ matrix.compiler.system == 'linux' || matrix.compiler.system == 'room' }}
+        if: ${{ matrix.compiler.system == 'linux' }}
         run: cmake --build build
-
-      - name: Package Room
-        if: ${{ matrix.compiler.system == 'room' }}
-        run: |
-          src=build/bin/eden-room
-          dst=artifacts/"eden-room-${{ matrix.compiler.arch }}-unknown-linux-musl"
-
-          mkdir -p artifacts
-          mv "$src" "$dst"
-          strip "$dst"
 
       - name: Package
         if: ${{ matrix.compiler.system == 'linux' }}
@@ -119,10 +105,3 @@ jobs:
         with:
           name: ${{ matrix.compiler.system }}-${{ matrix.compiler.arch }}
           path: ./*.deb
-
-      - name: Upload artifacts
-        if: ${{ matrix.compiler.system == 'room' }}
-        uses: actions/upload-artifact@v6.0.0
-        with:
-          name: room-${{ matrix.arch }}
-          path: artifacts/*
