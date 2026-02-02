@@ -142,7 +142,9 @@ dependencies_alpine(){
 		mbedtls-dev mbedtls-static
 }
 
-. /etc/os-release
+if [ -f /etc/os-release ]; then
+	. /etc/os-release
+fi
 
 case "$ID" in
   debian|ubuntu)
