@@ -54,18 +54,18 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6.0.1
 
-      - name: Setup
-        uses: ./.github/workflows/setup
-        with:
-          key: ${{ runner.os }}-${{ matrix.compiler.arch }}-${{ matrix.compiler.program }}
-          version: ${{ inputs.cpm-cache-version }}
-
       - name: Install dependencies
         run: |
           chmod a+x ./.ci/linux/deps.sh
           ./.ci/linux/deps.sh
         env:
           GITHUB_TOKEN: ${{ secrets.CUSTOM_GITHUB_TOKEN }}
+
+      - name: Setup
+        uses: ./.github/workflows/setup
+        with:
+          key: ${{ runner.os }}-${{ matrix.compiler.arch }}-${{ matrix.compiler.program }}
+          version: ${{ inputs.cpm-cache-version }}
 
       - name: Configure
         if: ${{ matrix.compiler.system == 'linux' }}
