@@ -61,10 +61,10 @@ jobs:
           version: ${{ inputs.cpm-cache-version }}
 
       - name: Install dependencies
-        if: ${{ matrix.compiler.system == 'linux' }}
+        if: ${{ matrix.compiler.dependency_type }}
         run: |
-          chmod a+x ./.ci/linux/deps.sh
-          ./.ci/linux/deps.sh
+          chmod a+x ./.ci/${{ matrix.compiler.dependency_type }}/deps.sh
+          ./.ci/${{ matrix.compiler.dependency_type }}/deps.sh
         env:
           GITHUB_TOKEN: ${{ secrets.CUSTOM_GITHUB_TOKEN }}
 
