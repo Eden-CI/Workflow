@@ -1,4 +1,4 @@
-name: "AppImage"
+name: "Linux"
 
 on:
   workflow_call:
@@ -23,10 +23,6 @@ on:
         description: 'matrix platform'
         type: string
         required: true
-      compiler:
-        description: 'matrix platform'
-        type: string
-        required: true
 
 env:
   DISABLE_ARM: ${{ vars.DISABLE_ARM }}
@@ -38,23 +34,21 @@ env:
 
 jobs:
   linux:
-    name: "AppImage ${{ matrix.os.arch }} ${{ matrix.compiler.program }} ${{ matrix.compiler.target }}"
-    runs-on: ${{ matrix.os.runs-on }}
+    name: "${{ matrix.compiler.pretty-name }} ${{ matrix.compiler.arch }} ${{ matrix.compiler.program }} ${{ matrix.compiler.target }}"
+    runs-on: ${{ matrix.compiler.runs-on }}
     container:
-      image: ghcr.io/pkgforge-dev/archlinux:latest
+      image: ${{ matrix.compiler.container }}
       options: --privileged --device /dev/fuse
-
     strategy:
       fail-fast: false
       matrix:
-        os: ${{ fromJson(inputs.matrix) }}
-        compiler: ${{ fromJson(inputs.compiler) }}
+        compiler: ${{ fromJson(inputs.matrix) }}
 
     env:
-      TARGET: "${{ matrix.os.arch }}"
+      TARGET: "${{ matrix.compiler.arch }}"
       COMPILER: "${{ matrix.compiler.program }}"
       PGO_TARGET: "${{ matrix.compiler.target }}"
-      FULL_ARCH: ${{ matrix.os.arch }}-${{ matrix.compiler.program }}-${{ matrix.compiler.target }}
+      FULL_ARCH: ${{ matrix.compiler.arch }}-${{ matrix.compiler.program }}-${{ matrix.compiler.target }}
 
     steps:
       - name: Checkout
@@ -63,10 +57,11 @@ jobs:
       - name: Setup
         uses: ./.github/workflows/setup
         with:
-          key: ${{ runner.os }}-${{ matrix.os.arch }}-${{ matrix.compiler.program }}
+          key: ${{ runner.os }}-${{ matrix.compiler.arch }}-${{ matrix.compiler.program }}
           version: ${{ inputs.cpm-cache-version }}
 
       - name: Install dependencies
+        if: ${{ matrix.compiler.system == 'linux' }}
         run: |
           chmod a+x ./.ci/linux/deps.sh
           ./.ci/linux/deps.sh
@@ -74,18 +69,39 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.CUSTOM_GITHUB_TOKEN }}
 
       - name: Configure
+        if: ${{ matrix.compiler.system == 'linux' }}
         run:  .ci/common/configure.sh -DCCACHE_PATH=${SCCACHE_PATH}
 
       - name: Build
+        if: ${{ matrix.compiler.system == 'linux' }}
         run: cmake --build build
 
       - name: Package
+        if: ${{ matrix.compiler.system == 'linux' }}
         run: ./.ci/linux/package.sh
         env:
           GITHUB_TOKEN: ${{ secrets.CUSTOM_GITHUB_TOKEN }}
 
       - name: Upload artifacts
+        if: ${{ matrix.compiler.system == 'linux' }}
         uses: actions/upload-artifact@v6.0.0
         with:
-          name: linux-${{ matrix.os.arch }}-${{ matrix.compiler.program }}-${{ matrix.compiler.target }}
+          name: linux-${{ matrix.compiler.arch }}-${{ matrix.compiler.program }}-${{ matrix.compiler.target }}
           path: ./*.AppImage*
+
+      - name: Build
+        if: ${{ matrix.compiler.system != 'linux' }}
+        shell: bash
+        run: |
+          chmod a+x ./.ci/deb/makedeb.sh
+          ./.ci/deb/makedeb.sh
+        env:
+          ARCH: ${{ matrix.compiler.arch }}
+          DEB_NAME: ${{ matrix.compiler.pretty-name }}
+
+      - name: Upload artifacts
+        if: ${{ matrix.compiler.system != 'linux' }}
+        uses: actions/upload-artifact@v6.0.0
+        with:
+          name: ${{ matrix.compiler.system }}-${{ matrix.compiler.arch }}
+          path: ./*.deb

@@ -30,9 +30,7 @@ jobs:
       pgo: ${{ steps.out.outputs.pgo }}
       windows-matrix: ${{ steps.windows-matrix.outputs.matrix }}
       android-matrix: ${{ steps.android-matrix.outputs.targets }}
-      debian-matrix: ${{ steps.appimage-matrix.outputs.debian }}
       appimage-matrix: ${{ steps.appimage-matrix.outputs.matrix }}
-      appimage-compiler:  ${{ steps.appimage-matrix.outputs.compiler }}
     name: "Parse and Clone"
     runs-on: ubuntu-latest
     steps:
@@ -129,11 +127,11 @@ jobs:
           target() {
             arch="$1"
             system="$2"
-            pretty-name="$3"
+            prettyname="$3"
             compiler="$4"
 
-            target_arch='"arch": "${arch}"'
-            if [ "${arch}" == "arm64" ]; then
+            target_arch="\"arch\": \"${arch}\""
+            if [ "${arch}" == "aarch64" ]; then
               runs_on='"runs-on": "windows-11-arm"'
             elif [ "${arch}" == "amd64" ]; then
               runs_on='"runs-on": "windows-2025"'
@@ -142,7 +140,7 @@ jobs:
               exit 1
             fi
 
-            target_system='"system": "${system}"'
+            target_system="\"system\": \"${system}\""
             if [ "${system}" == "mingw" ]; then
               shell='"shell": "msys2"'
             elif [ "${system}" == "windows" ]; then
@@ -152,31 +150,30 @@ jobs:
               exit 1
             fi
 
-            echo "{${runs_on}, ${target_arch}, ${target_system}, ${shell}, ${pretty-name}, ${compiler}}"
+            echo "{${runs_on}, ${target_arch}, ${target_system}, ${shell}, ${prettyname}, ${compiler}}"
           }
 
-          # AMD64
+          # Clang / AMD64
           amd64_clang="$(target "amd64" "mingw"   "$CLANG_AMD64" "$CLANG")"
           amd64_pgo="$(target   "amd64" "mingw"   "$CLANG_AMD64" "$PGO")"
+
+          # Windows / AMD64
           amd64_gcc="$(target   "amd64" "mingw"   "$MINGW_AMD64" "$GCC")"
           ucrt_gcc="$(target    "amd64" "mingw"   "$UCRT64"      "$UCRT")"
           win_msvc="$(target    "amd64" "windows" "$WIN_AMD64"   "$MSVC")"
 
           # Msys / ARM64
-          arm64_clang="$(target "arm64" "mingw" "$ARM64" "$CLANG")"
-          arm64_pgo="$(target   "arm64" "mingw" "$ARM64" "$PGO")"
+          aarch64_clang="$(target "aarch64" "mingw" "$ARM64" "$CLANG")"
+          aarch64_pgo="$(target   "aarch64" "mingw" "$ARM64" "$PGO")"
 
           INCLUDE="${amd64_gcc}, ${win_msvc}"
-
           if [ "${{ env.DISABLE_ARM }}" != "true" ]; then
-            INCLUDE="${INCLUDE}, ${arm64_clang}"
+            INCLUDE="${INCLUDE}, ${aarch64_clang}"
           fi
-
           if [ "${{ inputs.devel }}" != "true" ] || [ "${{ inputs.force_pgo }}" = "true" ]; then
             INCLUDE="${INCLUDE}, ${amd64_pgo}"
-
             if [ "${{ env.DISABLE_ARM }}" != "true" ]; then
-              INCLUDE="${INCLUDE}, ${arm64_pgo}"
+              INCLUDE="${INCLUDE}, ${aarch64_pgo}"
             fi
           fi
 
@@ -187,42 +184,76 @@ jobs:
       - name: Linux Matrix
         id: appimage-matrix
         run: |
-          AMD64='{    "runs-on": "ubuntu-24.04",     "arch": "amd64"}'
-          ARM='{      "runs-on": "ubuntu-24.04-arm", "arch": "aarch64"}'
-          STEAMDECK='{"runs-on": "ubuntu-24.04",     "arch": "steamdeck"}'
-          LEGACY='{   "runs-on": "ubuntu-24.04",     "arch": "legacy"}'
-          ROG_ALLY='{ "runs-on": "ubuntu-24.04",     "arch": "rog-ally"}'
+          RUNS_AMD64='"runs-on": "ubuntu-24.04"'
+          RUNS_AARCH64='"runs-on": "ubuntu-24.04-arm"'
 
-          if [ "${{ env.DISABLE_ARM }}" != true ]; then
-            AMD64="${AMD64}, ${ARM}"
+          APPIMAGE=' "pretty-name": "AppImage",     "system": "linux",        "container": "ghcr.io/pkgforge-dev/archlinux:latest"'
+          DEBIAN_12='"pretty-name": "Debian-12",    "system": "debian-12",    "container": "ghcr.io/xrplf/ci/debian-bookworm:gcc-12"'
+          DEBIAN_13='"pretty-name": "Debian-13",    "system": "debian-13",    "container": "ghcr.io/nilcons/debian:latest"'
+          UBUNTU='   "pretty-name": "Ubuntu-24.04", "system": "ubuntu-24.04", "container": "ubuntu:noble"'
+
+          AMD64='    "arch": "amd64"'
+          AARCH64='  "arch": "aarch64"'
+          LEGACY='   "arch": "legacy"'
+          ROG_ALLY=' "arch": "rog-ally"'
+          STEAMDECK='"arch": "steamdeck"'
+
+          CLANG='"program": "clang", "target": "standard"'
+          PGO='  "program": "clang", "target": "pgo"'
+          GCC='  "program": "gcc",   "target": "standard"'
+
+          target() {
+            runs_on="$1"
+            arch="$2"
+            system="$3"
+            compiler="$4"
+
+            echo "{${runs_on}, ${arch}, ${system}, ${compiler}}"
+          }
+
+          # AppImage / AMD64
+          amd64_appimage="$(target  "$RUNS_AMD64" "$AMD64"     "$APPIMAGE" "$GCC")"
+          amd64_steamdeck="$(target "$RUNS_AMD64" "$STEAMDECK" "$APPIMAGE" "$GCC")"
+          amd64_legacy="$(target    "$RUNS_AMD64" "$LEGACY"    "$APPIMAGE" "$GCC")"
+          amd64_rogally="$(target   "$RUNS_AMD64" "$ROG_ALLY"  "$APPIMAGE" "$GCC")"
+
+          # Debian-like / AMD64
+          amd64_ubuntu="$(target   "$RUNS_AMD64" "$AMD64" "$UBUNTU"    "$GCC")"
+          amd64_debian12="$(target "$RUNS_AMD64" "$AMD64" "$DEBIAN_12" "$GCC")"
+          adm64_debian13="$(target "$RUNS_AMD64" "$AMD64" "$DEBIAN_13" "$GCC")"
+
+          # Clang / AMD64
+          amd64_pgo="$(target           "$RUNS_AMD64" "$AMD64"     "$APPIMAGE" "$PGO")"
+          amd64_pgo_steamdeck="$(target "$RUNS_AMD64" "$STEAMDECK" "$APPIMAGE" "$PGO")"
+          amd64_pgo_legacy="$(target    "$RUNS_AMD64" "$LEGACY"    "$APPIMAGE" "$PGO")"
+          amd64_pgo_rogally="$(target   "$RUNS_AMD64" "$ROG_ALLY"  "$APPIMAGE" "$PGO")"
+
+          # AppImage / AARCH64
+          aarch64_appimage="$(target "$RUNS_AARCH64" "$AARCH64" "$APPIMAGE" "$GCC")"
+          aarch64_pgo="$(target "$RUNS_AARCH64" "$AARCH64" "$APPIMAGE" "$PGO")"
+
+          # Debian-like / AARCH64
+          aarch64_ubuntu="$(target   "$RUNS_AARCH64" "$AARCH64" "$UBUNTU"    "$GCC")"
+          aarch64_debian12="$(target "$RUNS_AARCH64" "$AARCH64" "$DEBIAN_12" "$GCC")"
+          aarch64_debian13="$(target "$RUNS_AARCH64" "$AARCH64" "$DEBIAN_13" "$GCC")"
+
+          INCLUDE="${amd64_appimage}, ${amd64_ubuntu}, ${amd64_debian12}, ${adm64_debian13}"
+          if [ "${{ env.DISABLE_ARM }}" != "true" ]; then
+            INCLUDE="${INCLUDE}, ${aarch64_appimage}, ${aarch64_ubuntu}, ${aarch64_debian12}, ${aarch64_debian13}"
           fi
-
-          DEBIAN="[${AMD64}]"
-
-          echo $DEBIAN
-          echo "debian=${DEBIAN}" >> $GITHUB_OUTPUT
-
-          INCLUDE="${AMD64}"
-          if [ "${{ inputs.devel }}" == "false" ]; then
-            INCLUDE="${INCLUDE}, ${STEAMDECK}, ${LEGACY}, ${ROG_ALLY}"
+          if [ "${{ inputs.devel }}" != "true" ]; then
+            INCLUDE="${INCLUDE}, ${amd64_steamdeck}, ${amd64_legacy}, ${amd64_rogally}"
+          fi
+          if [ "${{ inputs.devel }}" != "true" ] || [ "${{ inputs.force_pgo }}" = "true" ]; then
+            INCLUDE="${INCLUDE}, ${amd64_pgo}, ${amd64_pgo_steamdeck}, ${amd64_pgo_legacy}, ${amd64_pgo_rogally}"
+            if [ "${{ env.DISABLE_ARM }}" != "true" ]; then
+              INCLUDE="${INCLUDE}, ${aarch64_pgo}"
+            fi
           fi
 
           MATRIX="[${INCLUDE}]"
           echo $MATRIX
           echo "matrix=${MATRIX}" >> $GITHUB_OUTPUT
-
-          PGO='{  "program": "clang", "target": "pgo"}'
-          CLANG='{"program": "clang", "target": "standard"}'
-          GCC='{  "program": "gcc",   "target": "standard"}'
-
-          INCLUDE="${GCC}"
-          if [ "${{ inputs.devel }}" != "true" ] || [ "${{ inputs.force_pgo }}" = "true" ]; then
-            INCLUDE="${INCLUDE}, ${PGO}"
-          fi
-
-          MATRIX="[${INCLUDE}]"
-          echo $MATRIX
-          echo "compiler=${MATRIX}" >> $GITHUB_OUTPUT
 
   source:
     name: "Source Pack"
@@ -251,17 +282,6 @@ jobs:
           name: source
           path: ./*.tar.zst
 
-  deb:
-    name: ".deb builds"
-    needs: [clone]
-    uses: ./.github/workflows/deb.yml
-    with:
-      build-id: '${{ inputs.build-id }}'
-      cpm-cache-version: '${{ needs.clone.outputs.cachever }}'
-      devel: ${{ inputs.devel }}
-      matrix_platform: ${{ needs.clone.outputs.debian-matrix }}
-    secrets: inherit
-
   linux:
     name: "AppImage"
     needs: [clone]
@@ -272,7 +292,6 @@ jobs:
       devel: ${{ inputs.devel }}
       force_pgo: ${{ needs.clone.outputs.pgo }}
       matrix: ${{ needs.clone.outputs.appimage-matrix }}
-      compiler: ${{ needs.clone.outputs.appimage-compiler }}
     secrets: inherit
 
   windows:
