@@ -79,7 +79,6 @@ dependencies_debian() {
 	fi
 
 	if command -v apt >/dev/null 2>&1 ; then
-		$SUDO apt update
 		$SUDO apt install -y \
 			autoconf \
 			cmake \
