@@ -49,6 +49,7 @@ jobs:
       COMPILER: "${{ matrix.compiler.program }}"
       PGO_TARGET: "${{ matrix.compiler.target }}"
       FULL_ARCH: ${{ matrix.compiler.arch }}-${{ matrix.compiler.program }}-${{ matrix.compiler.target }}
+      ID: "${{ matrix.compiler.id }}"
 
     steps:
       - name: Checkout
@@ -57,7 +58,6 @@ jobs:
       - name: Install dependencies
         run: |
           chmod a+x ./.ci/linux/deps.sh
-          export ID=${{ matrix.compiler.id }}
           ./.ci/linux/deps.sh
         env:
           GITHUB_TOKEN: ${{ secrets.CUSTOM_GITHUB_TOKEN }}

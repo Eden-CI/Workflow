@@ -127,9 +127,14 @@ dependencies_debian() {
 			libboost-fiber-dev \
 			libboost-context-dev \
 			libsdl2-dev \
-			libopus-dev \
-			libasound2t64 \
-			vulkan-utility-libraries-dev
+			libopus-dev
+		if [ "$ID" = "debian" ] && [ "$VERSION_ID" -ge 13 ]; then
+			$SUDO apt install -y libasound2t64
+		elif [ "$ID" = "ubuntu" ]; then
+			$SUDO apt install -y libasound2t64
+		else
+			$SUDO apt install -y libasound2
+		fi
 		if [ "$(uname -m)" = 'x86_64' ]; then
 			$SUDO apt install -y libxbyak-dev
 		fi
