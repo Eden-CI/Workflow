@@ -135,6 +135,12 @@ dependencies_debian() {
 	fi
 }
 
+dependencies_alpine(){
+	apk add --no-cache \
+		bash cmake g++ gcc git ninja patch boost1.84-dev boost1.84-static \
+		mbedtls-dev mbedtls-static
+}
+
 . /etc/os-release
 
 case "$ID" in
@@ -143,6 +149,9 @@ case "$ID" in
     ;;
   arch)
     dependencies_arch
+    ;;
+  alpine)
+    dependencies_alpine
     ;;
   *)
     echo "[ERROR] Unsupported $ID!"

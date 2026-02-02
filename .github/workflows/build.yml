@@ -191,6 +191,7 @@ jobs:
           DEBIAN_12='"pretty-name": "Debian-12",    "system": "debian-12",    "container": "debian:bookworm"'
           DEBIAN_13='"pretty-name": "Debian-13",    "system": "debian-13",    "container": "debian:trixie"'
           UBUNTU='   "pretty-name": "Ubuntu-24.04", "system": "ubuntu-24.04", "container": "ubuntu:noble"'
+          ALPINE='   "pretty-name": "Alpine",       "system": "room",         "container": "alpine:3.23.3"'
 
           AMD64='    "arch": "amd64"'
           AARCH64='  "arch": "aarch64"'
@@ -236,6 +237,10 @@ jobs:
           aarch64_ubuntu="$(target   "$RUNS_AARCH64" "$AARCH64" "$UBUNTU"    "$GCC")"
           aarch64_debian12="$(target "$RUNS_AARCH64" "$AARCH64" "$DEBIAN_12" "$GCC")"
           aarch64_debian13="$(target "$RUNS_AARCH64" "$AARCH64" "$DEBIAN_13" "$GCC")"
+
+          # Room
+          amd64_room="$(target   "$RUNS_AMD64"   "$AMD64"   "$ALPINE"  "$GCC")"
+          aarch64_rooom"$(target "$RUNS_AARCH64" "$AARCH64" "$ALPINE" "$GCC")"
 
           INCLUDE="${amd64_appimage}, ${amd64_ubuntu}, ${amd64_debian12}, ${adm64_debian13}"
           if [ "${{ env.DISABLE_ARM }}" != "true" ]; then
@@ -336,8 +341,3 @@ jobs:
       cpm-cache-version: '${{ needs.clone.outputs.cachever }}'
       devel: ${{ inputs.devel }}
     secrets: inherit
-
-  room:
-    name: "musl room"
-    needs: [clone]
-    uses: ./.github/workflows/room.yml
