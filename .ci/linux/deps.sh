@@ -135,7 +135,7 @@ dependencies_debian() {
 	fi
 }
 
-source /etc/os-release
+. /etc/os-release
 
 case "$ID" in
   debian|ubuntu)
