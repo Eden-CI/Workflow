@@ -187,10 +187,10 @@ jobs:
           RUNS_AMD64='"runs-on": "ubuntu-24.04"'
           RUNS_AARCH64='"runs-on": "ubuntu-24.04-arm"'
 
-          APPIMAGE=' "pretty-name": "AppImage",     "system": "linux",        "container": "ghcr.io/pkgforge-dev/archlinux:latest", "dependency_type": "linux"'
+          APPIMAGE=' "pretty-name": "AppImage",     "system": "linux",        "container": "ghcr.io/pkgforge-dev/archlinux:latest"'
           DEBIAN_12='"pretty-name": "Debian-12",    "system": "debian-12",    "container": "debian:bookworm"'
           DEBIAN_13='"pretty-name": "Debian-13",    "system": "debian-13",    "container": "debian:trixie"'
-          UBUNTU='   "pretty-name": "Ubuntu-24.04", "system": "ubuntu-24.04", "container": "ubuntu:noble", "dependency_type": "deb"'
+          UBUNTU='   "pretty-name": "Ubuntu-24.04", "system": "ubuntu-24.04", "container": "ubuntu:noble"'
 
           AMD64='    "arch": "amd64"'
           AARCH64='  "arch": "aarch64"'
