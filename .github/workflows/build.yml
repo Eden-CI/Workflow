@@ -30,7 +30,7 @@ jobs:
       pgo: ${{ steps.out.outputs.pgo }}
       windows-matrix: ${{ steps.windows-matrix.outputs.matrix }}
       android-matrix: ${{ steps.android-matrix.outputs.targets }}
-      appimage-matrix: ${{ steps.appimage-matrix.outputs.matrix }}
+      linux-matrix: ${{ steps.linux-matrix.outputs.matrix }}
     name: "Parse and Clone"
     runs-on: ubuntu-latest
     steps:
@@ -182,7 +182,7 @@ jobs:
           echo "matrix=${MATRIX}" >> $GITHUB_OUTPUT
 
       - name: Linux Matrix
-        id: appimage-matrix
+        id: linux-matrix
         run: |
           RUNS_AMD64='"runs-on": "ubuntu-24.04"'
           RUNS_AARCH64='"runs-on": "ubuntu-24.04-arm"'
@@ -283,15 +283,15 @@ jobs:
           path: ./*.tar.zst
 
   linux:
-    name: "AppImage"
+    name: "Linux"
     needs: [clone]
-    uses: ./.github/workflows/appimage.yml
+    uses: ./.github/workflows/linux.yml
     with:
       build-id: '${{ inputs.build-id }}'
       cpm-cache-version: '${{ needs.clone.outputs.cachever }}'
       devel: ${{ inputs.devel }}
       force_pgo: ${{ needs.clone.outputs.pgo }}
-      matrix: ${{ needs.clone.outputs.appimage-matrix }}
+      matrix: ${{ needs.clone.outputs.linux-matrix }}
     secrets: inherit
 
   windows:
