@@ -277,7 +277,7 @@ case "$1" in
 *)
 	cat <<EOF
 Usage: $0 [--parse <type> | --clone <type>]
-Supported types: master | pull_request | tag | push | test
+Supported types: master | pull_request | tag | push | test | nightly
 
 Commands:
     --parse: Parses an existing payload from payload.json, and creates
