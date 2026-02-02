@@ -53,7 +53,6 @@ if command -v apt >/dev/null 2>&1 ; then
 		spirv-tools \
 		spirv-headers \
 		libusb-1.0-0-dev \
-		libxbyak-dev \
 		libboost-dev \
 		libboost-fiber-dev \
 		libboost-context-dev \
@@ -61,4 +60,7 @@ if command -v apt >/dev/null 2>&1 ; then
 		libopus-dev \
 		libasound2t64 \
 		vulkan-utility-libraries-dev
+	if [ "$(uname -m)" = 'x86_64' ]; then
+		$SUDO apt install -y libxbyak-dev
+	fi
 fi
