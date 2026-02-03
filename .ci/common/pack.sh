@@ -1,15 +1,16 @@
 #!/bin/sh -e
 
-# SPDX-FileCopyrightText: Copyright 2025 Eden Emulator Project
+# SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 # shellcheck disable=SC2043
 
 ROOTDIR="$PWD"
-ARTIFACTS_DIR="artifacts"
+DIR=$0; [ -n "${BASH_VERSION-}" ] && DIR="${BASH_SOURCE[0]}"; WORKFLOW_DIR="$(cd "$(dirname -- "$DIR")/../.." && pwd)"
+ARTIFACTS_DIR="$ROOTDIR/artifacts"
 
 # shellcheck disable=SC1091
-. "$ROOTDIR"/.ci/common/project.sh
+. "$WORKFLOW_DIR/.ci/common/project.sh"
 
 mkdir -p "$ARTIFACTS_DIR"
 

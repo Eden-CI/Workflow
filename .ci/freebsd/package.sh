@@ -13,7 +13,7 @@ ARTIFACTS_DIR="$ROOTDIR/artifacts"
 DIR=$0; [ -n "${BASH_VERSION-}" ] && DIR="${BASH_SOURCE[0]}"; WORKFLOW_DIR="$(cd "$(dirname -- "$DIR")/../.." && pwd)"
 . "$WORKFLOW_DIR/.ci/common/project.sh"
 
-VERSION=$(cat "$ROOTDIR/GIT-TAG" 2>/dev/null || echo 'v0.1.1-Workflow')
+VERSION=$(cat "$ROOTDIR/GIT-TAG" 2>/dev/null || cat "$WORKFLOW_DIR/WORKFLOW-TAG")
 PKG_NAME="${PROJECT_PRETTYNAME}-${VERSION}-${ARCH}"
 PKG_DIR="$ROOTDIR/install/usr"
 

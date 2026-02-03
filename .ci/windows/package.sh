@@ -1,15 +1,16 @@
 #!/bin/sh -e
 
-# SPDX-FileCopyrightText: Copyright 2025 Eden Emulator Project
+# SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 ROOTDIR="$PWD"
-BUILDDIR="${BUILDDIR:-build}"
+BUILDDIR="${BUILDDIR:-$ROOTDIR/build}"
 ARTIFACTS_DIR="$ROOTDIR/artifacts"
-WORKFLOW_DIR="$(cd "$(dirname "$0")/../.." && pwd)"
+DIR=$0; [ -n "${BASH_VERSION-}" ] && DIR="${BASH_SOURCE[0]}"; WORKFLOW_DIR="$(cd "$(dirname -- "$DIR")/../.." && pwd)"
+
 
 # shellcheck disable=SC1091
-. "$ROOTDIR"/.ci/common/project.sh
+. "$WORKFLOW_DIR/.ci/common/project.sh"
 
 BINDIR="$BUILDDIR/bin"
 PKGDIR="$BUILDDIR/pkg"
@@ -25,7 +26,7 @@ if [ ! -d "$WORKFLOW_DIR/.ci/common" ]; then
 fi
 
 # shellcheck disable=SC1091
-. "$WORKFLOW_DIR"/.ci/common/platform.sh
+. "$WORKFLOW_DIR/.ci/common/platform.sh"
 
 rm -f "$BINDIR/"*.pdb || true
 

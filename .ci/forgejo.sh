@@ -1,6 +1,6 @@
 #!/bin/sh -ex
 
-# SPDX-FileCopyrightText: Copyright 2025 Eden Emulator Project
+# SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 # payload manager for fj2ghook
@@ -8,7 +8,8 @@
 # shellcheck disable=SC1091
 
 ROOTDIR="$PWD"
-. "$ROOTDIR"/.ci/common/project.sh
+DIR=$0; [ -n "${BASH_VERSION-}" ] && DIR="${BASH_SOURCE[0]}"; WORKFLOW_DIR="$(cd "$(dirname -- "$DIR")/.." && pwd)"
+. "$WORKFLOW_DIR/.ci/common/project.sh"
 
 FORGEJO_LENV=${FORGEJO_LENV:-"forgejo.env"}
 touch "$FORGEJO_LENV"
@@ -247,7 +248,7 @@ clone_repository() {
 
 	echo "$FORGEJO_BRANCH" > GIT-REFSPEC
 	git rev-parse --short=10 HEAD > GIT-COMMIT
-	{ git describe --tags HEAD --abbrev=0 || echo 'v0.1.1-Workflow'; } > GIT-TAG
+	{ git describe --tags HEAD --abbrev=0 || cat "$WORKFLOW_DIR/WORKFLOW-TAG"; } > GIT-TAG
 
 	if [ "$1" = "tag" ]; then
 		cp GIT-TAG GIT-RELEASE
