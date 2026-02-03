@@ -36,8 +36,8 @@ runs:
     - name: Build
       shell: bash
       run: |
-        chmod a+x ./.ci/deb/makedeb.sh
-        ./.ci/deb/makedeb.sh
+        chmod a+x ./.ci/debian/makedeb.sh
+        ./.ci/debian/makedeb.sh
       env:
         ARCH: ${{ inputs.arch }}
         DEB_NAME: ${{ inputs.pretty-name }}

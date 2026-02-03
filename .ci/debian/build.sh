@@ -24,7 +24,7 @@ export PATH="$ROOTDIR/makedeb/usr/bin:$PATH"
 echo "-- Building..."
 cd "$ROOTDIR"
 
-SRC="$WORKFLOW_DIR/.ci/deb/PKGBUILD.in"
+SRC="$WORKFLOW_DIR/.ci/debian/PKGBUILD.in"
 DEST=PKGBUILD
 
 TAG=$(cat "$GITHUB_WORKSPACE"/GIT-TAG | sed 's/.git//' | sed 's/v//' | sed 's/[-_]/./g' | tr -d '\n')
