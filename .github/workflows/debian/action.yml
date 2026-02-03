@@ -33,17 +33,28 @@ runs:
         key: ${{ inputs.name }}-${{ inputs.arch }}
         version: ${{ inputs.cpm-cache-version }}
 
-    - name: Build
+    - name: Prepare makedeb env
       shell: bash
       run: |
-        chmod a+x ./.ci/debian/makedeb.sh
-        ./.ci/debian/makedeb.sh
+        apt update
+        useradd -m -s /bin/bash "${{ env.BUILDUSER }}"
+        echo "${{ env.BUILDUSER }} ALL=NOPASSWD: ALL" >> /etc/sudoers
+        chown -R "${BUILDUSER}:${BUILDUSER}" .
+        .ci/debian/makedeb.sh
+      env:
+        BUILDUSER: makedeb
+        GITHUB_TOKEN: ${{ secrets.CUSTOM_GITHUB_TOKEN }}
+
+    - name: Build
+      shell: bash
+      run: su - "${{ env.BUILDUSER }}" -c  ".ci/debian/build.sh"
       env:
         ARCH: ${{ inputs.arch }}
+        BUILDUSER: makedeb
         DEB_NAME: ${{ inputs.pretty-name }}
 
     - name: Upload artifacts
       uses: actions/upload-artifact@v6.0.0
       with:
         name: ${{ inputs.name }}-${{ inputs.arch }}
-        path: ./*.deb
+        path: ./artifacts/*.deb

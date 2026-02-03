@@ -1,53 +1,52 @@
 #!/bin/sh -ex
 
-# SPDX-FileCopyrightText: Copyright 2025 Eden Emulator Project
+# SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-export ROOTDIR="$PWD"
-WORKFLOW_DIR="$(cd "$(dirname "$0")/../.." && pwd)"
+ROOTDIR="$PWD"
+BUILDDIR="${BUILDDIR:-$ROOTDIR/build}"
+GITHUB_WORKSPACE=${GITHUB_WORKSPACE:-$ROOTDIR}
+ARTIFACTS_DIR="$ROOTDIR/artifacts"
 
-GITHUB_WORKSPACE="$ROOTDIR"
-
-# install makedeb
-echo "-- Installing makedeb..."
-[ ! -d makedeb-src ] && git clone 'https://github.com/makedeb/makedeb' makedeb-src
-cd makedeb-src
-git checkout stable
-
-make prepare VERSION=16.0.0 RELEASE=stable TARGET=apt CURRENT_VERSION=16.0.0 FILESYSTEM_PREFIX="$ROOTDIR/makedeb"
-make
-make package DESTDIR="$ROOTDIR/makedeb" TARGET=apt
-
-export PATH="$ROOTDIR/makedeb/usr/bin:$PATH"
+# shellcheck disable=SC1091
+DIR=$0; [ -n "${BASH_VERSION-}" ] && DIR="${BASH_SOURCE[0]}"; WORKFLOW_DIR="$(cd "$(dirname -- "$DIR")/../.." && pwd)"
+. "$WORKFLOW_DIR/.ci/common/project.sh"
 
 # now build
 echo "-- Building..."
-cd "$ROOTDIR"
+cd "$GITHUB_WORKSPACE"
 
+CONFIG_OPTS=""
+if [ -n "${SCCACHE_PATH-}" ] && [ -e "$SCCACHE_PATH" ]; then
+    CONFIG_OPTS=" -DCCACHE_PATH=\"${SCCACHE_PATH}\""
+fi
 SRC="$WORKFLOW_DIR/.ci/debian/PKGBUILD.in"
-DEST=PKGBUILD
+DEST="$GITHUB_WORKSPACE/PKGBUILD"
 
-TAG=$(cat "$GITHUB_WORKSPACE"/GIT-TAG | sed 's/.git//' | sed 's/v//' | sed 's/[-_]/./g' | tr -d '\n')
-if [ -f "$GITHUB_WORKSPACE"/GIT-RELEASE ]; then
+TAG=$(cat "$GITHUB_WORKSPACE/GIT-TAG" | sed 's/.git//' | sed 's/v//' | sed 's/[-_]/./g' | tr -d '\n')
+if [ -f "$GITHUB_WORKSPACE/GIT-RELEASE" ]; then
 	PKGVER="$TAG"
 else
-	REF=$(cat "$GITHUB_WORKSPACE"/GIT-COMMIT)
+	REF=$(cat "$GITHUB_WORKSPACE/GIT-COMMIT")
 	PKGVER="$TAG.$REF"
 fi
 
-sed "s/%PKGVER%/$PKGVER/" "$SRC"  > $DEST.1
-sed "s/%ARCH%/$ARCH/"     $DEST.1 > $DEST
+sed "s|%PKGVER%|$PKGVER|"             "$SRC"    > "$DEST.1"
+sed "s|%ARCH%|$ARCH|"                 "$DEST.1" > "$DEST.2"
+sed "s|%WORKFLOWDIR%|$WORKFLOW_DIR/|" "$DEST.2" > "$DEST.3"
+sed "s|%BUILDDIR%|$BUILDDIR|"         "$DEST.3" > "$DEST.4"
+sed "s|%CONFIG_OPTS%|$CONFIG_OPTS|"   "$DEST.4" > "$DEST.5"
+sed "s|%SOURCE%|$GITHUB_WORKSPACE|"   "$DEST.5" > "$DEST"
 
-rm $DEST.*
+rm "$DEST."*
 
-if ! command -v sudo >/dev/null 2>&1 ; then
-	alias sudo="su - root -c"
-fi
+export ROOTDIR
+export BUILDDIR
+export GITHUB_WORKSPACE
 
-makedeb --print-srcinfo > .SRCINFO
+makedeb --print-srcinfo > "$GITHUB_WORKSPACE/.SRCINFO"
 makedeb -s --no-confirm
 
 # for some grand reason, makepkg does not exit on errors
 ls ./*.deb || exit 1
-
-mv ./*.deb "${PROJECT_PRETTYNAME}-${DEB_NAME}-${ARTIFACT_REF}-${ARCH}.deb"
+mv ./*.deb "$ARTIFACTS_DIR/${PROJECT_PRETTYNAME}-${DEB_NAME}-${ARTIFACT_REF}-${ARCH}.deb"

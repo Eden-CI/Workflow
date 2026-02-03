@@ -34,20 +34,20 @@ trixie_depends=("${depends[@]}" "${_newrdeps[@]}" 'libmbedtls-dev')
 # you use boost 1.81 SPECIFICALLY (which isn't default for some wonderful reason)
 bookworm_depends=("${depends[@]}" 'libboost-context1.81-dev' 'libboost-fiber1.81-dev')
 
-source=("file://$GITHUB_WORKSPACE")
-noextract=("file://$GITHUB_WORKSPACE")
+source=("file://%SOURCE%")
+noextract=("file://%SOURCE%")
 sha256sums=('SKIP')
 
 build() {
-	cd "$GITHUB_WORKSPACE"
+	cd "%SOURCE%"
 	export TARGET=package-%ARCH%
 	export COMPILER=gcc
-    rm -rf build
-	"$ROOTDIR"/.ci/common/configure.sh -DCCACHE_PATH="${SCCACHE_PATH}"
-	cmake --build build
+	rm -rf "%BUILDDIR%"
+	"%WORKFLOWDIR%.ci/common/configure.sh" %CONFIG_OPTS%
+	cmake --build "%BUILDDIR%"
 }
 
 package() {
-	cd "$GITHUB_WORKSPACE"
-	DESTDIR="$pkgdir" cmake --install build
+	cd "%SOURCE%"
+	DESTDIR="$pkgdir" cmake --install %BUILDDIR%
 }

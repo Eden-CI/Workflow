@@ -50,6 +50,9 @@ jobs:
     name: "Ubuntu 24.04 (${{ matrix.os.arch }})"
     runs-on: ${{ matrix.os.runs-on }}
     needs: [set-matrix]
+    container:
+      image: ubuntu:noble
+      options: --privileged --device /dev/fuse -v "${{ github.workspace }}":"${{ github.workspace }}"
     strategy:
       fail-fast: false
       matrix:
@@ -72,7 +75,9 @@ jobs:
     name: "Debian 13 (${{ matrix.os.arch }})"
     runs-on: ${{ matrix.os.runs-on }}
     needs: [set-matrix]
-    container: ghcr.io/nilcons/debian:latest
+    container:
+      image: debian:trixie
+      options: --privileged --device /dev/fuse -v "${{ github.workspace }}":"${{ github.workspace }}"
     strategy:
       fail-fast: false
       matrix:
@@ -95,7 +100,9 @@ jobs:
     name: "Debian 12 (${{ matrix.os.arch }})"
     runs-on: ${{ matrix.os.runs-on }}
     needs: [set-matrix]
-    container: ghcr.io/xrplf/ci/debian-bookworm:gcc-12
+    container:
+      image: debian:bookworm
+      options: --privileged --device /dev/fuse -v "${{ github.workspace }}":"${{ github.workspace }}"
     strategy:
       fail-fast: false
       matrix:

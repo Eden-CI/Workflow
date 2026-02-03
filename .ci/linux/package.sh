@@ -8,7 +8,7 @@
 # shellcheck disable=SC1091
 
 ROOTDIR="$PWD"
-BUILDDIR="${BUILDDIR:-build}"
+BUILDDIR="${BUILDDIR:-$ROOTDIR/build}"
 . "$ROOTDIR"/.ci/common/project.sh
 
 download() {
