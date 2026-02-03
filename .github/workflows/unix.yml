@@ -87,14 +87,11 @@ jobs:
             cmake --build build
 
             echo "- Package"
-            bash ./.ci/freebsd/package.sh ${ARCH}
-
             cmake --install build --prefix install/usr
-            cd install
-            tar --owner root --group root --zstd -cf Eden-FreeBSD.tar.zst *
+            bash ./.ci/freebsd/package.sh
 
       - name: Upload Binary
         uses: actions/upload-artifact@v6.0.0
         with:
           name: ${{ matrix.os.platform }}-binary-${{ matrix.os.arch }}-${{ matrix.compiler }}
-          path: install/Eden-${{ matrix.os.name }}.tar.zst
+          path: artifacts/*.tar.zst
