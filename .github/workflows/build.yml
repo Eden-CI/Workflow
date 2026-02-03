@@ -184,10 +184,10 @@ jobs:
       devel: ${{ inputs.devel }}
     secrets: inherit
 
-  unix:
-    name: "UNIX"
+  freebsd:
+    name: "FreeBSD"
     needs: [clone]
-    uses: ./.github/workflows/unix.yml
+    uses: ./.github/workflows/freebsd.yml
     with:
       build-id: '${{ inputs.build-id }}'
       cpm-cache-version: '${{ needs.clone.outputs.cachever }}'
