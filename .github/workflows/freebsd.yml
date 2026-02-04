@@ -62,7 +62,7 @@ jobs:
 
       - name: Start VM (${{ matrix.os.name }})
         if: matrix.os.platform == 'freebsd'
-        uses: vmactions/freebsd-vm@v1.3.8
+        uses: vmactions/freebsd-vm@v1.3.9
         with:
           arch: ${{ matrix.os.vm-arch }}
           usesh: true
@@ -90,7 +90,7 @@ jobs:
         run: |
           cd "${{ github.workspace }}"
           cmake --build build
-          cmake --install build --prefix artifacts/usr
+          cmake --install build --prefix install/usr
 
       - name: Package
         shell: freebsd {0}
@@ -98,8 +98,12 @@ jobs:
           cd "${{ github.workspace }}"
           ./.ci/freebsd/package.sh
 
+      - name: rsync from qemu:artifacts to host:artifacts
+        shell: bash
+        run: rsync -av -e ssh freebsd:${{ github.workspace }}/artifacts/ ${{ github.workspace }}/artifacts/
+
       - name: Upload Binary
         uses: actions/upload-artifact@v6.0.0
         with:
           name: ${{ matrix.os.platform }}-binary-${{ matrix.os.arch }}-${{ matrix.compiler }}
-          path: ./artifacts/*.tar.zst
+          path: ./artifacts/*

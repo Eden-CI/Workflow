@@ -27,9 +27,9 @@ ldd "$PKG_DIR/bin/${PROJECT_REPO}" | awk '/=>/ {print $3}' | while read -r lib; 
 		/lib*|/usr/lib*) ;;  # Skip system libs
 		*)
 			if echo "$lib" | grep -q '^/usr/local/lib/qt6/'; then
-				cp -v "$lib" "$PKG_DIR/lib/qt6/"
+				cp "$lib" "$PKG_DIR/lib/qt6/"
 			else
-				cp -v "$lib" "$PKG_DIR/lib/"
+				cp "$lib" "$PKG_DIR/lib/"
 			fi
 			;;
 	esac
@@ -54,13 +54,13 @@ wayland-shell-integration
 for sub in $QT6_PLUGIN_SUBDIRS; do
 	if [ -d "$QT6_PLUGINS/$sub" ]; then
 		mkdir -p "$PKG_DIR/lib/qt6/plugins/$sub"
-		cp -rv "$QT6_PLUGINS/$sub"/* "$PKG_DIR/lib/qt6/plugins/$sub/"
+		cp -r "$QT6_PLUGINS/$sub"/* "$PKG_DIR/lib/qt6/plugins/$sub/"
 	fi
 done
 
 # Copy Qt6 translations
 mkdir -p "$PKG_DIR/share/translations"
-cp -v "$BUILDDIR/src/yuzu"/*.qm "$PKG_DIR/share/translations/"
+cp "$BUILDDIR/src/yuzu"/*.qm "$PKG_DIR/share/translations/"
 
 # Strip binaries
 strip "$PKG_DIR/bin/${PROJECT_REPO}"
@@ -73,6 +73,6 @@ chmod +x "$PKG_DIR/launch.sh"
 # Pack for upload
 mkdir -p "$ARTIFACTS_DIR"
 cd "$PKG_DIR"
-tar --zstd "$ARTIFACTS_DIR/$PKG_NAME.tar.zst" *
+tar --zstd -cvf "$ARTIFACTS_DIR/$PKG_NAME.tar.zst" .
 
 echo "FreeBSD package created at: $ARTIFACTS_DIR/$PKG_NAME.tar.zst"
