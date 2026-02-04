@@ -247,7 +247,7 @@ clone_repository() {
 
 	echo "$FORGEJO_BRANCH" > GIT-REFSPEC
 	git rev-parse --short=10 HEAD > GIT-COMMIT
-	{ git describe --tags HEAD --abbrev=0 || echo 'v0.1.0-Workflow'; } > GIT-TAG
+	{ git describe --tags HEAD --abbrev=0 || echo 'v0.1.1-Workflow'; } > GIT-TAG
 
 	if [ "$1" = "tag" ]; then
 		cp GIT-TAG GIT-RELEASE

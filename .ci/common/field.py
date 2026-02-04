@@ -6,8 +6,9 @@ import urllib.request
 import json
 
 # --- Environment variables ---
+GITHUB_TOKEN = os.getenv("GH_TOKEN") or os.getenv("GITHUB_TOKEN")
 FORGEJO_TOKEN = os.getenv("FJ_TOKEN") or os.getenv("FORGEJO_TOKEN")
-FORGEJO_HOST = os.getenv("FORGEJO_HOST", "git.eden-emu.dev")
+FORGEJO_HOST = os.getenv("FORGEJO_HOST")
 FORGEJO_REPO = os.getenv("FORGEJO_REPO")
 FORGEJO_BRANCH = os.getenv("FORGEJO_BRANCH")
 
@@ -17,24 +18,32 @@ def get_forgejo_field(**kwargs):
     default_msg = kwargs.get("default_msg", "No data provided")
 
     headers = {}
+    if FORGEJO_HOST == "github.com":
+        _api="api.github.com"
+        _token=f"Bearer {GITHUB_TOKEN}"
+    else:
+        _api=f"{FORGEJO_HOST}/api/v1"
+        _token=f"token {FORGEJO_TOKEN}"
+
     # "fake" req to see if the token works
-    if FORGEJO_TOKEN:
+    if FORGEJO_TOKEN or GITHUB_TOKEN:
         req = urllib.request.Request(
-            f"https://{FORGEJO_HOST}/api/v1/user",
-            headers={"Authorization": f"token {FORGEJO_TOKEN}"}
+            f"https://{_api}/user",
+            headers={"Authorization": _token}
         )
         # and if it does we use it always, to save ourselves from the hell of ratelimiting
         try:
             with urllib.request.urlopen(req) as response:
                 if response.getcode() == 200:
-                    headers["Authorization"] = f"token {FORGEJO_TOKEN}"
+                    headers["Authorization"] = _token
         except urllib.error.HTTPError:
             pass
 
+
     if pull_request_number:
-        url = f"https://{FORGEJO_HOST}/api/v1/repos/{FORGEJO_REPO}/pulls/{pull_request_number}"
+        url = f"https://{_api}/repos/{FORGEJO_REPO}/pulls/{pull_request_number}"
     else:
-        url = f"https://{FORGEJO_HOST}/api/v1/repos/{FORGEJO_REPO}/commits?sha={FORGEJO_BRANCH}&limit=1"
+        url = f"https://{_api}/repos/{FORGEJO_REPO}/commits?sha={FORGEJO_BRANCH}&per_page=1&limit=1"
 
     try:
         req = urllib.request.Request(url, headers=headers)
