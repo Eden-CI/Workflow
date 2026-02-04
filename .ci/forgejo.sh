@@ -72,7 +72,7 @@ parse_payload() {
 
 	# NB: mirrors do not (generally) work for our purposes
 	# unless they magically can mirror everything in 10 seconds
-	FALLBACK_IDX=0
+	: "${FALLBACK_IDX:=0}"
 	if [ -z "$FORGEJO_HOST" ]; then
 		FORGEJO_HOST=$(jq -r ".[$FALLBACK_IDX].host" $DEFAULT_JSON)
 	fi

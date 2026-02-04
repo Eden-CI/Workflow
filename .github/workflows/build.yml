@@ -40,7 +40,11 @@ jobs:
       - name: Parse Forgejo payload
         run: |
           echo '${{ toJSON(github.event.client_payload) }}' > ./payload.json
-          cat payload.json
+          jq . payload.json
+          if [ "${{ inputs.build-id }}" = 'test' ]; then
+            # use mirror on test, reduce load on our site and speed up tests
+            export FALLBACK_IDX=1
+          fi
           ./.ci/forgejo.sh --parse ${{ inputs.build-id }}
 
       - name: Load payload environment
