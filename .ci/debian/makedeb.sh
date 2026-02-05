@@ -27,6 +27,6 @@ make
 make package DESTDIR="$BUILDDIR/makedeb" TARGET=apt
 
 if [ -n "${CI:-}" ]; then
-    _OPTS="$BUILDDIR/makedeb/usr/bin" >> "$GITHUB_PATH"
+    echo "$BUILDDIR/makedeb/usr/bin" >> "$GITHUB_PATH"
 fi
 export PATH="$BUILDDIR/makedeb/usr/bin:$PATH"
