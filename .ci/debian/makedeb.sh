@@ -1,9 +1,11 @@
 #!/bin/sh -e
 
-# SPDX-FileCopyrightText: Copyright 2025 Eden Emulator Project
+# SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 # SPDX-License-Identifier: GPL-3.0-or-later
-WORKSPACE="$PWD"
-WORKFLOW_DIR="$(cd "$(dirname "$0")/../.." && pwd)"
+ROOTDIR="$PWD"
+BUILDDIR="/build"
+BUILDUSER="build"
+DIR=$0; [ -n "${BASH_VERSION-}" ] && DIR="${BASH_SOURCE[0]}"; WORKFLOW_DIR="$(cd "$(dirname -- "$DIR")/../.." && pwd)"
 
 # Use sudo if available, otherwise run directly
 if command -v sudo >/dev/null 2>&1 ; then
@@ -20,20 +22,23 @@ fi
 if ! command -v sudo > /dev/null 2>&1 ; then
 	apt install -y sudo
 
-	useradd -m -s /bin/bash -d /build build
-	echo "build ALL=NOPASSWD: ALL" >> /etc/sudoers
+	sudo useradd -m -s /bin/bash -d "$BUILDDIR" "$BUILDUSER"
+	echo "$BUILDUSER ALL=NOPASSWD: ALL" >> /etc/sudoers
 
 	# copy workspace stuff over
-	cp -r ./* .patch .ci .reuse /build
-	cp -r .cache /build || true
+	cp -r "$ROOTDIR/"* "$ROOTDIR/.patch" "$ROOTDIR/.ci" "$ROOTDIR/.reuse" "$BUILDDIR"
+	if [ -d "$ROOTDIR/.cache" ]; then
+		cp -r "$ROOTDIR/.cache" "$BUILDDIR"
+		rm -rf "$ROOTDIR/.cache"
+		chown -R "$BUILDUSER:$BUILDUSER" "$BUILDDIR/.cache"
+	fi
+	chown -R "$BUILDUSER:$BUILDUSER" "$BUILDDIR/"* "$BUILDDIR/.patch" "$BUILDDIR/.ci" "$BUILDDIR/.reuse"
 
-	cd /build
-	chown -R build:build ./* .patch .ci .reuse
-	chown -R build:build .cache || true
-	sudo -E -u build "$PWD/.ci/debian/build.sh"
-	rm -rf "$WORKSPACE"/.cache
-	mv .cache "$WORKSPACE"
-	cp ./*.deb "$WORKSPACE"
+	cd "$BUILDDIR"
+	sudo -E -u "$BUILDUSER" "$BUILDDIR/.ci/debian/build.sh"
+
+	mv "$BUILDDIR/.cache" "$ROOTDIR"
+	cp "$BUILDDIR/"*.deb "$ROOTDIR"
 # otherwise just run normally
 else
 	"$WORKFLOW_DIR/.ci/debian/build.sh"
