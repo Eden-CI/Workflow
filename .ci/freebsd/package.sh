@@ -14,7 +14,7 @@ WORKFLOW_DIR=$(CDPATH='' cd -P -- "$(dirname -- "$0")/../.." && pwd)
 . "$WORKFLOW_DIR/.ci/common/project.sh"
 
 VERSION=$(cat "$ROOTDIR/GIT-TAG" 2>/dev/null || cat "$WORKFLOW_DIR/WORKFLOW-TAG")
-PKG_NAME="${PROJECT_PRETTYNAME}-${VERSION}-${ARCH}"
+: "${PACKAGE_TARGET:=eden-freebsd.tar.zst}"
 PKG_DIR="$ROOTDIR/install/usr"
 
 echo "Making '$VERSION' build"
@@ -73,6 +73,6 @@ chmod +x "$PKG_DIR/launch.sh"
 # Pack for upload
 mkdir -p "$ARTIFACTS_DIR"
 cd "$PKG_DIR"
-tar --zstd -cvf "$ARTIFACTS_DIR/$PKG_NAME.tar.zst" .
+tar --zstd -cvf "$ARTIFACTS_DIR/${PACKAGE_TARGET}" .
 
-echo "FreeBSD package created at: $ARTIFACTS_DIR/$PKG_NAME.tar.zst"
+echo "FreeBSD package created at: $ARTIFACTS_DIR/${PACKAGE_TARGET}"

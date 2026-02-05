@@ -40,8 +40,8 @@ sha256sums=('SKIP')
 
 build() {
 	cd "%SOURCE%"
-	export TARGET=package-%ARCH%
-	export COMPILER=gcc
+	export TARGET=package-%TARGET%
+	export COMPILER=%COMPILER%
 	rm -rf "%BUILDDIR%"
 	"%WORKFLOWDIR%.ci/common/configure.sh" %CONFIG_OPTS%
 	cmake --build "%BUILDDIR%"

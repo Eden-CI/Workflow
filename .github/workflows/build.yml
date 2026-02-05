@@ -28,9 +28,16 @@ jobs:
     outputs:
       cachever: ${{ steps.out.outputs.cachever }}
       pgo: ${{ steps.out.outputs.pgo }}
+      # TODO: Use the JSON and send only one variable and make each step get theirs .id's
+      android-matrix: ${{ steps.matrix.outputs.android }}
+      linux-matrix: ${{ steps.matrix.outputs.linux }}
+      windows-matrix: ${{ steps.matrix.outputs.windows }}
+      room-matrix: ${{ steps.matrix.outputs.room }}
+      macos-matrix: ${{ steps.matrix.outputs.macos }}
+      freebsd-matrix: ${{ steps.matrix.outputs.freebsd }}
+
     name: "Parse and Clone"
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout
         uses: actions/checkout@v6.0.1
@@ -90,6 +97,16 @@ jobs:
             eden/*
             eden/.patch
 
+      - name: Build 'Workflow'
+        id: matrix
+        run: . ./.ci/common/workflow.sh
+
+      - name: Upload Workflow json
+        uses: actions/upload-artifact@v6.0.0
+        with:
+          name: workflow-json
+          path: workflow.json
+
   source:
     name: "Source Pack"
     runs-on: ubuntu-latest
@@ -117,25 +134,16 @@ jobs:
           name: source
           path: ./*.tar.zst
 
-  deb:
-    name: ".deb builds"
-    needs: [clone]
-    uses: ./.github/workflows/debian.yml
-    with:
-      build-id: '${{ inputs.build-id }}'
-      cpm-cache-version: '${{ needs.clone.outputs.cachever }}'
-      devel: ${{ inputs.devel }}
-    secrets: inherit
-
   linux:
-    name: "AppImage"
+    name: "Linux"
     needs: [clone]
-    uses: ./.github/workflows/appimage.yml
+    uses: ./.github/workflows/linux.yml
     with:
       build-id: '${{ inputs.build-id }}'
       cpm-cache-version: '${{ needs.clone.outputs.cachever }}'
       devel: ${{ inputs.devel }}
       force_pgo: ${{ needs.clone.outputs.pgo }}
+      matrix: ${{ needs.clone.outputs.linux-matrix }}
     secrets: inherit
 
   windows:
@@ -147,17 +155,7 @@ jobs:
       cpm-cache-version: '${{ needs.clone.outputs.cachever }}'
       devel: ${{ inputs.devel }}
       force_pgo: ${{ needs.clone.outputs.pgo }}
-    secrets: inherit
-
-  msys:
-    name: "MinGW"
-    needs: [clone]
-    uses: ./.github/workflows/msys.yml
-    with:
-      build-id: '${{ inputs.build-id }}'
-      cpm-cache-version: '${{ needs.clone.outputs.cachever }}'
-      devel: ${{ inputs.devel }}
-      force_pgo: ${{ needs.clone.outputs.pgo }}
+      matrix: ${{ needs.clone.outputs.windows-matrix }}
     secrets: inherit
 
   android:
@@ -168,6 +166,7 @@ jobs:
       build-id: '${{ inputs.build-id }}'
       cpm-cache-version: '${{ needs.clone.outputs.cachever }}'
       devel: ${{ inputs.devel }}
+      matrix: ${{ needs.clone.outputs.android-matrix }}
     secrets: inherit
 
   macos:
@@ -178,6 +177,7 @@ jobs:
       build-id: '${{ inputs.build-id }}'
       cpm-cache-version: '${{ needs.clone.outputs.cachever }}'
       devel: ${{ inputs.devel }}
+      matrix: ${{ needs.clone.outputs.macos-matrix }}
     secrets: inherit
 
   freebsd:
@@ -188,9 +188,15 @@ jobs:
       build-id: '${{ inputs.build-id }}'
       cpm-cache-version: '${{ needs.clone.outputs.cachever }}'
       devel: ${{ inputs.devel }}
+      matrix: ${{ needs.clone.outputs.freebsd-matrix }}
     secrets: inherit
 
   room:
     name: "musl room"
     needs: [clone]
     uses: ./.github/workflows/room.yml
+    with:
+      build-id: '${{ inputs.build-id }}'
+      cpm-cache-version: '${{ needs.clone.outputs.cachever }}'
+      devel: ${{ inputs.devel }}
+      matrix: ${{ needs.clone.outputs.room-matrix }}

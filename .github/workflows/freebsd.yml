@@ -15,6 +15,10 @@ on:
         description: 'Development mode (disables update checker)'
         type: string
         required: true
+      matrix:
+        description: 'Generated Matrix to each platform'
+        type: string
+        required: true
 
 env:
   DISABLE_ARM: ${{ vars.DISABLE_ARM }}
@@ -26,21 +30,18 @@ env:
 
 jobs:
   unix:
-    name: "${{ matrix.os.name }} (${{ matrix.os.arch }})"
-    runs-on: ubuntu-24.04
+    name: "${{ matrix.compiler.system-pretty }} (${{ matrix.compiler.package-target }})"
+    runs-on: "${{ matrix.compiler.runs-on }}"
     strategy:
       fail-fast: false
       matrix:
-        os:
-          - platform: freebsd
-            name: FreeBSD
-            arch: amd64
-            vm-arch: x86_64
-        compiler: [clang]
+        compiler: ${{ fromJson(inputs.matrix) }}
     env:
-      ARCH: ${{ matrix.os.arch }}
       SCCACHE_DIR: ${{ github.workspace }}/.sccache
-      TARGET: "${{ matrix.os.arch }}"
+      TARGET: "${{ matrix.compiler.target }}"
+      COMPILER: "${{ matrix.compiler.compiler }}"
+      PACKAGE_TARGET: "${{ matrix.compiler.package-target }}"
+      SYSTEM_PRETTY: "${{ matrix.compiler.system-pretty }}"
 
     steps:
       - name: Checkout
@@ -49,7 +50,7 @@ jobs:
       - name: Setup
         uses: ./.github/workflows/setup
         with:
-          key: ${{ matrix.os.name }}-${{ matrix.os.arch }}-${{ matrix.compiler }}
+          key: ${{ matrix.compiler.system }}-${{ matrix.compiler.package-target }}
           version: ${{ inputs.cpm-cache-version }}
 
       - name: Configure sccache
@@ -60,13 +61,11 @@ jobs:
             core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env.ACTIONS_RUNTIME_TOKEN || '');
             core.exportVariable('ACTIONS_CACHE_SERVICE_V2', `on`);
 
-      - name: Start VM (${{ matrix.os.name }})
-        if: matrix.os.platform == 'freebsd'
-        uses: vmactions/freebsd-vm@v1.3.9
+      - name: Start VM
+        uses: vmactions/freebsd-vm@v1.4.1
         with:
-          arch: ${{ matrix.os.vm-arch }}
           usesh: true
-          envs: 'ARCH DEVEL TARGET CCACHE BUILD_ID SCCACHE_DIR SCCACHE_GHA_ENABLED ACTIONS_RESULTS_URL ACTIONS_RUNTIME_TOKEN ACTIONS_CACHE_SERVICE_V2'
+          envs: 'PACKAGE_TARGET SYSTEM_PRETTY COMPILER DEVEL TARGET CCACHE BUILD_ID SCCACHE_DIR SCCACHE_GHA_ENABLED ACTIONS_RESULTS_URL ACTIONS_RUNTIME_TOKEN ACTIONS_CACHE_SERVICE_V2'
           prepare: |
             pkg install -y \
               devel/sccache \
@@ -107,5 +106,5 @@ jobs:
       - name: Upload Binary
         uses: actions/upload-artifact@v6.0.0
         with:
-          name: ${{ matrix.os.platform }}-binary-${{ matrix.os.arch }}-${{ matrix.compiler }}
+          name: ${{ matrix.compiler.system }}-${{ matrix.compiler.package-target }}
           path: ./artifacts/*

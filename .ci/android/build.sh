@@ -72,6 +72,7 @@ done
 : "${TARGET:=standard}"
 : "${TYPE:=Release}"
 : "${DEVEL:=true}"
+: "${PACKAGE_TARGET:=eden-android.apk}"
 
 TARGET_LOWER=$(echo "$TARGET" | tr '[:upper:]' '[:lower:]')
 
@@ -122,8 +123,8 @@ fi
 
 cd "$ARTIFACTS_DIR"
 
-mv ./*.apk "${PROJECT_PRETTYNAME}-Android-${ARTIFACT_REF}-${TARGET_LOWER}.apk"
-mv ./*.aab "${PROJECT_PRETTYNAME}-Android-${ARTIFACT_REF}-${TARGET_LOWER}.aab"
+mv ./*.apk "${PACKAGE_TARGET}"
+mv ./*.aab "${PACKAGE_TARGET}.aab"
 
 cd "$ROOTDIR"
 

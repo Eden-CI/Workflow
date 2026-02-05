@@ -15,6 +15,10 @@ on:
         description: 'Development mode (disables update checker)'
         type: string
         required: true
+      matrix:
+        description: 'Generated Matrix to each platform'
+        type: string
+        required: true
 
 env:
   DISABLE_ARM: ${{ vars.DISABLE_ARM }}
@@ -26,15 +30,16 @@ env:
 
 jobs:
   macos:
-    name: "macOS (${{ matrix.os.arch }})"
-    runs-on: ${{ matrix.os.runs-on }}
+    name: "${{ matrix.compiler.system-pretty }} (${{ matrix.compiler.package-target }})"
+    runs-on: "${{ matrix.compiler.runs-on }}"
     strategy:
       fail-fast: false
       matrix:
-        os:
-          - runs-on: macos-latest
-            arch: arm64
-        compiler: [universal]
+        compiler: ${{ fromJson(inputs.matrix) }}
+
+    env:
+      PACKAGE_TARGET: "${{ matrix.compiler.package-target }}"
+      GITHUB_TOKEN: ${{ secrets.CUSTOM_GITHUB_TOKEN }}
 
     steps:
       - name: Checkout
@@ -43,7 +48,7 @@ jobs:
       - name: Setup
         uses: ./.github/workflows/setup
         with:
-          key: ${{ runner.os }}-${{ matrix.os.arch }}-${{ matrix.compiler }}
+          key: ${{ matrix.compiler.system }}-${{ matrix.compiler.package-target }}
           version: ${{ inputs.cpm-cache-version }}
 
       - name: Install dependencies
@@ -61,5 +66,5 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v6.0.0
         with:
-          name: macos
+          name: ${{ matrix.compiler.system }}-${{ matrix.compiler.package-target }}
           path: artifacts/*

@@ -7,6 +7,8 @@
 
 # shellcheck disable=SC1091
 
+: "${PACKAGE_TARGET:=eden-linux.AppImage}"
+
 ROOTDIR="$PWD"
 BUILDDIR="${BUILDDIR:-$ROOTDIR/build}"
 WORKFLOW_DIR=$(CDPATH='' cd -P -- "$(dirname -- "$0")/../.." && pwd)
@@ -47,8 +49,8 @@ export DEPLOY_VULKAN=1
 export APPDIR="$ROOTDIR/AppDir"
 export APPENV="$ROOTDIR/AppDir/.env"
 export OUTPATH="$ARTIFACTS_DIR"
-export OUTNAME="${PROJECT_PRETTYNAME}-Linux-${ARTIFACT_REF}-${FULL_ARCH}.AppImage"
-UPINFO="gh-releases-zsync|eden-emulator|Releases|latest|*-${FULL_ARCH}.AppImage.zsync"
+export OUTNAME="${PACKAGE_TARGET}"
+UPINFO="gh-releases-zsync|eden-emulator|Releases|latest|*-${PACKAGE_TARGET}.zsync"
 
 if [ "$DEVEL" = 'true' ]; then
     case "$(uname)" in

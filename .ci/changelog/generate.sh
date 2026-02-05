@@ -1,17 +1,18 @@
-#!/bin/bash -e
+#!/bin/bash -ex
 
 # SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-# shellcheck disable=SC1091
-
 if [ -z "${BASH_VERSION:-}" ]; then
     echo "error: This script MUST be run with bash"
-    exit 1
 fi
 
-WORKFLOW_DIR=$(CDPATH='' cd -P -- "$(dirname -- "$0")/../.." && pwd)
+# shellcheck disable=SC1091
+
+ROOTDIR="$PWD"
+WORKFLOW_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 . "$WORKFLOW_DIR/.ci/common/project.sh"
+: "${WORKFLOW_JSON:=$ROOTDIR/workflow.json}"
 
 tagged() {
 	falsy "$DEVEL"
@@ -53,119 +54,208 @@ esac
 echo
 
 # TODO(crueter): Don't include fields if their corresponding artifacts aren't found.
-
-android() {
-	TYPE="$1"
-	FLAVOR="$2"
-	DESCRIPTION="$3"
-
-	echo -n "| "
-	echo -n "[Android $TYPE](${GITHUB_DOWNLOAD}/${GITHUB_TAG}/${PROJECT_PRETTYNAME}-Android-${ARTIFACT_REF}-${FLAVOR}.apk) | "
-	echo "$DESCRIPTION |"
+link_pkg() {
+    local title="$1"
+    local pkg="$2"
+    echo -n "<a href=\"${GITHUB_DOWNLOAD}/${GITHUB_TAG}/${pkg}\">$title</a>"
 }
 
-src() {
-	EXT="$1"
-	DESCRIPTION="$2"
+map_entries() {
+    local json="$1"
+    local -n out_array=$2
+    out_array=()
 
-	echo -n "| "
-	echo -n "[$EXT](${GITHUB_DOWNLOAD}/${GITHUB_TAG}/${PROJECT_PRETTYNAME}-Source-${ARTIFACT_REF}.${EXT}) | "
-	echo -n "$DESCRIPTION |"
-	echo
+    while IFS= read -r entry; do
+        local link final extra item
+
+        link=$(jq -r '.["package-link"]' <<< "$entry")
+        final=$(jq -r '.["package-final"]' <<< "$entry")
+        extra=$(jq -r '.["package-extra"] // ""' <<< "$entry")
+        item=$(link_pkg "$link" "$final")
+        [[ -n "$extra" && tagged && opts ]] && item="$item $(link_pkg "($extra)" "${final}${extra}")"
+
+        out_array+=("$item")
+    done < <(jq -c '.' <<< "$json")
 }
 
-linux_field() {
-	ARCH="$1"
-	PRETTY_ARCH="$2"
-	NOTES="${3}"
+process_table_id() {
+    group="$1"
+    ids="$2"
+    first="$3"
 
-	echo -n "| $PRETTY_ARCH | "
-	echo -n "[GCC](${GITHUB_DOWNLOAD}/${GITHUB_TAG}/${PROJECT_PRETTYNAME}-Linux-${ARTIFACT_REF}-${ARCH}-gcc-standard.AppImage) "
-	if tagged; then
-		echo -n "([zsync](${GITHUB_DOWNLOAD}/${GITHUB_TAG}/${PROJECT_PRETTYNAME}-Linux-${ARTIFACT_REF}-${ARCH}-gcc-standard.AppImage.zsync)) | "
-		if opts; then
-			echo -n "[PGO](${GITHUB_DOWNLOAD}/${GITHUB_TAG}/${PROJECT_PRETTYNAME}-Linux-${ARTIFACT_REF}-${ARCH}-clang-pgo.AppImage) "
-			echo -n "([zsync](${GITHUB_DOWNLOAD}/${GITHUB_TAG}/${PROJECT_PRETTYNAME}-Linux-${ARTIFACT_REF}-${ARCH}-clang-pgo.AppImage.zsync))"
-		fi
-	fi
+    # For Collumn 1
+    compare="package-title"
+    # For Collumn 3
+    arm_filter='^(aarch64|arm64)$'
+    has_aarch=false
 
-	echo "| $NOTES"
+    declare -A title_amd64 title_aarch title_notes title_n
+    declare -a all_titles ordered_titles table_lines
+
+    entries=$(jq -c --arg ids "$ids" --arg group "$group" '[.[$group][] | select(.id | test($ids))]' "$WORKFLOW_JSON")
+    while IFS= read -r title; do
+        all_titles+=("$title")
+    done < <(jq -r --arg compare "$compare" '.[] | .[$compare]' <<< "$entries" | sort -u)
+
+    for title in "${all_titles[@]}"; do [[ $title == "$first" ]] && ordered_titles+=("$title"); done
+    for title in "${all_titles[@]}"; do [[ $title != "$first" ]] && ordered_titles+=("$title"); done
+
+    for title in "${ordered_titles[@]}"; do
+        amd64_lines=()
+        aarch_lines=()
+
+        notes=$(jq -r --arg t "$title" --arg compare "$compare" 'first(.[] | select(.[$compare] == $t) | .comments // "")' <<< "$entries")
+        entries_amd64=$(jq -c --arg t "$title" --arg compare "$compare" --arg arm_filter "$arm_filter" '.[] | select(.[$compare] == $t and (.target | test($arm_filter) | not))' <<< "$entries")
+        entries_aarch64=$(jq -c --arg t "$title" --arg compare "$compare" --arg arm_filter "$arm_filter" '.[] | select(.[$compare] == $t and (.target | test($arm_filter)))' <<< "$entries")
+
+        map_entries "$entries_amd64" amd64_lines
+        map_entries "$entries_aarch64" aarch_lines
+
+        n=${#amd64_lines[@]}
+        (( ${#aarch_lines[@]} > n )) && n=${#aarch_lines[@]}
+        for ((i=0;i<n;i++)); do
+            [[ -z "${amd64_lines[i]:-}" ]] && amd64_lines[i]=''
+            [[ -z "${aarch_lines[i]:-}" ]] && aarch_lines[i]=''
+        done
+
+        title_n["$title"]=$n
+        title_amd64["$title"]="$(printf "%s\n" "${amd64_lines[@]}")"
+        title_aarch["$title"]="$(printf "%s\n" "${aarch_lines[@]}")"
+        title_notes["$title"]="$notes"
+    done
+
+    for a in "${title_aarch[@]}"; do [[ -n "$a" ]] && has_aarch=true && break; done
+
+    for title in "${ordered_titles[@]}"; do
+        readarray -t amd64_lines <<< "${title_amd64[$title]}"
+        readarray -t aarch_lines <<< "${title_aarch[$title]}"
+
+        notes="${title_notes[$title]}"
+        n=${title_n[$title]}
+        for ((i=0;i<n;i++)); do
+            [[ -z "${amd64_lines[i]:-}" && -z "${aarch_lines[i]:-}" ]] && continue
+            row="<tr>"
+            [[ $i -eq 0 ]] && row+="<td rowspan=\"$n\">$title</td>"
+            row+="<td>${amd64_lines[i]:-}</td>"
+            if $has_aarch; then
+                row+="<td>${aarch_lines[i]:-}</td>"
+                [[ $i -eq 0 ]] && row+="<td rowspan=\"$n\">$notes</td>"
+            else
+                [[ $i -eq 0 ]] && row+="<td colspan=\"2\" rowspan=\"$n\">$notes</td>"
+            fi
+            row+="</tr>"
+            table_lines+=("$row")
+        done
+    done
+
+    local th_aarch='' th_notes=''
+    if $has_aarch; then
+        th_aarch='<th width="125">aarch64</th>'
+        th_notes='<th width="500">Notes</th>'
+    else
+        th_notes='<th colspan="2" width="625">Notes</th>'
+    fi
+
+    cat << EOF
+<table>
+<thead align="left">
+<tr>
+<th width="125">Type</th>
+<th width="125">amd64</th>
+EOF
+    [ -n "$th_aarch" ] && echo "$th_aarch"
+    cat << EOF
+$th_notes
+</tr>
+</thead>
+<tbody align="left">
+EOF
+    for row in "${table_lines[@]}"; do
+        echo "$row"
+    done
+    echo "</tbody></table>"
+}
+
+android_matrix() {
+cat << EOF
+
+## Android
+
+EOF
+process_table_id "android" "android" "Standard"
 }
 
 linux_matrix() {
-	linux_field amd64 "amd64"
-	if opts; then
-		tagged && linux_field legacy "Legacy amd64" "Pre-Ryzen or Haswell CPUs (expect sadness)"
-		linux_field steamdeck "Steam Deck" "Zen 2, with additional patches for SteamOS"
-		tagged && linux_field rog-ally "ROG Ally X" "Zen 4"
-	fi
+cat << EOF
 
-	falsy "$DISABLE_ARM" && linux_field aarch64 "aarch64"
-}
+## Linux
 
-deb_field() {
-	BUILD="$1"
-	NOTES="${2}"
-	NAME="${BUILD//-/ }"
+### AppImage
 
-	echo -n "| $NAME | "
-
-	ARCHES=amd64
-	tagged && ARCHES="$ARCHES aarch64"
-	for ARCH in $ARCHES; do
-		echo -n "[$ARCH](${GITHUB_DOWNLOAD}/${GITHUB_TAG}/${PROJECT_PRETTYNAME}-$BUILD-${ARTIFACT_REF}-${ARCH}.deb) | "
-	done
-
-	echo "$NOTES"
+Linux packages are distributed via AppImage.
+EOF
+[[ opts && tagged ]] && cat << EOF
+</br><a href="https://zsync.moria.org.uk/">zsync</a> files are provided for easier updating, such as via <a href="https://github.com/ivan-hc/AM">AM</a>.
+EOF
+process_table_id "linux" "linux" "Standard"
 }
 
 deb_matrix() {
-    deb_field Ubuntu-24.04 "Not compatible with Ubuntu 25.04 or later"
-	deb_field Debian-12 "Drivers may be old"
-	deb_field Debian-13
+cat << EOF
+
+### Debian/Ubuntu
+
+Debian/Ubuntu targets are \`.deb\` files, which can be installed via \`sudo dpkg -i <package>.deb\`.
+
+EOF
+process_table_id "linux" "debian" "Ubuntu 24.04"
 }
 
 room_matrix() {
-	for arch in aarch64 x86_64; do
-		echo "- [$arch](${GITHUB_DOWNLOAD}/${GITHUB_TAG}/eden-room-$arch-unknown-linux-musl)"
-	done
-}
+cat <<EOF
 
-win_field() {
-	LABEL="$1"
-	COMPILER="$2"
-	NOTES="$3"
+### Room Executables
 
-	echo -n "| $LABEL | "
-	echo -n "[amd64](${GITHUB_DOWNLOAD}/${GITHUB_TAG}/${PROJECT_PRETTYNAME}-Windows-${ARTIFACT_REF}-amd64-${COMPILER}.zip) | "
-	falsy "$DISABLE_MSVC_ARM" && echo -n "[arm64](${GITHUB_DOWNLOAD}/${GITHUB_TAG}/${PROJECT_PRETTYNAME}-Windows-${ARTIFACT_REF}-arm64-${COMPILER}.zip)"
+These are statically linked Linux executables for the \`eden-room\` binary.
 
-	echo " | $NOTES"
-}
-
-msys() {
-	LABEL="$1"
-	AMD="$2"
-    ARM="$3"
-    TARGET="$4"
-	NOTES="$5"
-
-	echo -n "| $LABEL | "
-	echo -n "[amd64](${GITHUB_DOWNLOAD}/${GITHUB_TAG}/${PROJECT_PRETTYNAME}-Windows-${ARTIFACT_REF}-mingw-amd64-${AMD}-${TARGET}.zip) | "
-	echo -n "[arm64](${GITHUB_DOWNLOAD}/${GITHUB_TAG}/${PROJECT_PRETTYNAME}-Windows-${ARTIFACT_REF}-mingw-arm64-${ARM}-${TARGET}.zip) | "
-
-	echo "$NOTES"
+EOF
+process_table_id "room" "alpine" "x86_64"
 }
 
 win_matrix() {
-	win_field MSVC msvc-standard
+cat << EOF
 
-	if falsy "$DISABLE_MINGW"; then
-		msys "MinGW" gcc clang standard "May have additional bugs/glitches"
-		opts && tagged && msys "MinGW PGO" clang clang pgo || true
-	fi
+## Windows
+
+Windows packages are in-place zip files. Setup files are soon to come.
+Note that arm64 builds are experimental.
+
+EOF
+process_table_id "windows" "windows|mingw" "MSVC"
 }
 
+macos_matrix() {
+cat << EOF
+
+## macOS
+
+macOS comes in a tarballed app. These builds are currently experimental, and you should expect major graphical glitches and crashes.</br>
+In order to run the app, you *may* need to go to System Settings -> Privacy & Security -> Security -> Allow untrusted app.
+
+EOF
+process_table_id "macos" "macos" "macOS"
+}
+
+freebsd_matrix() {
+cat << EOF
+
+## FreeBSD
+
+EOF
+process_table_id "freebsd" "freebsd" "FreeBSD"
+}
+
+# MAGIC QLAUNCH HEADER
 echo "# Packages"
 
 if truthy "$EXPLAIN_TARGETS"; then
@@ -175,122 +265,54 @@ cat << EOF
 
 Each build is optimized for a specific architecture and uses a specific compiler.
 
-- **aarch64/arm64**: For devices that use the armv8-a instruction set; e.g. Snapdragon X, all Android devices, and Apple Silicon Macs.
-- **amd64**: For devices that use the amd64 (aka x86_64) instruction set; this is exclusively used by Intel and AMD CPUs and is only found on desktops.
+- **aarch64/arm64**: For devices that use the armv8-a instruction set; e.g. Snapdragon X, all Android devices, and Apple Silicon Macs.</br>
+- **amd64**: For devices that use the amd64 (aka x86_64) instruction set; this is exclusively used by Intel and AMD CPUs and is only found on desktops.</br>
 
 **Compilers**
 
-- **MSVC**: The default compiler for Windows. This is the most stable experience, but may lack in performance compared to any of the following alternatives.
-- **GCC**: The standard GNU compiler; this is the default for Linux and will provide the most stable experience.
-- **PGO**: These are built with Clang, and use PGO. PGO (profile-guided optimization) uses data from prior compilations
-	to determine the "hotspots" found within the codebase. Using these hotspots,
-	it can allocate more resources towards these heavily-used areas, and thus generally see improved performance to the tune of ~10-50%,
-	depending on the specific game, hardware, and platform. Do note that additional instabilities may occur.
-EOF
-fi
-
-cat << EOF
-
-## Linux
-
-Linux packages are distributed via AppImage.
-EOF
-
-if opts && tagged; then
-cat << EOF
-[zsync](https://zsync.moria.org.uk/) files are provided for easier updating, such as via
-[AM](https://github.com/ivan-hc/AM).
-
-| Build Type | GCC | PGO | Notes |
-|------------|-----|-----|-------|
-EOF
-else
-cat << EOF
-
-| Build Type | GCC | Notes |
-|------------|-----|-------|
+- **MSVC**: The default compiler for Windows. This is the most stable experience, but may lack in performance compared to any of the following alternatives.</br>
+- **GCC**: The standard GNU compiler; this is the default for Linux and will provide the most stable experience.</br>
+- **PGO**: These are built with Clang, and use PGO. PGO (profile-guided optimization) uses data from prior compilations</br>
+to determine the "hotspots" found within the codebase. Using these hotspots,</br>
+it can allocate more resources towards these heavily-used areas, and thus generally see improved performance to the tune of ~10-50%,</br>
+depending on the specific game, hardware, and platform. Do note that additional instabilities may occur.</br>
 EOF
 fi
 
 linux_matrix
 
-cat << EOF
-
-### Debian/Ubuntu
-
-Debian/Ubuntu targets are \`.deb\` files, which can be installed via \`sudo dpkg -i <package>.deb\`.
-
-EOF
-
-if tagged; then
-	echo "| Target | amd64 | aarch64 | Notes |"
-	echo "|--------|-------|---------|-------|"
-else
-	echo "| Target | amd64 | Notes |"
-	echo "|--------|-------|-------|"
-fi
-
 deb_matrix
-
-cat <<EOF
-
-### Room Executables
-
-These are statically linked Linux executables for the \`eden-room\` binary.
-
-EOF
 
 room_matrix
 
-# TODO: setup files
-cat << EOF
-
-## Windows
-
-Windows packages are in-place zip files. Setup files are soon to come.
-Note that arm64 builds are experimental.
-
-| Compiler | amd64 | arm64 | Notes |
-|----------|-------|-------|-------|
-EOF
-
 win_matrix
 
-if falsy "$DISABLE_ANDROID"; then
-	cat << EOF
+android_matrix
 
-## Android
+macos_matrix
 
-| Build  | Description |
-|--------|-------------|
-EOF
-
-	android Standard "standard" "Single APK for all supported Android devices (most users should use this)"
-	android x86_64 "chromeos" "For devices running Chrome/FydeOS, AVD emulators, or certain Intel Atom Android devices."
-	if tagged; then
-		android Optimized "optimized" "For any Android device that has Frame Generation or any other per-device feature"
-		android Legacy "legacy" "For Adreno A6xx and other older GPUs"
-	fi
-fi
+freebsd_matrix
 
 cat << EOF
-
-## macOS
-
-macOS comes in a tarballed app. These builds are currently experimental, and you should expect major graphical glitches and crashes.
-In order to run the app, you *may* need to go to System Settings -> Privacy & Security -> Security -> Allow untrusted app.
-
-| File | Description |
-| ---- | ----------- |
-| [macOS](${GITHUB_DOWNLOAD}/${GITHUB_TAG}/${PROJECT_PRETTYNAME}-macOS-${ARTIFACT_REF}.tar.gz) | For Apple Silicon (M1, M2, etc)|
 
 ## Source
 
 Contains all source code, submodules, and CPM cache at the time of release.
 This can be extracted with \`tar xf ${PROJECT_PRETTYNAME}-Source-${GITHUB_TAG}.tar.zst\`.
 
-| File | Description |
-| ---- | ----------- |
-| [tar.zst](${GITHUB_DOWNLOAD}/${GITHUB_TAG}/${PROJECT_PRETTYNAME}-Source-${ARTIFACT_REF}.tar.zst) | Source as a zstd-compressed tarball (Windows: use Git Bash or MSYS2) |
+<table>
+<thead align="left">
+<tr>
+<th width="150">File</th>
+<th width="700">Description</th>
+</tr>
+</thead>
+<tbody align="left">
+<tr>
+<td><a href="${GITHUB_DOWNLOAD}/${GITHUB_TAG}/${PROJECT_PRETTYNAME}-Source-${ARTIFACT_REF}.tar.zst">tar.zst</a></td>
+<td>Source as a zstd-compressed tarball (Windows: use Git Bash or MSYS2)</td>
+</tr>
+</tbody>
+</table>
 
 EOF

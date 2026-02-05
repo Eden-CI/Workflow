@@ -17,6 +17,7 @@ PKGDIR="$BUILDDIR/pkg"
 TMP_DIR=$(mktemp -d)
 EXE="${PROJECT_REPO}.exe"
 
+
 WINDEPLOYQT="${WINDEPLOYQT:-windeployqt6}"
 
 # check if common script folder is on Workflow
@@ -78,7 +79,8 @@ if [ "$PLATFORM" = "msys" ] && [ "$STATIC" != "ON" ]; then
 fi
 
 # ?ploo
-ZIP_NAME="${PROJECT_PRETTYNAME}-Windows-${ARTIFACT_REF}-${ARCH}.zip"
+: "${PACKAGE_TARGET:=eden-windows.zip}"
+ZIP_NAME="${PACKAGE_TARGET}"
 
 cp -r ./* "$TMP_DIR"/
 cp -r "$ROOTDIR"/LICENSE* "$ROOTDIR"/README* "$TMP_DIR"/

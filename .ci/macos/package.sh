@@ -14,14 +14,13 @@ WORKFLOW_DIR=$(CDPATH='' cd -P -- "$(dirname -- "$0")/../.." && pwd)
 BUILDDIR="${BUILDDIR:-$ROOTDIR/build}"
 ARTIFACTS_DIR="$ROOTDIR/artifacts"
 APP="${PROJECT_REPO}.app"
-
-ARTIFACT="${ARTIFACTS_DIR}/${PROJECT_PRETTYNAME}-macOS-${ARTIFACT_REF}.tar.gz"
+: "${PACKAGE_TARGET:=eden-macos.tar.gz}"
 
 cd "$BUILDDIR/bin"
 
 codesign --deep --force --verbose --sign - "$APP"
 
 mkdir -p "$ARTIFACTS_DIR"
-tar czf "$ARTIFACT" "$APP"
+tar czf "${ARTIFACTS_DIR}/${PACKAGE_TARGET}" "$APP"
 
-echo "-- macOS package created at $ARTIFACT"
+echo "-- macOS package created at ${ARTIFACTS_DIR}/${PACKAGE_TARGET}"

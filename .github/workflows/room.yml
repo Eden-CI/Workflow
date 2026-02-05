@@ -2,22 +2,39 @@ name: "eden-room"
 
 on:
   workflow_call:
+    inputs:
+      build-id:
+        description: 'Identifier for workflows and caching'
+        type: string
+        required: true
+      cpm-cache-version:
+        description: 'CPM Cache Version'
+        type: string
+        required: true
+      devel:
+        description: 'Development mode (disables update checker)'
+        type: string
+        required: true
+      matrix:
+        description: 'Generated Matrix to each platform'
+        type: string
+        required: true
 
 jobs:
   alpine:
-    name: "Alpine (${{ matrix.arch }})"
-    runs-on: ${{ matrix.runs-on }}
+    name: "${{ matrix.compiler.system-pretty }} (${{ matrix.compiler.package-target }})"
+    runs-on: "${{ matrix.compiler.runs-on }}"
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - arch: aarch64
-            runs-on: ubuntu-22.04-arm
-          - arch: x86_64
-            runs-on: ubuntu-22.04
+        compiler: ${{ fromJson(inputs.matrix) }}
 
     env:
-      ARCH: ${{ matrix.arch }}
+      TARGET: "${{ matrix.compiler.target }}"
+      COMPILER: "${{ matrix.compiler.compiler }}"
+      COMPILER_OPT: "${{ matrix.compiler.compiler-opt }}"
+      PACKAGE_TARGET: "${{ matrix.compiler.package-target }}"
+      SYSTEM_PRETTY: "${{ matrix.compiler.system-pretty }}"
 
     steps:
       - name: Checkout
@@ -35,7 +52,7 @@ jobs:
             -e GITHUB_REF_NAME \
             -e GITHUB_SHA \
             -e ARCH \
-            alpine:3.23 sh -c '
+            ${{ matrix.compiler.container }} sh -c '
               apk add --no-cache bash cmake g++ gcc git ninja patch boost1.84-dev boost1.84-static \
                 mbedtls-dev mbedtls-static
               cmake -S . -B build -GNinja -DYUZU_STATIC_ROOM=ON
@@ -44,7 +61,7 @@ jobs:
               mkdir -p artifacts
 
               src=build/bin/eden-room
-              dst=artifacts/"eden-room-$ARCH-unknown-linux-musl"
+              dst=artifacts/"eden-room-$PACKAGE_TARGET-unknown-linux-musl"
               mv "$src" "$dst"
 
               strip "$dst"
@@ -53,5 +70,5 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v6.0.0
         with:
-          name: room-${{ matrix.arch }}
+          name: ${{ matrix.compiler.system }}-${{ matrix.compiler.package-target }}
           path: artifacts/*

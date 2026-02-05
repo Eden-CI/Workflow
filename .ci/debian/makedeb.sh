@@ -2,6 +2,7 @@
 
 # SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 # SPDX-License-Identifier: GPL-3.0-or-later
+
 ROOTDIR="$PWD"
 BUILDDIR="/build"
 BUILDUSER="build"
@@ -16,7 +17,7 @@ fi
 if command -v apt >/dev/null 2>&1 ; then
 	$SUDO apt update
 	$SUDO apt install -y asciidoctor binutils build-essential curl fakeroot file \
-		gettext gawk libarchive-tools lsb-release python3 python3-apt zstd mold
+		gettext gawk git libarchive-tools lsb-release python3 python3-apt zstd mold
 fi
 
 # if in a container (does not have sudo), make a build user and run as that

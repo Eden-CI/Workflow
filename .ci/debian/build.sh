@@ -10,6 +10,7 @@ ARTIFACTS_DIR="$ROOTDIR/artifacts"
 # shellcheck disable=SC1091
 WORKFLOW_DIR=$(CDPATH='' cd -P -- "$(dirname -- "$0")/../.." && pwd)
 . "$WORKFLOW_DIR/.ci/common/project.sh"
+: "${PACKAGE_TARGET:=eden-debian.deb}"
 
 if ! command -v makedeb > /dev/null 2>&1 ; then
 	# install makedeb
@@ -46,11 +47,12 @@ else
 fi
 
 sed "s|%PKGVER%|$PKGVER|"             "$SRC"    > "$DEST.1"
-sed "s|%ARCH%|$ARCH|"                 "$DEST.1" > "$DEST.2"
+sed "s|%TARGET%|$TARGET|"             "$DEST.1" > "$DEST.2"
 sed "s|%WORKFLOWDIR%|$WORKFLOW_DIR/|" "$DEST.2" > "$DEST.3"
 sed "s|%BUILDDIR%|$BUILDDIR|"         "$DEST.3" > "$DEST.4"
 sed "s|%CONFIG_OPTS%|$CONFIG_OPTS|"   "$DEST.4" > "$DEST.5"
-sed "s|%SOURCE%|$ROOTDIR|"            "$DEST.5" > "$DEST"
+sed "s|%COMPILER%|$COMPILER|"         "$DEST.5" > "$DEST.6"
+sed "s|%SOURCE%|$ROOTDIR|"            "$DEST.6" > "$DEST"
 
 rm $DEST.*
 
@@ -64,4 +66,4 @@ makedeb -s --no-confirm
 # for some grand reason, makepkg does not exit on errors
 ls ./*.deb || exit 1
 mkdir -p "$ARTIFACTS_DIR"
-mv ./*.deb "$ARTIFACTS_DIR/${PROJECT_PRETTYNAME}-${DEB_NAME}-${ARTIFACT_REF}-${ARCH}.deb"
+mv ./*.deb "$ARTIFACTS_DIR/${PACKAGE_TARGET}"

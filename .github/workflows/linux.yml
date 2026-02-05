@@ -1,4 +1,4 @@
-name: "Android"
+name: "Linux"
 
 on:
   workflow_call:
@@ -15,15 +15,17 @@ on:
         description: 'Development mode (disables update checker)'
         type: string
         required: true
+      force_pgo:
+        description: 'Force PGO builds'
+        type: string
+        required: true
       matrix:
         description: 'Generated Matrix to each platform'
         type: string
         required: true
 
 env:
-  ANDROID_KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
-  ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
-  ANDROID_KEYSTORE_PASS: ${{ secrets.ANDROID_KEYSTORE_PASS }}
+  DISABLE_ARM: ${{ vars.DISABLE_ARM }}
   SCCACHE_GHA_ENABLED: "true"
   CCACHE: "true"
   FORGEJO_TOKEN: ${{ secrets.FORGEJO_TOKEN }}
@@ -31,19 +33,32 @@ env:
   BUILD_ID: ${{ inputs.build-id }}
 
 jobs:
-  android:
+  linux:
     name: "${{ matrix.compiler.system-pretty }} (${{ matrix.compiler.package-target }})"
-    runs-on: ${{ matrix.compiler.runs-on }}
+    runs-on: "${{ matrix.compiler.runs-on }}"
+    container:
+      image: "${{ matrix.compiler.container }}"
+      options: --privileged --device /dev/fuse -v "${{ github.workspace }}":"${{ github.workspace }}"
     strategy:
       fail-fast: false
       matrix:
         compiler: ${{ fromJson(inputs.matrix) }}
+
     env:
       TARGET: "${{ matrix.compiler.target }}"
+      COMPILER: "${{ matrix.compiler.compiler }}"
+      COMPILER_OPT: "${{ matrix.compiler.compiler-opt }}"
       PACKAGE_TARGET: "${{ matrix.compiler.package-target }}"
+      SYSTEM_PRETTY: "${{ matrix.compiler.system-pretty }}"
+      GITHUB_TOKEN: ${{ secrets.CUSTOM_GITHUB_TOKEN }}
+
     steps:
       - name: Checkout
         uses: actions/checkout@v6.0.1
+
+      - name: Install dependencies
+        if: ${{ matrix.compiler.id == 'linux' }}
+        run: ./.ci/linux/deps.sh
 
       - name: Setup
         uses: ./.github/workflows/setup
@@ -51,14 +66,24 @@ jobs:
           key: ${{ matrix.compiler.system }}-${{ matrix.compiler.package-target }}
           version: ${{ inputs.cpm-cache-version }}
 
-      - name: Install dependencies
-        run: ./.ci/android/deps.sh
+      - name: Configure
+        if: ${{ matrix.compiler.id == 'linux' }}
+        run:  .ci/common/configure.sh -DCCACHE_PATH=${SCCACHE_PATH}
 
       - name: Build
-        run: JAVA_HOME=$JAVA_HOME_17_X64 ./.ci/android/build.sh -DCCACHE_PATH=${SCCACHE_PATH}
+        if: ${{ matrix.compiler.id == 'linux' }}
+        run: cmake --build build
 
-      - name: Upload APK
+      - name: Package
+        if: ${{ matrix.compiler.id == 'linux' }}
+        run: ./.ci/linux/package.sh
+
+      - name: Build
+        if: ${{ matrix.compiler.id == 'debian' }}
+        run: ./.ci/debian/makedeb.sh
+
+      - name: Upload artifacts
         uses: actions/upload-artifact@v6.0.0
         with:
           name: ${{ matrix.compiler.system }}-${{ matrix.compiler.package-target }}
-          path: artifacts/*.apk
+          path: ./artifacts/*

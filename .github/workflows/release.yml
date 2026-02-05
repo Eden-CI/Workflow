@@ -49,7 +49,7 @@ jobs:
         run: ./.ci/common/pack.sh
 
       - name: Generate changelog
-        run: ./.ci/changelog/generate.sh "$BUILD_ID" > changelog.md
+        run: WORKFLOW_JSON=workflow-json/workflow.json . ./.ci/changelog/generate.sh "$BUILD_ID" > changelog.md
 
       - name: Delete Previous PR Number
         if: ${{ env.RELEASE_PR == '1' }}
@@ -58,7 +58,7 @@ jobs:
 
       - name: Release
         id: release
-        if: ${{ env.SEND_RELEASE == '1' }}
+        #if: ${{ env.SEND_RELEASE == '1' }}#REVERT BEFORE MERGE
         uses: softprops/action-gh-release@v2.5.0
         with:
           name: "${{ env.GITHUB_TITLE }}"

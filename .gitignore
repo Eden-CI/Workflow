@@ -4,6 +4,7 @@ changelog.md
 # envs
 payload.json
 forgejo.env
+workflow.json
 
 # makedeb stuff
 /install
