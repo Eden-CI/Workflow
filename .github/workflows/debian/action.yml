@@ -35,9 +35,7 @@ runs:
 
     - name: Build
       shell: bash
-      run: |
-        chmod a+x ./.ci/debian/makedeb.sh
-        ./.ci/debian/makedeb.sh
+      run: ./.ci/debian/makedeb.sh
       env:
         ARCH: ${{ inputs.arch }}
         DEB_NAME: ${{ inputs.pretty-name }}
@@ -46,4 +44,4 @@ runs:
       uses: actions/upload-artifact@v6.0.0
       with:
         name: ${{ inputs.name }}-${{ inputs.arch }}
-        path: ./*.deb
+        path: ./artifacts/*.deb

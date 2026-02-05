@@ -5,7 +5,6 @@
 
 ROOTDIR="$PWD"
 BUILDDIR="${BUILDDIR:-$ROOTDIR/build}"
-GITHUB_WORKSPACE=${GITHUB_WORKSPACE:-$ROOTDIR}
 ARTIFACTS_DIR="$ROOTDIR/artifacts"
 
 # shellcheck disable=SC1091
@@ -14,8 +13,8 @@ DIR=$0; [ -n "${BASH_VERSION-}" ] && DIR="${BASH_SOURCE[0]}"; WORKFLOW_DIR="$(cd
 
 # install makedeb
 echo "-- Installing makedeb..."
-[ ! -d makedeb-src ] && git clone 'https://github.com/makedeb/makedeb' makedeb-src
-cd makedeb-src
+[ ! -d "$ROOTDIR/makedeb-src" ] && git clone 'https://github.com/makedeb/makedeb' "$ROOTDIR/makedeb-src"
+cd "$ROOTDIR/makedeb-src"
 git checkout stable
 
 make prepare VERSION=16.0.0 RELEASE=stable TARGET=apt CURRENT_VERSION=16.0.0 FILESYSTEM_PREFIX="$ROOTDIR/makedeb"
@@ -26,7 +25,7 @@ export PATH="$ROOTDIR/makedeb/usr/bin:$PATH"
 
 # now build
 echo "-- Building..."
-cd "$GITHUB_WORKSPACE"
+cd "$ROOTDIR"
 
 CONFIG_OPTS=""
 if [ -n "${SCCACHE_PATH-}" ] && [ -e "$SCCACHE_PATH" ]; then
@@ -34,13 +33,13 @@ if [ -n "${SCCACHE_PATH-}" ] && [ -e "$SCCACHE_PATH" ]; then
 fi
 
 SRC="$WORKFLOW_DIR/.ci/debian/PKGBUILD.in"
-DEST=PKGBUILD
+DEST="$ROOTDIR/PKGBUILD"
 
-TAG=$(cat "$GITHUB_WORKSPACE"/GIT-TAG | sed 's/.git//' | sed 's/v//' | sed 's/[-_]/./g' | tr -d '\n')
-if [ -f "$GITHUB_WORKSPACE"/GIT-RELEASE ]; then
+TAG=$(cat "$ROOTDIR"/GIT-TAG | sed 's/.git//' | sed 's/v//' | sed 's/[-_]/./g' | tr -d '\n')
+if [ -f "$ROOTDIR"/GIT-RELEASE ]; then
 	PKGVER="$TAG"
 else
-	REF=$(cat "$GITHUB_WORKSPACE"/GIT-COMMIT)
+	REF=$(cat "$ROOTDIR"/GIT-COMMIT)
 	PKGVER="$TAG.$REF"
 fi
 
@@ -49,7 +48,7 @@ sed "s|%ARCH%|$ARCH|"                 "$DEST.1" > "$DEST.2"
 sed "s|%WORKFLOWDIR%|$WORKFLOW_DIR/|" "$DEST.2" > "$DEST.3"
 sed "s|%BUILDDIR%|$BUILDDIR|"         "$DEST.3" > "$DEST.4"
 sed "s|%CONFIG_OPTS%|$CONFIG_OPTS|"   "$DEST.4" > "$DEST.5"
-sed "s|%SOURCE%|$GITHUB_WORKSPACE|"   "$DEST.5" > "$DEST"
+sed "s|%SOURCE%|$ROOTDIR|"            "$DEST.5" > "$DEST"
 
 rm $DEST.*
 
@@ -57,11 +56,7 @@ if ! command -v sudo >/dev/null 2>&1 ; then
 	alias sudo="su - root -c"
 fi
 
-export ROOTDIR
-export BUILDDIR
-export GITHUB_WORKSPACE
-
-makedeb --print-srcinfo > "$GITHUB_WORKSPACE/.SRCINFO"
+makedeb --print-srcinfo > "$ROOTDIR/.SRCINFO"
 makedeb -s --no-confirm
 
 # for some grand reason, makepkg does not exit on errors
