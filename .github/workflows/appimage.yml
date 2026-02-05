@@ -100,9 +100,7 @@ jobs:
           version: ${{ inputs.cpm-cache-version }}
 
       - name: Install dependencies
-        run: |
-          chmod a+x ./.ci/linux/deps.sh
-          ./.ci/linux/deps.sh
+        run: ./.ci/linux/deps.sh
         env:
           GITHUB_TOKEN: ${{ secrets.CUSTOM_GITHUB_TOKEN }}
 
@@ -121,4 +119,4 @@ jobs:
         uses: actions/upload-artifact@v6.0.0
         with:
           name: linux-${{ matrix.os.arch }}-${{ matrix.compiler.program }}-${{ matrix.compiler.target }}
-          path: ./*.AppImage*
+          path: ./artifacts/*.AppImage*
