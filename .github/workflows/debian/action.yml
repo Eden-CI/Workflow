@@ -47,7 +47,7 @@ runs:
 
     - name: Build
       shell: bash
-      run: su - "${{ env.BUILDUSER }}" -c  ".ci/debian/build.sh"
+      run: su - "${{ env.BUILDUSER }}" -c  "cd ${{ github.workspace }}; .ci/debian/build.sh"
       env:
         ARCH: ${{ inputs.arch }}
         BUILDUSER: makedeb
