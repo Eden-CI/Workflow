@@ -17,7 +17,7 @@ jobs:
             runs-on: ubuntu-22.04
 
     env:
-      ARCH: ${{ matrix.arch }}
+      FULL_ARCH: ${{ matrix.arch }}
 
     steps:
       - name: Checkout
@@ -44,7 +44,7 @@ jobs:
               mkdir -p artifacts
 
               src=build/bin/eden-room
-              dst=artifacts/"eden-room-$ARCH-unknown-linux-musl"
+              dst=artifacts/"eden-room-$FULL_ARCH-unknown-linux-musl"
               mv "$src" "$dst"
 
               strip "$dst"

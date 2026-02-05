@@ -84,7 +84,7 @@ if [ -n "$SUPPORTS_TARGETS" ]; then
 	[ "$PLATFORM" = "linux" ] && ARCH_FLAGS="${ARCH_FLAGS} -pipe"
 
 	# For PGO, we fetch profdata and add it to our flags
-	if [ "$PGO_TARGET" = "pgo" ]; then
+	if [ "$COMPILER_OPT" = "-pgo" ]; then
 		echo "Creating PGO build"
 
 		CCACHE=OFF

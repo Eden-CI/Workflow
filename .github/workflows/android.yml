@@ -32,14 +32,15 @@ env:
 
 jobs:
   android:
-    name: "Android"
-    runs-on: ${{ matrix.target.runs-on }}
+    name: "${{ matrix.compiler.system-pretty }} (${{ matrix.compiler.package-target }})"
+    runs-on: ${{ matrix.compiler.runs-on }}
     strategy:
       fail-fast: false
       matrix:
-        target: ${{ fromJson(inputs.matrix) }}
+        compiler: ${{ fromJson(inputs.matrix) }}
     env:
-      TARGET: "${{ matrix.target.flavor }}"
+      TARGET: "${{ matrix.compiler.target }}"
+      PACKAGE_TARGET: "${{ matrix.compiler.package-target }}"
     steps:
       - name: Checkout
         uses: actions/checkout@v6.0.1
@@ -47,25 +48,17 @@ jobs:
       - name: Setup
         uses: ./.github/workflows/setup
         with:
-          key: ${{ runner.os }}-amd64-universal
+          key: ${{ matrix.compiler.system }}-${{ matrix.compiler.package-target }}
           version: ${{ inputs.cpm-cache-version }}
 
       - name: Install dependencies
-        run: |
-          ./.ci/android/deps.sh
+        run: ./.ci/android/deps.sh
 
       - name: Build
-        run: |
-          JAVA_HOME=$JAVA_HOME_17_X64 ./.ci/android/build.sh -DCCACHE_PATH=${SCCACHE_PATH}
+        run: JAVA_HOME=$JAVA_HOME_17_X64 ./.ci/android/build.sh -DCCACHE_PATH=${SCCACHE_PATH}
 
       - name: Upload APK
         uses: actions/upload-artifact@v6.0.0
         with:
-          name: android-${{ matrix.target.flavor }}
+          name: ${{ matrix.compiler.system }}-${{ matrix.compiler.package-target }}
           path: artifacts/*.apk
-
-      - name: Upload AAB
-        uses: actions/upload-artifact@v6.0.0
-        with:
-          name: android-aab-${{ matrix.target.flavor }}
-          path: artifacts/*.aab
