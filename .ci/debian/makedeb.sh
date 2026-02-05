@@ -18,8 +18,8 @@ fi
 
 # install makedeb
 echo "-- Installing makedeb..."
-[ ! -d makedeb-src ] && git clone 'https://github.com/makedeb/makedeb' makedeb-src
-cd makedeb-src
+[ ! -d makedeb-src ] && git clone 'https://github.com/makedeb/makedeb' "$BUILDDIR"
+cd $BUILDDIR
 git checkout stable
 
 make prepare VERSION=16.0.0 RELEASE=stable TARGET=apt CURRENT_VERSION=16.0.0 FILESYSTEM_PREFIX="$BUILDDIR/makedeb"

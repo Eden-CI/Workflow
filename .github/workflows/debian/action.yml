@@ -37,7 +37,7 @@ runs:
       shell: bash
       run: |
         apt update
-        useradd -m -s /bin/bash "${{ env.BUILDUSER }}"
+        useradd -m -s /bin/bash "${{ env.BUILDUSER }}" -d "${{ github.workspace }}"
         echo "${{ env.BUILDUSER }} ALL=NOPASSWD: ALL" >> /etc/sudoers
         chown -R "${BUILDUSER}:${BUILDUSER}" .
         .ci/debian/makedeb.sh
@@ -47,7 +47,7 @@ runs:
 
     - name: Build
       shell: bash
-      run: su - "${{ env.BUILDUSER }}" -c  "cd ${{ github.workspace }}; .ci/debian/build.sh"
+      run: su - "${{ env.BUILDUSER }}" -c  ".ci/debian/build.sh"
       env:
         ARCH: ${{ inputs.arch }}
         BUILDUSER: makedeb
