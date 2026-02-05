@@ -30,3 +30,4 @@ if [ -n "${CI:-}" ]; then
     echo "$BUILDDIR/makedeb/usr/bin" >> "$GITHUB_PATH"
 fi
 export PATH="$BUILDDIR/makedeb/usr/bin:$PATH"
+makedeb --help
