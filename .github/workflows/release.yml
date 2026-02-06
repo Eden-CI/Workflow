@@ -37,7 +37,7 @@ jobs:
         uses: actions/download-artifact@v7.0.0
 
       - name: Load environments
-        run:
+        run: |
           FORGEJO_LENV=forgejo-env/forgejo.env . .ci/fj/load-env.sh
           . .ci/common/steps.sh | tee -a "$GITHUB_ENV"
 
