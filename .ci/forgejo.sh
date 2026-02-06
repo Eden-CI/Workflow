@@ -7,8 +7,7 @@
 
 # shellcheck disable=SC1091
 
-ROOTDIR="$PWD"
-DIR=$0; [ -n "${BASH_VERSION-}" ] && DIR="${BASH_SOURCE[0]}"; WORKFLOW_DIR="$(cd "$(dirname -- "$DIR")/.." && pwd)"
+WORKFLOW_DIR=$(CDPATH='' cd -- "$(dirname -- "$0")/.." && pwd)
 . "$WORKFLOW_DIR/.ci/common/project.sh"
 
 FORGEJO_LENV=${FORGEJO_LENV:-"forgejo.env"}
@@ -73,7 +72,18 @@ parse_payload() {
 
 	# NB: mirrors do not (generally) work for our purposes
 	# unless they magically can mirror everything in 10 seconds
-	: "${FALLBACK_IDX:=0}"
+	# The only exception to this is on test builds, where we usually don't need to have the most up-to-date code.
+
+	# You can safely remove this if you don't have any regularly-updated mirrors.
+	# shellcheck disable=SC2153
+	case "$BUILD_ID" in
+		test|push)
+			FALLBACK_IDX=1
+			;;
+		*)
+			FALLBACK_IDX=0
+			;;
+	esac
 	if [ -z "$FORGEJO_HOST" ]; then
 		FORGEJO_HOST=$(jq -r ".[$FALLBACK_IDX].host" $DEFAULT_JSON)
 	fi
