@@ -25,6 +25,8 @@ jobs:
       FJ_TOKEN: "${{ secrets.FORGEJO_TOKEN }}"
       DISCORD_WEBHOOK: "${{ secrets.DISCORD_WEBHOOK }}"
       DEVEL: "${{ inputs.devel }}"
+      STATUS: "${{ inputs.status }}"
+      BUILD_ID: "${{ inputs.build-id }}"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6.0.1
@@ -34,27 +36,29 @@ jobs:
       - name: Download artifacts
         uses: actions/download-artifact@v7.0.0
 
-      - name: Load payload environment
-        run: FORGEJO_LENV=forgejo-env/forgejo.env . .ci/fj/load-env.sh
+      - name: Load environments
+        run:
+          FORGEJO_LENV=forgejo-env/forgejo.env . .ci/fj/load-env.sh
+          . .ci/common/steps.sh | tee -a "$GITHUB_ENV"
 
       - name: Send build status
-        if: ${{ always() && (inputs.build-id) == 'master' || (inputs.build-id) == 'pull_request' }}
-        run: python3 ./.ci/common/status.py --${{ inputs.status }}
+        if: ${{ env.SEND_STATUS == '1' }}
+        run: python3 ./.ci/common/status.py --$STATUS
 
       - name: Package artifacts nicely
         run: ./.ci/common/pack.sh
 
       - name: Generate changelog
-        run: ./.ci/changelog/generate.sh "${{ inputs.build-id }}" > changelog.md
+        run: ./.ci/changelog/generate.sh "$BUILD_ID" > changelog.md
 
       - name: Delete Previous PR Number
-        if: ${{ env.GH_TOKEN && (inputs.build-id) == 'pull_request' && (inputs.status) == 'success' }}
+        if: ${{ env.RELEASE_PR == '1' }}
         run: gh release delete "$FORGEJO_PR_NUMBER" --repo "$RELEASE_REPO" --cleanup-tag -y
         continue-on-error: true
 
       - name: Release
         id: release
-        if: ${{ env.GH_TOKEN && (inputs.build-id) != 'test' || (inputs.build-id) != 'push' && (inputs.status) == 'success' }}
+        if: ${{ env.SEND_RELEASE == '1' }}
         uses: softprops/action-gh-release@v2.5.0
         with:
           name: "${{ env.GITHUB_TITLE }}"
@@ -65,13 +69,12 @@ jobs:
           prerelease: false
           draft: ${{ inputs.build-id == 'tag' }}
           generate_release_notes: false
-          fail_on_unmatched_files: false
           make_latest: true
           files: |
             artifacts/*
 
       - name: Add Release URL to Summary
-        if: ${{ env.GH_TOKEN && (inputs.build-id) != 'test' || (inputs.build-id) != 'push' && (inputs.status) == 'success' }}
+        if: ${{ env.SEND_RELEASE == '1' }}
         run: |
           {
             echo "## Release Summary"
@@ -79,15 +82,15 @@ jobs:
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Send Release Status
-        if: ${{ env.FJ_TOKEN && (inputs.build-id) == 'master' || (inputs.build-id) == 'pull_request' && (inputs.status) == 'success'}}
+        if: ${{ env.SEND_STATUS == '1' }}
         run: python3 ./.ci/common/status.py --release ${{ steps.release.outputs.url }}
 
       - name: Send Nightly Release to Discord
-        if: ${{ env.DISCORD_WEBHOOK && (inputs.build-id) == 'nightly' && (inputs.status) == 'success' }}
+        if: ${{ env.RELEASE_DISCORD == '1' }}
         run: .ci/discord/publish.sh
 
       - name: Release (PR Number)
-        if: ${{ env.GH_TOKEN && (inputs.build-id) == 'pull_request' && (inputs.status) == 'success' }}
+        if: ${{ env.RELEASE_PR == '1' }}
         uses: softprops/action-gh-release@v2.5.0
         with:
           name: "${{ env.GITHUB_TITLE }}"
@@ -98,12 +101,10 @@ jobs:
           draft: false
           generate_release_notes: false
           token: ${{ env.GH_TOKEN }}
-          fail_on_unmatched_files: false
-          discussion_category_name: "PRs"
           make_latest: true
 
       - name: Release (Forgejo)
-        if: ${{ env.FJ_TOKEN && (inputs.build-id) == 'tag' && (inputs.status) == 'success' }}
+        if: ${{ env.RELEASE_FJ == '1' }}
         run: |
           . .ci/fj/release.sh
           echo "- View Release on Forgejo: [$FORGEJO_REF](${FJ_URL})" >> "$GITHUB_STEP_SUMMARY"
