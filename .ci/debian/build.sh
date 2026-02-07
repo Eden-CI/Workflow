@@ -11,17 +11,19 @@ ARTIFACTS_DIR="$ROOTDIR/artifacts"
 DIR=$0; [ -n "${BASH_VERSION-}" ] && DIR="${BASH_SOURCE[0]}"; WORKFLOW_DIR="$(cd "$(dirname -- "$DIR")/../.." && pwd)"
 . "$WORKFLOW_DIR/.ci/common/project.sh"
 
-# install makedeb
-echo "-- Installing makedeb..."
-[ ! -d "$ROOTDIR/makedeb-src" ] && git clone 'https://github.com/makedeb/makedeb' "$ROOTDIR/makedeb-src"
-cd "$ROOTDIR/makedeb-src"
-git checkout stable
+if ! command -v makedeb > /dev/null 2>&1 ; then
+	# install makedeb
+	echo "-- Installing makedeb..."
+	[ ! -d "$ROOTDIR/makedeb-src" ] && git clone 'https://github.com/makedeb/makedeb' "$ROOTDIR/makedeb-src"
+	cd "$ROOTDIR/makedeb-src"
+	git checkout stable
 
-make prepare VERSION=16.0.0 RELEASE=stable TARGET=apt CURRENT_VERSION=16.0.0 FILESYSTEM_PREFIX="$ROOTDIR/makedeb"
-make
-make package DESTDIR="$ROOTDIR/makedeb" TARGET=apt
+	make prepare VERSION=16.0.0 RELEASE=stable TARGET=apt CURRENT_VERSION=16.0.0 FILESYSTEM_PREFIX="$ROOTDIR/makedeb"
+	make
+	make package DESTDIR="$ROOTDIR/makedeb" TARGET=apt
 
-export PATH="$ROOTDIR/makedeb/usr/bin:$PATH"
+	export PATH="$ROOTDIR/makedeb/usr/bin:$PATH"
+fi
 
 # now build
 echo "-- Building..."

@@ -6,6 +6,7 @@ ROOTDIR="$PWD"
 BUILDDIR="/build"
 BUILDUSER="build"
 WORKFLOW_DIR=$(CDPATH='' cd -P -- "$(dirname -- "$0")/../.." && pwd)
+ARTIFACTS_DIR="$ROOTDIR/artifacts"
 
 # Use sudo if available, otherwise run directly
 if command -v sudo >/dev/null 2>&1 ; then
@@ -25,20 +26,21 @@ if ! command -v sudo > /dev/null 2>&1 ; then
 	sudo useradd -m -s /bin/bash -d "$BUILDDIR" "$BUILDUSER"
 	echo "$BUILDUSER ALL=NOPASSWD: ALL" >> /etc/sudoers
 
-	# copy workspace stuff over
+	# copy workspace stuff to fakeroot
 	cp -r "$ROOTDIR/"* "$ROOTDIR/.patch" "$ROOTDIR/.ci" "$ROOTDIR/.reuse" "$BUILDDIR"
 	if [ -d "$ROOTDIR/.cache" ]; then
 		cp -r "$ROOTDIR/.cache" "$BUILDDIR"
-		rm -rf "$ROOTDIR/.cache"
 		chown -R "$BUILDUSER:$BUILDUSER" "$BUILDDIR/.cache"
+		rm -rf "$ROOTDIR/.cache"
 	fi
 	chown -R "$BUILDUSER:$BUILDUSER" "$BUILDDIR/"* "$BUILDDIR/.patch" "$BUILDDIR/.ci" "$BUILDDIR/.reuse"
 
 	cd "$BUILDDIR"
 	sudo -E -u "$BUILDUSER" "$BUILDDIR/.ci/debian/build.sh"
 
+	# copy back from fakeroot to workspace
 	mv "$BUILDDIR/.cache" "$ROOTDIR"
-	cp "$BUILDDIR/"*.deb "$ROOTDIR"
+	cp "$BUILDDIR/artifacts/"*.deb "$ARTIFACTS_DIR"
 # otherwise just run normally
 else
 	"$WORKFLOW_DIR/.ci/debian/build.sh"
