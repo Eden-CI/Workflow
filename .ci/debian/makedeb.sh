@@ -40,6 +40,7 @@ if ! command -v sudo > /dev/null 2>&1 ; then
 
 	# copy back from fakeroot to workspace
 	mv "$BUILDDIR/.cache" "$ROOTDIR"
+	mkdir -p "$ARTIFACTS_DIR"
 	cp "$BUILDDIR/artifacts/"*.deb "$ARTIFACTS_DIR"
 # otherwise just run normally
 else

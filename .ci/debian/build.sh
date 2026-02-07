@@ -63,4 +63,5 @@ makedeb -s --no-confirm
 
 # for some grand reason, makepkg does not exit on errors
 ls ./*.deb || exit 1
+mkdir -p "$ARTIFACTS_DIR"
 mv ./*.deb "$ARTIFACTS_DIR/${PROJECT_PRETTYNAME}-${DEB_NAME}-${ARTIFACT_REF}-${ARCH}.deb"
