@@ -100,7 +100,9 @@ jobs:
 
       - name: rsync from qemu:artifacts to host:artifacts
         shell: bash
-        run: rsync -av -e ssh freebsd:${{ github.workspace }}/artifacts/ ${{ github.workspace }}/artifacts/
+        run: |
+          rsync -av -e ssh freebsd:${{ github.workspace }}/artifacts/ ${{ github.workspace }}/artifacts/
+          rsync -av -e ssh freebsd:${{ github.workspace }}/.cache/ ${{ github.workspace }}/.cache/
 
       - name: Upload Binary
         uses: actions/upload-artifact@v6.0.0
