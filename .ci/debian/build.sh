@@ -3,40 +3,54 @@
 # SPDX-FileCopyrightText: Copyright 2025 Eden Emulator Project
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-export ROOTDIR="$PWD"
-WORKFLOW_DIR="$(cd "$(dirname "$0")/../.." && pwd)"
+ROOTDIR="$PWD"
+BUILDDIR="${BUILDDIR:-$ROOTDIR/build}"
+ARTIFACTS_DIR="$ROOTDIR/artifacts"
 
-GITHUB_WORKSPACE="$ROOTDIR"
+# shellcheck disable=SC1091
+WORKFLOW_DIR=$(CDPATH='' cd -P -- "$(dirname -- "$0")/../.." && pwd)
+. "$WORKFLOW_DIR/.ci/common/project.sh"
 
-# install makedeb
-echo "-- Installing makedeb..."
-[ ! -d makedeb-src ] && git clone 'https://github.com/makedeb/makedeb' makedeb-src
-cd makedeb-src
-git checkout stable
+if ! command -v makedeb > /dev/null 2>&1 ; then
+	# install makedeb
+	echo "-- Installing makedeb..."
+	[ ! -d "$ROOTDIR/makedeb-src" ] && git clone 'https://github.com/makedeb/makedeb' "$ROOTDIR/makedeb-src"
+	cd "$ROOTDIR/makedeb-src"
+	git checkout stable
 
-make prepare VERSION=16.0.0 RELEASE=stable TARGET=apt CURRENT_VERSION=16.0.0 FILESYSTEM_PREFIX="$ROOTDIR/makedeb"
-make
-make package DESTDIR="$ROOTDIR/makedeb" TARGET=apt
+	make prepare VERSION=16.0.0 RELEASE=stable TARGET=apt CURRENT_VERSION=16.0.0 FILESYSTEM_PREFIX="$ROOTDIR/makedeb"
+	make
+	make package DESTDIR="$ROOTDIR/makedeb" TARGET=apt
 
-export PATH="$ROOTDIR/makedeb/usr/bin:$PATH"
+	export PATH="$ROOTDIR/makedeb/usr/bin:$PATH"
+fi
 
 # now build
 echo "-- Building..."
 cd "$ROOTDIR"
 
-SRC="$WORKFLOW_DIR/.ci/debian/PKGBUILD.in"
-DEST=PKGBUILD
+CONFIG_OPTS=""
+if [ -n "${SCCACHE_PATH-}" ] && [ -e "$SCCACHE_PATH" ]; then
+    CONFIG_OPTS=" -DCCACHE_PATH=\"${SCCACHE_PATH}\""
+fi
 
-TAG=$(cat "$GITHUB_WORKSPACE"/GIT-TAG | sed 's/.git//' | sed 's/v//' | sed 's/[-_]/./g' | tr -d '\n')
-if [ -f "$GITHUB_WORKSPACE"/GIT-RELEASE ]; then
+SRC="$WORKFLOW_DIR/.ci/debian/PKGBUILD.in"
+DEST="$ROOTDIR/PKGBUILD"
+
+TAG=$(cat "$ROOTDIR"/GIT-TAG | sed 's/.git//' | sed 's/v//' | sed 's/[-_]/./g' | tr -d '\n')
+if [ -f "$ROOTDIR"/GIT-RELEASE ]; then
 	PKGVER="$TAG"
 else
-	REF=$(cat "$GITHUB_WORKSPACE"/GIT-COMMIT)
+	REF=$(cat "$ROOTDIR"/GIT-COMMIT)
 	PKGVER="$TAG.$REF"
 fi
 
-sed "s/%PKGVER%/$PKGVER/" "$SRC"  > $DEST.1
-sed "s/%ARCH%/$ARCH/"     $DEST.1 > $DEST
+sed "s|%PKGVER%|$PKGVER|"             "$SRC"    > "$DEST.1"
+sed "s|%ARCH%|$ARCH|"                 "$DEST.1" > "$DEST.2"
+sed "s|%WORKFLOWDIR%|$WORKFLOW_DIR/|" "$DEST.2" > "$DEST.3"
+sed "s|%BUILDDIR%|$BUILDDIR|"         "$DEST.3" > "$DEST.4"
+sed "s|%CONFIG_OPTS%|$CONFIG_OPTS|"   "$DEST.4" > "$DEST.5"
+sed "s|%SOURCE%|$ROOTDIR|"            "$DEST.5" > "$DEST"
 
 rm $DEST.*
 
@@ -44,10 +58,10 @@ if ! command -v sudo >/dev/null 2>&1 ; then
 	alias sudo="su - root -c"
 fi
 
-makedeb --print-srcinfo > .SRCINFO
+makedeb --print-srcinfo > "$ROOTDIR/.SRCINFO"
 makedeb -s --no-confirm
 
 # for some grand reason, makepkg does not exit on errors
 ls ./*.deb || exit 1
-
-mv ./*.deb "${PROJECT_PRETTYNAME}-${DEB_NAME}-${ARTIFACT_REF}-${ARCH}.deb"
+mkdir -p "$ARTIFACTS_DIR"
+mv ./*.deb "$ARTIFACTS_DIR/${PROJECT_PRETTYNAME}-${DEB_NAME}-${ARTIFACT_REF}-${ARCH}.deb"
