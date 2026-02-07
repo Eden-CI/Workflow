@@ -29,3 +29,7 @@ runs:
       uses: actions/download-artifact@v7.0.0
       with:
         name: source
+
+    - name: Unpack Source
+      shell: bash
+      run: tar -xf *.tar.zst
