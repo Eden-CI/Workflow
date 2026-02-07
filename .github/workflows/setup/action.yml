@@ -28,11 +28,4 @@ runs:
     - name: Clone
       uses: actions/download-artifact@v7.0.0
       with:
-        name: eden
-
-    - name: Set up CPM cache
-      uses: actions/cache@v5.0.1
-      with:
-        path: |
-          ${{ github.workspace }}/.cache
-        key: ${{ inputs.key }}-cpm-${{ inputs.version }}
+        name: source

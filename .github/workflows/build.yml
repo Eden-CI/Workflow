@@ -64,16 +64,13 @@ jobs:
         if: ${{ env.TEMP_PATCH_NUMBER != '' }}
         run: |
           wget https://git.eden-emu.dev/eden-emu/eden/pulls/${TEMP_PATCH_NUMBER}.patch
-          git -C eden apply --3way --ignore-whitespace ../${TEMP_PATCH_NUMBER}.patch
-          rm ${TEMP_PATCH_NUMBER}.patch
+          git -C eden apply --3way --ignore-whitespace ${TEMP_PATCH_NUMBER}.patch
 
       - name: Summary
-        run: |
-          ./.ci/fj/summary.sh ${{ inputs.build-id }}
+        run: ./.ci/fj/summary.sh ${{ inputs.build-id }}
 
       - name: Cleanup
-        run: |
-          rm -rf eden/.git* eden/.ci eden/.github
+        run: rm -rf eden/.git* eden/.ci eden/.github
 
       - name: Upload payload environment
         uses: actions/upload-artifact@v6.0.0
@@ -90,12 +87,9 @@ jobs:
             eden/*
             eden/.patch
 
-  source:
-    name: "Source Pack"
-    runs-on: ubuntu-latest
-    needs: [clone]
+      - name: Cleanup
+        run: find . -mindepth 1 -delete
 
-    steps:
       - name: Checkout
         uses: actions/checkout@v6.0.1
 
