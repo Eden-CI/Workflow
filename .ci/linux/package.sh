@@ -47,8 +47,8 @@ export DEPLOY_VULKAN=1
 export APPDIR="$ROOTDIR/AppDir"
 export APPENV="$ROOTDIR/AppDir/.env"
 export OUTPATH="$ARTIFACTS_DIR"
-export OUTNAME="${PROJECT_PRETTYNAME}-Linux-${ARTIFACT_REF}-${FULL_ARCH}.AppImage"
-UPINFO="gh-releases-zsync|eden-emulator|Releases|latest|*-${FULL_ARCH}.AppImage.zsync"
+export OUTNAME="${PROJECT_PRETTYNAME}-${SYSTEM_PRETTY}-${ARTIFACT_REF}-${PACKAGE_TARGET}.AppImage"
+UPINFO="gh-releases-zsync|eden-emulator|Releases|latest|*-${PACKAGE_TARGET}.AppImage.zsync"
 
 if [ "$DEVEL" = 'true' ]; then
     case "$(uname)" in

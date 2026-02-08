@@ -35,8 +35,9 @@ else
 	PKGVER="$TAG.$REF"
 fi
 
-sed "s/%PKGVER%/$PKGVER/" "$SRC"  > $DEST.1
-sed "s/%ARCH%/$ARCH/"     $DEST.1 > $DEST
+sed "s|%PKGVER%|$PKGVER|"  "$SRC"  > "$DEST.1"
+sed "s|%TARGET%|$TARGET|" "$DEST.1" > "$DEST.2"
+sed "s|%COMPILER%|$COMPILER|" "$DEST.2" > "$DEST"
 
 rm $DEST.*
 
@@ -50,4 +51,4 @@ makedeb -s --no-confirm
 # for some grand reason, makepkg does not exit on errors
 ls ./*.deb || exit 1
 
-mv ./*.deb "${PROJECT_PRETTYNAME}-${DEB_NAME}-${ARTIFACT_REF}-${ARCH}.deb"
+mv ./*.deb "${PROJECT_PRETTYNAME}-${SYSTEM_PRETTY}-${ARTIFACT_REF}-${PACKAGE_TARGET}.deb"

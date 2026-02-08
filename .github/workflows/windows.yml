@@ -19,6 +19,10 @@ on:
         description: 'Force PGO builds'
         type: string
         required: true
+      matrix:
+        description: 'Generated Matrix to each platform'
+        type: string
+        required: true
 
 env:
   DISABLE_ARM: ${{ vars.DISABLE_ARM }}
@@ -29,44 +33,19 @@ env:
   BUILD_ID: ${{ inputs.build-id }}
 
 jobs:
-  win-matrix:
-    name: "Generate Windows compilers"
-    runs-on: ubuntu-latest
-    outputs:
-      compiler: ${{ steps.set.outputs.compiler }}
-    steps:
-      - id: set
-        run: |
-          PGO='{"program": "clang", "target": "pgo"}'
-          CLANG='{"program": "clang", "target": "standard"}'
-          MSVC='{"program": "msvc", "target": "standard"}'
-
-          if [ "${{ inputs.devel }}" != "true" ] || [ "${{ inputs.force_pgo }}" = "true" ]; then
-            COMPILER="[${MSVC}]"
-          else
-            COMPILER="[${MSVC}]"
-          fi
-
-          echo $COMPILER
-          echo "compiler=${COMPILER}" >> $GITHUB_OUTPUT
-
   windows:
-    name: "Windows ${{ matrix.os.arch }} ${{ matrix.compiler.program }} ${{ matrix.compiler.target }}"
-    needs: [win-matrix]
-    runs-on: ${{ matrix.os.runs-on }}
+    name: "${{ matrix.compiler.system-pretty }} (${{ matrix.compiler.package-target }})"
+    runs-on: ${{ matrix.compiler.runs-on }}
     strategy:
       fail-fast: false
       matrix:
-        os:
-          - runs-on: windows-latest
-            arch: amd64
-        compiler: ${{ fromJson(needs.win-matrix.outputs.compiler) }}
+        compiler: ${{ fromJson(inputs.matrix) }}
 
     env:
-      TARGET: ${{ matrix.os.arch }}
-      COMPILER: "${{ matrix.compiler.program }}"
-      PGO_TARGET: "${{ matrix.compiler.target }}"
-      ARCH: ${{ matrix.os.arch }}-${{ matrix.compiler.program }}-${{ matrix.compiler.target }}
+      TARGET: ${{ matrix.compiler.target }}
+      COMPILER: "${{ matrix.compiler.compiler }}"
+      COMPILER_OPT: "${{ matrix.compiler.compiler-opt }}"
+      PACKAGE_TARGET: "${{ matrix.compiler.package-target }}"
 
     steps:
       - name: Checkout
@@ -75,55 +54,82 @@ jobs:
       - name: Setup
         uses: ./.github/workflows/setup
         with:
-          key: ${{ runner.os }}-${{ matrix.os.arch }}-${{ matrix.compiler.program }}
+          key: ${{ matrix.compiler.system }}-${{ matrix.compiler.package-target }}
           version: ${{ inputs.cpm-cache-version }}
 
       - name: Load payload environment
         shell: bash
         run: . ./.ci/fj/load-env.sh
 
+      - name: Setup MSYS2
+        if: ${{ matrix.compiler.id == 'mingw' }}
+        id: msys2
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: ${{ matrix.compiler.system-pretty }}
+          update: true
+          install: >-
+            git make autoconf libtool automake-wrapper patch jq
+            pactoys ninja
+          pacboy: >-
+            qt6-tools:p qt6-translations:p qt6-svg:p
+
+            7zip:p sccache:p cmake:p toolchain:p clang:p python-pip:p lld:p
+            openssl:p boost:p fmt:p lz4:p nlohmann-json:p zlib:p zstd:p
+            vulkan-memory-allocator:p vulkan-devel:p glslang:p
+            enet:p opus:p mbedtls:p libusb:p unordered_dense:p
+
+            jbigkit:p xz:p libdeflate:p bzip2:p lerc:p graphite2:p crt-git:p
+            libwebp:p libtiff:p brotli:p
+
       - name: Set up MSVC
+        if: ${{ matrix.compiler.id == 'windows' }}
         uses: ilammy/msvc-dev-cmd@v1.13.0
         with:
-          arch: ${{ matrix.os.arch }}
+          arch: ${{ matrix.compiler.target }}
 
       - name: Install LLVM/Clang
-        if: matrix.compiler.program == 'clang'
+        if: ${{ matrix.compiler.compiler == 'clang' && matrix.compiler.id == 'windows' }}
         uses: Eden-CI/install-llvm-action@v1
         with:
           version: "21.1.4"
           env: true
 
       - name: Check LLVM/Clang
-        if: matrix.compiler.program == 'clang'
+        if: ${{ matrix.compiler.compiler == 'clang' && matrix.compiler.id == 'windows' }}
         shell: bash
         run: |
           echo "C:/Program Files/LLVM/bin" >> $GITHUB_PATH
           "C:/Program Files/LLVM/bin/clang-cl" --version
 
       - name: Install Vulkan SDK
+        if: ${{ matrix.compiler.id == 'windows' }}
         shell: powershell
         run: |
           ./.ci/windows/install-vulkan-sdk.ps1
 
-      - name: Configure
+      - name: Configure dos2unix
+        if: ${{ matrix.compiler.id == 'windows' }}
         shell: bash
         run: |
           git config --global core.autocrlf off
           dos2unix .patch/boost/*
-          .ci/common/configure.sh -DCCACHE_PATH=${SCCACHE_PATH}
+
+      - name: Configure
+        env:
+          MSYS2_LOCATION: ${{ steps.msys2.outputs.msys2-location }}
+        run: ${{matrix.compiler.shell}} -c ".ci/common/configure.sh -DCCACHE_PATH=sccache"
 
       - name: Build
-        shell: bash
-        run: cmake --build build
+        run: ${{matrix.compiler.shell}} -c "cmake --build build"
 
       - name: Package
-        shell: bash
-        run: ./.ci/windows/package.sh
+        run: ${{matrix.compiler.shell}} -c "./.ci/windows/package.sh"
+        env:
+          MSYS_TOOLCHAIN: ${{ matrix.compiler.system-pretty }}
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v6.0.0
         with:
-          name: windows-${{ env.ARCH }}
+          name: ${{ matrix.compiler.system }}-${{ matrix.compiler.package-target }}
           path: artifacts/*
-

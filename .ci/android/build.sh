@@ -122,8 +122,8 @@ fi
 
 cd "$ARTIFACTS_DIR"
 
-mv ./*.apk "${PROJECT_PRETTYNAME}-Android-${ARTIFACT_REF}-${TARGET_LOWER}.apk"
-mv ./*.aab "${PROJECT_PRETTYNAME}-Android-${ARTIFACT_REF}-${TARGET_LOWER}.aab"
+mv ./*.apk "${PROJECT_PRETTYNAME}-Android-${ARTIFACT_REF}-${PACKAGE_TARGET}.apk"
+mv ./*.aab "${PROJECT_PRETTYNAME}-Android-${ARTIFACT_REF}-${PACKAGE_TARGET}.aab"
 
 cd "$ROOTDIR"
 
