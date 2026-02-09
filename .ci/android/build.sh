@@ -24,9 +24,9 @@ bool values are "true" or "false"
 Options:
     -r, --release        	Enable update checker. If set, sets the DEVEL bool variable to false.
                          	By default, DEVEL is true.
-    -t, --target <FLAVOR> 	Build flavor (variable: TARGET)
-                          	Valid values are: legacy, optimized, standard, chromeos
-                          	Default: standard
+    -t, --target <TARGET> 	Build flavor (variable: TARGET)
+                          	Valid values are: Legacy, GenshinSpoof, Mainline, ChromeOS
+                          	Default: Mainline
     -b, --build-type <TYPE>	Build type (variable: TYPE)
                           	Valid values are: Release, RelWithDebInfo, Debug
                           	Default: Debug
@@ -69,19 +69,18 @@ while true; do
 	shift
 done
 
-: "${TARGET:=standard}"
+: "${TARGET:=Mainline}"
 : "${TYPE:=Release}"
 : "${DEVEL:=true}"
 
-TARGET_LOWER=$(echo "$TARGET" | tr '[:upper:]' '[:lower:]')
-
-case "$TARGET_LOWER" in
-	legacy) FLAVOR=Legacy ;;
-	optimized) FLAVOR=GenshinSpoof ;;
-	standard) FLAVOR=Mainline ;;
-    chromeos) FLAVOR=ChromeOS ;;
+case "$TARGET" in
+	Legacy) FLAVOR=legacy ;;
+	GenshinSpoof) FLAVOR=optimized ;;
+	Mainline) FLAVOR=standard ;;
+	ChromeOS) FLAVOR=chromeos ;;
 	*) die "Invalid build flavor $TARGET."
 esac
+PACKAGE_TARGET="${PROJECT_PRETTYNAME}-Android-${ARTIFACT_REF}-${TARGET}.apk"
 
 case "$TYPE" in
 	RelWithDebInfo|Release|Debug) ;;
@@ -122,7 +121,7 @@ fi
 
 cd "$ARTIFACTS_DIR"
 
-mv ./*.apk "${PROJECT_PRETTYNAME}-Android-${ARTIFACT_REF}-${TARGET_LOWER}.apk"
+mv ./*.apk "${PACKAGE_TARGET}"
 
 cd "$ROOTDIR"
 

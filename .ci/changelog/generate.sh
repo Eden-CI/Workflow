@@ -260,11 +260,11 @@ if falsy "$DISABLE_ANDROID"; then
 |--------|-------------|
 EOF
 
-	android Standard "standard" "Single APK for all supported Android devices (most users should use this)"
-	android x86_64 "chromeos" "For devices running Chrome/FydeOS, AVD emulators, or certain Intel Atom Android devices."
+	android Standard "Mainline" "Single APK for all supported Android devices (most users should use this)"
+	android x86_64 "ChromeOS" "For devices running Chrome/FydeOS, AVD emulators, or certain Intel Atom Android devices."
 	if tagged; then
-		android Optimized "optimized" "For any Android device that has Frame Generation or any other per-device feature"
-		android Legacy "legacy" "For Adreno A6xx and other older GPUs"
+		android Optimized "GenshinSpoof" "For any Android device that has Frame Generation or any other per-device feature"
+		android Legacy "Legacy" "For Adreno A6xx and other older GPUs"
 	fi
 fi
 

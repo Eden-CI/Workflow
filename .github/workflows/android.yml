@@ -35,10 +35,10 @@ jobs:
     steps:
       - id: set
         run: |
-          OPT='{"flavor": "optimized"}'
-          LEG='{"flavor": "legacy"}'
-          STD='{"flavor": "standard"}'
-          CHR='{"flavor": "chromeos"}'
+          OPT='{"target": "GenshinSpoof"}'
+          LEG='{"target": "Legacy"}'
+          STD='{"target": "Mainline"}'
+          CHR='{"target": "ChromeOS"}'
 
           if [ "${{ inputs.devel }}" = "false" ]; then
             TARGETS="[$OPT, $LEG, $STD, $CHR]"
@@ -59,7 +59,7 @@ jobs:
       matrix:
         target: ${{ fromJson(needs.and-matrix.outputs.targets) }}
     env:
-      TARGET: "${{ matrix.target.flavor }}"
+      TARGET: "${{ matrix.target.target }}"
     steps:
       - name: Checkout
         uses: actions/checkout@v6.0.1
@@ -81,5 +81,5 @@ jobs:
       - name: Upload APK
         uses: actions/upload-artifact@v6.0.0
         with:
-          name: android-${{ matrix.target.flavor }}
+          name: android-${{ matrix.target.target }}
           path: artifacts/*.apk
