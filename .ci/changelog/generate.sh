@@ -51,11 +51,11 @@ echo
 
 android() {
 	TYPE="$1"
-	FLAVOR="$2"
+	TARGET="$2"
 	DESCRIPTION="$3"
 
 	echo -n "| "
-	echo -n "[Android $TYPE](${GITHUB_DOWNLOAD}/${GITHUB_TAG}/${PROJECT_PRETTYNAME}-Android-${ARTIFACT_REF}-${FLAVOR}.apk) | "
+	echo -n "[Android $TYPE](${GITHUB_DOWNLOAD}/${GITHUB_TAG}/${PROJECT_PRETTYNAME}-Android-${ARTIFACT_REF}-${TARGET}.apk) | "
 	echo "$DESCRIPTION |"
 }
 
@@ -75,9 +75,9 @@ linux_field() {
 	NOTES="${3}"
 
 	echo -n "| $PRETTY_ARCH | "
-	echo -n "[GCC](${GITHUB_DOWNLOAD}/${GITHUB_TAG}/${PROJECT_PRETTYNAME}-Linux-${ARTIFACT_REF}-${ARCH}-gcc-standard.AppImage) "
+	echo -n "[GCC](${GITHUB_DOWNLOAD}/${GITHUB_TAG}/${PROJECT_PRETTYNAME}-Linux-${ARTIFACT_REF}-${ARCH}-gcc.AppImage) "
 	if tagged; then
-		echo -n "([zsync](${GITHUB_DOWNLOAD}/${GITHUB_TAG}/${PROJECT_PRETTYNAME}-Linux-${ARTIFACT_REF}-${ARCH}-gcc-standard.AppImage.zsync)) | "
+		echo -n "([zsync](${GITHUB_DOWNLOAD}/${GITHUB_TAG}/${PROJECT_PRETTYNAME}-Linux-${ARTIFACT_REF}-${ARCH}-gcc.AppImage.zsync)) | "
 		if opts; then
 			echo -n "[PGO](${GITHUB_DOWNLOAD}/${GITHUB_TAG}/${PROJECT_PRETTYNAME}-Linux-${ARTIFACT_REF}-${ARCH}-clang-pgo.AppImage) "
 			echo -n "([zsync](${GITHUB_DOWNLOAD}/${GITHUB_TAG}/${PROJECT_PRETTYNAME}-Linux-${ARTIFACT_REF}-${ARCH}-clang-pgo.AppImage.zsync))"
@@ -130,34 +130,21 @@ win_field() {
 	LABEL="$1"
 	COMPILER="$2"
 	NOTES="$3"
+	ARM_COMPILER="$4"
 
 	echo -n "| $LABEL | "
 	echo -n "[amd64](${GITHUB_DOWNLOAD}/${GITHUB_TAG}/${PROJECT_PRETTYNAME}-Windows-${ARTIFACT_REF}-amd64-${COMPILER}.zip) | "
-	falsy "$DISABLE_MSVC_ARM" && echo -n "[arm64](${GITHUB_DOWNLOAD}/${GITHUB_TAG}/${PROJECT_PRETTYNAME}-Windows-${ARTIFACT_REF}-arm64-${COMPILER}.zip)"
+	[ -n "$ARM_COMPILER" ] && echo -n "[arm64](${GITHUB_DOWNLOAD}/${GITHUB_TAG}/${PROJECT_PRETTYNAME}-Windows-${ARTIFACT_REF}-arm64-${ARM_COMPILER}.zip)"
 
 	echo " | $NOTES"
 }
 
-msys() {
-	LABEL="$1"
-	AMD="$2"
-    ARM="$3"
-    TARGET="$4"
-	NOTES="$5"
-
-	echo -n "| $LABEL | "
-	echo -n "[amd64](${GITHUB_DOWNLOAD}/${GITHUB_TAG}/${PROJECT_PRETTYNAME}-Windows-${ARTIFACT_REF}-mingw-amd64-${AMD}-${TARGET}.zip) | "
-	echo -n "[arm64](${GITHUB_DOWNLOAD}/${GITHUB_TAG}/${PROJECT_PRETTYNAME}-Windows-${ARTIFACT_REF}-mingw-arm64-${ARM}-${TARGET}.zip) | "
-
-	echo "$NOTES"
-}
-
 win_matrix() {
-	win_field MSVC msvc-standard
+	win_field MSVC msvc
 
 	if falsy "$DISABLE_MINGW"; then
-		msys "MinGW" gcc clang standard "May have additional bugs/glitches"
-		opts && tagged && msys "MinGW PGO" clang clang pgo || true
+		win_field "MinGW" clang "May have additional bugs/glitches" clang
+		opts && tagged && win_field "MinGW PGO" clang-pgo "" clang-pgo || true
 	fi
 }
 
@@ -277,7 +264,7 @@ In order to run the app, you *may* need to go to System Settings -> Privacy & Se
 
 | File | Description |
 | ---- | ----------- |
-| [macOS](${GITHUB_DOWNLOAD}/${GITHUB_TAG}/${PROJECT_PRETTYNAME}-macOS-${ARTIFACT_REF}.tar.gz) | For Apple Silicon (M1, M2, etc)|
+| [macOS arm64](${GITHUB_DOWNLOAD}/${GITHUB_TAG}/${PROJECT_PRETTYNAME}-macOS-${ARTIFACT_REF}-arm64-AppleClang.tar.gz) | For Apple Silicon (M1, M2, etc)|
 
 ## Source
 
