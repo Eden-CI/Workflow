@@ -6,7 +6,7 @@ on:
 jobs:
   alpine:
     name: "Alpine (${{ matrix.os.target }})"
-    runs-on: ${{ matrix.runs-on }}
+    runs-on: ${{ matrix.os.runs-on }}
     strategy:
       fail-fast: false
       matrix:

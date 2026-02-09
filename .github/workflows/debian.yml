@@ -37,22 +37,22 @@ jobs:
           debian_12='"system": "Debian-12", "system-pretty": "Debian 12",    "container": "debian:bookworm", "compiler": "gcc"'
           debian_13='"system": "Debian-13", "system-pretty": "Debian 13",    "container": "debian:trixie",   "compiler": "gcc"'
 
-          linux_amd='"runs-on": "ubuntu-24.04",     "target": "amd64"'
-          linux_arm='"runs-on": "ubuntu-24.04-arm", "target": "aarch64"'
+          linux_amd64='"runs-on": "ubuntu-24.04",     "target": "amd64"'
+          linux_aarch64='"runs-on": "ubuntu-24.04-arm", "target": "aarch64"'
 
           json_build() {
             echo "{ $1, $2}"
           }
 
           # Debian-like / AMD64
-          amd64_ubuntu=$(json_build   "$linux_amd" "$ubuntu")
-          amd64_debian12=$(json_build "$linux_amd" "$debian_12")
-          amd64_debian13=$(json_build "$linux_amd" "$debian_13")
+          amd64_ubuntu=$(json_build   "$linux_amd64" "$ubuntu")
+          amd64_debian12=$(json_build "$linux_amd64" "$debian_12")
+          amd64_debian13=$(json_build "$linux_amd64" "$debian_13")
 
           # Debian-like / AARCH64
-          aarch64_ubuntu=$(json_build   "$linux-aarch64" "$ubuntu")
-          aarch64_debian12=$(json_build "$linux-aarch64" "$debian_12")
-          aarch64_debian13=$(json_build "$linux-aarch64" "$debian_13")
+          aarch64_ubuntu=$(json_build   "$linux_aarch64" "$ubuntu")
+          aarch64_debian12=$(json_build "$linux_aarch64" "$debian_12")
+          aarch64_debian13=$(json_build "$linux_aarch64" "$debian_13")
 
           INCLUDE="$amd64_ubuntu, $amd64_debian12, $amd64_debian13"
           if [ "${{ inputs.devel }}" = "false" ]; then
@@ -64,11 +64,11 @@ jobs:
           echo "matrix=${MATRIX}" >> $GITHUB_OUTPUT
 
   debian:
-    name: "${{ matrix.compile.system-pretty }} (${{ matrix.compile.target }}-${{ matrix.compiler.compiler }})"
+    name: "${{ matrix.compiler.system-pretty }} (${{ matrix.compiler.target }}-${{ matrix.compiler.compiler }})"
     needs: [set-matrix]
+    runs-on: ${{ matrix.compiler.runs-on }}
     container:
-      image: ${{ matrix.compile.container }}
-    runs-on: ${{ matrix.compile.runs-on }}
+      image: ${{ matrix.compiler.container }}
     strategy:
       fail-fast: false
       matrix:
@@ -77,7 +77,7 @@ jobs:
       TARGET: ${{ matrix.compiler.target }}
       COMPILER: ${{ matrix.compiler.compiler }}
       FULL_TARGET: ${{ matrix.compiler.target }}-${{ matrix.compiler.compiler }}
-      DEB_NAME: ${{ matrix.compile.system }}
+      DEB_NAME: ${{ matrix.compiler.system }}
 
     steps:
       - name: Checkout
@@ -91,7 +91,7 @@ jobs:
       - name: Setup
         uses: ./.github/workflows/setup
         with:
-          key: ${{ matrix.compile.system }}-${{ env.FULL_TARGET }}
+          key: ${{ matrix.compiler.system }}-${{ env.FULL_TARGET }}
           version: ${{ inputs.cpm-cache-version }}
 
       - name: Build
@@ -101,5 +101,5 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v6.0.0
         with:
-          name: ${{ matrix.compile.system }}-${{ env.FULL_TARGET }}
+          name: ${{ matrix.compiler.system }}-${{ env.FULL_TARGET }}
           path: ./artifacts/*
