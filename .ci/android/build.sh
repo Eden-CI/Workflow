@@ -13,7 +13,7 @@ RETURN=0
 
 usage() {
     cat <<EOF
-Usage: $0 [-t|--target FLAVOR] [-b|--build-type BUILD_TYPE]
+Usage: $0 [-t|--target TARGET] [-b|--build-type BUILD_TYPE]
        [-h|--help] [-r|--release] [extra options]
 
 Build script for Android.
@@ -24,7 +24,7 @@ bool values are "true" or "false"
 Options:
     -r, --release        	Enable update checker. If set, sets the DEVEL bool variable to false.
                          	By default, DEVEL is true.
-    -t, --target <TARGET> 	Build flavor (variable: TARGET)
+    -t, --target <TARGET> 	Build target (variable: TARGET)
                           	Valid values are: Legacy, GenshinSpoof, Mainline, ChromeOS
                           	Default: Mainline
     -b, --build-type <TYPE>	Build type (variable: TYPE)
@@ -74,11 +74,8 @@ done
 : "${DEVEL:=true}"
 
 case "$TARGET" in
-	Legacy) FLAVOR=legacy ;;
-	GenshinSpoof) FLAVOR=optimized ;;
-	Mainline) FLAVOR=standard ;;
-	ChromeOS) FLAVOR=chromeos ;;
-	*) die "Invalid build flavor $TARGET."
+	Legacy|GenshinSpoof|Mainline|ChromeOS) ;;
+	*) die "Invalid build target $TARGET."
 esac
 
 : "${FULL_TARGET:=$TARGET}"
@@ -109,7 +106,7 @@ fi
 
 echo "-- building..."
 
-./gradlew "copy${FLAVOR}${TYPE}Outputs" \
+./gradlew "copy${TARGET}${TYPE}Outputs" \
     -Dorg.gradle.caching="${CCACHE}" \
     -Dorg.gradle.parallel="${CCACHE}" \
     -Dorg.gradle.workers.max="${NUM_JOBS}" \
