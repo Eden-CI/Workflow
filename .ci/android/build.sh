@@ -33,7 +33,7 @@ Options:
 
 Extra arguments are passed to CMake (e.g. -DCMAKE_OPTION_NAME=VALUE)
 Set the CCACHE variable to "true" to enable build caching.
-The APK and AAB will be output into "$ARTIFACTS_DIR".
+The APK will be output into "$ARTIFACTS_DIR".
 
 EOF
 
@@ -123,10 +123,9 @@ fi
 cd "$ARTIFACTS_DIR"
 
 mv ./*.apk "${PROJECT_PRETTYNAME}-Android-${ARTIFACT_REF}-${TARGET_LOWER}.apk"
-mv ./*.aab "${PROJECT_PRETTYNAME}-Android-${ARTIFACT_REF}-${TARGET_LOWER}.aab"
 
 cd "$ROOTDIR"
 
-echo "-- Done! APK and AAB artifacts are in ${ARTIFACTS_DIR}"
+echo "-- Done! APK artifacts are in ${ARTIFACTS_DIR}"
 
 ls -l "${ARTIFACTS_DIR}/"

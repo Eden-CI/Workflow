@@ -83,9 +83,3 @@ jobs:
         with:
           name: android-${{ matrix.target.flavor }}
           path: artifacts/*.apk
-
-      - name: Upload AAB
-        uses: actions/upload-artifact@v6.0.0
-        with:
-          name: android-aab-${{ matrix.target.flavor }}
-          path: artifacts/*.aab
