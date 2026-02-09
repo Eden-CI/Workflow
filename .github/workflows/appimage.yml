@@ -56,9 +56,9 @@ jobs:
           echo $MATRIX
           echo "matrix=${MATRIX}" >> $GITHUB_OUTPUT
 
-          PGO='{"program": "clang", "target": "pgo"}'
-          CLANG='{"program": "clang", "target": "standard"}'
-          GCC='{"program": "gcc", "target": "standard"}'
+          PGO='{"program": "clang", "compiler-opt": "-pgo"}'
+          CLANG='{"program": "clang"}'
+          GCC='{"program": "gcc"}'
 
           if [ "${{ inputs.devel }}" != "true" ] || [ "${{ inputs.force_pgo }}" = "true" ]; then
             COMPILER="[${GCC},${PGO}]"
@@ -70,7 +70,7 @@ jobs:
           echo "compiler=${COMPILER}" >> $GITHUB_OUTPUT
 
   linux:
-    name: "AppImage ${{ matrix.os.arch }} ${{ matrix.compiler.program }} ${{ matrix.compiler.target }}"
+    name: "AppImage ${{ matrix.os.arch }} ${{ matrix.compiler.program }}${{ matrix.compiler.compiler-opt }}"
     needs: [set-matrix]
     runs-on: ${{ matrix.os.runs-on }}
     container:
@@ -86,8 +86,8 @@ jobs:
     env:
       TARGET: "${{ matrix.os.arch }}"
       COMPILER: "${{ matrix.compiler.program }}"
-      PGO_TARGET: "${{ matrix.compiler.target }}"
-      FULL_ARCH: ${{ matrix.os.arch }}-${{ matrix.compiler.program }}-${{ matrix.compiler.target }}
+      PGO_TARGET: "${{ matrix.compiler.compiler-opt }}"
+      FULL_ARCH: ${{ matrix.os.arch }}-${{ matrix.compiler.program }}${{ matrix.compiler.compiler-opt }}
 
     steps:
       - name: Checkout
@@ -118,5 +118,5 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v6.0.0
         with:
-          name: linux-${{ matrix.os.arch }}-${{ matrix.compiler.program }}-${{ matrix.compiler.target }}
+          name: linux-${{ matrix.os.arch }}-${{ matrix.compiler.program }}${{ matrix.compiler.compiler-opt }}
           path: ./artifacts/*.AppImage*
