@@ -30,90 +30,76 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.set.outputs.matrix }}
-      compiler: ${{ steps.set.outputs.compiler }}
     steps:
       - id: set
         run: |
-          BASE='[{"runs-on": "ubuntu-24.04", "target": "amd64", "compiler": "gcc"}'
-          ARM=',{"runs-on": "ubuntu-24.04-arm", "target": "aarch64", "compiler": "gcc"}]'
+          ubuntu='"system": "Ubuntu-24.04", "system-pretty": "Ubuntu 24.04", "container": "ubuntu:noble",    "compiler": "gcc"'
+          debian_12='"system": "Debian-12", "system-pretty": "Debian 12",    "container": "debian:bookworm", "compiler": "gcc"'
+          debian_13='"system": "Debian-13", "system-pretty": "Debian 13",    "container": "debian:trixie",   "compiler": "gcc"'
 
+          linux_amd='"runs-on": "ubuntu-24.04",     "target": "amd64"'
+          linux_arm='"runs-on": "ubuntu-24.04-arm", "target": "aarch64"'
+
+          json_build() {
+            echo "{ $1, $2}"
+          }
+
+          # Debian-like / AMD64
+          amd64_ubuntu=$(json_build   "$linux_amd" "$ubuntu")
+          amd64_debian12=$(json_build "$linux_amd" "$debian_12")
+          amd64_debian13=$(json_build "$linux_amd" "$debian_13")
+
+          # Debian-like / AARCH64
+          aarch64_ubuntu=$(json_build   "$linux-aarch64" "$ubuntu")
+          aarch64_debian12=$(json_build "$linux-aarch64" "$debian_12")
+          aarch64_debian13=$(json_build "$linux-aarch64" "$debian_13")
+
+          INCLUDE="$amd64_ubuntu, $amd64_debian12, $amd64_debian13"
           if [ "${{ inputs.devel }}" = "false" ]; then
-            MATRIX="${BASE}${ARM}"
-          else
-            MATRIX="${BASE}]"
+            INCLUDE="$INCLUDE, $aarch64_ubuntu, $aarch64_debian12, $aarch64_debian13"
           fi
+          MATRIX="[${INCLUDE}]"
 
           echo $MATRIX
           echo "matrix=${MATRIX}" >> $GITHUB_OUTPUT
 
-  ubuntu:
-    name: "Ubuntu 24.04 (${{ matrix.os.target }})"
-    runs-on: ${{ matrix.os.runs-on }}
+  debian:
+    name: "${{ matrix.compile.system-pretty }} (${{ matrix.compile.target }}-${{ matrix.compiler.compiler }})"
     needs: [set-matrix]
+    container:
+      image: ${{ matrix.compile.container }}
+    runs-on: ${{ matrix.compile.runs-on }}
     strategy:
       fail-fast: false
       matrix:
-        os: ${{ fromJson(needs.set-matrix.outputs.matrix) }}
+        compiler: ${{ fromJson(needs.set-matrix.outputs.matrix) }}
+    env:
+      TARGET: ${{ matrix.compiler.target }}
+      COMPILER: ${{ matrix.compiler.compiler }}
+      FULL_TARGET: ${{ matrix.compiler.target }}-${{ matrix.compiler.compiler }}
+      DEB_NAME: ${{ matrix.compile.system }}
 
     steps:
       - name: Checkout
         uses: actions/checkout@v6.0.1
 
-      - name: Build & Package
-        uses: ./.github/workflows/debian
+      - name: Install sccache
+        uses: Eden-CI/sccache-action@v0.0.1
         with:
-          target: ${{ matrix.os.target }}
-          compiler: ${{ matrix.os.compiler }}
-          name: ubuntu-24.04
-          pretty-name: Ubuntu-24.04
-          cpm-cache-version: ${{ inputs.cpm-cache-version }}
-          devel: ${{ inputs.devel }}
+          disable_annotations: true
 
-  debian-13:
-    name: "Debian 13 (${{ matrix.os.target }})"
-    runs-on: ${{ matrix.os.runs-on }}
-    needs: [set-matrix]
-    container: ghcr.io/nilcons/debian:latest
-    strategy:
-      fail-fast: false
-      matrix:
-        os: ${{ fromJson(needs.set-matrix.outputs.matrix) }}
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v6.0.1
-
-      - name: Build & Package
-        uses: ./.github/workflows/debian
+      - name: Setup
+        uses: ./.github/workflows/setup
         with:
-          target: ${{ matrix.os.target }}
-          compiler: ${{ matrix.os.compiler }}
-          name: debian-13
-          pretty-name: Debian-13
-          cpm-cache-version: ${{ inputs.cpm-cache-version }}
-          devel: ${{ inputs.devel }}
+          key: ${{ matrix.compile.system }}-${{ env.FULL_TARGET }}
+          version: ${{ inputs.cpm-cache-version }}
 
-  debian-12:
-    name: "Debian 12 (${{ matrix.os.target }})"
-    runs-on: ${{ matrix.os.runs-on }}
-    needs: [set-matrix]
-    container: ghcr.io/xrplf/ci/debian-bookworm:gcc-12
-    strategy:
-      fail-fast: false
-      matrix:
-        os: ${{ fromJson(needs.set-matrix.outputs.matrix) }}
+      - name: Build
+        shell: bash
+        run: ./.ci/debian/makedeb.sh
 
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v6.0.1
-
-      - name: Build & Package
-        uses: ./.github/workflows/debian
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v6.0.0
         with:
-          target: ${{ matrix.os.target }}
-          compiler: ${{ matrix.os.compiler }}
-          name: debian-12
-          pretty-name: Debian-12
-          cpm-cache-version: ${{ inputs.cpm-cache-version }}
-          devel: ${{ inputs.devel }}
-
+          name: ${{ matrix.compile.system }}-${{ env.FULL_TARGET }}
+          path: ./artifacts/*
