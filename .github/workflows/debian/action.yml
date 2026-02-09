@@ -1,8 +1,11 @@
 name: Debian Build
 
 inputs:
-  arch:
+  target:
     description: 'aarch64 or amd64'
+    required: true
+  compiler:
+    description: 'gcc or clang'
     required: true
   name:
     description: 'what to name this workflow'
@@ -30,18 +33,19 @@ runs:
     - name: Setup
       uses: ./.github/workflows/setup
       with:
-        key: ${{ inputs.name }}-${{ inputs.arch }}
+        key: ${{ inputs.name }}-${{ inputs.target }}
         version: ${{ inputs.cpm-cache-version }}
 
     - name: Build
       shell: bash
       run: ./.ci/debian/makedeb.sh
       env:
-        ARCH: ${{ inputs.arch }}
+        TARGET: ${{ inputs.target }}
+        COMPILER: ${{ inputs.compiler }}
         DEB_NAME: ${{ inputs.pretty-name }}
 
     - name: Upload artifacts
       uses: actions/upload-artifact@v6.0.0
       with:
-        name: ${{ inputs.name }}-${{ inputs.arch }}
-        path: ./artifacts/*.deb
+        name: ${{ inputs.name }}-${{ inputs.target }}
+        path: ./artifacts/*

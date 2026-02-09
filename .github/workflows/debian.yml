@@ -34,8 +34,8 @@ jobs:
     steps:
       - id: set
         run: |
-          BASE='[{"runs-on": "ubuntu-24.04", "arch": "amd64"}'
-          ARM=',{"runs-on": "ubuntu-24.04-arm", "arch": "aarch64"}]'
+          BASE='[{"runs-on": "ubuntu-24.04", "target": "amd64", "compiler": "gcc"}'
+          ARM=',{"runs-on": "ubuntu-24.04-arm", "target": "aarch64", "compiler": "gcc"}]'
 
           if [ "${{ inputs.devel }}" = "false" ]; then
             MATRIX="${BASE}${ARM}"
@@ -47,7 +47,7 @@ jobs:
           echo "matrix=${MATRIX}" >> $GITHUB_OUTPUT
 
   ubuntu:
-    name: "Ubuntu 24.04 (${{ matrix.os.arch }})"
+    name: "Ubuntu 24.04 (${{ matrix.os.target }})"
     runs-on: ${{ matrix.os.runs-on }}
     needs: [set-matrix]
     strategy:
@@ -62,14 +62,15 @@ jobs:
       - name: Build & Package
         uses: ./.github/workflows/debian
         with:
-          arch: ${{ matrix.os.arch }}
+          target: ${{ matrix.os.target }}
+          compiler: ${{ matrix.os.compiler }}
           name: ubuntu-24.04
           pretty-name: Ubuntu-24.04
           cpm-cache-version: ${{ inputs.cpm-cache-version }}
           devel: ${{ inputs.devel }}
 
   debian-13:
-    name: "Debian 13 (${{ matrix.os.arch }})"
+    name: "Debian 13 (${{ matrix.os.target }})"
     runs-on: ${{ matrix.os.runs-on }}
     needs: [set-matrix]
     container: ghcr.io/nilcons/debian:latest
@@ -85,14 +86,15 @@ jobs:
       - name: Build & Package
         uses: ./.github/workflows/debian
         with:
-          arch: ${{ matrix.os.arch }}
+          target: ${{ matrix.os.target }}
+          compiler: ${{ matrix.os.compiler }}
           name: debian-13
           pretty-name: Debian-13
           cpm-cache-version: ${{ inputs.cpm-cache-version }}
           devel: ${{ inputs.devel }}
 
   debian-12:
-    name: "Debian 12 (${{ matrix.os.arch }})"
+    name: "Debian 12 (${{ matrix.os.target }})"
     runs-on: ${{ matrix.os.runs-on }}
     needs: [set-matrix]
     container: ghcr.io/xrplf/ci/debian-bookworm:gcc-12
@@ -108,7 +110,8 @@ jobs:
       - name: Build & Package
         uses: ./.github/workflows/debian
         with:
-          arch: ${{ matrix.os.arch }}
+          target: ${{ matrix.os.target }}
+          compiler: ${{ matrix.os.compiler }}
           name: debian-12
           pretty-name: Debian-12
           cpm-cache-version: ${{ inputs.cpm-cache-version }}
