@@ -62,7 +62,8 @@ fi
 makedeb --print-srcinfo > "$ROOTDIR/.SRCINFO"
 makedeb -s --no-confirm
 
-PACKAGE_TARGET="${PROJECT_PRETTYNAME}-${DEB_NAME}-${ARTIFACT_REF}-${TARGET}.deb"
+: "${FULL_TARGET:=$TARGET}"
+PACKAGE_TARGET="${PROJECT_PRETTYNAME}-${DEB_NAME}-${ARTIFACT_REF}-${FULL_TARGET}.deb"
 
 # for some grand reason, makepkg does not exit on errors
 ls ./*.deb || exit 1

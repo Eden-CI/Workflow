@@ -122,7 +122,7 @@ deb_matrix() {
 
 room_matrix() {
 	for arch in aarch64 x86_64; do
-		echo "- [$arch](${GITHUB_DOWNLOAD}/${GITHUB_TAG}/eden-room-$arch-unknown-linux-musl)"
+		echo "- [$arch](${GITHUB_DOWNLOAD}/${GITHUB_TAG}/eden-room-linux-$arch-musl)"
 	done
 }
 

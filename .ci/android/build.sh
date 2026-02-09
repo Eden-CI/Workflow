@@ -80,7 +80,9 @@ case "$TARGET" in
 	ChromeOS) FLAVOR=chromeos ;;
 	*) die "Invalid build flavor $TARGET."
 esac
-PACKAGE_TARGET="${PROJECT_PRETTYNAME}-Android-${ARTIFACT_REF}-${TARGET}.apk"
+
+: "${FULL_TARGET:=$TARGET}"
+PACKAGE_TARGET="${PROJECT_PRETTYNAME}-Android-${ARTIFACT_REF}-${FULL_TARGET}.apk"
 
 case "$TYPE" in
 	RelWithDebInfo|Release|Debug) ;;

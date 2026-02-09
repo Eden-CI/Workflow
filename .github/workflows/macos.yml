@@ -26,15 +26,17 @@ env:
 
 jobs:
   macos:
-    name: "macOS (${{ matrix.os.arch }})"
+    name: "macOS (${{ matrix.os.target }})"
     runs-on: ${{ matrix.os.runs-on }}
     strategy:
       fail-fast: false
       matrix:
         os:
           - runs-on: macos-latest
-            arch: arm64
-        compiler: [universal]
+            target: arm64
+            compiler: AppleClang
+    env:
+      FULL_TARGET: ${{ matrix.os.target }}-${{ matrix.os.compiler }}
 
     steps:
       - name: Checkout
@@ -43,7 +45,7 @@ jobs:
       - name: Setup
         uses: ./.github/workflows/setup
         with:
-          key: ${{ runner.os }}-${{ matrix.os.arch }}-${{ matrix.compiler }}
+          key: ${{ runner.os }}-${{ matrix.os.target }}-${{ matrix.os.compiler }}
           version: ${{ inputs.cpm-cache-version }}
 
       - name: Install dependencies

@@ -59,7 +59,8 @@ jobs:
       matrix:
         target: ${{ fromJson(needs.and-matrix.outputs.targets) }}
     env:
-      TARGET: "${{ matrix.target.target }}"
+      TARGET: ${{ matrix.target.target }}
+      FULL_TARGET: ${{ matrix.target.target }}
     steps:
       - name: Checkout
         uses: actions/checkout@v6.0.1
@@ -81,5 +82,5 @@ jobs:
       - name: Upload APK
         uses: actions/upload-artifact@v6.0.0
         with:
-          name: android-${{ matrix.target.target }}
+          name: android-${{ env.FULL_TARGET }}
           path: artifacts/*.apk

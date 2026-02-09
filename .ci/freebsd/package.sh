@@ -13,7 +13,8 @@ ARTIFACTS_DIR="$ROOTDIR/artifacts"
 WORKFLOW_DIR=$(CDPATH='' cd -P -- "$(dirname -- "$0")/../.." && pwd)
 . "$WORKFLOW_DIR/.ci/common/project.sh"
 
-PACKAGE_TARGET="${PROJECT_PRETTYNAME}-FreeBSD-${ARTIFACT_REF}-${TARGET}.tar.zst"
+: "${FULL_TARGET:=unknown}"
+PACKAGE_TARGET="${PROJECT_PRETTYNAME}-FreeBSD-${ARTIFACT_REF}-${FULL_TARGET}.tar.zst"
 PKG_DIR="$ROOTDIR/install/usr"
 
 echo "Making '$ARTIFACT_REF' build"

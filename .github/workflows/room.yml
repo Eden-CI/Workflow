@@ -5,19 +5,19 @@ on:
 
 jobs:
   alpine:
-    name: "Alpine (${{ matrix.arch }})"
+    name: "Alpine (${{ matrix.os.target }})"
     runs-on: ${{ matrix.runs-on }}
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - arch: aarch64
+        os:
+          - target: aarch64
             runs-on: ubuntu-22.04-arm
-          - arch: x86_64
+          - target: x86_64
             runs-on: ubuntu-22.04
 
     env:
-      ARCH: ${{ matrix.arch }}
+      FULL_TARGET: ${{ matrix.os.target }}-musl
 
     steps:
       - name: Checkout
@@ -34,7 +34,7 @@ jobs:
             -e GITHUB_REF \
             -e GITHUB_REF_NAME \
             -e GITHUB_SHA \
-            -e ARCH \
+            -e FULL_TARGET \
             alpine:3.23 sh -c '
               apk add --no-cache bash cmake g++ gcc git ninja patch boost1.84-dev boost1.84-static \
                 mbedtls-dev mbedtls-static
@@ -44,7 +44,7 @@ jobs:
               mkdir -p artifacts
 
               src=build/bin/eden-room
-              dst=artifacts/"eden-room-$ARCH-unknown-linux-musl"
+              dst=artifacts/"eden-room-linux-$FULL_TARGET"
               mv "$src" "$dst"
 
               strip "$dst"
@@ -53,5 +53,5 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v6.0.0
         with:
-          name: room-${{ matrix.arch }}
+          name: room-${{ matrix.os.target }}
           path: artifacts/*

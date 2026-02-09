@@ -24,6 +24,10 @@ inputs:
 
 runs:
   using: composite
+  env:
+    TARGET: ${{ inputs.target }}
+    COMPILER: ${{ inputs.compiler }}
+    FULL_TARGET: ${{ inputs.target }}-${{ inputs.compiler }}
   steps:
     - name: Install sccache
       uses: Eden-CI/sccache-action@v0.0.1
@@ -40,8 +44,6 @@ runs:
       shell: bash
       run: ./.ci/debian/makedeb.sh
       env:
-        TARGET: ${{ inputs.target }}
-        COMPILER: ${{ inputs.compiler }}
         DEB_NAME: ${{ inputs.pretty-name }}
 
     - name: Upload artifacts

@@ -38,14 +38,14 @@ jobs:
     steps:
       - id: set
         run: |
-          BASE='[{"runs-on": "ubuntu-latest", "arch": "amd64"},{"runs-on": "ubuntu-latest", "arch": "steamdeck"}'
-          ARM=',{"runs-on": "ubuntu-24.04-arm", "arch": "aarch64"}'
+          BASE='[{"runs-on": "ubuntu-latest", "target": "amd64"},{"runs-on": "ubuntu-latest", "target": "steamdeck"}'
+          ARM=',{"runs-on": "ubuntu-24.04-arm", "target": "aarch64"}'
 
           if [ "${{ env.DISABLE_ARM }}" != true ]; then
             BASE="${BASE}${ARM}"
           fi
 
-          EXTRA=',{"runs-on": "ubuntu-latest", "arch": "legacy"},{"runs-on": "ubuntu-latest", "arch": "rog-ally"}'
+          EXTRA=',{"runs-on": "ubuntu-latest", "target": "legacy"},{"runs-on": "ubuntu-latest", "target": "rog-ally"}'
 
           if [ "${{ inputs.devel }}" != "true" ]; then
             MATRIX="${BASE}${EXTRA}]"
@@ -70,7 +70,7 @@ jobs:
           echo "compiler=${COMPILER}" >> $GITHUB_OUTPUT
 
   linux:
-    name: "AppImage ${{ matrix.os.arch }} ${{ matrix.compiler.compiler }}${{ matrix.compiler.compiler-opt }}"
+    name: "AppImage ${{ matrix.os.target }} ${{ matrix.compiler.compiler }}${{ matrix.compiler.compiler-opt }}"
     needs: [set-matrix]
     runs-on: ${{ matrix.os.runs-on }}
     container:
@@ -84,10 +84,10 @@ jobs:
         compiler: ${{ fromJson(needs.set-matrix.outputs.compiler) }}
 
     env:
-      TARGET: "${{ matrix.os.arch }}"
+      TARGET: "${{ matrix.os.target }}"
       COMPILER: "${{ matrix.compiler.compiler }}"
       PGO_TARGET: "${{ matrix.compiler.compiler-opt }}"
-      FULL_ARCH: ${{ matrix.os.arch }}-${{ matrix.compiler.compiler }}${{ matrix.compiler.compiler-opt }}
+      FULL_TARGET: ${{ matrix.os.target }}-${{ matrix.compiler.compiler }}${{ matrix.compiler.compiler-opt }}
 
     steps:
       - name: Checkout
@@ -96,7 +96,7 @@ jobs:
       - name: Setup
         uses: ./.github/workflows/setup
         with:
-          key: ${{ runner.os }}-${{ matrix.os.arch }}-${{ matrix.compiler.compiler }}
+          key: ${{ runner.os }}-${{ env.FULL_TARGET }}
           version: ${{ inputs.cpm-cache-version }}
 
       - name: Install dependencies
@@ -118,5 +118,5 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v6.0.0
         with:
-          name: linux-${{ matrix.os.arch }}-${{ matrix.compiler.compiler }}${{ matrix.compiler.compiler-opt }}
+          name: linux-${{ env.FULL_TARGET }}
           path: ./artifacts/*.AppImage*

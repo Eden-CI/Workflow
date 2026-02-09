@@ -15,13 +15,14 @@ BUILDDIR="${BUILDDIR:-$ROOTDIR/build}"
 ARTIFACTS_DIR="$ROOTDIR/artifacts"
 APP="${PROJECT_REPO}.app"
 
-ARTIFACT="${ARTIFACTS_DIR}/${PROJECT_PRETTYNAME}-macOS-${ARTIFACT_REF}.tar.gz"
+: "${FULL_TARGET:=unknown}"
+PACKAGE_TARGET="${PROJECT_PRETTYNAME}-macOS-${ARTIFACT_REF}-${FULL_TARGET}.tar.gz"
 
 cd "$BUILDDIR/bin"
 
 codesign --deep --force --verbose --sign - "$APP"
 
 mkdir -p "$ARTIFACTS_DIR"
-tar czf "$ARTIFACT" "$APP"
+tar czf "$ARTIFACTS_DIR/$PACKAGE_TARGET" "$APP"
 
-echo "-- macOS package created at $ARTIFACT"
+echo "-- macOS package created at $ARTIFACTS_DIR/$PACKAGE_TARGET"

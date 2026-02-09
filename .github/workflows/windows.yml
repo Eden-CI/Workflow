@@ -51,7 +51,7 @@ jobs:
           echo "compiler=${COMPILER}" >> $GITHUB_OUTPUT
 
   windows:
-    name: "Windows ${{ matrix.os.arch }} ${{ matrix.compiler.compiler }}${{ matrix.compiler.compiler-opt }}"
+    name: "Windows ${{ matrix.os.target }} ${{ matrix.compiler.compiler }}${{ matrix.compiler.compiler-opt }}"
     needs: [win-matrix]
     runs-on: ${{ matrix.os.runs-on }}
     strategy:
@@ -59,14 +59,14 @@ jobs:
       matrix:
         os:
           - runs-on: windows-latest
-            arch: amd64
+            target: amd64
         compiler: ${{ fromJson(needs.win-matrix.outputs.compiler) }}
 
     env:
-      TARGET: ${{ matrix.os.arch }}
+      TARGET: ${{ matrix.os.target }}
       COMPILER: "${{ matrix.compiler.compiler }}"
       PGO_TARGET: "${{ matrix.compiler.compiler-opt }}"
-      ARCH: ${{ matrix.os.arch }}-${{ matrix.compiler.compiler }}${{ matrix.compiler.compiler-opt }}
+      FULL_TARGET: ${{ matrix.os.target }}-${{ matrix.compiler.compiler }}${{ matrix.compiler.compiler-opt }}
 
     steps:
       - name: Checkout
@@ -75,7 +75,7 @@ jobs:
       - name: Setup
         uses: ./.github/workflows/setup
         with:
-          key: ${{ runner.os }}-${{ matrix.os.arch }}-${{ matrix.compiler.compiler }}
+          key: ${{ runner.os }}-${{ env.FULL_TARGET }}
           version: ${{ inputs.cpm-cache-version }}
 
       - name: Load payload environment
@@ -85,7 +85,7 @@ jobs:
       - name: Set up MSVC
         uses: ilammy/msvc-dev-cmd@v1.13.0
         with:
-          arch: ${{ matrix.os.arch }}
+          arch: ${{ matrix.os.target }}
 
       - name: Install LLVM/Clang
         if: matrix.compiler.compiler == 'clang'
@@ -124,6 +124,6 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v6.0.0
         with:
-          name: windows-${{ env.ARCH }}
+          name: windows-${{ env.FULL_TARGET }}
           path: artifacts/*
 

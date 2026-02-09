@@ -8,6 +8,8 @@ BUILDDIR="${BUILDDIR:-$ROOTDIR/build}"
 ARTIFACTS_DIR="$ROOTDIR/artifacts"
 WORKFLOW_DIR=$(CDPATH='' cd -P -- "$(dirname -- "$0")/../.." && pwd)
 
+: "${FULL_TARGET:=unknown}"
+PACKAGE_TARGET="${PROJECT_PRETTYNAME}-Windows-${ARTIFACT_REF}-${FULL_TARGET}.zip"
 
 # shellcheck disable=SC1091
 . "$WORKFLOW_DIR/.ci/common/project.sh"
@@ -77,12 +79,9 @@ if [ "$PLATFORM" = "msys" ] && [ "$STATIC" != "ON" ]; then
 	find ./*/ -name "*.dll" | while read -r dll; do deps "$dll"; done
 fi
 
-# ?ploo
-ZIP_NAME="${PROJECT_PRETTYNAME}-Windows-${ARTIFACT_REF}-${ARCH}.zip"
-
 cp -r ./* "$TMP_DIR"/
 cp -r "$ROOTDIR"/LICENSE* "$ROOTDIR"/README* "$TMP_DIR"/
 
-7z a -tzip "$ARTIFACTS_DIR/$ZIP_NAME" "$TMP_DIR"/*
+7z a -tzip "$ARTIFACTS_DIR/$PACKAGE_TARGET" "$TMP_DIR"/*
 
 rm -rf "$TMP_DIR"

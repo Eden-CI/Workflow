@@ -37,10 +37,10 @@ jobs:
     steps:
       - id: set
         run: |
-          AMD64='"runs-on": "windows-latest", "arch": "amd64", "msystem": "MINGW64"'
-          UCRT64='"runs-on": "windows-latest", "arch": "amd64", "msystem": "UCRT64"'
-          AMDCLANG64='"runs-on": "windows-latest", "arch": "amd64", "msystem": "CLANG64"'
-          ARM64='"runs-on": "windows-11-arm", "arch": "arm64", "msystem": "CLANGARM64"'
+          AMD64='"runs-on": "windows-latest", "target": "amd64", "msystem": "MINGW64"'
+          UCRT64='"runs-on": "windows-latest", "target": "amd64", "msystem": "UCRT64"'
+          AMDCLANG64='"runs-on": "windows-latest", "target": "amd64", "msystem": "CLANG64"'
+          ARM64='"runs-on": "windows-11-arm", "target": "arm64", "msystem": "CLANGARM64"'
 
           PGO='"compiler": "clang", "compiler-opt": "-pgo"'
           CLANG='"compiler": "clang"'
@@ -73,7 +73,7 @@ jobs:
   # TODO: setup
   # TODO: can we combine this with windows.yml?
   msys:
-    name: "${{ matrix.os.msystem }} ${{ matrix.os.arch }} ${{ matrix.os.compiler }}${{ matrix.os.compiler-opt }}"
+    name: "${{ matrix.os.msystem }} ${{ matrix.os.target }} ${{ matrix.os.compiler }}${{ matrix.os.compiler-opt }}"
     needs: [msys-matrix]
     runs-on: ${{ matrix.os.runs-on }}
     strategy:
@@ -82,10 +82,10 @@ jobs:
         os: ${{ fromJson(needs.msys-matrix.outputs.include) }}
 
     env:
-      TARGET: ${{ matrix.os.arch }}
+      TARGET: ${{ matrix.os.target }}
       COMPILER: "${{ matrix.os.compiler }}"
       PGO_TARGET: "${{ matrix.os.compiler-opt }}"
-      ARCH: ${{ matrix.os.arch }}-${{ matrix.os.compiler }}${{ matrix.os.compiler-opt }}
+      FULL_TARGET: ${{ matrix.os.target }}-${{ matrix.os.compiler }}${{ matrix.os.compiler-opt }}
 
     steps:
       - name: Checkout
@@ -94,7 +94,7 @@ jobs:
       - name: Setup
         uses: ./.github/workflows/setup
         with:
-          key: MSYS2-${{ matrix.os.msystem }}-${{ matrix.os.arch }}-${{ matrix.os.compiler }}
+          key: MSYS2-${{ env.FULL_TARGET }}
           version: ${{ inputs.cpm-cache-version }}
 
       - name: Load payload environment
@@ -137,11 +137,10 @@ jobs:
         run: ./.ci/windows/package.sh
         env:
           MSYS_TOOLCHAIN: ${{ matrix.os.msystem }}
-          ARCH: mingw-${{ env.ARCH }}
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v6.0.0
         with:
-          name: mingw-${{ env.ARCH }}
+          name: mingw-${{ env.FULL_TARGET }}
           path: artifacts/*
 
