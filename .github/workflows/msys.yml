@@ -42,10 +42,10 @@ jobs:
           AMDCLANG64='"runs-on": "windows-latest", "arch": "amd64", "msystem": "CLANG64"'
           ARM64='"runs-on": "windows-11-arm", "arch": "arm64", "msystem": "CLANGARM64"'
 
-          PGO='"program": "clang", "compiler-opt": "-pgo"'
-          CLANG='"program": "clang"'
-          GCC='"program": "gcc"'
-          UCRT='"program": "gcc", "compiler-opt": "-ucrt"'
+          PGO='"compiler": "clang", "compiler-opt": "-pgo"'
+          CLANG='"compiler": "clang"'
+          GCC='"compiler": "gcc"'
+          UCRT='"compiler": "gcc", "compiler-opt": "-ucrt"'
 
           target() {
             arch="$1"
@@ -73,7 +73,7 @@ jobs:
   # TODO: setup
   # TODO: can we combine this with windows.yml?
   msys:
-    name: "${{ matrix.os.msystem }} ${{ matrix.os.arch }} ${{ matrix.os.program }}${{ matrix.os.compiler-opt }}"
+    name: "${{ matrix.os.msystem }} ${{ matrix.os.arch }} ${{ matrix.os.compiler }}${{ matrix.os.compiler-opt }}"
     needs: [msys-matrix]
     runs-on: ${{ matrix.os.runs-on }}
     strategy:
@@ -83,9 +83,9 @@ jobs:
 
     env:
       TARGET: ${{ matrix.os.arch }}
-      COMPILER: "${{ matrix.os.program }}"
+      COMPILER: "${{ matrix.os.compiler }}"
       PGO_TARGET: "${{ matrix.os.compiler-opt }}"
-      ARCH: ${{ matrix.os.arch }}-${{ matrix.os.program }}${{ matrix.os.compiler-opt }}
+      ARCH: ${{ matrix.os.arch }}-${{ matrix.os.compiler }}${{ matrix.os.compiler-opt }}
 
     steps:
       - name: Checkout
@@ -94,7 +94,7 @@ jobs:
       - name: Setup
         uses: ./.github/workflows/setup
         with:
-          key: MSYS2-${{ matrix.os.msystem }}-${{ matrix.os.arch }}-${{ matrix.os.program }}
+          key: MSYS2-${{ matrix.os.msystem }}-${{ matrix.os.arch }}-${{ matrix.os.compiler }}
           version: ${{ inputs.cpm-cache-version }}
 
       - name: Load payload environment

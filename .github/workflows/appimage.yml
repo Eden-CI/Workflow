@@ -56,9 +56,9 @@ jobs:
           echo $MATRIX
           echo "matrix=${MATRIX}" >> $GITHUB_OUTPUT
 
-          PGO='{"program": "clang", "compiler-opt": "-pgo"}'
-          CLANG='{"program": "clang"}'
-          GCC='{"program": "gcc"}'
+          PGO='{"compiler": "clang", "compiler-opt": "-pgo"}'
+          CLANG='{"compiler": "clang"}'
+          GCC='{"compiler": "gcc"}'
 
           if [ "${{ inputs.devel }}" != "true" ] || [ "${{ inputs.force_pgo }}" = "true" ]; then
             COMPILER="[${GCC},${PGO}]"
@@ -70,7 +70,7 @@ jobs:
           echo "compiler=${COMPILER}" >> $GITHUB_OUTPUT
 
   linux:
-    name: "AppImage ${{ matrix.os.arch }} ${{ matrix.compiler.program }}${{ matrix.compiler.compiler-opt }}"
+    name: "AppImage ${{ matrix.os.arch }} ${{ matrix.compiler.compiler }}${{ matrix.compiler.compiler-opt }}"
     needs: [set-matrix]
     runs-on: ${{ matrix.os.runs-on }}
     container:
@@ -85,9 +85,9 @@ jobs:
 
     env:
       TARGET: "${{ matrix.os.arch }}"
-      COMPILER: "${{ matrix.compiler.program }}"
+      COMPILER: "${{ matrix.compiler.compiler }}"
       PGO_TARGET: "${{ matrix.compiler.compiler-opt }}"
-      FULL_ARCH: ${{ matrix.os.arch }}-${{ matrix.compiler.program }}${{ matrix.compiler.compiler-opt }}
+      FULL_ARCH: ${{ matrix.os.arch }}-${{ matrix.compiler.compiler }}${{ matrix.compiler.compiler-opt }}
 
     steps:
       - name: Checkout
@@ -96,7 +96,7 @@ jobs:
       - name: Setup
         uses: ./.github/workflows/setup
         with:
-          key: ${{ runner.os }}-${{ matrix.os.arch }}-${{ matrix.compiler.program }}
+          key: ${{ runner.os }}-${{ matrix.os.arch }}-${{ matrix.compiler.compiler }}
           version: ${{ inputs.cpm-cache-version }}
 
       - name: Install dependencies
@@ -118,5 +118,5 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v6.0.0
         with:
-          name: linux-${{ matrix.os.arch }}-${{ matrix.compiler.program }}${{ matrix.compiler.compiler-opt }}
+          name: linux-${{ matrix.os.arch }}-${{ matrix.compiler.compiler }}${{ matrix.compiler.compiler-opt }}
           path: ./artifacts/*.AppImage*

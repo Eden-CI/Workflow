@@ -37,9 +37,9 @@ jobs:
     steps:
       - id: set
         run: |
-          PGO='{"program": "clang", "compiler-opt": "-pgo"}'
-          CLANG='{"program": "clang"}'
-          MSVC='{"program": "msvc"}'
+          PGO='{"compiler": "clang", "compiler-opt": "-pgo"}'
+          CLANG='{"compiler": "clang"}'
+          MSVC='{"compiler": "msvc"}'
 
           if [ "${{ inputs.devel }}" != "true" ] || [ "${{ inputs.force_pgo }}" = "true" ]; then
             COMPILER="[${MSVC}]"
@@ -51,7 +51,7 @@ jobs:
           echo "compiler=${COMPILER}" >> $GITHUB_OUTPUT
 
   windows:
-    name: "Windows ${{ matrix.os.arch }} ${{ matrix.compiler.program }}${{ matrix.compiler.compiler-opt }}"
+    name: "Windows ${{ matrix.os.arch }} ${{ matrix.compiler.compiler }}${{ matrix.compiler.compiler-opt }}"
     needs: [win-matrix]
     runs-on: ${{ matrix.os.runs-on }}
     strategy:
@@ -64,9 +64,9 @@ jobs:
 
     env:
       TARGET: ${{ matrix.os.arch }}
-      COMPILER: "${{ matrix.compiler.program }}"
+      COMPILER: "${{ matrix.compiler.compiler }}"
       PGO_TARGET: "${{ matrix.compiler.compiler-opt }}"
-      ARCH: ${{ matrix.os.arch }}-${{ matrix.compiler.program }}${{ matrix.compiler.compiler-opt }}
+      ARCH: ${{ matrix.os.arch }}-${{ matrix.compiler.compiler }}${{ matrix.compiler.compiler-opt }}
 
     steps:
       - name: Checkout
@@ -75,7 +75,7 @@ jobs:
       - name: Setup
         uses: ./.github/workflows/setup
         with:
-          key: ${{ runner.os }}-${{ matrix.os.arch }}-${{ matrix.compiler.program }}
+          key: ${{ runner.os }}-${{ matrix.os.arch }}-${{ matrix.compiler.compiler }}
           version: ${{ inputs.cpm-cache-version }}
 
       - name: Load payload environment
@@ -88,14 +88,14 @@ jobs:
           arch: ${{ matrix.os.arch }}
 
       - name: Install LLVM/Clang
-        if: matrix.compiler.program == 'clang'
+        if: matrix.compiler.compiler == 'clang'
         uses: Eden-CI/install-llvm-action@v1
         with:
           version: "21.1.4"
           env: true
 
       - name: Check LLVM/Clang
-        if: matrix.compiler.program == 'clang'
+        if: matrix.compiler.compiler == 'clang'
         shell: bash
         run: |
           echo "C:/Program Files/LLVM/bin" >> $GITHUB_PATH
