@@ -48,10 +48,10 @@ jobs:
           UCRT='"compiler": "gcc", "compiler-opt": "-ucrt"'
 
           target() {
-            arch="$1"
-            compiler="$2"
+            _target="$1"
+            _compiler="$2"
 
-            echo "{${arch}, ${compiler}}"
+            echo "{${_target}, ${_compiler}}"
           }
 
           amd_gcc="$(target "$AMD64" "$GCC")"

@@ -50,12 +50,12 @@ echo
 # TODO(crueter): Don't include fields if their corresponding artifacts aren't found.
 
 android() {
-	TYPE="$1"
-	TARGET="$2"
+	TITLE="$1"
+	FULL_TARGET="$2"
 	DESCRIPTION="$3"
 
 	echo -n "| "
-	echo -n "[Android $TYPE](${GITHUB_DOWNLOAD}/${GITHUB_TAG}/${PROJECT_PRETTYNAME}-Android-${ARTIFACT_REF}-${TARGET}.apk) | "
+	echo -n "[Android $TITLE](${GITHUB_DOWNLOAD}/${GITHUB_TAG}/${PROJECT_PRETTYNAME}-Android-${ARTIFACT_REF}-${FULL_TARGET}.apk) | "
 	echo "$DESCRIPTION |"
 }
 
@@ -70,17 +70,19 @@ src() {
 }
 
 linux_field() {
-	ARCH="$1"
-	PRETTY_ARCH="$2"
+	TARGET="$1"
+	PRETTY_TARGET="$2"
 	NOTES="${3}"
+	gcc_FULL_TARGET="${TARGET}-gcc"
+	pgo_FULL_TARGET="${TARGET}-clang-pgo"
 
-	echo -n "| $PRETTY_ARCH | "
-	echo -n "[GCC](${GITHUB_DOWNLOAD}/${GITHUB_TAG}/${PROJECT_PRETTYNAME}-Linux-${ARTIFACT_REF}-${ARCH}-gcc.AppImage) "
+	echo -n "| $PRETTY_TARGET | "
+	echo -n "[GCC](${GITHUB_DOWNLOAD}/${GITHUB_TAG}/${PROJECT_PRETTYNAME}-Linux-${ARTIFACT_REF}-${gcc_FULL_TARGET}.AppImage) "
 	if tagged; then
-		echo -n "([zsync](${GITHUB_DOWNLOAD}/${GITHUB_TAG}/${PROJECT_PRETTYNAME}-Linux-${ARTIFACT_REF}-${ARCH}-gcc.AppImage.zsync)) | "
+		echo -n "([zsync](${GITHUB_DOWNLOAD}/${GITHUB_TAG}/${PROJECT_PRETTYNAME}-Linux-${ARTIFACT_REF}-${gcc_FULL_TARGET}.AppImage.zsync)) | "
 		if opts; then
-			echo -n "[PGO](${GITHUB_DOWNLOAD}/${GITHUB_TAG}/${PROJECT_PRETTYNAME}-Linux-${ARTIFACT_REF}-${ARCH}-clang-pgo.AppImage) "
-			echo -n "([zsync](${GITHUB_DOWNLOAD}/${GITHUB_TAG}/${PROJECT_PRETTYNAME}-Linux-${ARTIFACT_REF}-${ARCH}-clang-pgo.AppImage.zsync))"
+			echo -n "[PGO](${GITHUB_DOWNLOAD}/${GITHUB_TAG}/${PROJECT_PRETTYNAME}-Linux-${ARTIFACT_REF}-${pgo_FULL_TARGET}.AppImage) "
+			echo -n "([zsync](${GITHUB_DOWNLOAD}/${GITHUB_TAG}/${PROJECT_PRETTYNAME}-Linux-${ARTIFACT_REF}-${pgo_FULL_TARGET}.AppImage.zsync))"
 		fi
 	fi
 
@@ -105,10 +107,10 @@ deb_field() {
 
 	echo -n "| $NAME | "
 
-	ARCHES=amd64
-	tagged && ARCHES="$ARCHES aarch64"
-	for ARCH in $ARCHES; do
-		echo -n "[$ARCH](${GITHUB_DOWNLOAD}/${GITHUB_TAG}/${PROJECT_PRETTYNAME}-$BUILD-${ARTIFACT_REF}-${ARCH}.deb) | "
+	TARGET=amd64
+	tagged && TARGET="$TARGET aarch64"
+	for FULL_TARGET in $TARGET; do
+		echo -n "[$FULL_TARGET](${GITHUB_DOWNLOAD}/${GITHUB_TAG}/${PROJECT_PRETTYNAME}-$BUILD-${ARTIFACT_REF}-${FULL_TARGET}.deb) | "
 	done
 
 	echo "$NOTES"
@@ -121,8 +123,9 @@ deb_matrix() {
 }
 
 room_matrix() {
-	for arch in aarch64 x86_64; do
-		echo "- [$arch](${GITHUB_DOWNLOAD}/${GITHUB_TAG}/eden-room-linux-$arch-musl)"
+	for TARGET in aarch64 x86_64; do
+		FULL_TARGET="$TARGET-musl"
+		echo "- [$TARGET](${GITHUB_DOWNLOAD}/${GITHUB_TAG}/eden-room-linux-$FULL_TARGET)"
 	done
 }
 
