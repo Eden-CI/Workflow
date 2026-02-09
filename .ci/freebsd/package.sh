@@ -12,11 +12,10 @@ ARTIFACTS_DIR="$ROOTDIR/artifacts"
 # shellcheck disable=SC1091
 . "$ROOTDIR/.ci/common/project.sh"
 
-VERSION=$(cat "$ROOTDIR/GIT-TAG" 2>/dev/null || cat "$ROOTDIR/WORKFLOW-TAG")
-PKG_NAME="${PROJECT_PRETTYNAME}-FreeBSD-${ARTIFACT_REF}-${ARCH}"
+PACKAGE_TARGET="${PROJECT_PRETTYNAME}-FreeBSD-${ARTIFACT_REF}-${TARGET}.tar.zst"
 PKG_DIR="$ROOTDIR/install/usr"
 
-echo "Making '$VERSION' build"
+echo "Making '$ARTIFACT_REF' build"
 
 mkdir -p "$PKG_DIR/lib/qt6"
 
@@ -72,6 +71,6 @@ chmod +x "$PKG_DIR/launch.sh"
 # Pack for upload
 mkdir -p "$ARTIFACTS_DIR"
 cd "$PKG_DIR"
-tar --zstd -cvf "$ARTIFACTS_DIR/$PKG_NAME.tar.zst" .
+tar --zstd -cvf "$ARTIFACTS_DIR/$PACKAGE_TARGET" .
 
-echo "FreeBSD package created at: $ARTIFACTS_DIR/$PKG_NAME.tar.zst"
+echo "FreeBSD package created at: $ARTIFACTS_DIR/$PACKAGE_TARGET"
