@@ -22,7 +22,7 @@ find "$ROOTDIR" \( \
 		-name '*.tar.zst' -o \
 		-name '*.apk' -o \
 		-name '*.tar.gz' -o \
-		-name '*unknown-linux-musl*' \
+		-name '*-musl*' \
     \) -exec cp {} "$ARTIFACTS_DIR" \;
 
 ls -lh "$ARTIFACTS_DIR"

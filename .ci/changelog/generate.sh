@@ -110,7 +110,8 @@ deb_field() {
 	TARGET=amd64
 	tagged && TARGET="$TARGET aarch64"
 	for FULL_TARGET in $TARGET; do
-		echo -n "[$FULL_TARGET](${GITHUB_DOWNLOAD}/${GITHUB_TAG}/${PROJECT_PRETTYNAME}-$BUILD-${ARTIFACT_REF}-${FULL_TARGET}.deb) | "
+		gcc_FULL_TARGET="${TARGET}-gcc"
+		echo -n "[$FULL_TARGET](${GITHUB_DOWNLOAD}/${GITHUB_TAG}/${PROJECT_PRETTYNAME}-$BUILD-${ARTIFACT_REF}-${gcc_FULL_TARGET}.deb) | "
 	done
 
 	echo "$NOTES"
@@ -132,11 +133,12 @@ room_matrix() {
 win_field() {
 	LABEL="$1"
 	COMPILER="$2"
-	NOTES="$3"
-	ARM_COMPILER="$4"
+	ARM_COMPILER="$3"
+	NOTES="$4"
 
 	echo -n "| $LABEL | "
-	echo -n "[amd64](${GITHUB_DOWNLOAD}/${GITHUB_TAG}/${PROJECT_PRETTYNAME}-Windows-${ARTIFACT_REF}-amd64-${COMPILER}.zip) | "
+	[ -n "$COMPILER" ] && echo -n "[amd64](${GITHUB_DOWNLOAD}/${GITHUB_TAG}/${PROJECT_PRETTYNAME}-Windows-${ARTIFACT_REF}-amd64-${COMPILER}.zip)"
+	echo -n " | "
 	[ -n "$ARM_COMPILER" ] && echo -n "[arm64](${GITHUB_DOWNLOAD}/${GITHUB_TAG}/${PROJECT_PRETTYNAME}-Windows-${ARTIFACT_REF}-arm64-${ARM_COMPILER}.zip)"
 
 	echo " | $NOTES"
@@ -146,8 +148,9 @@ win_matrix() {
 	win_field MSVC msvc
 
 	if falsy "$DISABLE_MINGW"; then
-		win_field "MinGW" clang "May have additional bugs/glitches" clang
-		opts && tagged && win_field "MinGW PGO" clang-pgo "" clang-pgo || true
+		win_field "MinGW (GCC)" gcc "" "May have additional bugs/glitches"
+		win_field "MinGW (Clang)" "" clang ""
+		opts && tagged && win_field "MinGW (PGO)" clang-pgo clang-pgo "" || true
 	fi
 }
 
