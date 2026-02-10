@@ -58,7 +58,7 @@ jobs:
 
       - name: Release
         id: release
-        #if: ${{ env.SEND_RELEASE == '1' }}
+        if: ${{ env.SEND_RELEASE == '1' }}
         uses: softprops/action-gh-release@v2.5.0
         with:
           name: "${{ env.GITHUB_TITLE }}"
@@ -67,7 +67,7 @@ jobs:
           body_path: ./changelog.md
           token: ${{ env.GH_TOKEN }}
           prerelease: false
-          draft: true
+          draft: ${{ inputs.build-id == 'tag' }}
           generate_release_notes: false
           make_latest: true
           files: |
