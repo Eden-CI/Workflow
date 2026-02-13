@@ -14,7 +14,7 @@ WORKFLOW_DIR=$(CDPATH='' cd -P -- "$(dirname -- "$0")/../.." && pwd)
 . "$WORKFLOW_DIR/.ci/common/project.sh"
 
 VERSION=$(cat "$ROOTDIR/GIT-TAG" 2>/dev/null || cat "$WORKFLOW_DIR/WORKFLOW-TAG")
-PKG_NAME="${PROJECT_PRETTYNAME}-FreeBSD-${ARTIFACT_REF}-${ARCH}"
+PKG_NAME="${PROJECT_PRETTYNAME}-${VERSION}-${ARCH}"
 PKG_DIR="$ROOTDIR/install/usr"
 
 echo "Making '$VERSION' build"
