@@ -86,7 +86,7 @@ jobs:
     env:
       TARGET: "${{ matrix.os.target }}"
       COMPILER: "${{ matrix.compiler.compiler }}"
-      PGO_TARGET: "${{ matrix.compiler.compiler-opt }}"
+      COMPILER_OPT: "${{ matrix.compiler.compiler-opt }}"
       FULL_TARGET: ${{ matrix.os.target }}-${{ matrix.compiler.compiler }}${{ matrix.compiler.compiler-opt }}
 
     steps:
