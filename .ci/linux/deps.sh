@@ -39,6 +39,7 @@ pacman -Syu --noconfirm --overwrite "*" \
 	python-requests \
 	qt6ct \
 	qt6-tools \
+	qt6-charts \
 	spirv-headers \
 	spirv-tools \
 	strace \

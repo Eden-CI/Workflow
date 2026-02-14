@@ -16,7 +16,7 @@ depends=('libglu1-mesa-dev' 'libhidapi-dev'
 	'libfmt-dev' 'liblz4-dev' 'libzstd-dev' 'libssl-dev' 'libavfilter-dev'
 	'libavcodec-dev' 'libswscale-dev' 'zlib1g-dev' 'libva-dev' 'libvdpau-dev' 'libcpp-httplib-dev'
 	'libcubeb-dev' 'libvulkan-dev' 'spirv-tools' 'libusb-1.0-0-dev' 'libsdl2-dev'
-	'libqt6core5compat6' 'libquazip1-qt6-dev' 'libopus-dev')
+	'libqt6core5compat6' 'libquazip1-qt6-dev' 'libopus-dev' 'qt6-charts-dev')
 
 makedepends=('autoconf' 'glslang-tools' 'cmake' 'git' 'gcc' 'g++' 'ninja-build' 'qt6-tools-dev'
 	'libtool' 'nasm' 'pkg-config' 'nlohmann-json3-dev' 'spirv-headers')

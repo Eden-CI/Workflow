@@ -20,7 +20,7 @@ env:
   FORGEJO_TOKEN: ${{ secrets.FORGEJO_TOKEN }}
   DEVEL: ${{ inputs.devel }}
   BUILD_ID: ${{ inputs.build-id }}
-  TEMP_PATCH_NUMBER: ""
+  TEMP_PATCH_NUMBER: "3537"
   FORCE_PGO: "false"
 
 jobs:
