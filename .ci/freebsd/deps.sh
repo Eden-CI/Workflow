@@ -16,7 +16,7 @@ pkg install -y \
   devel/pkgconf \
   devel/qt6-base \
   devel/qt6-tools \
-  devel/qt6-charts \
+  x11-toolkits/qt6-charts \
   devel/simpleini \
   net/enet \
   multimedia/ffnvcodec-headers \

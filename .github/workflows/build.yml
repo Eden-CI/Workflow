@@ -16,7 +16,7 @@ env:
   DISABLE_ARM: ${{ vars.DISABLE_ARM }}
   SCCACHE_GHA_ENABLED: "true"
   CCACHE: "true"
-  CPM_CACHE_VERSION: "v15"
+  CPM_CACHE_VERSION: "v16"
   FORGEJO_TOKEN: ${{ secrets.FORGEJO_TOKEN }}
   DEVEL: ${{ inputs.devel }}
   BUILD_ID: ${{ inputs.build-id }}
