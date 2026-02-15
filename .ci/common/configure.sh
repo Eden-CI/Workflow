@@ -1,6 +1,6 @@
 #!/bin/bash -e
 
-# SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
+# SPDX-FileCopyrightText: Copyright 2025 Eden Emulator Project
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 # The master CMake configurator.
@@ -19,8 +19,8 @@
 # shellcheck disable=SC1091
 
 ROOTDIR="$PWD"
-BUILDDIR="${BUILDDIR:-$ROOTDIR/build}"
-WORKFLOW_DIR=$(CDPATH='' cd -P -- "$(dirname -- "$0")/../.." && pwd)
+BUILDDIR="${BUILDDIR:-build}"
+WORKFLOW_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 
 # shellcheck disable=SC2153
 echo "Build ID: $BUILD_ID"
@@ -38,7 +38,7 @@ if [ ! -d "$WORKFLOW_DIR/.ci/common" ]; then
 	exit 1
 fi
 
-. "$WORKFLOW_DIR/.ci/common/project.sh"
+. "$WORKFLOW_DIR"/.ci/common/project.sh
 
 # annoying
 if [ "$DEVEL" = "true" ]; then
@@ -106,7 +106,7 @@ COMMON_FLAGS=(
 	-DYUZU_CMD="${STANDALONE:-OFF}"
 
 	# The room functionality is bundled in now.
-	# We don't need it standalone.
+	# We don't need it standalone
 	-DYUZU_ROOM_STANDALONE=OFF
 
 	-DNIGHTLY_BUILD="${NIGHTLY:-OFF}"

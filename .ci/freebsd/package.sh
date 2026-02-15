@@ -10,10 +10,10 @@ BUILDDIR="${BUILDDIR:-$ROOTDIR/build}"
 ARTIFACTS_DIR="$ROOTDIR/artifacts"
 
 # shellcheck disable=SC1091
-WORKFLOW_DIR=$(CDPATH='' cd -P -- "$(dirname -- "$0")/../.." && pwd)
+DIR=$0; [ -n "${BASH_VERSION-}" ] && DIR="${BASH_SOURCE[0]}"; WORKFLOW_DIR="$(cd "$(dirname -- "$DIR")/../.." && pwd)"
 . "$WORKFLOW_DIR/.ci/common/project.sh"
 
-VERSION=$(cat "$ROOTDIR/GIT-TAG" 2>/dev/null || cat "$WORKFLOW_DIR/WORKFLOW-TAG")
+VERSION=$(cat "$ROOTDIR/GIT-TAG" 2>/dev/null || echo 'v0.1.1-Workflow')
 PKG_NAME="${PROJECT_PRETTYNAME}-FreeBSD-${ARTIFACT_REF}-${ARCH}"
 PKG_DIR="$ROOTDIR/install/usr"
 

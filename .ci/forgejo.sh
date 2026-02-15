@@ -1,14 +1,14 @@
 #!/bin/sh -ex
 
-# SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
+# SPDX-FileCopyrightText: Copyright 2025 Eden Emulator Project
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 # payload manager for fj2ghook
 
 # shellcheck disable=SC1091
 
-WORKFLOW_DIR=$(CDPATH='' cd -- "$(dirname -- "$0")/.." && pwd)
-. "$WORKFLOW_DIR/.ci/common/project.sh"
+ROOTDIR="$PWD"
+. "$ROOTDIR"/.ci/common/project.sh
 
 FORGEJO_LENV=${FORGEJO_LENV:-"forgejo.env"}
 touch "$FORGEJO_LENV"
@@ -72,18 +72,7 @@ parse_payload() {
 
 	# NB: mirrors do not (generally) work for our purposes
 	# unless they magically can mirror everything in 10 seconds
-	# The only exception to this is on test builds, where we usually don't need to have the most up-to-date code.
-
-	# You can safely remove this if you don't have any regularly-updated mirrors.
-	# shellcheck disable=SC2153
-	case "$BUILD_ID" in
-		test|push)
-			FALLBACK_IDX=1
-			;;
-		*)
-			FALLBACK_IDX=0
-			;;
-	esac
+	: "${FALLBACK_IDX:=0}"
 	if [ -z "$FORGEJO_HOST" ]; then
 		FORGEJO_HOST=$(jq -r ".[$FALLBACK_IDX].host" $DEFAULT_JSON)
 	fi
@@ -258,7 +247,7 @@ clone_repository() {
 
 	echo "$FORGEJO_BRANCH" > GIT-REFSPEC
 	git rev-parse --short=10 HEAD > GIT-COMMIT
-	{ git describe --tags HEAD --abbrev=0 || cat "$WORKFLOW_DIR/WORKFLOW-TAG"; } > GIT-TAG
+	{ git describe --tags HEAD --abbrev=0 || echo 'v0.1.1-Workflow'; } > GIT-TAG
 
 	if [ "$1" = "tag" ]; then
 		cp GIT-TAG GIT-RELEASE
