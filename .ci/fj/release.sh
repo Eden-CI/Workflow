@@ -5,7 +5,9 @@
 
 # shellcheck disable=SC1091
 
-. ".ci/common/project.sh"
+ROOTDIR="$PWD"
+WORKFLOW_DIR=$(CDPATH='' cd -P -- "$(dirname -- "$0")/../.." && pwd)
+. "$WORKFLOW_DIR/.ci/common/project.sh"
 ARTIFACTS_DIR="$ROOTDIR/artifacts"
 
 DEFAULT_JSON=".ci/default.json"
