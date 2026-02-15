@@ -1,12 +1,7 @@
 #!/bin/bash -e
 
-# SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
+# SPDX-FileCopyrightText: Copyright 2025 Eden Emulator Project
 # SPDX-License-Identifier: GPL-3.0-or-later
-
-if [ -z "${BASH_VERSION:-}" ]; then
-    echo "error: This script MUST be run with bash"
-    exit 1
-fi
 
 SDL_FLAGS=(-DYUZU_USE_BUNDLED_SDL2=ON)
 

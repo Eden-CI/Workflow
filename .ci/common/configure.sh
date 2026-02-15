@@ -1,6 +1,6 @@
 #!/bin/bash -e
 
-# SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
+# SPDX-FileCopyrightText: Copyright 2025 Eden Emulator Project
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 # The master CMake configurator.
@@ -16,15 +16,10 @@
 # - USE_WEBENGINE: Enable Qt WebEngine (default OFF)
 # - CCACHE: Enable CCache (default OFF)
 
-if [ -z "${BASH_VERSION:-}" ]; then
-    echo "error: This script MUST be run with bash"
-    exit 1
-fi
-
 # shellcheck disable=SC1091
 
 ROOTDIR="$PWD"
-BUILDDIR="${BUILDDIR:-$ROOTDIR/build}"
+BUILDDIR="${BUILDDIR:-build}"
 WORKFLOW_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 
 # shellcheck disable=SC2153
@@ -43,7 +38,7 @@ if [ ! -d "$WORKFLOW_DIR/.ci/common" ]; then
 	exit 1
 fi
 
-. "$WORKFLOW_DIR/.ci/common/project.sh"
+. "$WORKFLOW_DIR"/.ci/common/project.sh
 
 # annoying
 if [ "$DEVEL" = "true" ]; then
