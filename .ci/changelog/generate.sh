@@ -5,6 +5,11 @@
 
 # shellcheck disable=SC1091
 
+if [ -z "${BASH_VERSION:-}" ]; then
+    echo "error: This script MUST be run with bash"
+    exit 1
+fi
+
 WORKFLOW_DIR=$(CDPATH='' cd -P -- "$(dirname -- "$0")/../.." && pwd)
 . "$WORKFLOW_DIR/.ci/common/project.sh"
 
