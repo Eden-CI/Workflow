@@ -3,14 +3,15 @@
 # SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-# shellcheck disable=SC1091
-
 if [ -z "${BASH_VERSION:-}" ]; then
     echo "error: This script MUST be run with bash"
     exit 1
 fi
 
-WORKFLOW_DIR=$(CDPATH='' cd -P -- "$(dirname -- "$0")/../.." && pwd)
+# shellcheck disable=SC1091
+
+ROOTDIR="$PWD"
+WORKFLOW_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 . "$WORKFLOW_DIR/.ci/common/project.sh"
 
 opts() {

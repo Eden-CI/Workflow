@@ -16,16 +16,16 @@
 # - USE_WEBENGINE: Enable Qt WebEngine (default OFF)
 # - CCACHE: Enable CCache (default OFF)
 
-# shellcheck disable=SC1091
-
 if [ -z "${BASH_VERSION:-}" ]; then
     echo "error: This script MUST be run with bash"
     exit 1
 fi
 
+# shellcheck disable=SC1091
+
 ROOTDIR="$PWD"
 BUILDDIR="${BUILDDIR:-$ROOTDIR/build}"
-WORKFLOW_DIR=$(CDPATH='' cd -P -- "$(dirname -- "$0")/../.." && pwd)
+WORKFLOW_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 
 # shellcheck disable=SC2153
 echo "Build ID: $BUILD_ID"
@@ -111,7 +111,7 @@ COMMON_FLAGS=(
 	-DYUZU_CMD="${STANDALONE:-OFF}"
 
 	# The room functionality is bundled in now.
-	# We don't need it standalone.
+	# We don't need it standalone
 	-DYUZU_ROOM_STANDALONE=OFF
 
 	-DNIGHTLY_BUILD="${NIGHTLY:-OFF}"

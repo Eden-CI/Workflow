@@ -5,7 +5,7 @@
 ROOTDIR="$PWD"
 BUILDDIR="/build"
 BUILDUSER="build"
-WORKFLOW_DIR=$(CDPATH='' cd -P -- "$(dirname -- "$0")/../.." && pwd)
+DIR=$0; [ -n "${BASH_VERSION-}" ] && DIR="${BASH_SOURCE[0]}"; WORKFLOW_DIR="$(cd "$(dirname -- "$DIR")/../.." && pwd)"
 
 # Use sudo if available, otherwise run directly
 if command -v sudo >/dev/null 2>&1 ; then
