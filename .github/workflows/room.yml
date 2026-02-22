@@ -37,7 +37,7 @@ jobs:
             -e ARCH \
             alpine:3.23 sh -c '
               apk add --no-cache bash cmake g++ gcc git ninja patch boost1.84-dev boost1.84-static \
-                mbedtls-dev mbedtls-static
+                mbedtls-dev mbedtls-static openssl-libs-static openssl-dev
               cmake -S . -B build -GNinja -DYUZU_STATIC_ROOM=ON
               cmake --build build
 
