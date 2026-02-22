@@ -15,7 +15,3 @@ forgejo.env
 /pkg
 
 /.vscode
-
-# linux package
-uruntime2appimage*
-quick-sharun*
