@@ -36,6 +36,7 @@ rm -rf "$APPDIR"
 
 # deploy
 curl -L --retry 30 "$SHARUN" -o quick-sharun
+chmod a+x quick-sharun
 ./quick-sharun \
 	"$BUILDDIR/bin/${PROJECT_REPO}" \
 	"$BUILDDIR/bin/${PROJECT_REPO}-cli"
