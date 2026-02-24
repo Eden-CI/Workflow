@@ -27,8 +27,12 @@ UPINFO="gh-releases-zsync|eden-emulator|Releases|latest|*-${FULL_ARCH}.AppImage.
 
 if [ "$DEVEL" = 'true' ]; then
 	sed -i "s|Name=${PROJECT_PRETTYNAME}|Name=${PROJECT_PRETTYNAME} Nightly|" "$DESKTOP"
-    UPINFO="$(echo "$UPINFO" | sed 's|Releases|nightly|')"
 fi
+
+if [ "$BUILD_ID" = nightly ]; then
+	UPINFO=$(echo "$UPINFO" | sed 's/eden-emulator|Releases/Eden-CI|Nightly/g')
+fi
+
 export UPINFO
 
 # cleanup
