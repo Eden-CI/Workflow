@@ -115,10 +115,6 @@ COMMON_FLAGS=(
 # cmd line stuff
 EXTRA_ARGS=("$@")
 
-if [ "$PLATFORM" = macos ]; then
-	EXTRA_ARGS+=(-DMbedTLS_FORCE_BUNDLED=ON)
-fi
-
 # aggregate
 CMAKE_FLAGS=(
 	"${COMMON_FLAGS[@]}"
