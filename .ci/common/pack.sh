@@ -27,6 +27,6 @@ find "$ROOTDIR" \( \
 
 # last minute save yolo
 sudo apt-get install -y mktorrent
-mktorrent -v -p -a udp://tracker.opentrackr.org:1337/announce -o "$ARTIFACTS_DIR/$PROJECT_PRETTYNAME.torrent" "$ARTIFACTS_DIR"
+mktorrent -p -o "$ARTIFACTS_DIR/$PROJECT_PRETTYNAME.torrent" "$ARTIFACTS_DIR/$PROJECT_PRETTYNAME.AppImage"
 
 ls -lh "$ARTIFACTS_DIR"
