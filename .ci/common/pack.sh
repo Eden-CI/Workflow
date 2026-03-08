@@ -25,8 +25,7 @@ find "$ROOTDIR" \( \
 		-name '*unknown-linux-musl*' \
     \) -exec cp {} "$ARTIFACTS_DIR" \;
 
-# last minute save yolo
 sudo apt-get install -y mktorrent
-mktorrent -p -o "$ARTIFACTS_DIR/$PROJECT_PRETTYNAME.torrent" "$ARTIFACTS_DIR/"
+mktorrent -p -o "$ARTIFACTS_DIR/${PROJECT_PRETTYNAME}-${ARTIFACT_REF}.torrent" "$ARTIFACTS_DIR/"
 
 ls -lh "$ARTIFACTS_DIR"
