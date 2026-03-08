@@ -27,7 +27,7 @@ export OUTNAME="${PROJECT_PRETTYNAME}-Linux-${ARTIFACT_REF}-${FULL_ARCH}.AppImag
 _zsync="${PROJECT_PRETTYNAME}-Linux-${FULL_ARCH}.AppImage.zsync"
 
 # Thanks, Microsoft.
-UPINFO="${FORGEJO_HOST}/${FORGEJO_REPO}/${_zsync}"
+UPINFO="zsync|${FORGEJO_HOST}/${FORGEJO_REPO}/${_zsync}"
 
 if [ "$DEVEL" = 'true' ]; then
 	sed -i "s|Name=${PROJECT_PRETTYNAME}|Name=${PROJECT_PRETTYNAME} Nightly|" "$DESKTOP"
