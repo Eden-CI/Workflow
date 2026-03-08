@@ -27,6 +27,6 @@ find "$ROOTDIR" \( \
 
 # last minute save yolo
 sudo apt-get install -y mktorrent
-mktorrent -p -o "$ARTIFACTS_DIR/$PROJECT_PRETTYNAME.torrent" "$ARTIFACTS_DIR/$PROJECT_PRETTYNAME.AppImage"
+mktorrent -p -o "$ARTIFACTS_DIR/$PROJECT_PRETTYNAME.torrent" "$ARTIFACTS_DIR/"
 
 ls -lh "$ARTIFACTS_DIR"
