@@ -23,14 +23,19 @@ export DEPLOY_VULKAN=1
 export ADD_HOOKS="wayland-is-broken.src.hook"
 export OUTPATH="$ARTIFACTS_DIR"
 export OUTNAME="${PROJECT_PRETTYNAME}-Linux-${ARTIFACT_REF}-${FULL_ARCH}.AppImage"
-UPINFO="gh-releases-zsync|eden-emulator|Releases|latest|*-${FULL_ARCH}.AppImage.zsync"
+
+_zsync="${PROJECT_PRETTYNAME}-Linux-${FULL_ARCH}.AppImage.zsync"
+
+# Thanks, Microsoft.
+UPINFO="${FORGEJO_HOST}/${FORGEJO_REPO}/${_zsync}"
 
 if [ "$DEVEL" = 'true' ]; then
 	sed -i "s|Name=${PROJECT_PRETTYNAME}|Name=${PROJECT_PRETTYNAME} Nightly|" "$DESKTOP"
 fi
 
+# shellcheck disable=SC2153
 if [ "$BUILD_ID" = nightly ]; then
-	UPINFO=$(echo "$UPINFO" | sed 's/eden-emulator|Releases/Eden-CI|Nightly/g')
+	UPINFO="gh-releases-zsync|Eden-CI|Nightly|latest|*-${FULL_ARCH}.AppImage.zsync"
 fi
 
 export UPINFO
@@ -51,6 +56,8 @@ echo "-- Generating AppImage... --"
 
 if [ "$DEVEL" = 'true' ]; then
     rm -f "$OUTPATH/$OUTNAME.zsync"
+elif [ "$BUILD_ID" = "tag" ]; then
+    mv "$OUTPATH/$OUTNAME.zsync" "$OUTPATH/${_zsync}"
 fi
 
 echo "Linux package created: $OUTPATH/$OUTNAME"
