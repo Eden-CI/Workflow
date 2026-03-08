@@ -53,6 +53,17 @@ jobs:
           echo "cachever=${CPM_CACHE_VERSION}" >> "$GITHUB_OUTPUT"
           echo "pgo=${FORCE_PGO}" >> "$GITHUB_OUTPUT"
 
+      - name: torrent test
+        run: .ci/fj/torrent.sh
+        env:
+          GH_TOKEN: "${{ secrets.CUSTOM_GITHUB_TOKEN }}"
+          FJ_TOKEN: "${{ secrets.FORGEJO_TOKEN }}"
+          VPS_SSH_HOST: "${{ secrets.VPS_SSH_HOST }}"
+          VPS_SSH_PORT: "${{ secrets.VPS_SSH_PORT }}"
+          VPS_SSH_PRIV: "${{ secrets.VPS_SSH_PRIV }}"
+          VPS_SSH_PUB: "${{ secrets.VPS_SSH_PUB }}"
+          FORGEJO_REPO: eden-emu/eden
+          FORGEJO_REF: v0.2.0-rc1
       - name: Clone
         run: ./.ci/forgejo.sh --clone ${{ inputs.build-id }}
 
