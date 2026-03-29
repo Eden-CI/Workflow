@@ -12,7 +12,7 @@ ARTIFACTS_DIR="$ROOTDIR/artifacts"
 # shellcheck disable=SC1091
 . "$ROOTDIR/.ci/common/project.sh"
 
-VERSION=$(cat "$ROOTDIR/GIT-TAG" 2>/dev/null || cat "WORKFLOW-TAG")
+VERSION=$(cat "$ROOTDIR/GIT-TAG" 2>/dev/null || cat "$ROOTDIR/WORKFLOW-TAG")
 PKG_NAME="${PROJECT_PRETTYNAME}-FreeBSD-${ARTIFACT_REF}-${ARCH}"
 PKG_DIR="$ROOTDIR/install/usr"
 

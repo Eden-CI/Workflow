@@ -266,7 +266,7 @@ clone_repository() {
 
 	echo "$FORGEJO_BRANCH" > GIT-REFSPEC
 	git rev-parse --short=10 HEAD > GIT-COMMIT
-	{ git describe --tags HEAD --abbrev=0 || cat "WORKFLOW-TAG"; } > GIT-TAG
+	{ git describe --tags HEAD --abbrev=0 || cat "$ROOTDIR/WORKFLOW-TAG"; } > GIT-TAG
 
 	if [ "$1" = "tag" ]; then
 		cp GIT-TAG GIT-RELEASE
