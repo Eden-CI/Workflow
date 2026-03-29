@@ -140,7 +140,7 @@ parse_payload() {
 
 		FORGEJO_PR_NUMBER=$(jq -r '.number' $PAYLOAD_JSON)
 		FORGEJO_PR_URL=$(jq -r '.url' $PAYLOAD_JSON)
-		FORGEJO_PR_TITLE=$(.ci/common/field.py field="title" default_msg="No title provided" pull_request_number="$FORGEJO_PR_NUMBER")
+		FORGEJO_PR_TITLE=$(python3 "$ROOTDIR/.ci/common/field.py" field="title" default_msg="No title provided" pull_request_number="$FORGEJO_PR_NUMBER")
 
 		{
 			echo "FORGEJO_PR_NUMBER=$FORGEJO_PR_NUMBER"

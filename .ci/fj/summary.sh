@@ -30,7 +30,7 @@ pull_request() {
 
 	EOF
 
-	.ci/common/field.py field=body default_msg="No changelog provided" pull_request_number="$FORGEJO_PR_NUMBER"
+	python3 "$ROOTDIR/.ci/common/field.py" field=body default_msg="No changelog provided" pull_request_number="$FORGEJO_PR_NUMBER"
 }
 
 push() {
