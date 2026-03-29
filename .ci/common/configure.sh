@@ -20,7 +20,6 @@
 
 ROOTDIR="$PWD"
 BUILDDIR="${BUILDDIR:-$ROOTDIR/build}"
-WORKFLOW_DIR=$(CDPATH='' cd -P -- "$(dirname -- "$0")/../.." && pwd)
 
 # shellcheck disable=SC2153
 echo "Build ID: $BUILD_ID"
@@ -33,12 +32,12 @@ if [ ! -f "$ROOTDIR/CMakeLists.txt" ]; then
 fi
 
 # check if common script folder is on Workflow
-if [ ! -d "$WORKFLOW_DIR/.ci/common" ]; then
-	echo "error: could not find .ci/common in Workflow at $WORKFLOW_DIR"
+if [ ! -d ".ci/common" ]; then
+	echo "error: could not find .ci/common"
 	exit 1
 fi
 
-. "$WORKFLOW_DIR/.ci/common/project.sh"
+. ".ci/common/project.sh"
 
 # annoying
 if [ "$DEVEL" = "true" ]; then
@@ -52,13 +51,13 @@ if [ "$BUILD_ID" = nightly ]; then
 fi
 
 # platform handling
-. "$WORKFLOW_DIR"/.ci/common/platform.sh
+. ".ci/common/platform.sh"
 
 # sdl/arch handling (targets)
-. "$WORKFLOW_DIR"/.ci/common/targets.sh
+. ".ci/common/targets.sh"
 
 # compiler handling
-. "$WORKFLOW_DIR"/.ci/common/compiler.sh
+. ".ci/common/compiler.sh"
 
 # Flags all targets use
 COMMON_FLAGS=(

@@ -8,8 +8,7 @@
 ROOTDIR="$PWD"
 
 # shellcheck disable=SC1091
-WORKFLOW_DIR=$(CDPATH='' cd -P -- "$(dirname -- "$0")/../.." && pwd)
-. "$WORKFLOW_DIR/.ci/common/project.sh"
+. ".ci/common/project.sh"
 
 BUILDDIR="${BUILDDIR:-$ROOTDIR/build}"
 ARTIFACTS_DIR="$ROOTDIR/artifacts"

@@ -6,11 +6,9 @@
 ROOTDIR="$PWD"
 BUILDDIR="${BUILDDIR:-$ROOTDIR/build}"
 ARTIFACTS_DIR="$ROOTDIR/artifacts"
-WORKFLOW_DIR=$(CDPATH='' cd -P -- "$(dirname -- "$0")/../.." && pwd)
-
 
 # shellcheck disable=SC1091
-. "$WORKFLOW_DIR/.ci/common/project.sh"
+. ".ci/common/project.sh"
 
 BINDIR="$BUILDDIR/bin"
 PKGDIR="$BUILDDIR/pkg"
@@ -20,13 +18,13 @@ EXE="${PROJECT_REPO}.exe"
 WINDEPLOYQT="${WINDEPLOYQT:-windeployqt6}"
 
 # check if common script folder is on Workflow
-if [ ! -d "$WORKFLOW_DIR/.ci/common" ]; then
-	echo "error: could not find .ci/common in Workflow at $WORKFLOW_DIR"
+if [ ! -d ".ci/common" ]; then
+	echo "error: could not find .ci/common"
 	exit 1
 fi
 
 # shellcheck disable=SC1091
-. "$WORKFLOW_DIR/.ci/common/platform.sh"
+. ".ci/common/platform.sh"
 
 rm -f "$BINDIR/"*.pdb || true
 

@@ -6,11 +6,10 @@
 # shellcheck disable=SC2043
 
 ROOTDIR="$PWD"
-WORKFLOW_DIR=$(CDPATH='' cd -P -- "$(dirname -- "$0")/../.." && pwd)
 ARTIFACTS_DIR="$ROOTDIR/artifacts"
 
 # shellcheck disable=SC1091
-. "$WORKFLOW_DIR/.ci/common/project.sh"
+. ".ci/common/project.sh"
 
 mkdir -p "$ARTIFACTS_DIR"
 

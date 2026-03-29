@@ -7,8 +7,7 @@
 
 # shellcheck disable=SC1091
 
-WORKFLOW_DIR=$(CDPATH='' cd -- "$(dirname -- "$0")/.." && pwd)
-. "$WORKFLOW_DIR/.ci/common/project.sh"
+. ".ci/common/project.sh"
 
 FORGEJO_LENV=${FORGEJO_LENV:-"forgejo.env"}
 touch "$FORGEJO_LENV"
@@ -266,7 +265,7 @@ clone_repository() {
 
 	echo "$FORGEJO_BRANCH" > GIT-REFSPEC
 	git rev-parse --short=10 HEAD > GIT-COMMIT
-	{ git describe --tags HEAD --abbrev=0 || cat "$WORKFLOW_DIR/WORKFLOW-TAG"; } > GIT-TAG
+	{ git describe --tags HEAD --abbrev=0 || cat "WORKFLOW-TAG"; } > GIT-TAG
 
 	if [ "$1" = "tag" ]; then
 		cp GIT-TAG GIT-RELEASE

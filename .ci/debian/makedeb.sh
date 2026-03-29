@@ -5,7 +5,6 @@
 ROOTDIR="$PWD"
 BUILDDIR="/build"
 BUILDUSER="build"
-WORKFLOW_DIR=$(CDPATH='' cd -P -- "$(dirname -- "$0")/../.." && pwd)
 ARTIFACTS_DIR="$ROOTDIR/artifacts"
 
 # Use sudo if available, otherwise run directly
@@ -44,5 +43,5 @@ if ! command -v sudo > /dev/null 2>&1 ; then
 	cp "$BUILDDIR/artifacts/"*.deb "$ARTIFACTS_DIR"
 # otherwise just run normally
 else
-	"$WORKFLOW_DIR/.ci/debian/build.sh"
+	".ci/debian/build.sh"
 fi

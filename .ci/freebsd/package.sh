@@ -10,10 +10,9 @@ BUILDDIR="${BUILDDIR:-$ROOTDIR/build}"
 ARTIFACTS_DIR="$ROOTDIR/artifacts"
 
 # shellcheck disable=SC1091
-WORKFLOW_DIR=$(CDPATH='' cd -P -- "$(dirname -- "$0")/../.." && pwd)
-. "$WORKFLOW_DIR/.ci/common/project.sh"
+. ".ci/common/project.sh"
 
-VERSION=$(cat "$ROOTDIR/GIT-TAG" 2>/dev/null || cat "$WORKFLOW_DIR/WORKFLOW-TAG")
+VERSION=$(cat "$ROOTDIR/GIT-TAG" 2>/dev/null || cat "WORKFLOW-TAG")
 PKG_NAME="${PROJECT_PRETTYNAME}-FreeBSD-${ARTIFACT_REF}-${ARCH}"
 PKG_DIR="$ROOTDIR/install/usr"
 
@@ -67,7 +66,7 @@ strip "$PKG_DIR/bin/${PROJECT_REPO}"
 find "$PKG_DIR/lib" -type f -name '*.so*' -exec strip {} \;
 
 # Create a launcher for the pack
-cp "$WORKFLOW_DIR/.ci/freebsd/launch.sh" "$PKG_DIR"
+cp ".ci/freebsd/launch.sh" "$PKG_DIR"
 chmod +x "$PKG_DIR/launch.sh"
 
 # Pack for upload

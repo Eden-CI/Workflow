@@ -8,8 +8,7 @@ BUILDDIR="${BUILDDIR:-$ROOTDIR/build}"
 ARTIFACTS_DIR="$ROOTDIR/artifacts"
 
 # shellcheck disable=SC1091
-WORKFLOW_DIR=$(CDPATH='' cd -P -- "$(dirname -- "$0")/../.." && pwd)
-. "$WORKFLOW_DIR/.ci/common/project.sh"
+. ".ci/common/project.sh"
 
 if ! command -v makedeb > /dev/null 2>&1 ; then
 	# install makedeb
@@ -34,7 +33,7 @@ if [ -n "${SCCACHE_PATH-}" ] && [ -e "$SCCACHE_PATH" ]; then
     CONFIG_OPTS=" -DCCACHE_PATH=\"${SCCACHE_PATH}\""
 fi
 
-SRC="$WORKFLOW_DIR/.ci/debian/PKGBUILD.in"
+SRC=".ci/debian/PKGBUILD.in"
 DEST="$ROOTDIR/PKGBUILD"
 
 TAG=$(cat "$ROOTDIR"/GIT-TAG | sed 's/.git//' | sed 's/v//' | sed 's/[-_]/./g' | tr -d '\n')
@@ -47,8 +46,7 @@ fi
 
 sed "s|%PKGVER%|$PKGVER|"             "$SRC"    > "$DEST.1"
 sed "s|%ARCH%|$ARCH|"                 "$DEST.1" > "$DEST.2"
-sed "s|%WORKFLOWDIR%|$WORKFLOW_DIR/|" "$DEST.2" > "$DEST.3"
-sed "s|%BUILDDIR%|$BUILDDIR|"         "$DEST.3" > "$DEST.4"
+sed "s|%BUILDDIR%|$BUILDDIR|"         "$DEST.2" > "$DEST.4"
 sed "s|%CONFIG_OPTS%|$CONFIG_OPTS|"   "$DEST.4" > "$DEST.5"
 sed "s|%SOURCE%|$ROOTDIR|"            "$DEST.5" > "$DEST"
 

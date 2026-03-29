@@ -5,8 +5,7 @@
 
 # shellcheck disable=SC1091
 
-WORKFLOW_DIR=$(CDPATH='' cd -P -- "$(dirname -- "$0")/../.." && pwd)
-. "$WORKFLOW_DIR/.ci/common/project.sh"
+. ".ci/common/project.sh"
 
 opts() {
 	falsy "$DISABLE_OPTS"
