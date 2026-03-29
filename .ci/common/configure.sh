@@ -32,12 +32,12 @@ if [ ! -f "$ROOTDIR/CMakeLists.txt" ]; then
 fi
 
 # check if common script folder is on Workflow
-if [ ! -d ".ci/common" ]; then
-	echo "error: could not find .ci/common"
+if [ ! -d "$ROOTDIR/.ci/common" ]; then
+	echo "error: could not find $ROOTDIR/.ci/common"
 	exit 1
 fi
 
-. ".ci/common/project.sh"
+. "$ROOTDIR/.ci/common/project.sh"
 
 # annoying
 if [ "$DEVEL" = "true" ]; then
@@ -51,13 +51,13 @@ if [ "$BUILD_ID" = nightly ]; then
 fi
 
 # platform handling
-. ".ci/common/platform.sh"
+. "$ROOTDIR/.ci/common/platform.sh"
 
 # sdl/arch handling (targets)
-. ".ci/common/targets.sh"
+. "$ROOTDIR/.ci/common/targets.sh"
 
 # compiler handling
-. ".ci/common/compiler.sh"
+. "$ROOTDIR/.ci/common/compiler.sh"
 
 # Flags all targets use
 COMMON_FLAGS=(

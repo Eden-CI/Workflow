@@ -43,5 +43,5 @@ if ! command -v sudo > /dev/null 2>&1 ; then
 	cp "$BUILDDIR/artifacts/"*.deb "$ARTIFACTS_DIR"
 # otherwise just run normally
 else
-	".ci/debian/build.sh"
+	"$ROOTDIR/.ci/debian/build.sh"
 fi

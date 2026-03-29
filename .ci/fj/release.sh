@@ -6,10 +6,10 @@
 # shellcheck disable=SC1091
 
 ROOTDIR="$PWD"
-. ".ci/common/project.sh"
+. "$ROOTDIR/.ci/common/project.sh"
 ARTIFACTS_DIR="$ROOTDIR/artifacts"
 
-DEFAULT_JSON=".ci/default.json"
+DEFAULT_JSON="$ROOTDIR/.ci/default.json"
 FJ_HOST=$(jq -r ".[0].host" $DEFAULT_JSON)
 FJ_REPO=$(jq -r ".[0].repository" $DEFAULT_JSON)
 

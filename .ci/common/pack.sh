@@ -9,7 +9,7 @@ ROOTDIR="$PWD"
 ARTIFACTS_DIR="$ROOTDIR/artifacts"
 
 # shellcheck disable=SC1091
-. ".ci/common/project.sh"
+. "$ROOTDIR/.ci/common/project.sh"
 
 mkdir -p "$ARTIFACTS_DIR"
 

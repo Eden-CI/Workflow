@@ -5,7 +5,8 @@
 
 # shellcheck disable=SC1091
 
-. ".ci/common/project.sh"
+ROOTDIR="$PWD"
+. "$ROOTDIR/.ci/common/project.sh"
 
 opts() {
 	falsy "$DISABLE_OPTS"

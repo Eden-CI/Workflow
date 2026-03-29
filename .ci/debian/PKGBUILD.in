@@ -43,7 +43,7 @@ build() {
 	export TARGET=package-%ARCH%
 	export COMPILER=gcc
 	rm -rf "%BUILDDIR%"
-	".ci/common/configure.sh" %CONFIG_OPTS%
+	"%ROOTDIR%.ci/common/configure.sh" %CONFIG_OPTS%
 	cmake --build "%BUILDDIR%"
 }
 

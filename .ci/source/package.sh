@@ -6,8 +6,8 @@
 # shellcheck disable=SC1091
 
 ROOTDIR="$PWD"
-. ".ci/common/project.sh"
-ARTIFACT_NAME="${ROOTDIR}/${PROJECT_PRETTYNAME}-Source-${ARTIFACT_REF}.tar.zst"
+. "$ROOTDIR/.ci/common/project.sh"
+ARTIFACT_NAME="$ROOTDIR/${PROJECT_PRETTYNAME}-Source-${ARTIFACT_REF}.tar.zst"
 
 cd "${PROJECT_REPO}"
 

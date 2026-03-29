@@ -7,7 +7,8 @@
 
 # shellcheck disable=SC1091
 
-. ".ci/common/project.sh"
+ROOTDIR="$PWD"
+. "$ROOTDIR/.ci/common/project.sh"
 
 FORGEJO_LENV=${FORGEJO_LENV:-"forgejo.env"}
 touch "$FORGEJO_LENV"
@@ -22,8 +23,8 @@ _release_field() {
 }
 
 parse_payload() {
-	DEFAULT_JSON=".ci/default.json"
-	RELEASE_JSON=".ci/release.json"
+	DEFAULT_JSON="$ROOTDIR/.ci/default.json"
+	RELEASE_JSON="$ROOTDIR/.ci/release.json"
 	PAYLOAD_JSON="payload.json"
 
 	if [ ! -f "$PAYLOAD_JSON" ]; then
@@ -169,7 +170,7 @@ parse_payload() {
 		;;
 	nightly)
 		FORGEJO_BRANCH=$(jq -r ".[$FALLBACK_IDX].branch" $DEFAULT_JSON)
-		FORGEJO_REF=$(.ci/common/field.py field="sha")
+		FORGEJO_REF=$("$ROOTDIR/.ci/common/field.py" field="sha")
 
 		_host="$RELEASE_NIGHTLY_HOST"
 		_repo="$RELEASE_NIGHTLY_REPO"
@@ -189,7 +190,7 @@ parse_payload() {
 		;;
 	push | test)
 		FORGEJO_BRANCH=$(jq -r ".[$FALLBACK_IDX].branch" $DEFAULT_JSON)
-		FORGEJO_REF=$(.ci/common/field.py field="sha")
+		FORGEJO_REF=$("$ROOTDIR/.ci/common/field.py" field="sha")
 
 		_host="$RELEASE_MASTER_HOST"
 		_repo="$RELEASE_MASTER_REPO"
