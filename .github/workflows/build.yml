@@ -66,7 +66,7 @@ jobs:
 
       - name: Send pending status
         if: ${{ (inputs.build-id) == 'master' || (inputs.build-id) == 'pull_request' }}
-        run: python3 .ci/common/status.py --pending
+        run: python3 ./.ci/common/status.py --pending
 
       - name: Apply Temporary Patch
         if: ${{ env.TEMP_PATCH_NUMBER != '' }}
@@ -105,7 +105,7 @@ jobs:
         uses: actions/download-artifact@v7.0.0
 
       - name: Load payload environment
-        run: FORGEJO_LENV=forgejo-env/forgejo.env . .ci/fj/load-env.sh
+        run: FORGEJO_LENV=forgejo-env/forgejo.env . ./.ci/fj/load-env.sh
 
       - name: Build
         run: ./.ci/source/build.sh

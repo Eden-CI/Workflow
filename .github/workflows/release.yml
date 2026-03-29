@@ -42,8 +42,8 @@ jobs:
 
       - name: Load environments
         run: |
-          FORGEJO_LENV=forgejo-env/forgejo.env . .ci/fj/load-env.sh
-          . .ci/common/steps.sh | tee -a "$GITHUB_ENV"
+          FORGEJO_LENV=forgejo-env/forgejo.env . ./.ci/fj/load-env.sh
+          . ./.ci/common/steps.sh | tee -a "$GITHUB_ENV"
 
       - name: Send build status
         if: ${{ env.SEND_STATUS == '1' }}
@@ -111,12 +111,12 @@ jobs:
       - name: Release (Forgejo)
         if: ${{ env.RELEASE_FJ == '1' }}
         run: |
-          . .ci/fj/release.sh
+          . ./.ci/fj/release.sh
           echo "- View Release on Forgejo: [$FORGEJO_REF](${FJ_URL})" >> "$GITHUB_STEP_SUMMARY"
 
       - name: Setup Torrent (Forgejo)
         if: ${{ env.RELEASE_FJ == '1' && env.VPS_SSH_PRIV }}
-        run: .ci/fj/torrent.sh
+        run: ./.ci/fj/torrent.sh
 
       - name: Upload changelog
         if: ${{ always() }}
