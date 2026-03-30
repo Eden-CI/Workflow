@@ -44,7 +44,7 @@ export UPINFO
 rm -rf "$APPDIR"
 
 # deploy
-curl -L --retry 30 "$SHARUN" -o quick-sharun
+curl -sSfL --retry 30 "$SHARUN" -o quick-sharun
 chmod a+x quick-sharun
 ./quick-sharun \
 	"$BUILDDIR/bin/${PROJECT_REPO}" \
