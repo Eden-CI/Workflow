@@ -18,4 +18,4 @@ PAYLOAD=$(jq -c -n \
 }
 ')
 
-curl -sS -X POST -H "Content-Type: application/json" -d "$PAYLOAD" "$DISCORD_WEBHOOK"
+curl -H "Content-Type: application/json" -d "$PAYLOAD" "$DISCORD_WEBHOOK"

@@ -96,7 +96,7 @@ parse_payload() {
 
 	TRIES=0
 	TIMEOUT=5
-	while ! curl -sSfL "$FORGEJO_CLONE_URL" >/dev/null 2>&1; do
+	while ! curl -fL "$FORGEJO_CLONE_URL" >/dev/null 2>&1; do
 		echo "Repository $FORGEJO_CLONE_URL is unreachable."
 		echo "Check URL or authentication."
 
@@ -179,7 +179,7 @@ parse_payload() {
 		_ref="${FORGEJO_REF}"
 
 		# if last nightly was the same ref as this one, exit early
-		_last_sha=$(curl -sSL "https://api.github.com/repos/$_repo/releases/latest" | jq -r '.tag_name' | cut -d'.' -f2)
+		_last_sha=$(curl "https://api.github.com/repos/$_repo/releases/latest" | jq -r '.tag_name' | cut -d'.' -f2)
 
 		if [ "$_last_sha" = "$_ref" ]; then
 			echo "current ref $_ref is same as last nightly $_last_sha, skipping"
@@ -233,7 +233,7 @@ parse_payload() {
 }
 
 clone_repository() {
-	if ! curl -sSfL "$FORGEJO_CLONE_URL" >/dev/null 2>&1; then
+	if ! curl -fL "$FORGEJO_CLONE_URL" >/dev/null 2>&1; then
 		echo "Repository $FORGEJO_CLONE_URL is not reachable."
 		echo "Check URL or authentication."
 		echo
