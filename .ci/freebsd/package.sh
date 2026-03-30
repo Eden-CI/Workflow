@@ -52,7 +52,7 @@ wayland-shell-integration
 for sub in $QT6_PLUGIN_SUBDIRS; do
 	if [ -d "$QT6_PLUGINS/$sub" ]; then
 		mkdir -p "$PKG_DIR/lib/qt6/plugins/$sub"
-		cp -r "$QT6_PLUGINS/$sub"/* "$PKG_DIR/lib/qt6/plugins/$sub/"
+		find "$QT6_PLUGINS/$sub" -maxdepth 1 -type f -exec cp {} "$PKG_DIR/lib/qt6/plugins/$sub/" \;
 	fi
 done
 
