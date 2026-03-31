@@ -74,10 +74,13 @@ done
 : "${DEVEL:=true}"
 
 case "$TARGET" in
-	Legacy|GenshinSpoof|Mainline|ChromeOS) ;;
+	Legacy) PRETTY_TARGET=legacy ;;
+	GenshinSpoof) PRETTY_TARGET=optimized ;;
+	Mainline) PRETTY_TARGET=standard ;;
+    ChromeOS) PRETTY_TARGET=chromeos ;;
 	*) die "Invalid build target $TARGET."
 esac
-PACKAGE_TARGET="${PROJECT_PRETTYNAME}-Android-${ARTIFACT_REF}-${TARGET}.apk"
+PACKAGE_TARGET="${PROJECT_PRETTYNAME}-Android-${ARTIFACT_REF}-${PRETTY_TARGET}.apk"
 
 case "$TYPE" in
 	RelWithDebInfo|Release|Debug) ;;
