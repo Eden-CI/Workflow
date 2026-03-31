@@ -15,7 +15,7 @@ FJ_REPO="$RELEASE_REPO"
 # "https://$B2_BUCKET.$B2_URL/$B2_DIR/$GITHUB_TAG/<asset>"
 
 sed -i "s|$RELEASE_HOST/$RELEASE_REPO|$FJ_HOST/$FJ_REPO|g" "$ROOTDIR/changelog.md"
-git clone --depth 1 https://git.crueter.xyz/scripts/fj.git
+# git clone --depth 1 https://git.crueter.xyz/scripts/fj.git
 
 echo "-- Creating Release"
 "$ROOTDIR/fj/fj.sh" -k "$FJ_TOKEN" -r "$FJ_REPO" -u "$FJ_HOST" release -t "$FORGEJO_REF" \
@@ -24,6 +24,6 @@ echo "-- Creating Release"
 echo "-- Uploading Assets"
 
 "$ROOTDIR/fj/fj.sh" -k "$FJ_TOKEN" -r "$FJ_REPO" -u "$FJ_HOST" release -t "$FORGEJO_REF" \
-	external "$(cat "$ROOTDIR"/urls.txt)"
+	external $(cat "$ROOTDIR"/urls.txt)
 
 export FJ_URL="https://$FJ_HOST/$FJ_REPO/releases/tag/$FORGEJO_REF"
