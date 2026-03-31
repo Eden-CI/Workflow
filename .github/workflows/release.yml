@@ -23,6 +23,10 @@ jobs:
     env:
       GH_TOKEN: "${{ secrets.CUSTOM_GITHUB_TOKEN }}"
       FJ_TOKEN: "${{ secrets.FORGEJO_TOKEN }}"
+
+      B2_TOKEN: "${{ secrets.B2_TOKEN }}"
+      B2_KEY: "${{ secrets.B2_KEY }}"
+
       VPS_SSH_HOST: "${{ secrets.VPS_SSH_HOST }}"
       VPS_SSH_PORT: "${{ secrets.VPS_SSH_PORT }}"
       VPS_SSH_PRIV: "${{ secrets.VPS_SSH_PRIV }}"
@@ -61,58 +65,59 @@ jobs:
         run: gh release delete "$FORGEJO_PR_NUMBER" --repo "$RELEASE_REPO" --cleanup-tag -y
         continue-on-error: true
 
+      # - name: Release
+      #   id: release
+      #   if: ${{ env.RELEASE_GH == '1' }}
+      #   uses: softprops/action-gh-release@v2.5.0
+      #   with:
+      #     name: "${{ env.GITHUB_TITLE }}"
+      #     tag_name: ${{ env.GITHUB_TAG }}
+      #     repository: ${{ env.RELEASE_REPO }}
+      #     body_path: ./changelog.md
+      #     token: ${{ env.GH_TOKEN }}
+      #     prerelease: false
+      #     draft: ${{ inputs.build-id == 'tag' }}
+      #     generate_release_notes: false
+      #     make_latest: true
+      #     files: |
+      #       artifacts/*
+
+      # - name: Add Release URL to Summary
+      #   if: ${{ env.RELEASE_GH == '1' }}
+      #   run: |
+      #     {
+      #       echo "## Release Summary"
+      #       echo "- View Release on GitHub: [$GITHUB_TITLE](${{ steps.release.outputs.url }})"
+      #     } >> "$GITHUB_STEP_SUMMARY"
+
       - name: Release
         id: release
-        if: ${{ env.RELEASE_GH == '1' }}
-        uses: softprops/action-gh-release@v2.5.0
-        with:
-          name: "${{ env.GITHUB_TITLE }}"
-          tag_name: ${{ env.GITHUB_TAG }}
-          repository: ${{ env.RELEASE_REPO }}
-          body_path: ./changelog.md
-          token: ${{ env.GH_TOKEN }}
-          prerelease: false
-          draft: ${{ inputs.build-id == 'tag' }}
-          generate_release_notes: false
-          make_latest: true
-          files: |
-            artifacts/*
+        if: ${{ env.RELEASE_FJ == '1' }}
+        run: ./.ci/release.sh
 
-      - name: Add Release URL to Summary
-        if: ${{ env.RELEASE_GH == '1' }}
-        run: |
-          {
-            echo "## Release Summary"
-            echo "- View Release on GitHub: [$GITHUB_TITLE](${{ steps.release.outputs.url }})"
-          } >> "$GITHUB_STEP_SUMMARY"
+      # TODO(crueter): PR number releases
 
       - name: Send Release Status
-        if: ${{ env.SEND_STATUS == '1' && env.RELEASE_GH == '1' }}
+        if: ${{ env.SEND_STATUS == '1' && env.RELEASE_FJ == '1' }}
         run: python3 ./.ci/common/status.py --release ${{ steps.release.outputs.url }}
 
       - name: Send Nightly Release to Discord
         if: ${{ env.RELEASE_DISCORD == '1' }}
         run: .ci/discord/publish.sh
 
-      - name: Release (PR Number)
-        if: ${{ env.RELEASE_PR == '1' }}
-        uses: softprops/action-gh-release@v2.5.0
-        with:
-          name: "${{ env.GITHUB_TITLE }}"
-          tag_name: ${{ env.FORGEJO_PR_NUMBER }}
-          repository: ${{ env.RELEASE_REPO }}
-          body_path: ./changelog.md
-          prerelease: false
-          draft: false
-          generate_release_notes: false
-          token: ${{ env.GH_TOKEN }}
-          make_latest: true
-
-      - name: Release (Forgejo)
-        if: ${{ env.RELEASE_FJ == '1' }}
-        run: |
-          . ./.ci/fj/release.sh
-          echo "- View Release on Forgejo: [$FORGEJO_REF](${FJ_URL})" >> "$GITHUB_STEP_SUMMARY"
+      # - name: Release (PR Number)
+      #   if: ${{ env.RELEASE_PR == '1' }}
+      #   uses: softprops/action-gh-release@v2.5.0
+      #   with:
+      #     name: "${{ env.GITHUB_TITLE }}"
+      #     tag_name: ${{ env.FORGEJO_PR_NUMBER }}
+      #     repository: ${{ env.RELEASE_REPO }}
+      #     body_path: ./changelog.md
+      #     prerelease: false
+      #     draft: false
+      #     generate_release_notes: false
+      #     token: ${{ env.GH_TOKEN }}
+      #     make_latest: true
 
       - name: Setup Torrent (Forgejo)
         if: ${{ env.RELEASE_FJ == '1' && env.VPS_SSH_PRIV }}

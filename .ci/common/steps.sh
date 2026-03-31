@@ -12,9 +12,13 @@ fj() {
 	[ -n "$FJ_TOKEN" ]
 }
 
-gh() {
-	[ -n "$GH_TOKEN" ]
+b2() {
+    [ -n "$B2_TOKEN" ] && [ -n "$B2_KEY" ]
 }
+
+# gh() {
+# 	[ -n "$GH_TOKEN" ]
+# }
 
 dc() {
 	[ -n "$DISCORD_WEBHOOK" ]
@@ -33,13 +37,15 @@ status() {
 }
 
 # We don't release on test builds.
+# TODO(crueter): handling for lack of b2/fj token
+# on test builds/master/etc wtfffffffffff
 release() {
 	case "$BUILD_ID" in
 	test)
-		false
+		success && { b2 || fj; }
 		;;
 	*)
-		success && gh
+		success && { b2 || fj; }
 		;;
 	esac
 }
@@ -57,10 +63,10 @@ if [ "$BUILD_ID" = "nightly" ] && dc && release; then
 	echo "RELEASE_DISCORD=1"
 fi
 
-if [ "$BUILD_ID" = "tag" ] && fj && success; then
+if release; then
 	echo "RELEASE_FJ=1"
 fi
 
-if release && [ "$BUILD_ID" != 'tag' ]; then
-	echo "RELEASE_GH=1"
-fi
+# if release && [ "$BUILD_ID" != 'tag' ]; then
+# 	echo "RELEASE_GH=1"
+# fi

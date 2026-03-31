@@ -244,7 +244,6 @@ parse_payload() {
 		echo "FORGEJO_BRANCH=$FORGEJO_BRANCH"
 		echo "FORGEJO_CLONE_URL=$FORGEJO_CLONE_URL"
 
-		# TODO: get rid of host
 		echo "RELEASE_HOST=$_host"
 		echo "RELEASE_REPO=$_repo"
         echo "RELEASE_B2=$_b2"
