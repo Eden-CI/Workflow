@@ -120,7 +120,7 @@ jobs:
       #     make_latest: true
 
       - name: Setup Torrent (Forgejo)
-        if: ${{ env.RELEASE_FJ == '1' && env.VPS_SSH_PRIV }}
+        if: ${{ env.RELEASE_TAG == '1' && env.VPS_SSH_PRIV }}
         run: ./.ci/fj/torrent.sh
 
       - name: Upload changelog

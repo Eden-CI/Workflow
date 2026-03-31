@@ -67,6 +67,10 @@ if release; then
 	echo "RELEASE_FJ=1"
 fi
 
+if [ "$BUILD_ID" = tag ] && release; then
+    echo "RELEASE_TAG=1"
+fi
+
 # if release && [ "$BUILD_ID" != 'tag' ]; then
 # 	echo "RELEASE_GH=1"
 # fi

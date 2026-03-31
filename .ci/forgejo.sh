@@ -260,7 +260,7 @@ parse_payload() {
 		echo "ARTIFACT_REF=$_ref"
 		echo "GITHUB_DOWNLOAD=https://$_host/$_repo/releases/download"
 
-		echo "MASTER_RELEASE_URL=https://$RELEASE_MASTER_HOST/$RELEASE_MASTER_REPO/releases"
+		echo "MASTER_RELEASE_URL=https://$MASTER_FJ_HOST/$MASTER_FJ_REPO/releases"
 
 		# Package targets need this
 		echo "PROJECT_PRETTYNAME=$PROJECT_PRETTYNAME"
