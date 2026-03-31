@@ -1,0 +1,26 @@
+[
+    {
+        "build-id": "master",
+        "host": "git.eden-emu.dev",
+        "repo": "eden-ci/master",
+        "b2": true
+    },
+    {
+        "build-id": "pull_request",
+        "host": "git.eden-emu.dev",
+        "repo": "eden-ci/pr",
+        "b2": true
+    },
+    {
+        "build-id": "nightly",
+        "host": "git.eden-emu.dev",
+        "repo": "eden-ci/nightly",
+        "b2": false
+    },
+    {
+        "build-id": "tag",
+        "host": "git.eden-emu.dev",
+        "repo": "eden-emu/eden",
+        "b2": false
+    }
+]
