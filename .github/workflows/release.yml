@@ -60,10 +60,10 @@ jobs:
         if: ${{ always() }}
         run: ./.ci/changelog/generate.sh "$BUILD_ID" > changelog.md
 
-      - name: Delete Previous PR Number
-        if: ${{ env.RELEASE_PR == '1' }}
-        run: gh release delete "$FORGEJO_PR_NUMBER" --repo "$RELEASE_REPO" --cleanup-tag -y
-        continue-on-error: true
+      # - name: Delete Previous PR Number
+      #   if: ${{ env.RELEASE_PR == '1' }}
+      #   run: gh release delete "$FORGEJO_PR_NUMBER" --repo "$RELEASE_REPO" --cleanup-tag -y
+      #   continue-on-error: true
 
       # - name: Release
       #   id: release

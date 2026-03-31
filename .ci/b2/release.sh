@@ -12,7 +12,11 @@ _local="$ARTIFACTS_DIR"
 _bucket="$B2_BUCKET"
 
 # now upload. :)
-"$ROOTDIR/.ci/b2/tools/dir.sh" "$_bucket" "$_dir" "$_local"
+cd "$ROOTDIR/.ci/b2"
+
+tools/dir.sh "$_bucket" "$_dir" "$_local"
 
 # and get the URLs and put them in a file
-"$ROOTDIR/.ci/b2/tools/url.sh" "$_bucket" "$_dir" >"$ROOTDIR/urls.txt"
+tools/url.sh "$_bucket" "$_dir" >"$ROOTDIR/urls.txt"
+
+cd "$ROOTDIR"
