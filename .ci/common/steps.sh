@@ -36,13 +36,10 @@ status() {
 	esac
 }
 
-# We don't release on test builds.
-# TODO(crueter): handling for lack of b2/fj token
-# on test builds/master/etc wtfffffffffff
 release() {
 	case "$BUILD_ID" in
 	test)
-		success && { b2 || fj; }
+		false
 		;;
 	*)
 		success && { b2 || fj; }
