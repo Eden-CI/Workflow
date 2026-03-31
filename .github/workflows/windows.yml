@@ -37,9 +37,9 @@ jobs:
     steps:
       - id: set
         run: |
-          PGO='{"compiler": "clang", "compiler-opt": "-pgo"}'
-          CLANG='{"compiler": "clang"}'
-          MSVC='{"compiler": "msvc"}'
+          PGO='{"compiler": "clang", "compiler-opt": "pgo"}'
+          CLANG='{"compiler": "clang", "compiler-opt": "standard"}'
+          MSVC='{"compiler": "msvc", "compiler-opt": "standard"}'
 
           if [ "${{ inputs.devel }}" != "true" ] || [ "${{ inputs.force_pgo }}" = "true" ]; then
             COMPILER="[${MSVC}]"
@@ -51,7 +51,7 @@ jobs:
           echo "compiler=${COMPILER}" >> $GITHUB_OUTPUT
 
   windows:
-    name: "Windows ${{ matrix.os.arch }} ${{ matrix.compiler.compiler }}${{ matrix.compiler.compiler-opt }}"
+    name: "Windows ${{ matrix.os.arch }} ${{ matrix.compiler.compiler }} ${{ matrix.compiler.compiler-opt }}"
     needs: [win-matrix]
     runs-on: ${{ matrix.os.runs-on }}
     strategy:
@@ -66,7 +66,7 @@ jobs:
       TARGET: ${{ matrix.os.arch }}
       COMPILER: "${{ matrix.compiler.compiler }}"
       COMPILER_OPT: "${{ matrix.compiler.compiler-opt }}"
-      ARCH: ${{ matrix.os.arch }}-${{ matrix.compiler.compiler }}${{ matrix.compiler.compiler-opt }}
+      ARCH: ${{ matrix.os.arch }}-${{ matrix.compiler.compiler }}-${{ matrix.compiler.compiler-opt }}
 
     steps:
       - name: Checkout
