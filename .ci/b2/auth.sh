@@ -5,6 +5,6 @@ _set() {
 }
 
 _set aws_access_key_id "$B2_KEY"
-_set aws_secret_access_key "$B2_SECRET"
+_set aws_secret_access_key "$B2_TOKEN"
 _set output json
 _set default.s3.signature_version s3v4
