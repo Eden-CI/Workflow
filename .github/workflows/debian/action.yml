@@ -4,9 +4,6 @@ inputs:
   target:
     description: 'aarch64 or amd64'
     required: true
-  compiler:
-    description: 'gcc or clang'
-    required: true
   name:
     description: 'what to name this workflow'
     required: true
@@ -41,7 +38,6 @@ runs:
       run: ./.ci/debian/makedeb.sh
       env:
         TARGET: ${{ inputs.target }}
-        COMPILER: ${{ inputs.compiler }}
         DEB_NAME: ${{ inputs.pretty-name }}
 
     - name: Upload artifacts

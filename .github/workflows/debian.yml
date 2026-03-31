@@ -34,8 +34,8 @@ jobs:
     steps:
       - id: set
         run: |
-          BASE='[{"runs-on": "ubuntu-24.04", "target": "amd64", "compiler": "gcc"}'
-          ARM=',{"runs-on": "ubuntu-24.04-arm", "target": "aarch64", "compiler": "gcc"}]'
+          BASE='[{"runs-on": "ubuntu-24.04", "target": "amd64"}'
+          ARM=',{"runs-on": "ubuntu-24.04-arm", "target": "aarch64"}]'
 
           if [ "${{ inputs.devel }}" = "false" ]; then
             MATRIX="${BASE}${ARM}"
@@ -63,7 +63,6 @@ jobs:
         uses: ./.github/workflows/debian
         with:
           target: ${{ matrix.os.target }}
-          compiler: ${{ matrix.os.compiler }}
           name: ubuntu-24.04
           pretty-name: Ubuntu-24.04
           cpm-cache-version: ${{ inputs.cpm-cache-version }}
@@ -87,7 +86,6 @@ jobs:
         uses: ./.github/workflows/debian
         with:
           target: ${{ matrix.os.target }}
-          compiler: ${{ matrix.os.compiler }}
           name: debian-13
           pretty-name: Debian-13
           cpm-cache-version: ${{ inputs.cpm-cache-version }}
@@ -111,7 +109,6 @@ jobs:
         uses: ./.github/workflows/debian
         with:
           target: ${{ matrix.os.target }}
-          compiler: ${{ matrix.os.compiler }}
           name: debian-12
           pretty-name: Debian-12
           cpm-cache-version: ${{ inputs.cpm-cache-version }}

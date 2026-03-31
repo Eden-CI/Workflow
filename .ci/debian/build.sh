@@ -49,8 +49,7 @@ sed "s|%TARGET%|$TARGET|"             "$DEST.1" > "$DEST.2"
 sed "s|%ROOTDIR%|$ROOTDIR/|"          "$DEST.2" > "$DEST.3"
 sed "s|%BUILDDIR%|$BUILDDIR|"         "$DEST.3" > "$DEST.4"
 sed "s|%CONFIG_OPTS%|$CONFIG_OPTS|"   "$DEST.4" > "$DEST.5"
-sed "s|%SOURCE%|$ROOTDIR|"            "$DEST.5" > "$DEST.6"
-sed "s|%COMPILER%|$COMPILER|"         "$DEST.6" > "$DEST"
+sed "s|%SOURCE%|$ROOTDIR|"            "$DEST.5" > "$DEST"
 
 rm $DEST.*
 
