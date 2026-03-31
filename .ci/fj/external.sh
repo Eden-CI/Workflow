@@ -11,17 +11,16 @@ ROOTDIR="$PWD"
 FJ_HOST="$RELEASE_HOST"
 FJ_REPO="$RELEASE_REPO"
 
-# TODO(crueter): Fix asset urls to use b2 urls
-# "https://$B2_BUCKET.$B2_URL/$B2_DIR/$GITHUB_TAG/<asset>"
-
-sed -i "s|$RELEASE_HOST/$RELEASE_REPO|$FJ_HOST/$FJ_REPO|g" "$ROOTDIR/changelog.md"
+sed -i "s|$RELEASE_HOST/$RELEASE_REPO/releases/download|$B2_BUCKET.$B2_URL/$B2_DIR|g" "$ROOTDIR/changelog.md"
 git clone --depth 1 https://git.crueter.xyz/scripts/fj.git
 
 echo "-- Creating Release"
 "$ROOTDIR/fj/fj.sh" -k "$FJ_TOKEN" -r "$FJ_REPO" -u "$FJ_HOST" release -t "$FORGEJO_REF" \
-	create -b "$ROOTDIR/changelog.md" -n "$PROJECT_PRETTYNAME $FORGEJO_REF" -d
+	create -b "$ROOTDIR/changelog.md" -n "$PROJECT_PRETTYNAME $FORGEJO_REF"
 
 echo "-- Uploading Assets"
+
+# shellcheck disable=SC2046
 
 "$ROOTDIR/fj/fj.sh" -k "$FJ_TOKEN" -r "$FJ_REPO" -u "$FJ_HOST" release -t "$FORGEJO_REF" \
 	external $(cat "$ROOTDIR"/urls.txt)
