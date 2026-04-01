@@ -1,4 +1,5 @@
 name: Debian Build
+description: Build for Debian/Ubuntu
 
 inputs:
   arch:
@@ -12,11 +13,9 @@ inputs:
     required: true
   cpm-cache-version:
     description: "CPM cache version (e.g. v7)"
-    type: string
     required: true
   devel:
     description: 'development build'
-    type: string
     required: true
 
 runs:
@@ -41,7 +40,8 @@ runs:
         DEB_NAME: ${{ inputs.pretty-name }}
 
     - name: Upload artifacts
-      uses: actions/upload-artifact@v6.0.0
+      uses: actions/upload-artifact@v7
       with:
         name: ${{ inputs.name }}-${{ inputs.arch }}
         path: ./artifacts/*.deb
+        archive: false

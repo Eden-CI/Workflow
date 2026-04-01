@@ -73,15 +73,14 @@ jobs:
           version: ${{ inputs.cpm-cache-version }}
 
       - name: Install dependencies
-        run: |
-          ./.ci/android/deps.sh
+        run: ./.ci/android/deps.sh
 
       - name: Build
-        run: |
-          JAVA_HOME=$JAVA_HOME_17_X64 ./.ci/android/build.sh -DCCACHE_PATH=${SCCACHE_PATH}
+        run: JAVA_HOME=$JAVA_HOME_17_X64 ./.ci/android/build.sh -DCCACHE_PATH=${SCCACHE_PATH}
 
       - name: Upload APK
-        uses: actions/upload-artifact@v6.0.0
+        uses: actions/upload-artifact@v7
         with:
           name: android-${{ matrix.target.flavor }}
+          archive: false
           path: artifacts/*.apk

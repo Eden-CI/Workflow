@@ -4,7 +4,7 @@ on:
   workflow_call:
     inputs:
       build-id:
-        description: 'Identifier for workflows and caching'
+        description: "Identifier for workflows and caching"
         type: string
         required: true
       cpm-cache-version:
@@ -12,11 +12,11 @@ on:
         type: string
         required: true
       devel:
-        description: 'Development mode (disables update checker)'
+        description: "Development mode (disables update checker)"
         type: string
         required: true
       force_pgo:
-        description: 'Force PGO builds'
+        description: "Force PGO builds"
         type: string
         required: true
 
@@ -105,7 +105,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.CUSTOM_GITHUB_TOKEN }}
 
       - name: Configure
-        run:  ./.ci/common/configure.sh -DCCACHE_PATH=${SCCACHE_PATH}
+        run: ./.ci/common/configure.sh -DCCACHE_PATH=${SCCACHE_PATH}
 
       - name: Build
         run: cmake --build build
@@ -115,8 +115,16 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.CUSTOM_GITHUB_TOKEN }}
 
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v6.0.0
+      - name: Upload AppImage
+        uses: actions/upload-artifact@v7
         with:
           name: linux-${{ matrix.os.arch }}-${{ matrix.compiler.program }}-${{ matrix.compiler.target }}
           path: ./artifacts/*.AppImage*
+          archive: false
+
+      - name: Upload zsync
+        uses: actions/upload-artifact@v7
+        with:
+          name: linux-${{ matrix.os.arch }}-${{ matrix.compiler.program }}-${{ matrix.compiler.target }}-zsync
+          path: ./artifacts/*.AppImage.zsync
+          archive: false

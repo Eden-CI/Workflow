@@ -42,7 +42,9 @@ jobs:
           persist-credentials: false
 
       - name: Download artifacts
-        uses: actions/download-artifact@v7.0.0
+        uses: actions/download-artifact@v8
+        with:
+          skip-decompress: true
 
       - name: Load environments
         run: |
@@ -95,7 +97,8 @@ jobs:
 
       - name: Upload changelog
         if: ${{ always() }}
-        uses: actions/upload-artifact@v6.0.0
+        uses: actions/upload-artifact@v7
         with:
           name: changelog
           path: changelog.md
+          archive: false

@@ -122,8 +122,8 @@ jobs:
         run: ./.ci/windows/package.sh
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v6.0.0
+        uses: actions/upload-artifact@v7
         with:
           name: windows-${{ env.ARCH }}
           path: artifacts/*
-
+          archive: false

@@ -140,8 +140,9 @@ jobs:
           ARCH: mingw-${{ env.ARCH }}
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v6.0.0
+        uses: actions/upload-artifact@v7
         with:
           name: mingw-${{ env.ARCH }}
+          archive: false
           path: artifacts/*
 

@@ -59,9 +59,10 @@ jobs:
       # Clone step is still changing forgejo.env, due to a bug on Forgejo, send after it
       # <https://codeberg.org/forgejo/forgejo/issues/9601>
       - name: Upload payload environment
-        uses: actions/upload-artifact@v6.0.0
+        uses: actions/upload-artifact@v7
         with:
           name: forgejo-env
+          archive: false
           path: forgejo.env
 
       - name: Send pending status
@@ -84,7 +85,7 @@ jobs:
           rm -rf eden/.git* eden/.ci eden/.github
 
       - name: Upload cloned repo
-        uses: actions/upload-artifact@v6.0.0
+        uses: actions/upload-artifact@v7
         with:
           name: eden
           include-hidden-files: true
@@ -102,7 +103,7 @@ jobs:
         uses: actions/checkout@v6.0.1
 
       - name: Clone
-        uses: actions/download-artifact@v7.0.0
+        uses: actions/download-artifact@v8
 
       - name: Load payload environment
         run: FORGEJO_LENV=forgejo-env/forgejo.env . ./.ci/fj/load-env.sh
