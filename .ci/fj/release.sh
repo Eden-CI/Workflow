@@ -81,9 +81,9 @@ fi
 
 ## PR Number ##
 
-_header "PR RELEASE"
-
 if [ "$RELEASE_PR" = 1 ]; then
+    _header "PR RELEASE"
+
     "$ROOTDIR/fj/fj.sh" -k "$FJ_TOKEN" -r "$FJ_REPO" -u "$FJ_HOST" release -t "$FORGEJO_PR_NUMBER" \
         create -b "$ROOTDIR/changelog.md" -n "$GITHUB_TITLE" -a -r
 fi
