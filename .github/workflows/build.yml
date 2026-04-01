@@ -174,7 +174,7 @@ jobs:
     secrets: inherit
 
   freebsd:
-    if: ${{ inputs.devel == 'true' }}
+    if: ${{ inputs.build-id == 'pull_request' }}
     name: "FreeBSD"
     needs: [clone]
     uses: ./.github/workflows/freebsd.yml
