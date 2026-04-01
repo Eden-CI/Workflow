@@ -13,6 +13,10 @@ b2() {
     [ -n "$B2_TOKEN" ] && [ -n "$B2_KEY" ]
 }
 
+release() {
+    [ "$RELEASE_FJ" = "1" ]
+}
+
 _group() {
     echo "##[group]$*"
 }
@@ -30,6 +34,7 @@ _end
 ## Changelog ##
 _group "Generating changelog"
 "$ROOTDIR"/.ci/changelog/generate.sh "$BUILD_ID" > changelog.md
+cat changelog.md
 _end
 
 ## build status ##
@@ -42,23 +47,19 @@ fi
 
 ## The actual release ##
 
-if [ "$RELEASE_B2" = "true" ]; then
-    if b2; then
-        _group "Publishing to B2"
+if release && b2 && [ "$RELEASE_B2" = "true" ]; then
+    _group "Publishing to B2"
+    "$ROOTDIR"/.ci/b2/auth.sh
+    "$ROOTDIR"/.ci/b2/release.sh
+    _end
 
-        "$ROOTDIR"/.ci/b2/auth.sh
-        "$ROOTDIR"/.ci/b2/release.sh
-        _end
-
+    # create an external release on Forgejo with the B2 URLs
+    if fj; then
         _group "Forgejo Release"
-
-        if fj; then
-            # create an external release on Forgejo with the B2 URLs
-            "$ROOTDIR"/.ci/fj/release.sh true
-        fi
+        "$ROOTDIR"/.ci/fj/release.sh true
         _end
     fi
-elif fj && [ "$RELEASE_FJ" = "1" ]; then
+elif release && fj; then
     # the darkest days are upon us...
     _group "Forgejo Release"
     "$ROOTDIR"/.ci/fj/release.sh false
