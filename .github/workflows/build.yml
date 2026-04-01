@@ -184,6 +184,7 @@ jobs:
     secrets: inherit
 
   room:
+    if: ${{ inputs.build-id == 'pull_request' || inputs.build-id == 'tag' }}
     name: "musl room"
     needs: [clone]
     uses: ./.github/workflows/room.yml

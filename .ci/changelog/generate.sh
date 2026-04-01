@@ -231,13 +231,15 @@ fi
 
 deb_matrix
 
-cat <<EOF
+if [ "$1" = "tag" ]; then
+    cat <<-EOF
 
-### Room Executables
+	### Room Executables
 
-These are statically linked Linux executables for the \`eden-room\` binary.
+	These are statically linked Linux executables for the \`eden-room\` binary.
 
-EOF
+	EOF
+fi
 
 room_matrix
 
@@ -272,7 +274,7 @@ if falsy "$DISABLE_ANDROID"; then
 	fi
 fi
 
-cat << EOF
+cat <<EOF
 
 ## macOS
 
