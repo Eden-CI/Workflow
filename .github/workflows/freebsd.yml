@@ -90,21 +90,3 @@ jobs:
           cd "${{ github.workspace }}"
           cmake --build build
           cmake --install build --prefix install/usr
-
-      - name: Package
-        shell: freebsd {0}
-        run: |
-          cd "${{ github.workspace }}"
-          ./.ci/freebsd/package.sh
-
-      - name: rsync from qemu:artifacts to host:artifacts
-        shell: bash
-        run: |
-          rsync -av -e ssh freebsd:${{ github.workspace }}/artifacts/ ${{ github.workspace }}/artifacts/
-          rsync -av -e ssh freebsd:${{ github.workspace }}/.cache/ ${{ github.workspace }}/.cache/
-
-      - name: Upload Binary
-        uses: actions/upload-artifact@v6.0.0
-        with:
-          name: ${{ matrix.os.platform }}-${{ matrix.os.target }}-${{ matrix.compiler }}
-          path: ./artifacts/*
