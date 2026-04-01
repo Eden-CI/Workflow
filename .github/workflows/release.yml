@@ -45,6 +45,7 @@ jobs:
         uses: actions/download-artifact@v8
         with:
           skip-decompress: true
+          merge-multiple: true
 
       - name: Load environments
         run: |
