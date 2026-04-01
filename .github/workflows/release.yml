@@ -49,17 +49,6 @@ jobs:
           FORGEJO_LENV=forgejo-env/forgejo.env . ./.ci/fj/load-env.sh
           . ./.ci/common/steps.sh | tee -a "$GITHUB_ENV"
 
-      - name: Send build status
-        if: ${{ env.SEND_STATUS == '1' }}
-        run: python3 ./.ci/common/status.py --$STATUS
-
-      - name: Package artifacts nicely
-        run: ./.ci/common/pack.sh
-
-      - name: Generate changelog
-        if: ${{ always() }}
-        run: ./.ci/changelog/generate.sh "$BUILD_ID" > changelog.md
-
       # - name: Delete Previous PR Number
       #   if: ${{ env.RELEASE_PR == '1' }}
       #   run: gh release delete "$FORGEJO_PR_NUMBER" --repo "$RELEASE_REPO" --cleanup-tag -y
@@ -84,18 +73,8 @@ jobs:
 
       - name: Release
         id: release
-        if: ${{ env.RELEASE_FJ == '1' }}
+        if: ${{ always() }}
         run: ./.ci/release.sh
-
-      # TODO(crueter): PR number releases
-
-      - name: Send Release Status
-        if: ${{ env.SEND_STATUS == '1' && env.RELEASE_FJ == '1' }}
-        run: python3 ./.ci/common/status.py --release "$FJ_URL"
-
-      - name: Send Nightly Release to Discord
-        if: ${{ env.RELEASE_DISCORD == '1' }}
-        run: .ci/discord/publish.sh
 
       # - name: Release (PR Number)
       #   if: ${{ env.RELEASE_PR == '1' }}
@@ -110,10 +89,6 @@ jobs:
       #     generate_release_notes: false
       #     token: ${{ env.GH_TOKEN }}
       #     make_latest: true
-
-      - name: Setup Torrent (Forgejo)
-        if: ${{ env.RELEASE_TAG == '1' && env.VPS_SSH_PRIV }}
-        run: ./.ci/fj/torrent.sh
 
       - name: Upload changelog
         if: ${{ always() }}

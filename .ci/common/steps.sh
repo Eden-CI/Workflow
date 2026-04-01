@@ -42,6 +42,7 @@ release() {
 		false
 		;;
 	*)
+        # TODO(crueter): Better handling
 		success && { b2 || fj; }
 		;;
 	esac
