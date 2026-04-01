@@ -13,7 +13,7 @@ runs:
   using: composite
   steps:
     - name: Install sccache
-      uses: Eden-CI/sccache-action@v0.0.1
+      uses: Eden-CI/sccache-action@master
       with:
         disable_annotations: true
 

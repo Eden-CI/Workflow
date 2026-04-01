@@ -21,11 +21,6 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: Install sccache
-      uses: Eden-CI/sccache-action@v0.0.1
-      with:
-        disable_annotations: true
-
     - name: Setup
       uses: ./.github/workflows/setup
       with:

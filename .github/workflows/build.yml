@@ -102,8 +102,19 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6.0.1
 
+      - name: Download Forgejo environment
+        uses: actions/download-artifact@v8
+        with:
+          name: forgejo.env
+
+      - name: Load payload environment
+        shell: bash
+        run: . ./.ci/fj/load-env.sh
+
       - name: Clone
         uses: actions/download-artifact@v8
+        with:
+          name: eden
 
       - name: Load payload environment
         run: . ./.ci/fj/load-env.sh
