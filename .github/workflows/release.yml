@@ -48,7 +48,7 @@ jobs:
 
       - name: Load environments
         run: |
-          export FORGEJO_LENV=forgejo-env/forgejo.env
+          export FORGEJO_LENV=forgejo.env
           [ -f "$FORGEJO_LENV" ] || exit 0
 
           . ./.ci/fj/load-env.sh

@@ -13,7 +13,7 @@ ARTIFACTS_DIR="$ROOTDIR/artifacts"
 
 mkdir -p "$ARTIFACTS_DIR"
 
-rm -f eden.zip ./*.env
+rm -f eden.zip
 
 find "$ROOTDIR" \( \
 	    -name '*.deb' -o \

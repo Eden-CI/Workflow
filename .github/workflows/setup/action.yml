@@ -20,7 +20,7 @@ runs:
     - name: Download Forgejo environment
       uses: actions/download-artifact@v8
       with:
-        name: forgejo-env
+        name: forgejo.env
 
     - name: Load payload environment
       shell: bash

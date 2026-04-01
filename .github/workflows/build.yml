@@ -61,7 +61,7 @@ jobs:
       - name: Upload payload environment
         uses: actions/upload-artifact@v7
         with:
-          name: forgejo-env
+          name: forgejo.env
           archive: false
           path: forgejo.env
 
@@ -106,7 +106,7 @@ jobs:
         uses: actions/download-artifact@v8
 
       - name: Load payload environment
-        run: FORGEJO_LENV=forgejo-env/forgejo.env . ./.ci/fj/load-env.sh
+        run: . ./.ci/fj/load-env.sh
 
       - name: Build
         run: ./.ci/source/build.sh
