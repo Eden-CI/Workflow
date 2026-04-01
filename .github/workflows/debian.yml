@@ -25,92 +25,40 @@ env:
   BUILD_ID: ${{ inputs.build-id }}
 
 jobs:
-  set-matrix:
-    name: "Generate Debian Matrix"
-    runs-on: ubuntu-latest
-    outputs:
-      matrix: ${{ steps.set.outputs.matrix }}
-      compiler: ${{ steps.set.outputs.compiler }}
-    steps:
-      - id: set
-        run: |
-          BASE='[{"runs-on": "ubuntu-24.04", "arch": "amd64"}'
-          ARM=',{"runs-on": "ubuntu-24.04-arm", "arch": "aarch64"}]'
-
-          if [ "${{ inputs.devel }}" = "false" ]; then
-            MATRIX="${BASE}${ARM}"
-          else
-            MATRIX="${BASE}]"
-          fi
-
-          echo $MATRIX
-          echo "matrix=${MATRIX}" >> $GITHUB_OUTPUT
-
-  ubuntu:
-    name: "Ubuntu 24.04 (${{ matrix.os.arch }})"
-    runs-on: ${{ matrix.os.runs-on }}
-    needs: [set-matrix]
+  debian:
+    name: "Debian 12"
+    runs-on: ${{ matrix.runs-on }}
+    container: debian:12
     strategy:
       fail-fast: false
       matrix:
-        os: ${{ fromJson(needs.set-matrix.outputs.matrix) }}
+        include:
+          - runs-on: ubuntu-24.04
+            arch: amd64
+
+          - runs-on: ubuntu-24.04-arm
+            arch: aarch64
+
+    env:
+      TARGET: ${{ matrix.arch }}
+      DEBIAN_VERSION: 12
+      COMPILER: gcc
 
     steps:
       - name: Checkout
         uses: actions/checkout@v6.0.1
 
-      - name: Build & Package
-        uses: ./.github/workflows/debian
+      - name: Setup
+        uses: ./.github/workflows/setup
         with:
-          arch: ${{ matrix.os.arch }}
-          name: ubuntu-24.04
-          pretty-name: Ubuntu-24.04
-          cpm-cache-version: ${{ inputs.cpm-cache-version }}
-          devel: ${{ inputs.devel }}
+          key: debian-${{ matrix.arch }}
+          version: ${{ inputs.cpm-cache-version }}
 
-  debian-13:
-    name: "Debian 13 (${{ matrix.os.arch }})"
-    runs-on: ${{ matrix.os.runs-on }}
-    needs: [set-matrix]
-    container: ghcr.io/nilcons/debian:latest
-    strategy:
-      fail-fast: false
-      matrix:
-        os: ${{ fromJson(needs.set-matrix.outputs.matrix) }}
+      - name: Install dependencies
+        run: ./.ci/debian/deps.sh
 
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v6.0.1
+      - name: Configure
+        run:  ./.ci/common/configure.sh -DCCACHE_PATH=${SCCACHE_PATH}
 
-      - name: Build & Package
-        uses: ./.github/workflows/debian
-        with:
-          arch: ${{ matrix.os.arch }}
-          name: debian-13
-          pretty-name: Debian-13
-          cpm-cache-version: ${{ inputs.cpm-cache-version }}
-          devel: ${{ inputs.devel }}
-
-  debian-12:
-    name: "Debian 12 (${{ matrix.os.arch }})"
-    runs-on: ${{ matrix.os.runs-on }}
-    needs: [set-matrix]
-    container: ghcr.io/xrplf/ci/debian-bookworm:gcc-12
-    strategy:
-      fail-fast: false
-      matrix:
-        os: ${{ fromJson(needs.set-matrix.outputs.matrix) }}
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v6.0.1
-
-      - name: Build & Package
-        uses: ./.github/workflows/debian
-        with:
-          arch: ${{ matrix.os.arch }}
-          name: debian-12
-          pretty-name: Debian-12
-          cpm-cache-version: ${{ inputs.cpm-cache-version }}
-          devel: ${{ inputs.devel }}
-
+      - name: Build
+        run: cmake --build build

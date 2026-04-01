@@ -123,7 +123,8 @@ jobs:
         run: ./.ci/source/build.sh
 
   deb:
-    name: ".deb builds"
+    if: ${{ inputs.build-id == 'pull_request' }}
+    name: "Debian"
     needs: [clone]
     uses: ./.github/workflows/debian.yml
     with:
