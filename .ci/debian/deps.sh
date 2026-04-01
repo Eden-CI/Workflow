@@ -27,5 +27,4 @@ if [ "$DEBIAN_VERSION" -ge 13 ]; then
 fi
 
 apt update
-apt upgrade
-apt install "$@"
+apt install -y "$@"
