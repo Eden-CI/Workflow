@@ -102,28 +102,6 @@ linux_matrix() {
 	falsy "$DISABLE_ARM" && linux_field aarch64 "aarch64"
 }
 
-deb_field() {
-	BUILD="$1"
-	NOTES="${2}"
-	NAME="${BUILD//-/ }"
-
-	echo -n "| $NAME | "
-
-	ARCHES=amd64
-	tagged && ARCHES="$ARCHES aarch64"
-	for ARCH in $ARCHES; do
-		echo -n "[$ARCH](${GITHUB_DOWNLOAD}/${GITHUB_TAG}/${PROJECT_PRETTYNAME}-$BUILD-${ARTIFACT_REF}-${ARCH}.deb) | "
-	done
-
-	echo "$NOTES"
-}
-
-deb_matrix() {
-    deb_field Ubuntu-24.04 "Not compatible with Ubuntu 25.04 or later"
-	deb_field Debian-12 "Drivers may be old"
-	deb_field Debian-13
-}
-
 room_matrix() {
 	for arch in aarch64 x86_64; do
 		echo "- [$arch](${GITHUB_DOWNLOAD}/${GITHUB_TAG}/eden-room-$arch-unknown-linux-musl)"
@@ -212,24 +190,6 @@ else
 fi
 
 linux_matrix
-
-cat << EOF
-
-### Debian/Ubuntu
-
-Debian/Ubuntu targets are \`.deb\` files, which can be installed via \`sudo dpkg -i <package>.deb\`.
-
-EOF
-
-if tagged; then
-	echo "| Target | amd64 | aarch64 | Notes |"
-	echo "|--------|-------|---------|-------|"
-else
-	echo "| Target | amd64 | Notes |"
-	echo "|--------|-------|-------|"
-fi
-
-deb_matrix
 
 if [ "$1" = "tag" ]; then
     cat <<-EOF
