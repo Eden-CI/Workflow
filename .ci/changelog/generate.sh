@@ -59,7 +59,7 @@ android() {
 	DESCRIPTION="$3"
 
 	echo -n "| "
-	echo -n "[Android $TYPE](${GITHUB_DOWNLOAD}/${GITHUB_TAG}/${PROJECT_PRETTYNAME}-Android-${ARTIFACT_REF}-${FLAVOR}.apk) | "
+	echo -n "[$TYPE](${GITHUB_DOWNLOAD}/${GITHUB_TAG}/${PROJECT_PRETTYNAME}-Android-${ARTIFACT_REF}-${FLAVOR}.apk) | "
 	echo "$DESCRIPTION |"
 }
 
@@ -264,11 +264,11 @@ if falsy "$DISABLE_ANDROID"; then
 	|--------|-------------|
 	EOF
 
-	android Standard "standard" "Single APK for all supported Android devices (most users should use this)"
-	android x86_64 "chromeos" "For devices running Chrome/FydeOS, AVD emulators, or certain Intel Atom Android devices."
+	android Standard "standard" "The standard build. Most users should use this."
+	android ChromeOS "chromeos" "For devices running Chrome/FydeOS, AVD emulators, or certain Intel Atom Android devices."
 	if tagged; then
-		android Optimized "optimized" "For any Android device that has Frame Generation or any other per-device feature"
-		android Legacy "legacy" "For Adreno A6xx and other older GPUs"
+		android "Genshin Spoof" "optimized" "Spoofs Eden as Genshin Impact, which may enable optimizations/frame generation on some flagship devices."
+		android Legacy "legacy" "For Adreno A6xx and other older GPUs--e.g. Snapdragon 865 and older"
 	fi
 fi
 
