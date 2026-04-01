@@ -1,5 +1,8 @@
 #!/bin/sh -e
 
+# early exit :)
+[ -n "$RELEASE_HOST" ] || exit 0
+
 ROOTDIR="$PWD"
 
 fj() {

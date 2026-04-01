@@ -46,7 +46,10 @@ jobs:
 
       - name: Load environments
         run: |
-          FORGEJO_LENV=forgejo-env/forgejo.env . ./.ci/fj/load-env.sh
+          export FORGEJO_LENV=forgejo-env/forgejo.env
+          [ -f "$FORGEJO_LENV" ] || exit 0
+
+          . ./.ci/fj/load-env.sh
           . ./.ci/common/steps.sh | tee -a "$GITHUB_ENV"
 
       # - name: Delete Previous PR Number
