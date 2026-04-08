@@ -23,7 +23,8 @@ find "$ROOTDIR" \( \
 		-name '*.tar.zst' -o \
 		-name '*.apk' -o \
 		-name '*.tar.gz' -o \
-		-name '*unknown-linux-musl*' \
+		-name '*unknown-linux-musl*' -o \
+		-name '*.dmg' \
     \) -not -path "*artifacts*" -exec cp {} "$ARTIFACTS_DIR" \;
 
 if [ "$DEVEL" = false ]; then

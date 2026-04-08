@@ -18,6 +18,9 @@ VOLUME_NAME="${PROJECT_PRETTYNAME} ${ARTIFACT_REF} Installer"
 
 codesign --deep --force --verbose --sign - "$APPDIR/$APP"
 
+# No clue why this is here
+rm -rf "$APPDIR"/send-presence.app
+
 mkdir -p "$ARTIFACTS_DIR"
 
 sudo create-dmg \
