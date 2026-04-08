@@ -9,6 +9,7 @@ brew install --formula --quiet \
   boost \
   Catch2 \
   cmake \
+  create-dmg \
   cubeb \
   enet \
   fmt \

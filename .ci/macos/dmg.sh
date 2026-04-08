@@ -11,20 +11,17 @@ ROOTDIR="$PWD"
 BUILDDIR="${BUILDDIR:-$ROOTDIR/build}"
 ARTIFACTS_DIR="$ROOTDIR/artifacts"
 APP="${PROJECT_REPO}.app"
+APPDIR="${BUILDDIR}/bin"
 
-ARTIFACT="${PROJECT_PRETTYNAME}-macOS-${ARTIFACT_REF}.dmg"
+ARTIFACT="${ARTIFACTS_DIR}/${PROJECT_PRETTYNAME}-macOS-${ARTIFACT_REF}.dmg"
+VOLUME_NAME="${PROJECT_PRETTYNAME} ${ARTIFACT_REF} Installer"
 
-cd "$BUILDDIR/bin"
-
-codesign --deep --force --verbose --sign - "$APP"
+codesign --deep --force --verbose --sign - "$APPDIR/$APP"
 
 mkdir -p "$ARTIFACTS_DIR"
 
-curl -L https://github.com/create-dmg/create-dmg/raw/refs/heads/master/create-dmg -O
-chmod a+x ./create-dmg
-
-sudo ./create-dmg \
-  --volname "${PROJECT_PRETTYNAME} ${ARTIFACT_REF} Installer" \
+sudo create-dmg \
+  --volname "${VOLUME_NAME}" \
   --window-pos 200 120 \
   --window-size 800 400 \
   --icon-size 128 \
@@ -32,10 +29,8 @@ sudo ./create-dmg \
   --hide-extension "${APP}" \
   --app-drop-link 600 185 \
   "${ARTIFACT}" \
-  "${BUILDDIR}/bin"
+  "${APPDIR}"
 
 ls -lh
 
-mv "${ARTIFACT}.dmg" "$ARTIFACTS_DIR"
-
-echo "-- macOS package created at $ARTIFACT"
+echo "-- macOS package created at $ARTIFACTS_DIR/$ARTIFACT"
