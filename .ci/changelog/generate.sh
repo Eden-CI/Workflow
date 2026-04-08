@@ -239,12 +239,12 @@ cat <<EOF
 
 ## macOS
 
-macOS comes in a tarballed app. These builds are currently experimental, and you should expect major graphical glitches and crashes.
+macOS comes in a DMG image. These builds are currently experimental, and you should expect major graphical glitches and crashes.
 In order to run the app, you *may* need to go to System Settings -> Privacy & Security -> Security -> Allow untrusted app.
 
 | File | Description |
 | ---- | ----------- |
-| [macOS](${GITHUB_DOWNLOAD}/${GITHUB_TAG}/${PROJECT_PRETTYNAME}-macOS-${ARTIFACT_REF}.tar.gz) | For Apple Silicon (M1, M2, etc)|
+| [macOS (DMG)](${GITHUB_DOWNLOAD}/${GITHUB_TAG}/${PROJECT_PRETTYNAME}-macOS-${ARTIFACT_REF}.dmg) | For Apple Silicon (M1, M2, etc)|
 
 EOF
 

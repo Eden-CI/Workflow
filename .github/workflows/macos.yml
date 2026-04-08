@@ -56,7 +56,7 @@ jobs:
         run: cmake --build build
 
       - name: Package
-        run: ./.ci/macos/package.sh
+        run: ./.ci/macos/dmg.sh
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v7
