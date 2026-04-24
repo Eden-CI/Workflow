@@ -40,7 +40,7 @@ case "$BUILD_ID" in
 esac
 
 # Upload
-# tools/dir.sh "$_bucket" "$_dir" "$_local"
+tools/dir.sh "$_bucket" "$_dir" "$_local"
 
 # and get the URLs and put them in a file
 # TODO(crueter): Move these off of Forgejo and onto some static page.
