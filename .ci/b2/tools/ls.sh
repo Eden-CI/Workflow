@@ -1,9 +1,9 @@
 #!/bin/sh -e
 
 # TODO(crueter): URLs?
-USAGE="tools/ls.sh <BUCKET> <QUERY>"
+USAGE="tools/ls.sh <BUCKET>"
 
 bucket="${1:?$USAGE}"
-dir="${2:?$USAGE}"
+shift
 
-./b2.sh s3api list-objects --bucket "$bucket" --prefix "$dir" --query 'Contents[].[Key]' --output text
+./b2.sh s3api list-objects --bucket "$bucket" --query 'Contents[].[Key]' --output text "$@"
