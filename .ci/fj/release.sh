@@ -29,7 +29,7 @@ FJ_REPO="$RELEASE_REPO"
 ## Make changelog ##
 if external; then
     _find="$RELEASE_HOST/$RELEASE_REPO/releases/download"
-    _replace="$B2_BUCKET.$B2_URL/$B2_DIR"
+    _replace="$B2_PUBLIC_URL"
 else
     _find="$RELEASE_HOST/$RELEASE_REPO"
     _replace="$FJ_HOST/$FJ_REPO"

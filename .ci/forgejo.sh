@@ -51,31 +51,28 @@ parse_payload() {
 	RELEASE_PGO_HOST=github.com
 	RELEASE_PGO_REPO=Eden-CI/PGO
 
-	# B2
-	MASTER_B2_BUCKET=$(b2_field "master" bucket)
-    MASTER_B2_DIR=$(b2_field "master" directory)
-	MASTER_B2_URL=$(b2_field "master" url)
+	# B2 and Forgejo
+	# shellcheck disable=SC2153
+	case "$BUILD_ID" in
+		test|push) _build=master ;;
+		*) _build="$BUILD_ID" ;;
+	esac
 
-	PR_B2_BUCKET=$(b2_field "pull_request" bucket)
-    PR_B2_DIR=$(b2_field "pull_request" directory)
-	PR_B2_URL=$(b2_field "pull_request" url)
+	B2_BUCKET=$(b2_field "$_build" bucket)
+	B2_DIR=$(b2_field "$_build" directory)
+	B2_URL=$(b2_field "$_build" url)
+	B2_PUBLIC_URL=$(b2_field "$_build" public)
 
-    # Forgejo
+	if [ "$B2_DIR" = "null" ]; then
+		B2_DIR=""
+	fi
+
+	RELEASE_HOST=$(fj_field "$_build" host)
+	RELEASE_REPO=$(fj_field "$_build" repo)
+	RELEASE_B2=$(fj_field "$_build" b2)
+
     MASTER_FJ_HOST=$(fj_field "master" host)
     MASTER_FJ_REPO=$(fj_field "master" repo)
-    MASTER_FJ_B2=$(fj_field "master" b2)
-
-    PR_FJ_HOST=$(fj_field "pull_request" host)
-    PR_FJ_REPO=$(fj_field "pull_request" repo)
-    PR_FJ_B2=$(fj_field "pull_request" b2)
-
-    NIGHTLY_FJ_HOST=$(fj_field "nightly" host)
-    NIGHTLY_FJ_REPO=$(fj_field "nightly" repo)
-    NIGHTLY_FJ_B2=$(fj_field "nightly" b2)
-
-    TAG_FJ_HOST=$(fj_field "tag" host)
-    TAG_FJ_REPO=$(fj_field "tag" repo)
-    TAG_FJ_B2=$(fj_field "tag" b2)
 
 	# Payloads do not define host
 	# This is just for verbosity
@@ -139,14 +136,6 @@ parse_payload() {
 
 		FORGEJO_BEFORE=$(jq -r '.before' $PAYLOAD_JSON)
 
-		_host="$MASTER_FJ_HOST"
-		_repo="$MASTER_FJ_REPO"
-        _b2="$MASTER_FJ_B2"
-
-        _bucket="$MASTER_B2_BUCKET"
-        _dir="$MASTER_B2_DIR"
-        _url="$MASTER_B2_URL"
-
 		_tag="v${_timestamp}.${FORGEJO_REF}"
 		_ref="${FORGEJO_REF}"
 
@@ -166,14 +155,6 @@ parse_payload() {
 			echo "FORGEJO_PR_TITLE=$FORGEJO_PR_TITLE"
 		} >>"$FORGEJO_LENV"
 
-		_host="$PR_FJ_HOST"
-		_repo="$PR_FJ_REPO"
-        _b2="$PR_FJ_B2"
-
-        _bucket="$PR_B2_BUCKET"
-        _dir="$PR_B2_DIR"
-        _url="$PR_B2_URL"
-
 		_tag="${FORGEJO_PR_NUMBER}-${FORGEJO_REF}"
 		_ref="${FORGEJO_PR_NUMBER}-${FORGEJO_REF}"
 
@@ -183,10 +164,6 @@ parse_payload() {
 		FORGEJO_REF=$(jq -r '.tag' $PAYLOAD_JSON)
 		FORGEJO_BRANCH=stable
 
-		_host="$TAG_FJ_HOST"
-		_repo="$TAG_FJ_REPO"
-        _b2="$TAG_FJ_B2"
-
 		_tag="${FORGEJO_REF}"
 		_ref="${FORGEJO_REF}"
 
@@ -195,10 +172,6 @@ parse_payload() {
 	nightly)
 		FORGEJO_BRANCH=$(jq -r ".[$FALLBACK_IDX].branch" "$DEFAULT_JSON")
 		FORGEJO_REF=$("$ROOTDIR/.ci/common/field.py" field="sha")
-
-		_host="$NIGHTLY_FJ_HOST"
-		_repo="$NIGHTLY_FJ_REPO"
-        _b2="$NIGHTLY_FJ_B2"
 
 		_tag="v${_timestamp}.${FORGEJO_REF}"
 		_ref="${FORGEJO_REF}"
@@ -217,14 +190,6 @@ parse_payload() {
 	push | test)
 		FORGEJO_BRANCH=$(jq -r ".[$FALLBACK_IDX].branch" "$DEFAULT_JSON")
 		FORGEJO_REF=$("$ROOTDIR/.ci/common/field.py" field="sha")
-
-		_host="$MASTER_FJ_HOST"
-		_repo="$MASTER_FJ_REPO"
-        _b2="$MASTER_FJ_B2"
-
-        _bucket="$MASTER_B2_BUCKET"
-        _dir="$MASTER_B2_DIR"
-        _url="$MASTER_B2_URL"
 
 		_tag="v${_timestamp}.${FORGEJO_REF}"
 		_ref="${FORGEJO_REF}"
@@ -245,13 +210,14 @@ parse_payload() {
 		echo "FORGEJO_CLONE_URL=$FORGEJO_CLONE_URL"
 		echo "FORGEJO_BEFORE=$FORGEJO_BEFORE"
 
-		echo "RELEASE_HOST=$_host"
-		echo "RELEASE_REPO=$_repo"
-        echo "RELEASE_B2=$_b2"
+		echo "RELEASE_HOST=$RELEASE_HOST"
+		echo "RELEASE_REPO=$RELEASE_REPO"
+        echo "RELEASE_B2=$RELEASE_B2"
 
-        echo "B2_BUCKET=$_bucket"
-        echo "B2_DIR=$_dir"
-        echo "B2_URL=$_url"
+        echo "B2_BUCKET=$B2_BUCKET"
+        echo "B2_DIR=$B2_DIR"
+        echo "B2_URL=$B2_URL"
+        echo "B2_PUBLIC_URL=$B2_PUBLIC_URL"
 
 		echo "RELEASE_PGO_HOST=$RELEASE_PGO_HOST"
 		echo "RELEASE_PGO_REPO=$RELEASE_PGO_REPO"
@@ -259,7 +225,7 @@ parse_payload() {
 		echo "GITHUB_TAG=$_tag"
 		echo "GITHUB_TITLE=$_title"
 		echo "ARTIFACT_REF=$_ref"
-		echo "GITHUB_DOWNLOAD=https://$_host/$_repo/releases/download"
+		echo "GITHUB_DOWNLOAD=https://$RELEASE_HOST/$RELEASE_REPO/releases/download"
 
 		echo "MASTER_RELEASE_URL=https://$MASTER_FJ_HOST/$MASTER_FJ_REPO/releases"
 
@@ -313,7 +279,6 @@ clone_repository() {
 
 	if [ "$1" = "nightly" ]; then
 		# construct changelog
-		# shellcheck disable=SC2016
 		_url="https://$FORGEJO_HOST/$FORGEJO_REPO"
 		_format="- %s [\`%h\`]($_url/commit/%H)%n  - Committed on %as by %an %(trailers:key=Reviewed-on,valueonly=true,separator=)"
 		_find="Committed on (.+) by (.+) .+/pulls/([0-9]+)"

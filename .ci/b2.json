@@ -3,12 +3,20 @@
     "build-id": "master",
     "bucket": "eden0-public-EdenCI-Master",
     "url": "s3.eu-central-003.backblazeb2.com",
-    "directory": "Builds/Master"
+    "public": "master.eden-emu.dev",
+    "directory": "/Builds/Master"
   },
   {
     "build-id": "pull_request",
     "bucket": "eden0-public-EdenCI-PR",
     "url": "s3.eu-central-003.backblazeb2.com",
-    "directory": "Builds/PR"
+    "public": "pr.eden-emu.dev",
+    "directory": "/Builds/PR"
+  },
+  {
+    "build-id": "tag",
+    "bucket": "eden0-public-Eden-Stable",
+    "url": "s3.eu-central-003.backblazeb2.com",
+    "public": "stable.eden-emu.dev"
   }
 ]

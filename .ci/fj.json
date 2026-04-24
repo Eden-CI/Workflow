@@ -21,6 +21,6 @@
         "build-id": "tag",
         "host": "git.eden-emu.dev",
         "repo": "eden-emu/eden",
-        "b2": false
+        "b2": true
     }
 ]
