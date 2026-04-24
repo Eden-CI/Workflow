@@ -4,8 +4,7 @@
 
 ROOTDIR="$PWD"
 . "$ROOTDIR/.ci/common/project.sh"
-# ARTIFACTS_DIR="$ROOTDIR/artifacts"
-ARTIFACTS_DIR="${1:?}"
+ARTIFACTS_DIR="$ROOTDIR/artifacts"
 
 # upload to a subdir of the main bucket dir
 _dir="$B2_DIR$GITHUB_TAG"

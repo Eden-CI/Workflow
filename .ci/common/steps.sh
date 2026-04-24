@@ -38,7 +38,7 @@ status() {
 
 release() {
 	case "$BUILD_ID" in
-	test)
+	test|push)
 		false
 		;;
 	*)
