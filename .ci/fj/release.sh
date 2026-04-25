@@ -47,20 +47,22 @@ _header "Creating Release"
 "$ROOTDIR/fj/fj.sh" -k "$FJ_TOKEN" -r "$FJ_REPO" -u "$FJ_HOST" release -t "$GITHUB_TAG" \
 	create -b "$ROOTDIR/changelog.md" -n "$GITHUB_TITLE" -a -r || true
 
+sleep 5
+
 ## Uploading ##
 
 _header "Uploading Assets"
 
-if external; then
-    "$ROOTDIR/fj/fj.sh" -k "$FJ_TOKEN" -r "$FJ_REPO" -u "$FJ_HOST" release -t "$GITHUB_TAG" \
-        external $(cat "$ROOTDIR"/urls.txt)
-else
+if ! external; then
     # Cloudflare sucks, so we upload twice just to ensure we don't get blocked.
     "$ROOTDIR/fj/fj.sh" -k "$FJ_TOKEN" -r "$FJ_REPO" -u "$FJ_HOST" release -t "$GITHUB_TAG" \
         upload -g "$ARTIFACTS_DIR"/*
 
     "$ROOTDIR/fj/fj.sh" -k "$FJ_TOKEN" -r "$FJ_REPO" -u "$FJ_HOST" release -t "$GITHUB_TAG" \
         upload -g "$ARTIFACTS_DIR"/*
+elif [ "$BUILD_ID" = "nightly" ] || [ "$BUILD_ID" = "tag" ]; then
+    "$ROOTDIR/fj/fj.sh" -k "$FJ_TOKEN" -r "$FJ_REPO" -u "$FJ_HOST" release -t "$GITHUB_TAG" \
+        external $(cat "$ROOTDIR"/urls.txt)
 fi
 
 ## Summary ##
