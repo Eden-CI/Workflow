@@ -44,7 +44,10 @@ tools/dir.sh "$_bucket" "$_dir" "$_local"
 
 # and get the URLs and put them in a file
 # TODO(crueter): Move these off of Forgejo and onto some static page.
-tools/url.sh "$_bucket" "$_dir" >"$ROOTDIR/urls.txt"
+for artifact in "$_dir"/*; do
+	_name=$(basename "$artifact")
+	echo "https://$B2_PUBLIC_URL/${GITHUB_TAG}/${_name}"
+done > "$ROOTDIR"/urls.txt
 
 # Latest rels
 # These are still versioned
