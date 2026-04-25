@@ -84,7 +84,7 @@ linux_field() {
 
 	printf "| %s | " "$pretty_arch"
 	file_link "Standard AppImage" "Linux-${ARTIFACT_REF}-${arch}-gcc-standard.AppImage"
-	
+
 	if tagged; then
 		printf " ("
 		file_link "zsync" "Linux-${arch}-gcc-standard.AppImage.zsync"
@@ -235,7 +235,7 @@ In order to run the app, you *may* need to go to System Settings -> Privacy & Se
 EOF
 
 printf -- "- "
-file_link "macOS DMG" "macOS-${ARTIFACT_REF}"
+file_link "macOS DMG" "macOS-${ARTIFACT_REF}.dmg"
 echo
 
 if [ "$1" = "tag" ]; then
