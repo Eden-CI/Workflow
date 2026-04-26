@@ -51,8 +51,9 @@ cat "$_local"/release.json
 _header "Getting urls.txt"
 # get the URLs and put them in a file
 # TODO(crueter): Move these off of Forgejo and onto some static page.
-find "$_local" -type f -exec basename {} \; | while read -r artifact; do
-	echo "https://$B2_PUBLIC_URL/${GITHUB_TAG}/${artifact}"
+find "$_local" -type f | while read -r artifact; do
+	_name="$(basename "$artifact")"
+	echo "https://$B2_PUBLIC_URL/${GITHUB_TAG}/${_name}"
 done > "$ROOTDIR"/urls.txt
 
 echo
@@ -78,8 +79,7 @@ if [ -n "$CF_TOKEN" ] && [ -n "$CF_ZONE_ID" ]; then
 	# Now purge Cloudflare's cache for "latest" zsync and release.json so auto-updaters actually work
 	_header "Purging Cloudflare cache"
 
-	for artifact in "$_local"/*.zsync "$_local"/*.json "$_local"/*.txt; do
-		[ -e "$artifact" ] || continue
+	find "$_local" -name '*.zsync' -o -name '*.json' -o -name '*.txt' | while read -r artifact; do
 		_name=$(basename "$artifact")
 		echo "https://$B2_PUBLIC_URL/latest/${_name}"
 	done > purge.txt
