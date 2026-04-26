@@ -7,7 +7,7 @@
 
 data=$(jq -n --args '{files: $ARGS.positional}' "$@")
 
-curl --fail -X POST "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/purge_cache" \
+curl -s --fail -X POST "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/purge_cache" \
      -H "Authorization: Bearer $CF_TOKEN" -H "Content-Type: application/json" --data "$data"
 
 echo

@@ -7,12 +7,19 @@ ROOTDIR="$PWD"
 ARTIFACTS_DIR="$ROOTDIR/artifacts"
 
 # upload to a subdir of the main bucket dir
-_dir="$B2_DIR$GITHUB_TAG"
+_remote="$B2_DIR$GITHUB_TAG"
 _local="$ARTIFACTS_DIR"
 _bucket="$B2_BUCKET"
 
 cd "$ROOTDIR/.ci/b2"
 
+_header() {
+    echo
+    echo "----- $* -----"
+    echo
+}
+
+_header "Creating release.json"
 # Fake API endpoint
 # TODO(crueter): Automate tagged rels
 case "$BUILD_ID" in
@@ -39,31 +46,50 @@ case "$BUILD_ID" in
 		;;
 esac
 
-# Upload
-tools/dir.sh "$_bucket" "$_dir" "$_local"
+cat "$_local"/release.json
 
-# and get the URLs and put them in a file
+_header "Getting urls.txt"
+# get the URLs and put them in a file
 # TODO(crueter): Move these off of Forgejo and onto some static page.
-for artifact in "$_dir"/*; do
-	_name=$(basename "$artifact")
-	echo "https://$B2_PUBLIC_URL/${GITHUB_TAG}/${_name}"
+find "$_local" -type f -exec basename {} \; | while read -r artifact; do
+	echo "https://$B2_PUBLIC_URL/${GITHUB_TAG}/${artifact}"
 done > "$ROOTDIR"/urls.txt
+
+echo
+cat "$ROOTDIR"/urls.txt
+cp "$ROOTDIR"/urls.txt "$_local"
+
+_header "Uploading versioned artifacts"
+# Upload
+tools/dir.sh "$_bucket" "$_remote" "$_local"
 
 # Latest rels
 # These are still versioned
 # FIXME(crueter): Zsync may be temporarily unavailable? Not a big deal tbh
+_header "Deleting old latest"
 tools/rm.sh "$_bucket" "latest" --exclude "*.json"
+
+_header "Uploading latest artifacts"
 tools/dir.sh "$_bucket" "latest" "$_local"
 
 cd "$ROOTDIR"
 
 if [ -n "$CF_TOKEN" ] && [ -n "$CF_ZONE_ID" ]; then
 	# Now purge Cloudflare's cache for "latest" zsync and release.json so auto-updaters actually work
-	for artifact in "$_dir"/*.zsync "$_dir"/*.json; do
+	_header "Purging Cloudflare cache"
+
+	for artifact in "$_local"/*.zsync "$_local"/*.json "$_local"/*.txt; do
+		[ -e "$artifact" ] || continue
 		_name=$(basename "$artifact")
 		echo "https://$B2_PUBLIC_URL/latest/${_name}"
 	done > purge.txt
 
-	# shellcheck disable=SC2046
-	.ci/cf/purge-cache.sh $(cat purge.txt)
+	echo "Purging URLs:"
+	cat purge.txt
+	echo
+
+	if [ -s purge.txt ]; then
+		# shellcheck disable=SC2046
+		.ci/cf/purge-cache.sh $(cat purge.txt)
+	fi
 fi
