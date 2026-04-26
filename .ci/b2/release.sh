@@ -56,3 +56,14 @@ tools/rm.sh "$_bucket" "latest" --exclude "*.json"
 tools/dir.sh "$_bucket" "latest" "$_local"
 
 cd "$ROOTDIR"
+
+if [ -n "$CF_TOKEN" ] && [ -n "$CF_ZONE_ID" ]; then
+	# Now purge Cloudflare's cache for "latest" zsync and release.json so auto-updaters actually work
+	for artifact in "$_dir"/*.zsync "$_dir"/*.json; do
+		_name=$(basename "$artifact")
+		echo "https://$B2_PUBLIC_URL/latest/${_name}"
+	done > purge.txt
+
+	# shellcheck disable=SC2046
+	.ci/cf/purge-cache.sh $(cat purge.txt)
+fi

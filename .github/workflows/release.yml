@@ -27,6 +27,9 @@ jobs:
       B2_TOKEN: "${{ secrets.B2_TOKEN }}"
       B2_KEY: "${{ secrets.B2_KEY }}"
 
+      CF_ZONE_ID: "${{ secrets.CF_ZONE_ID }}"
+      CF_TOKEN: "${{ secrets.CF_TOKEN }}"
+
       VPS_SSH_HOST: "${{ secrets.VPS_SSH_HOST }}"
       VPS_SSH_PORT: "${{ secrets.VPS_SSH_PORT }}"
       VPS_SSH_PRIV: "${{ secrets.VPS_SSH_PRIV }}"

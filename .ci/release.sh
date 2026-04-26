@@ -78,9 +78,9 @@ fi
 
 ## Torrent ##
 
-if [ "$RELEASE_TAG" = "1" ] && [ -n "$VPS_SSH_PRIV" ]; then
-    _group "Publishing to Discord"
-    "$ROOTDIR"/.ci/fj/torrent.sh
-    _end
-fi
+# if [ "$RELEASE_TAG" = "1" ] && [ -n "$VPS_SSH_PRIV" ]; then
+#     _group "Publishing to Discord"
+#     "$ROOTDIR"/.ci/fj/torrent.sh
+#     _end
+# fi
 
