@@ -19,36 +19,8 @@ _header() {
     echo
 }
 
-_header "Creating release.json"
-# Fake API endpoint
-# TODO(crueter): Automate tagged rels
-case "$BUILD_ID" in
-	nightly)
-		_log="$ROOTDIR/changelogs"
-		mkdir -p "$_log"
-		jq -c -n \
-			--arg title "$GITHUB_TITLE" \
-			--arg tag "$GITHUB_TAG" \
-			--arg body "$(cat "$ROOTDIR"/nightly-changelog.md)" \
-			--arg base "https://$B2_PUBLIC_URL" \
-			'{tag_name: $tag, name: $title, body: $body, base: $base}' > "$_local"/release.json
-		;;
-	# FIXME(crueter): Pull from somewhere, idk
-	tag)
-		_log="$ROOTDIR/changelogs"
-		mkdir -p "$_log"
-		jq -c -n \
-			--arg title "$GITHUB_TITLE" \
-			--arg tag "$GITHUB_TAG" \
-			--arg body "Unimplemented" \
-			--arg base "https://$B2_PUBLIC_URL" \
-			'{tag_name: $tag, name: $title, body: $body, base: $base}' > "$_local"/release.json
-		;;
-esac
-
-cat "$_local"/release.json
-
-_header "Getting urls.txt"
+## URLS ##
+_header "Creating urls.txt"
 # get the URLs and put them in a file
 # TODO(crueter): Move these off of Forgejo and onto some static page.
 find "$_local" -type f | while read -r artifact; do
@@ -60,23 +32,58 @@ echo
 cat "$ROOTDIR"/urls.txt
 cp "$ROOTDIR"/urls.txt "$_local"
 
+# passed to release.json
+_assets=$(jq -R -s -c 'split("\n") | map(select(length > 0))' "$ROOTDIR/urls.txt")
+
+## RELEASE.JSON ##
+_header "Creating release.json"
+# Fake API endpoint
+# TODO(crueter): Automate tagged rels
+case "$BUILD_ID" in
+    nightly)
+        _body="$(cat "$ROOTDIR/nightly-changelog.md")"
+        ;;
+    tag)
+        # FIXME(crueter): Pull from somewhere, idk
+        _body="Unimplemented"
+        ;;
+    *)
+        _body="Build: $BUILD_ID"
+        ;;
+esac
+
+jq -c -n \
+    --arg title "$GITHUB_TITLE" \
+    --arg tag "$GITHUB_TAG" \
+    --arg body "$_body" \
+    --arg base "https://$B2_PUBLIC_URL" \
+    --argjson assets "$_assets" \
+    '{
+        tag_name: $tag,
+        name: $title,
+        body: $body,
+        base: $base,
+        assets: $assets
+    }' > "$_local/release.json"
+
+cat "$_local"/release.json
+
+## UPLOAD ##
 _header "Uploading versioned artifacts"
-# Upload
 tools/dir.sh "$_bucket" "$_remote" "$_local"
 
-# Latest rels
-# These are still versioned
-# FIXME(crueter): Zsync may be temporarily unavailable? Not a big deal tbh
+## RM OLD LATEST (except release.json) ##
 _header "Deleting old latest"
 tools/rm.sh "$_bucket" "latest" --exclude "*.json"
 
+## UPLOAD NEW LATEST ##
 _header "Uploading latest artifacts"
 tools/dir.sh "$_bucket" "latest" "$_local"
 
 cd "$ROOTDIR"
 
+# Now purge Cloudflare's cache for "latest" zsync and release.json so auto-updaters actually work
 if [ -n "$CF_TOKEN" ] && [ -n "$CF_ZONE_ID" ]; then
-	# Now purge Cloudflare's cache for "latest" zsync and release.json so auto-updaters actually work
 	_header "Purging Cloudflare cache"
 
 	find "$_local" -name '*.zsync' -o -name '*.json' -o -name '*.txt' | while read -r artifact; do

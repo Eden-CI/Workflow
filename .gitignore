@@ -19,3 +19,6 @@ forgejo.env
 # linux package
 uruntime2appimage*
 quick-sharun*
+
+/*.json
+/private
