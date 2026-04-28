@@ -125,9 +125,9 @@ win_field() {
 	notes="$4"
 
 	printf "| %s | " "$label"
-	file_link "amd64 zip" "Windows-${ARTIFACT_REF}-${amd_compiler}.zip"
+	file_link "amd64/x86_64 zip" "Windows-${ARTIFACT_REF}-${amd_compiler}.zip"
 	printf " | "
-	file_link "arm64 zip" "Windows-${ARTIFACT_REF}-${arm_compiler}.zip"
+	file_link "arm64/aarch64 zip" "Windows-${ARTIFACT_REF}-${arm_compiler}.zip"
 
 	echo " | $notes |"
 }
@@ -202,7 +202,7 @@ cat <<EOF
 
 Windows packages are in-place zip files. Setup files are soon to come.
 
-| Build | AMD | ARM | Notes |
+| Build | AMD64/x86_64 | ARM/aarch64 | Notes |
 |-------|-----|-----|-------|
 EOF
 
