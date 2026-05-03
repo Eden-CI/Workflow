@@ -10,39 +10,39 @@ if [ -n "$SUPPORTS_TARGETS" ]; then
 	case "$TARGET" in
 		amd64)
 			echo "Making amd64-v3 optimized build of ${PROJECT_PRETTYNAME}"
-			ARCH_FLAGS="-march=x86-64-v3 -mtune=generic"
+			ARCH_FLAGS="-march=x86-64-v3 -mtune=generic -fomit-frame-pointer"
 			ARCH="amd64"
 			;;
 		steamdeck|zen2)
 			echo "Making Steam Deck (Zen 2) optimized build of ${PROJECT_PRETTYNAME}"
-			ARCH_FLAGS="-march=znver2 -mtune=znver2"
+			ARCH_FLAGS="-march=znver2 -mtune=znver2 -fomit-frame-pointer"
 			ARCH="steamdeck"
 			STEAMDECK=true
 			;;
 		rog-ally|allyx|zen4)
 			echo "Making ROG Ally X (Zen 4) optimized build of ${PROJECT_PRETTYNAME}"
-			ARCH_FLAGS="-march=znver4 -mtune=znver4"
+			ARCH_FLAGS="-march=znver4 -mtune=znver4 -fomit-frame-pointer"
 			ARCH="rog-ally-x"
 			STEAMDECK=true
 			;;
 		legacy)
 			echo "Making amd64 generic build of ${PROJECT_PRETTYNAME}"
-			ARCH_FLAGS="-march=x86-64 -mtune=generic"
+			ARCH_FLAGS="-march=x86-64 -mtune=generic -fomit-frame-pointer"
 			ARCH=legacy
 			;;
 		aarch64|arm64)
 			echo "Making armv8-a build of ${PROJECT_PRETTYNAME}"
-			ARCH_FLAGS="-march=armv8-a -mtune=generic"
+			ARCH_FLAGS="-march=armv8-a -mtune=generic -fomit-frame-pointer"
 			ARCH=aarch64
 			;;
 		armv9)
 			echo "Making armv9-a build of ${PROJECT_PRETTYNAME}"
-			ARCH_FLAGS="-march=armv9-a -mtune=generic"
+			ARCH_FLAGS="-march=armv9-a -mtune=generic -fomit-frame-pointer"
 			ARCH=armv9
 			;;
 		native)
 			echo "Making native build of ${PROJECT_PRETTYNAME}"
-			ARCH_FLAGS="-march=native -mtune=native"
+			ARCH_FLAGS="-march=native -mtune=native -fomit-frame-pointer"
 			FFMPEG=OFF
 			OPENSSL=OFF
 			;;
@@ -51,7 +51,7 @@ if [ -n "$SUPPORTS_TARGETS" ]; then
 		# and want to target generic architectures
 		package-amd64)
 			echo "Making package-friendly amd64 build of ${PROJECT_PRETTYNAME}"
-			ARCH_FLAGS="-march=x86-64 -mtune=generic"
+			ARCH_FLAGS="-march=x86-64 -mtune=generic -fomit-frame-pointer"
 			STANDALONE=ON
 			PACKAGE=true
 			FFMPEG=OFF
@@ -61,7 +61,7 @@ if [ -n "$SUPPORTS_TARGETS" ]; then
 			;;
 		package-aarch64)
 			echo "Making package-friendly aarch64 build of ${PROJECT_PRETTYNAME}"
-			ARCH_FLAGS="-march=armv8-a -mtune=generic"
+			ARCH_FLAGS="-march=armv8-a -mtune=generic -fomit-frame-pointer"
 			STANDALONE=ON
 			PACKAGE=true
 			FFMPEG=OFF
