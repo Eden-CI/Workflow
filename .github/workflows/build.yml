@@ -153,17 +153,6 @@ jobs:
       force_pgo: ${{ needs.clone.outputs.pgo }}
     secrets: inherit
 
-  windows:
-    name: "Windows"
-    needs: [clone]
-    uses: ./.github/workflows/windows.yml
-    with:
-      build-id: '${{ inputs.build-id }}'
-      cpm-cache-version: '${{ needs.clone.outputs.cachever }}'
-      devel: ${{ inputs.devel }}
-      force_pgo: ${{ needs.clone.outputs.pgo }}
-    secrets: inherit
-
   msys:
     name: "MinGW"
     needs: [clone]

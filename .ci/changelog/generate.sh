@@ -133,7 +133,7 @@ win_field() {
 }
 
 win_matrix() {
-	win_field "Standard" "amd64-msvc-standard" "mingw-arm64-clang-standard"
+	win_field "Standard" "mingw-amd64-gcc-standard" "mingw-arm64-clang-standard"
 
 	if tagged; then
 		win_field "PGO" "mingw-amd64-clang-pgo" "mingw-arm64-clang-pgo" "Recommended"
