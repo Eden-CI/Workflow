@@ -20,6 +20,7 @@ export DESKTOP="$ROOTDIR/dist/dev.eden_emu.eden.desktop"
 export OPTIMIZE_LAUNCH=1
 export DEPLOY_OPENGL=1
 export DEPLOY_VULKAN=1
+export VERSION="${GITHUB_TAG}"
 
 ADD_HOOKS="wayland-is-broken.hook"
 if [ "$DEVEL" != "true" ]; then
