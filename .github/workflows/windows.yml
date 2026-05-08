@@ -37,12 +37,17 @@ jobs:
       msys: ${{ steps.msys.outputs.matrix }}
       msvc: ${{ steps.msvc.outputs.matrix }}
     steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
       ## MSYS2 ##
-      - id: msys
+      - name: MSYS Matrix
+        id: msys
         run: ./.ci/matrix/msys.sh
 
       # TODO(crueter): See if PGO does anything appreciable.
-      - id: msvc
+      - name: MSVC Matrix
+        id: msvc
         run: ./.ci/matrix/msvc.sh
 
   # TODO: setup
