@@ -159,6 +159,18 @@ jobs:
         with:
           arch: ${{ matrix.os.arch }}
 
+      - name: Install LLVM/Clang
+        uses: Nerixyz/install-llvm-action@feat/new-llvm-versions
+        with:
+          version: "22.1.4"
+          env: true
+
+      - name: Check LLVM/Clang
+        shell: bash
+        run: |
+          echo "${LLVM_PATH}/bin" >> $GITHUB_PATH
+          "${LLVM_PATH}/bin/clang-cl" --version
+
       - name: Install Vulkan SDK
         shell: powershell
         run: ./.ci/windows/install-vulkan-sdk.ps1
