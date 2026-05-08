@@ -1,4 +1,4 @@
-name: "MSYS2"
+name: "Windows"
 
 on:
   workflow_call:
@@ -29,14 +29,19 @@ env:
   BUILD_ID: ${{ inputs.build-id }}
 
 jobs:
-  msys-matrix:
-    name: "Generate MSYS Matrix"
+  set-matrix:
+    name: "Generate Matrices"
     runs-on: ubuntu-latest
     outputs:
-      include: ${{ steps.set.outputs.include }}
+      msys: ${{ steps.msys.outputs.matrix }}
+      msvc: ${{ steps.msvc.outputs.matrix }}
     steps:
-      - id: set
+      ## MSYS2 ##
+      - id: msys
         run: |
+          # Currently uses MINGW64. Could try clang64 or ucrt64,
+          # but not viable right now.
+
           AMD64='"runs-on": "windows-latest", "arch": "amd64", "msystem": "MINGW64"'
           ARM64='"runs-on": "windows-11-arm", "arch": "arm64", "msystem": "CLANGARM64"'
 
@@ -56,25 +61,46 @@ jobs:
           arm_clang="$(target "$ARM64" "$CLANG")"
           arm_pgo="$(target "$ARM64" "$PGO")"
 
+          MATRIX="[${amd_gcc}, ${arm_clang}"
           if [ "${{ inputs.devel }}" != "true" ] || [ "${{ inputs.force_pgo }}" = "true" ]; then
-            INCLUDE="[${amd_gcc}, ${arm_clang}, ${amd_pgo}, ${arm_pgo}]"
-          else
-            INCLUDE="[${amd_gcc}, ${arm_clang}]"
+            MATRIX="$MATRIX, ${amd_pgo}, ${arm_pgo}"
           fi
 
-          echo $INCLUDE
-          echo "include=${INCLUDE}" >> $GITHUB_OUTPUT
+          MATRIX="$MATRIX]"
+
+          echo $MATRIX
+          echo "matrix=${MATRIX}" >> $GITHUB_OUTPUT
+
+      # TODO(crueter): See if PGO does anything appreciable.
+      - id: msvc
+        run: |
+          AMD64='"runs-on": "windows-latest", "arch": "amd64"'
+          ARM64='"runs-on": "windows-11-arm", "arch": "arm64"'
+
+          PGO='"program": "msvc", "target": "pgo"'
+          CLANG='"program": "msvc", "target": "standard"'
+
+          target() {
+            arch="$1"
+            compiler="$2"
+
+            echo "{${arch}, ${compiler}}"
+          }
+
+          amd64_msvc="$(target "$AMD64" "$CLANG")"
+          MATRIX="[${amd64_msvc}]"
+
+          echo "matrix=${MATRIX}" >> $GITHUB_OUTPUT
 
   # TODO: setup
-  # TODO: can we combine this with windows.yml?
   msys:
     name: "${{ matrix.os.msystem }} ${{ matrix.os.arch }} ${{ matrix.os.program }} ${{ matrix.os.target }}"
-    needs: [msys-matrix]
+    needs: [set-matrix]
     runs-on: ${{ matrix.os.runs-on }}
     strategy:
       fail-fast: false
       matrix:
-        os: ${{ fromJson(needs.msys-matrix.outputs.include) }}
+        os: ${{ fromJson(needs.set-matrix.outputs.msys) }}
 
     env:
       TARGET: ${{ matrix.os.arch }}
@@ -118,8 +144,7 @@ jobs:
 
       - name: Configure
         shell: msys2 {0}
-        run: |
-          ./.ci/common/configure.sh -DCCACHE_PATH=sccache
+        run: ./.ci/common/configure.sh -DCCACHE_PATH=sccache
         env:
           MSYS2_LOCATION: ${{ steps.msys2.outputs.msys2-location }}
 
@@ -138,6 +163,68 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: mingw-${{ env.ARCH }}
+          archive: false
+          path: artifacts/*
+
+
+  # TODO: setup
+  msvc:
+    name: "MSVC ${{ matrix.os.arch }} ${{ matrix.os.target }}"
+    needs: [set-matrix]
+    runs-on: ${{ matrix.os.runs-on }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ${{ fromJson(needs.set-matrix.outputs.msvc) }}
+
+    env:
+      TARGET: ${{ matrix.os.arch }}
+      COMPILER: "${{ matrix.os.program }}"
+      PGO_TARGET: "${{ matrix.os.target }}"
+      ARCH: ${{ matrix.os.arch }}-${{ matrix.os.program }}-${{ matrix.os.target }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup
+        uses: ./.github/workflows/setup
+        with:
+          key: MSVC-${{ matrix.os.msystem }}-${{ matrix.os.arch }}-${{ matrix.os.program }}
+          version: ${{ inputs.cpm-cache-version }}
+
+      - name: Load payload environment
+        shell: bash
+        run: . ./.ci/fj/load-env.sh
+
+      - name: Set up MSVC
+        uses: Eden-CI/msvc-dev-cmd@master
+        with:
+          arch: ${{ matrix.os.arch }}
+
+      - name: Install Vulkan SDK
+        shell: powershell
+        run: ./.ci/windows/install-vulkan-sdk.ps1
+
+      - name: Configure
+        shell: bash
+        run: |
+          git config --global core.autocrlf off
+          dos2unix .patch/boost/*
+          ./.ci/common/configure.sh -DCCACHE_PATH=${SCCACHE_PATH}
+
+      - name: Build
+        shell: bash
+        run: cmake --build build
+
+      - name: Package
+        shell: bash
+        run: ./.ci/windows/package.sh
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: msvc-${{ env.ARCH }}
           archive: false
           path: artifacts/*
 

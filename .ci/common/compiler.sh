@@ -18,6 +18,9 @@ if [ "$COMPILER" = "clang" ]; then
 	esac
 
 	COMPILER_FLAGS+=(-DCMAKE_C_COMPILER="$CLANG" -DCMAKE_CXX_COMPILER="$CLANGPP" -DCMAKE_EXE_LINKER_FLAGS="-fuse-ld=lld")
+elif [ "$COMPILER" = "msvc" ]; then
+	# bruh
+	COMPILER_FLAGS+=(-DCMAKE_C_COMPILER=clang-cl -DCMAKE_CXX_COMPILER=clang-cl)
 fi
 
 export COMPILER_FLAGS

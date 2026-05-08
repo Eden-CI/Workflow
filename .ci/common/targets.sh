@@ -7,7 +7,17 @@ SDL_FLAGS=(-DYUZU_USE_BUNDLED_SDL2=ON)
 
 # only clang and gcc support this
 if [ -n "$SUPPORTS_TARGETS" ]; then
+	# MSVC (clang-cl) makes generic builds
+	if [ "$PLATFORM" = win ] && [ "$TARGET" = amd64 ]; then
+		TARGET=legacy
+	fi
+
 	case "$TARGET" in
+		legacy)
+			echo "Making amd64 generic build of ${PROJECT_PRETTYNAME}"
+			ARCH_FLAGS="-march=x86-64 -mtune=generic"
+			ARCH=legacy
+			;;
 		amd64)
 			echo "Making amd64-v3 optimized build of ${PROJECT_PRETTYNAME}"
 			ARCH_FLAGS="-march=x86-64-v3 -mtune=generic"
@@ -24,11 +34,6 @@ if [ -n "$SUPPORTS_TARGETS" ]; then
 			ARCH_FLAGS="-march=znver4 -mtune=znver4"
 			ARCH="rog-ally-x"
 			STEAMDECK=true
-			;;
-		legacy)
-			echo "Making amd64 generic build of ${PROJECT_PRETTYNAME}"
-			ARCH_FLAGS="-march=x86-64 -mtune=generic"
-			ARCH=legacy
 			;;
 		aarch64|arm64)
 			echo "Making armv8-a build of ${PROJECT_PRETTYNAME}"
