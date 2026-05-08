@@ -16,7 +16,8 @@ target() {
 
 amd64_msvc="$(target "$AMD64" "$CLANG")"
 arm64_msvc="$(target "$ARM64" "$CLANG")"
-MATRIX="[${amd64_msvc}, ${arm64_msvc}]"
+# MATRIX="[${amd64_msvc}, ${arm64_msvc}]"
+MATRIX="[${amd64_msvc}]"
 
 echo "$MATRIX"
 echo "matrix=${MATRIX}" >>"$GITHUB_OUTPUT"
