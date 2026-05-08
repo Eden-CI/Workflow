@@ -118,26 +118,49 @@ room_matrix() {
 	done
 }
 
-win_field() {
-	label="$1"
-	amd_compiler="$2"
-	arm_compiler="$3"
-	notes="$4"
+msvc_field() {
+	printf "| amd64/x86_64 (MSVC) | "
+	file_link "MSVC zip" "Windows-${ARTIFACT_REF}-amd64-msvc-standard.zip"
+	if tagged && opts; then
+		printf " | "
+	fi
 
-	printf "| %s | " "$label"
-	file_link "amd64/x86_64 zip" "Windows-${ARTIFACT_REF}-${amd_compiler}.zip"
-	printf " | "
-	file_link "arm64/aarch64 zip" "Windows-${ARTIFACT_REF}-${arm_compiler}.zip"
+	echo " | Use if you encounter graphical issues on other builds (e.g. Pokemon Scarlet & Violet) |"
+}
+
+cat <<EOF
+Desc, Standard, PGO, notes
+amd64-v3, amd64-gcc-standard, amd64-clang-pgo, Requires 4th generation Intel, Ryzen, or newer
+Zen 4, rog-ally-gcc-standard, rog-ally-clang-pgo, Requires Zen 4 or newer (e.g. ROG Ally X, Legion Go S)
+aarch64/arm64, arm64-clang-standard, arm64-clang-pgo, Snapdragon devices
+EOF
+
+win_field() {
+	arch="$1"
+	pretty_arch="$2"
+	notes="$3"
+
+	if [ "$arch" = arm64 ]; then
+		compiler=clang
+	else
+		compiler=gcc
+	fi
+
+	printf "| %s | " "$pretty_arch"
+	file_link "Standard zip" "Windows-${ARTIFACT_REF}-${arch}-${compiler}-standard.zip"
+
+	if tagged && opts; then
+		file_link "PGO zip" "Windows-${ARTIFACT_REF}-${arch}-clang-pgo.AppImage"
+	fi
 
 	echo " | $notes |"
 }
 
 win_matrix() {
-	win_field "Standard" "mingw-amd64-gcc-standard" "mingw-arm64-clang-standard"
-
-	if tagged; then
-		win_field "PGO" "mingw-amd64-clang-pgo" "mingw-arm64-clang-pgo" "Recommended"
-	fi
+	msvc_field
+	win_field amd64 "amd64/x86_64 v3" "Built with MinGW. Requires Ryzen, 4th gen Intel, or newer"
+	win_field rog-ally "Zen 4" "Requires Zen 4 or newer. Incompatible with Intel"
+	win_field arm64 "aarch64/arm64" "Snapdragon devices"
 }
 
 echo "# Packages"
@@ -151,6 +174,7 @@ if truthy "$EXPLAIN_TARGETS"; then
 
 		- **aarch64/arm64**: For devices that use the armv8-a instruction set; e.g. Snapdragon X, all Android devices, and Apple Silicon Macs.
 		- **amd64**: For devices that use the amd64 (aka x86_64) instruction set; this is exclusively used by Intel and AMD CPUs and is only found on desktops.
+		- **v3**: For devices that use the x86_64-v3 instruction set or newer; this is found on Ryzen, Intel 4th Generation (Haswell), and newer.
 
 		### PGO
 
@@ -202,9 +226,20 @@ cat <<EOF
 
 Windows packages are in-place zip files. Setup files are soon to come.
 
-| Build | AMD64/x86_64 | ARM/aarch64 | Notes |
-|-------|-----|-----|-------|
 EOF
+
+if opts && tagged; then
+	cat <<-EOF
+		| Build Type | Standard | PGO (Recommended) | Notes |
+		|------------|----------|-------------------|-------|
+	EOF
+else
+	cat <<-EOF
+
+		| Build Type |  | Notes |
+		|------------|--|-------|
+	EOF
+fi
 
 win_matrix
 
@@ -214,7 +249,7 @@ if falsy "$DISABLE_ANDROID"; then
 		## Android
 
 		| Build  | Notes |
-		|--------|-------------|
+		|--------|-------|
 	EOF
 
 	android "Standard APK" "standard" "The standard build. Most users should use this."

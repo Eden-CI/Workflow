@@ -42,8 +42,16 @@ jobs:
           # Currently uses MINGW64. Could try clang64 or ucrt64,
           # but not viable right now.
 
-          AMD64='"runs-on": "windows-latest", "arch": "amd64", "msystem": "MINGW64"'
-          ARM64='"runs-on": "windows-11-arm", "arch": "arm64", "msystem": "CLANGARM64"'
+          arch() {
+            cat <<-EOF
+            "runs-on": "$1", "arch": "$2", "msystem": "$3"
+            EOF
+          }
+
+          AMD64="$(arch windows-latest amd64 MINGW64)"
+          LEGACY="$(arch windows-latest legacy MINGW64)"
+          ALLY="$(arch windows-latest rog-ally MINGW64)"
+          ARM64="$(arch windows-11-arm arm64 CLANGARM64)"
 
           PGO='"program": "clang", "target": "pgo"'
           CLANG='"program": "clang", "target": "standard"'
@@ -56,14 +64,20 @@ jobs:
             echo "{${arch}, ${compiler}}"
           }
 
+          # TODO(crueter): dedupe in some way
+          # TODO(crueter): Probably don't need legacy?
           amd_gcc="$(target "$AMD64" "$GCC")"
           amd_pgo="$(target "$AMD64" "$PGO")"
+          legacy_gcc="$(target "$LEGACY" "$GCC")"
+          legacy_pgo="$(target "$LEGACY" "$PGO")"
+          ally_gcc="$(target "$ALLY" "$GCC")"
+          ally_pgo="$(target "$ALLY" "$PGO")"
           arm_clang="$(target "$ARM64" "$CLANG")"
           arm_pgo="$(target "$ARM64" "$PGO")"
 
-          MATRIX="[${amd_gcc}, ${arm_clang}"
+          MATRIX="[${amd_gcc}, ${legacy_gcc}, ${arm_clang}"
           if [ "${{ inputs.devel }}" != "true" ] || [ "${{ inputs.force_pgo }}" = "true" ]; then
-            MATRIX="$MATRIX, ${amd_pgo}, ${arm_pgo}"
+            MATRIX="$MATRIX, ${amd_pgo}, ${legacy_pgo}, ${ally_gcc}, ${ally_pgo}, ${arm_pgo}"
           fi
 
           MATRIX="$MATRIX]"
@@ -157,7 +171,6 @@ jobs:
         run: ./.ci/windows/package.sh
         env:
           MSYS_TOOLCHAIN: ${{ matrix.os.msystem }}
-          ARCH: mingw-${{ env.ARCH }}
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v7
