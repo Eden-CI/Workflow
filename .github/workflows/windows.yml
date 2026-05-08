@@ -75,9 +75,9 @@ jobs:
           arm_clang="$(target "$ARM64" "$CLANG")"
           arm_pgo="$(target "$ARM64" "$PGO")"
 
-          MATRIX="[${amd_gcc}, ${legacy_gcc}, ${arm_clang}"
+          MATRIX="[${amd_gcc}, ${arm_clang}"
           if [ "${{ inputs.devel }}" != "true" ] || [ "${{ inputs.force_pgo }}" = "true" ]; then
-            MATRIX="$MATRIX, ${amd_pgo}, ${legacy_pgo}, ${ally_gcc}, ${ally_pgo}, ${arm_pgo}"
+            MATRIX="$MATRIX, ${amd_pgo}, ${ally_gcc}, ${ally_pgo}, ${arm_pgo}"
           fi
 
           MATRIX="$MATRIX]"
