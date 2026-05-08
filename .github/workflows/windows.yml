@@ -27,6 +27,7 @@ env:
   FORGEJO_TOKEN: ${{ secrets.FORGEJO_TOKEN }}
   DEVEL: ${{ inputs.devel }}
   BUILD_ID: ${{ inputs.build-id }}
+  FORCE_PGO: ${{ inputs.force_pgo }}
 
 jobs:
   set-matrix:
@@ -38,73 +39,11 @@ jobs:
     steps:
       ## MSYS2 ##
       - id: msys
-        run: |
-          # Currently uses MINGW64. Could try clang64 or ucrt64,
-          # but not viable right now.
-
-          arch() {
-            cat <<-EOF
-            "runs-on": "$1", "arch": "$2", "msystem": "$3"
-            EOF
-          }
-
-          AMD64="$(arch windows-latest amd64 MINGW64)"
-          LEGACY="$(arch windows-latest legacy MINGW64)"
-          ALLY="$(arch windows-latest rog-ally MINGW64)"
-          ARM64="$(arch windows-11-arm arm64 CLANGARM64)"
-
-          PGO='"program": "clang", "target": "pgo"'
-          CLANG='"program": "clang", "target": "standard"'
-          GCC='"program": "gcc", "target": "standard"'
-
-          target() {
-            arch="$1"
-            compiler="$2"
-
-            echo "{${arch}, ${compiler}}"
-          }
-
-          # TODO(crueter): dedupe in some way
-          # TODO(crueter): Probably don't need legacy?
-          amd_gcc="$(target "$AMD64" "$GCC")"
-          amd_pgo="$(target "$AMD64" "$PGO")"
-          legacy_gcc="$(target "$LEGACY" "$GCC")"
-          legacy_pgo="$(target "$LEGACY" "$PGO")"
-          ally_gcc="$(target "$ALLY" "$GCC")"
-          ally_pgo="$(target "$ALLY" "$PGO")"
-          arm_clang="$(target "$ARM64" "$CLANG")"
-          arm_pgo="$(target "$ARM64" "$PGO")"
-
-          MATRIX="[${amd_gcc}, ${arm_clang}"
-          if [ "${{ inputs.devel }}" != "true" ] || [ "${{ inputs.force_pgo }}" = "true" ]; then
-            MATRIX="$MATRIX, ${amd_pgo}, ${ally_gcc}, ${ally_pgo}, ${arm_pgo}"
-          fi
-
-          MATRIX="$MATRIX]"
-
-          echo $MATRIX
-          echo "matrix=${MATRIX}" >> $GITHUB_OUTPUT
+        run: ./.ci/matrix/msys.sh
 
       # TODO(crueter): See if PGO does anything appreciable.
       - id: msvc
-        run: |
-          AMD64='"runs-on": "windows-latest", "arch": "amd64"'
-          ARM64='"runs-on": "windows-11-arm", "arch": "arm64"'
-
-          PGO='"program": "msvc", "target": "pgo"'
-          CLANG='"program": "msvc", "target": "standard"'
-
-          target() {
-            arch="$1"
-            compiler="$2"
-
-            echo "{${arch}, ${compiler}}"
-          }
-
-          amd64_msvc="$(target "$AMD64" "$CLANG")"
-          MATRIX="[${amd64_msvc}]"
-
-          echo "matrix=${MATRIX}" >> $GITHUB_OUTPUT
+        run: ./.ci/matrix/msvc.sh
 
   # TODO: setup
   msys:
@@ -179,8 +118,8 @@ jobs:
           archive: false
           path: artifacts/*
 
-
   # TODO: setup
+  # TODO(crueter): Could probably be combined but I'm lazy + it doesn't matter.
   msvc:
     name: "MSVC ${{ matrix.os.arch }} ${{ matrix.os.target }}"
     needs: [set-matrix]
@@ -203,7 +142,7 @@ jobs:
       - name: Setup
         uses: ./.github/workflows/setup
         with:
-          key: MSVC-${{ matrix.os.msystem }}-${{ matrix.os.arch }}-${{ matrix.os.program }}
+          key: Windows-${{ matrix.os.arch }}-${{ matrix.os.program }}
           version: ${{ inputs.cpm-cache-version }}
 
       - name: Load payload environment
