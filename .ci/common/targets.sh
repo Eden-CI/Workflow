@@ -3,7 +3,7 @@
 # SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-SDL_FLAGS=(-DYUZU_USE_BUNDLED_SDL2=ON)
+SDL_FLAGS=(-DYUZU_USE_BUNDLED_SDL3=ON)
 
 # only clang and gcc support this
 if [ -n "$SUPPORTS_TARGETS" ]; then
@@ -100,17 +100,9 @@ if [ -n "$SUPPORTS_TARGETS" ]; then
 	fi
 fi
 
-# Steamdeck targets need older sdl2
-if [ "$STEAMDECK" = "true" ]; then
-	SDL_FLAGS=(
-		-DYUZU_SYSTEM_PROFILE=steamdeck
-		-DYUZU_USE_EXTERNAL_SDL2=ON
-	)
-fi
-
-# Package targets use system sdl2
+# Package targets use system sdl3
 if [ "$PACKAGE" = "true" ]; then
-	SDL_FLAGS=(-DYUZU_USE_BUNDLED_SDL2=OFF)
+	SDL_FLAGS=(-DYUZU_USE_BUNDLED_SDL3=OFF)
 fi
 
 [ -n "$ARCH_FLAGS" ] && ARCH_CMAKE+=(-DCMAKE_C_FLAGS="${ARCH_FLAGS}" -DCMAKE_CXX_FLAGS="${ARCH_FLAGS}")

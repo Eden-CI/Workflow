@@ -11,7 +11,7 @@ set -- autoconf glslang-tools cmake git gcc g++ ninja-build \
     qt6-base-private-dev libenet-dev libsimpleini-dev libcpp-jwt-dev libfmt-dev \
     liblz4-dev libzstd-dev libssl-dev libavfilter-dev libavcodec-dev \
     libswscale-dev zlib1g-dev libva-dev libvdpau-dev \
-    libcubeb-dev libvulkan-dev spirv-tools libusb-1.0-0-dev libsdl2-dev \
+    libcubeb-dev libvulkan-dev spirv-tools libusb-1.0-0-dev libsdl3-dev \
     libqt6core5compat6 libquazip1-qt6-dev libopus-dev qt6-charts-dev
 
 
