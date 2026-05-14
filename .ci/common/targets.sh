@@ -27,13 +27,11 @@ if [ -n "$SUPPORTS_TARGETS" ]; then
 			echo "Making Steam Deck (Zen 2) optimized build of ${PROJECT_PRETTYNAME}"
 			ARCH_FLAGS="-march=znver2 -mtune=znver2"
 			ARCH="steamdeck"
-			STEAMDECK=true
 			;;
 		rog-ally|allyx|zen4)
 			echo "Making ROG Ally X (Zen 4) optimized build of ${PROJECT_PRETTYNAME}"
 			ARCH_FLAGS="-march=znver4 -mtune=znver4"
 			ARCH="rog-ally-x"
-			STEAMDECK=true
 			;;
 		aarch64|arm64)
 			echo "Making armv8-a build of ${PROJECT_PRETTYNAME}"
@@ -100,9 +98,11 @@ if [ -n "$SUPPORTS_TARGETS" ]; then
 	fi
 fi
 
-# Package targets use system sdl3
+# Package targets SHOULD use system sdl3
+# but since Debian 12 is our minimum target we can't use it yet
+# TODO: Drop debian 12
 if [ "$PACKAGE" = "true" ]; then
-	SDL_FLAGS=(-DYUZU_USE_BUNDLED_SDL3=OFF)
+	SDL_FLAGS=(-DYUZU_USE_BUNDLED_SDL3=ON)
 fi
 
 [ -n "$ARCH_FLAGS" ] && ARCH_CMAKE+=(-DCMAKE_C_FLAGS="${ARCH_FLAGS}" -DCMAKE_CXX_FLAGS="${ARCH_FLAGS}")
