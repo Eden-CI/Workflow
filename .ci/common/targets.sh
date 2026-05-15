@@ -98,8 +98,8 @@ if [ -n "$SUPPORTS_TARGETS" ]; then
 	fi
 fi
 
-# Package targets SHOULD use system sdl3
-# but since Debian 12 is our minimum target we can't use it yet
+# Package targets should use system sdl3
+# Mostly to test comp
 # TODO: Drop debian 12
 if [ "$PACKAGE" = "true" ]; then
 	SDL_FLAGS=(-DYUZU_USE_BUNDLED_SDL3=ON)
