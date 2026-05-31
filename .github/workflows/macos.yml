@@ -34,7 +34,7 @@ jobs:
         os:
           - runs-on: macos-latest
             arch: arm64
-        compiler: [universal]
+        compiler: [clang]
 
     steps:
       - name: Checkout
