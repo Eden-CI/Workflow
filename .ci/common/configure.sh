@@ -77,8 +77,8 @@ COMMON_FLAGS=(
 	-DYUZU_USE_BUNDLED_SIRIT="${SIRIT:-ON}"
 
 	# Bundled stuff (only if not building for a pkg)
+	# TODO: ffmpeg external
 	-DYUZU_USE_BUNDLED_FFMPEG="${FFMPEG:-ON}"
-	-DYUZU_USE_BUNDLED_OPENSSL="${OPENSSL:-ON}"
 
 	# macos only
 	-DYUZU_USE_BUNDLED_MOLTENVK=ON
