@@ -11,12 +11,9 @@ SDL_FLAGS=(
 OPENSSL=external
 
 # only clang and gcc support this
-if [ -n "$SUPPORTS_TARGETS" ]; then
-	# MSVC (clang-cl) makes generic builds
-	if [ "$PLATFORM" = win ] && [ "$TARGET" = amd64 ]; then
-		TARGET=legacy
-	fi
-
+if [ "$PLATFORM" = win ]; then
+	OPENSSL=bundled
+elif [ -n "$SUPPORTS_TARGETS" ]; then
 	case "$TARGET" in
 		legacy)
 			echo "Making amd64 generic build of ${PROJECT_PRETTYNAME}"
