@@ -27,6 +27,7 @@ env:
   FORGEJO_TOKEN: ${{ secrets.FORGEJO_TOKEN }}
   DEVEL: ${{ inputs.devel }}
   BUILD_ID: ${{ inputs.build-id }}
+  FORCE_PGO: ${{ inputs.force_pgo }}
 
 jobs:
   # TODO(crueter): All matrix steps can be combined into one, probably.
