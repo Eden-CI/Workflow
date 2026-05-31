@@ -83,7 +83,7 @@ jobs:
         run: ./.ci/common/configure.sh -DCCACHE_PATH=${SCCACHE_PATH}
 
       - name: Build
-        run: cmake --build build
+        run: cmake --build build --verbose
 
       - name: Package
         run: ./.ci/linux/package.sh
