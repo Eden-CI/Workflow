@@ -29,6 +29,7 @@ env:
   BUILD_ID: ${{ inputs.build-id }}
 
 jobs:
+  # TODO(crueter): All matrix steps can be combined into one, probably.
   set-matrix:
     name: "Generate AppImage Matrix"
     runs-on: ubuntu-latest
@@ -36,6 +37,9 @@ jobs:
       matrix: ${{ steps.set.outputs.matrix }}
       compiler: ${{ steps.set.outputs.compiler }}
     steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
       - id: set
         run: ./.ci/matrix/appimage.sh
 
