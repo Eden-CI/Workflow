@@ -31,7 +31,7 @@ env:
 
 jobs:
   set-matrix:
-    name: "Generate Matrices"
+    name: "Generate Windows Matrices"
     runs-on: ubuntu-latest
     outputs:
       msys: ${{ steps.msys.outputs.matrix }}
