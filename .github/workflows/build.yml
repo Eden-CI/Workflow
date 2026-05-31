@@ -21,7 +21,7 @@ env:
   DEVEL: ${{ inputs.devel }}
   BUILD_ID: ${{ inputs.build-id }}
   TEMP_PATCH_NUMBER: ""
-  FORCE_PGO: "false"
+  FORCE_PGO: "true"
 
 jobs:
   clone:
