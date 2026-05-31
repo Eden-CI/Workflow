@@ -9,8 +9,8 @@ arch() {
 	EOF
 }
 
-AMD64="$(arch windows-latest amd64 MINGW64)"
-ALLY="$(arch windows-latest rog-ally MINGW64)"
+AMD64="$(arch windows-latest amd64 UCRT64)"
+ALLY="$(arch windows-latest rog-ally UCRT64)"
 ARM64="$(arch windows-11-arm arm64 CLANGARM64)"
 
 PGO='"program": "clang", "target": "pgo"'
