@@ -73,6 +73,12 @@ elif [ -n "$SUPPORTS_TARGETS" ]; then
 			# apparently gcc-arm64 on ubuntu dislikes lto
 			LTO=OFF
 			;;
+		m1|apple)
+			echo "Making Apple M1 build of ${PROJECT_PRETTYNAME}"
+			ARCH_FLAGS="-march=apple-m1 -mtune=apple-m1"
+			ARCH=m1
+			OPENSSL=bundled
+			;;
 		*)
 			echo "Invalid target $TARGET specified"
 			exit 1

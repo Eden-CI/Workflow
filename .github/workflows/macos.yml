@@ -37,11 +37,11 @@ jobs:
         compiler: [clang]
 
     env:
-      TARGET: aarch64
+      TARGET: m1
       COMPILER: clang
 
       # TODO: force_pgo input, matrix, etc.
-      PGO_TARGET: pgo
+      PGO_TARGET: standard
 
     steps:
       - name: Checkout
