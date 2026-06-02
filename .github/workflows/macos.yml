@@ -38,6 +38,7 @@ jobs:
 
     env:
       TARGET: aarch64
+      COMPILER: clang
 
     steps:
       - name: Checkout
