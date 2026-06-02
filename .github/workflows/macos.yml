@@ -40,6 +40,9 @@ jobs:
       TARGET: aarch64
       COMPILER: clang
 
+      # TODO: force_pgo input, matrix, etc.
+      PGO_TARGET: pgo
+
     steps:
       - name: Checkout
         uses: actions/checkout@v6
