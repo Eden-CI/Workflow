@@ -75,7 +75,7 @@ elif [ -n "$SUPPORTS_TARGETS" ]; then
 			;;
 		m1|apple)
 			echo "Making Apple M1 build of ${PROJECT_PRETTYNAME}"
-			ARCH_FLAGS="-mcpu=apple-m1 -mtune=apple-m1"
+			ARCH_FLAGS="-mcpu=apple-m1"
 			ARCH=m1
 			OPENSSL=bundled
 			;;
