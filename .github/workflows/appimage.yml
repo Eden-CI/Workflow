@@ -79,6 +79,13 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.CUSTOM_GITHUB_TOKEN }}
 
+      - name: Check make
+        run: |
+          which make
+          make --version
+          file "$(which make)"
+          ldd "$(which make)"
+
       - name: Configure
         run: ./.ci/common/configure.sh -DCCACHE_PATH=${SCCACHE_PATH}
 
