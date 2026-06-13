@@ -75,18 +75,18 @@ jobs:
           version: ${{ inputs.cpm-cache-version }}
 
       - name: Install dependencies
-        run: ./.ci/linux/deps.sh
+        run: ./.ci/deps/arch.sh
         env:
           GITHUB_TOKEN: ${{ secrets.CUSTOM_GITHUB_TOKEN }}
 
       - name: Configure
-        run: ./.ci/common/configure.sh -DCCACHE_PATH=${SCCACHE_PATH}
+        run: ./.ci/build/configure.sh -DCCACHE_PATH=${SCCACHE_PATH}
 
       - name: Build
         run: cmake --build build -- -d explain -d stats --verbose
 
       - name: Package
-        run: ./.ci/linux/package.sh
+        run: ./.ci/package/linux.sh
         env:
           GITHUB_TOKEN: ${{ secrets.CUSTOM_GITHUB_TOKEN }}
 

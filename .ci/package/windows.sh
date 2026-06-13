@@ -8,7 +8,7 @@ BUILDDIR="${BUILDDIR:-$ROOTDIR/build}"
 ARTIFACTS_DIR="$ROOTDIR/artifacts"
 
 # shellcheck disable=SC1091
-. "$ROOTDIR/.ci/common/project.sh"
+. "$ROOTDIR/.ci/build/project.sh"
 
 BINDIR="$BUILDDIR/bin"
 PKGDIR="$BUILDDIR/pkg"
@@ -18,13 +18,13 @@ EXE="${PROJECT_REPO}.exe"
 WINDEPLOYQT="${WINDEPLOYQT:-windeployqt6}"
 
 # check if common script folder is on Workflow
-if [ ! -d "$ROOTDIR/.ci/common" ]; then
-	echo "error: could not find $ROOTDIR/.ci/common"
+if [ ! -d "$ROOTDIR/.ci/build" ]; then
+	echo "error: could not find $ROOTDIR/.ci/build"
 	exit 1
 fi
 
 # shellcheck disable=SC1091
-. "$ROOTDIR/.ci/common/platform.sh"
+. "$ROOTDIR/.ci/build/platform.sh"
 
 rm -f "$BINDIR/"*.pdb || true
 

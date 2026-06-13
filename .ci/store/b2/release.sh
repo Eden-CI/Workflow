@@ -3,7 +3,7 @@
 # shellcheck disable=SC1091
 
 ROOTDIR="$PWD"
-. "$ROOTDIR/.ci/common/project.sh"
+. "$ROOTDIR/.ci/build/project.sh"
 ARTIFACTS_DIR="$ROOTDIR/artifacts"
 
 # upload to a subdir of the main bucket dir
@@ -11,7 +11,7 @@ _remote="$B2_DIR$GITHUB_TAG"
 _local="$ARTIFACTS_DIR"
 _bucket="$B2_BUCKET"
 
-cd "$ROOTDIR/.ci/b2"
+cd "$ROOTDIR/.ci/store/b2"
 
 _header() {
     echo
@@ -99,6 +99,6 @@ if [ -n "$CF_TOKEN" ] && [ -n "$CF_ZONE_ID" ]; then
 
 	if [ -s purge.txt ]; then
 		# shellcheck disable=SC2046
-		.ci/cf/purge-cache.sh $(cat purge.txt)
+		.ci/store/cf/purge-cache.sh $(cat purge.txt)
 	fi
 fi

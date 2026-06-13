@@ -17,7 +17,7 @@ To start, you must have repositories to store builds. Right now, these MUST be G
 
 You're recommended to create an organization specifically for this workflow, *plus* individual repositories for each type: PR, Master, and Release. In the future, Nightly and Continuous test builds will be separate as well.
 
-Once done, edit the corresponding entries in `.ci/release.json`. Additionally, edit `.ci/default.json` to include your Forgejo source code repository and any other mirrors.
+Once done, edit the corresponding entries in `.ci/config/fj.json`. Additionally, edit `.ci/config/default.json` to include your Forgejo source code repository and any other mirrors.
 
 ## Tokens
 

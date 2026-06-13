@@ -1,6 +1,7 @@
 # Contributing
 
 Maintainers:
+
 - crueter <crueter@eden-emu.dev>
 
 Thanks for your interest in contributing! Before you begin, make sure that you're in the right place. If you want to contribute to Eden, go to [its dedicated repository](https://git.eden-emu.dev/eden-emu/eden). If you want to contribute directly to the CI/build scripts for Eden, then continue on here.
@@ -9,7 +10,7 @@ Thanks for your interest in contributing! Before you begin, make sure that you'r
 
 Make sure to follow the general layout already present in this repository.
 
-- Scripts and programs should go in `.ci` and be organized by category. If you're not sure where it goes, put it in `common`.
+- Scripts and programs should go in `.ci` and be organized by category (`build/`, `package/`, `release/`, `store/`, `config/`, `deps/`, `fj/`, `matrix/`).
 - GitHub workflows go in `.github/workflows`. Follow standard conventions there, nothing in particular is nonstandard here.
 
 ## Conventions
@@ -18,7 +19,7 @@ These are not hard and fast rules, but you are very strongly encouraged to follo
 
 - Scripts should be POSIX shell, unless you absolutely need bash features such as arrays, or Python features.
 - External dependencies should be minimized if possible. Script suites that manage complex request tasks such as Forgejo releases are okay.
-- Conditional CMake configuration options should be placed within files in `.ci/common`, either hijacking existing files or adding new ones.
+- Conditional CMake configuration options should be placed within files in `.ci/build`, either hijacking existing files or adding new ones.
 
 ## Policies
 

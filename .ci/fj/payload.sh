@@ -8,7 +8,7 @@
 # shellcheck disable=SC1091
 
 ROOTDIR="$PWD"
-. "$ROOTDIR/.ci/common/project.sh"
+. "$ROOTDIR/.ci/build/project.sh"
 
 FORGEJO_LENV=${FORGEJO_LENV:-"forgejo.env"}
 touch "$FORGEJO_LENV"
@@ -24,15 +24,15 @@ _field() {
 }
 
 b2_field() {
-	_field "$ROOTDIR"/.ci/b2.json "$1" "$2"
+	_field "$ROOTDIR"/.ci/config/b2.json "$1" "$2"
 }
 
 fj_field() {
-	_field "$ROOTDIR"/.ci/fj.json "$1" "$2"
+	_field "$ROOTDIR"/.ci/config/fj.json "$1" "$2"
 }
 
 parse_payload() {
-	DEFAULT_JSON="$ROOTDIR/.ci/default.json"
+	DEFAULT_JSON="$ROOTDIR/.ci/config/default.json"
 	PAYLOAD_JSON="payload.json"
 
 	if [ ! -f "$PAYLOAD_JSON" ]; then
@@ -147,7 +147,7 @@ parse_payload() {
 
 		FORGEJO_PR_NUMBER=$(jq -r '.number' $PAYLOAD_JSON)
 		FORGEJO_PR_URL=$(jq -r '.url' $PAYLOAD_JSON)
-		FORGEJO_PR_TITLE=$(python3 "$ROOTDIR/.ci/common/field.py" field="title" default_msg="No title provided" pull_request_number="$FORGEJO_PR_NUMBER")
+		FORGEJO_PR_TITLE=$(python3 "$ROOTDIR/.ci/field.py" field="title" default_msg="No title provided" pull_request_number="$FORGEJO_PR_NUMBER")
 
 		{
 			echo "FORGEJO_PR_NUMBER=$FORGEJO_PR_NUMBER"
@@ -171,7 +171,7 @@ parse_payload() {
 		;;
 	nightly)
 		FORGEJO_BRANCH=$(jq -r ".[$FALLBACK_IDX].branch" "$DEFAULT_JSON")
-		FORGEJO_REF=$("$ROOTDIR/.ci/common/field.py" field="sha")
+		FORGEJO_REF=$("$ROOTDIR/.ci/field.py" field="sha")
 
 		_tag="v${_timestamp}.${FORGEJO_REF}"
 		_ref="${FORGEJO_REF}"
@@ -189,7 +189,7 @@ parse_payload() {
 		;;
 	push | test)
 		FORGEJO_BRANCH=$(jq -r ".[$FALLBACK_IDX].branch" "$DEFAULT_JSON")
-		FORGEJO_REF=$("$ROOTDIR/.ci/common/field.py" field="sha")
+		FORGEJO_REF=$("$ROOTDIR/.ci/field.py" field="sha")
 
 		_tag="v${_timestamp}.${FORGEJO_REF}"
 		_ref="${FORGEJO_REF}"

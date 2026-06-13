@@ -41,7 +41,7 @@ jobs:
         run: |
           echo '${{ toJSON(github.event.client_payload) }}' > ./payload.json
           jq . payload.json
-          ./.ci/forgejo.sh --parse ${{ inputs.build-id }}
+          ./.ci/fj/payload.sh --parse ${{ inputs.build-id }}
 
       - name: Load payload environment
         run: . ./.ci/fj/load-env.sh
@@ -54,7 +54,7 @@ jobs:
           echo "pgo=${FORCE_PGO}" >> "$GITHUB_OUTPUT"
 
       - name: Clone
-        run: ./.ci/forgejo.sh --clone ${{ inputs.build-id }}
+        run: ./.ci/fj/payload.sh --clone ${{ inputs.build-id }}
 
       # Clone step is still changing forgejo.env, due to a bug on Forgejo, send after it
       # <https://codeberg.org/forgejo/forgejo/issues/9601>
@@ -67,7 +67,7 @@ jobs:
 
       - name: Send pending status
         if: ${{ (inputs.build-id) == 'master' || (inputs.build-id) == 'pull_request' }}
-        run: python3 ./.ci/common/status.py --pending
+        run: python3 ./.ci/release/status.py --pending
 
       - name: Apply Temporary Patch
         if: ${{ env.TEMP_PATCH_NUMBER != '' }}
@@ -129,7 +129,7 @@ jobs:
         run: . ./.ci/fj/load-env.sh
 
       - name: Build
-        run: ./.ci/source/build.sh
+        run: ./.ci/build/source.sh
 
   deb:
     if: ${{ inputs.build-id == 'pull_request' || inputs.build-id == 'test' }}

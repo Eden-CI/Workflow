@@ -24,20 +24,20 @@ BUILDDIR="${BUILDDIR:-$ROOTDIR/build}"
 # shellcheck disable=SC2153
 echo "Build ID: $BUILD_ID"
 
-. "$ROOTDIR/.ci/common/project.sh"
+. "$ROOTDIR/.ci/build/project.sh"
 
 if [ "$BUILD_ID" = nightly ]; then
 	NIGHTLY=ON
 fi
 
 # platform handling
-. "$ROOTDIR/.ci/common/platform.sh"
+. "$ROOTDIR/.ci/build/platform.sh"
 
 # SDL/arch handling (targets)
-. "$ROOTDIR/.ci/common/targets.sh"
+. "$ROOTDIR/.ci/build/targets.sh"
 
 # compiler handling
-. "$ROOTDIR/.ci/common/compiler.sh"
+. "$ROOTDIR/.ci/build/compiler.sh"
 
 # Disable update checker on linux appimage
 if [ "$PLATFORM" = "linux" ]; then

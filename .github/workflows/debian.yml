@@ -59,10 +59,10 @@ jobs:
           version: ${{ inputs.cpm-cache-version }}
 
       - name: Install dependencies
-        run: ./.ci/debian/deps.sh
+        run: ./.ci/deps/debian.sh
 
       - name: Configure
-        run:  ./.ci/common/configure.sh -DCCACHE_PATH=${SCCACHE_PATH}
+        run:  ./.ci/build/configure.sh -DCCACHE_PATH=${SCCACHE_PATH}
 
       - name: Build
         run: cmake --build build

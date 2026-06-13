@@ -6,7 +6,7 @@
 # shellcheck disable=SC1091
 
 ROOTDIR="$PWD"
-. ./.ci/common/project.sh
+. ./.ci/build/project.sh
 
 opts() {
 	falsy "$DISABLE_OPTS"
@@ -30,7 +30,7 @@ pull_request)
 	echo "([Master Build]($MASTER_RELEASE_URL?q=$FORGEJO_PR_MERGE_BASE&expanded=true))"
 	echo
 	echo "## Changelog"
-	python3 .ci/common/field.py field="body" default_msg="No changelog provided" pull_request_number="$FORGEJO_PR_NUMBER"
+	python3 .ci/field.py field="body" default_msg="No changelog provided" pull_request_number="$FORGEJO_PR_NUMBER"
 	;;
 tag)
 	echo "## Changelog"

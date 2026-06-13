@@ -28,12 +28,12 @@ _end() {
 ## Pack ##
 
 _group "Packaging artifacts nicely"
-"$ROOTDIR"/.ci/common/pack.sh
+"$ROOTDIR"/.ci/release/pack.sh
 _end
 
 ## Changelog ##
 _group "Generating changelog"
-"$ROOTDIR"/.ci/changelog/generate.sh "$BUILD_ID" > changelog.md
+"$ROOTDIR"/.ci/release/changelog.sh "$BUILD_ID" > changelog.md
 cat changelog.md
 _end
 
@@ -41,7 +41,7 @@ _end
 
 if [ "$SEND_STATUS" = "1" ]; then
     _group "Sending build status"
-    python3 "$ROOTDIR"/.ci/common/status.py --"$STATUS"
+    python3 "$ROOTDIR"/.ci/release/status.py --"$STATUS"
     _end
 fi
 
@@ -49,8 +49,8 @@ fi
 
 if release && b2 && [ "$RELEASE_B2" = "true" ]; then
     _group "Publishing to B2"
-    "$ROOTDIR"/.ci/b2/auth.sh
-    "$ROOTDIR"/.ci/b2/release.sh
+    "$ROOTDIR"/.ci/store/b2/auth.sh
+    "$ROOTDIR"/.ci/store/b2/release.sh
     _end
 
     # create an external release on Forgejo with the B2 URLs
@@ -72,7 +72,7 @@ fi
 
 if [ "$RELEASE_DISCORD" = "1" ]; then
     _group "Publishing to Discord"
-    "$ROOTDIR"/.ci/discord/publish.sh
+    "$ROOTDIR"/.ci/release/discord.sh
     _end
 fi
 

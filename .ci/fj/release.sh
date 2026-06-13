@@ -9,7 +9,7 @@
 # TODO(crueter): DEDUP
 
 ROOTDIR="$PWD"
-. "$ROOTDIR/.ci/common/project.sh"
+. "$ROOTDIR/.ci/build/project.sh"
 ARTIFACTS_DIR="$ROOTDIR"/artifacts
 
 _external="$1"
@@ -80,7 +80,7 @@ fi
 
 if [ "$SEND_STATUS" = "1" ]; then
     _header "Sending Release status"
-    python3 "$ROOTDIR"/.ci/common/status.py --release "$FJ_URL"
+    python3 "$ROOTDIR"/.ci/release/status.py --release "$FJ_URL"
 fi
 
 ## PR Number ##

@@ -54,16 +54,16 @@ jobs:
           version: ${{ inputs.cpm-cache-version }}
 
       - name: Install dependencies
-        run: ./.ci/macos/deps.sh
+        run: ./.ci/deps/macos.sh
 
       - name: Configure
-        run: ./.ci/common/configure.sh -DCCACHE_PATH=${SCCACHE_PATH}
+        run: ./.ci/build/configure.sh -DCCACHE_PATH=${SCCACHE_PATH}
 
       - name: Build
         run: cmake --build build
 
       - name: Package
-        run: ./.ci/macos/dmg.sh
+        run: ./.ci/package/macos.sh --format dmg
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v7

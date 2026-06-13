@@ -56,7 +56,7 @@ jobs:
           [ -f "$FORGEJO_LENV" ] || exit 0
 
           . ./.ci/fj/load-env.sh
-          . ./.ci/common/steps.sh | tee -a "$GITHUB_ENV"
+          . ./.ci/release/steps.sh | tee -a "$GITHUB_ENV"
 
       # - name: Delete Previous PR Number
       #   if: ${{ env.RELEASE_PR == '1' }}
