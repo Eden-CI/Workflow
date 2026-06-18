@@ -27,6 +27,8 @@ pacman -Syu --noconfirm --overwrite "*" \
 	libva \
 	libvdpau \
 	libvpx \
+	libxcursor \
+	libxss \
 	lld \
 	llvm \
     lxqt-qtplugin \
