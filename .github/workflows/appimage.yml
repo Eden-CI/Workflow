@@ -39,7 +39,7 @@ jobs:
       compiler: ${{ steps.set.outputs.compiler }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - id: set
         run: ./.ci/matrix/appimage.sh
@@ -66,7 +66,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Setup
         uses: ./.github/workflows/setup
