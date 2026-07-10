@@ -177,10 +177,7 @@ jobs:
 
       - name: Configure
         shell: bash
-        run: |
-          git config --global core.autocrlf off
-          dos2unix .patch/boost/*
-          ./.ci/build/configure.sh -DCCACHE_PATH=${SCCACHE_PATH}
+        run: ./.ci/build/configure.sh -DCCACHE_PATH=${SCCACHE_PATH}
 
       - name: Build
         shell: bash
