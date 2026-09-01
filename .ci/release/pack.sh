@@ -29,6 +29,7 @@ find "$ROOTDIR" \( \
 
 if [ "$DEVEL" = false ]; then
 	if command -v apt-get >/dev/null 2>&1; then
+		sudo apt-get update
 		sudo apt-get install -y mktorrent
 	fi
 	files_dir="${PROJECT_PRETTYNAME}-${GITHUB_TAG}"
