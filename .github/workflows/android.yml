@@ -29,7 +29,7 @@ env:
 jobs:
   and-matrix:
     name: "Generate Android targets"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     outputs:
       targets: ${{ steps.set.outputs.targets }}
     steps:

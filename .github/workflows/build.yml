@@ -29,7 +29,7 @@ jobs:
       cachever: ${{ steps.out.outputs.cachever }}
       pgo: ${{ steps.out.outputs.pgo }}
     name: Parse and Clone
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
 
     steps:
       - name: Checkout
@@ -104,7 +104,7 @@ jobs:
   source:
     if: ${{ inputs.build-id == 'pull_request' }}
     name: Source Pack
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     needs: [clone]
 
     steps:

@@ -33,7 +33,7 @@ jobs:
   # TODO(crueter): All matrix steps can be combined into one, probably.
   set-matrix:
     name: "Generate AppImage Matrix"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     outputs:
       matrix: ${{ steps.set.outputs.matrix }}
       compiler: ${{ steps.set.outputs.compiler }}

@@ -38,7 +38,7 @@ jobs:
       DEVEL: "${{ inputs.devel }}"
       STATUS: "${{ inputs.status }}"
       BUILD_ID: "${{ inputs.build-id }}"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     steps:
       - uses: actions/checkout@v7
         with:
