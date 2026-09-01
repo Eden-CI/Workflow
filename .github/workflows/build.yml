@@ -120,6 +120,9 @@ jobs:
         shell: bash
         run: . ./.ci/fj/load-env.sh
 
+      - name: Install CMake
+        run: sudo apt install -y cmake
+
       - name: Clone
         uses: actions/download-artifact@v8
         with:
