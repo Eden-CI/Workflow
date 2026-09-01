@@ -3,10 +3,14 @@
 # SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 # SPDX-License-Identifier: GPL-3.0-or-later
 
+# TODO: This is slop, convert to shell.
+
 import os
-import requests
 import sys
 import argparse
+import json
+import urllib.error
+import urllib.request
 
 # Required Forgejo environment variables
 FORGEJO_HOST = os.getenv("FORGEJO_HOST")
@@ -77,18 +81,34 @@ def send_commit_status(state: str, release_url: str | None = None):
         "context": target_context
     }
 
-    headers = {"Authorization": f"token {FORGEJO_TOKEN}", "Content-Type": "application/json"}
+    headers = {
+        "Authorization": f"token {FORGEJO_TOKEN}",
+        "Content-Type": "application/json",
+        "User-Agent": "Python-urllib/3",
+    }
+
+    payload = json.dumps(data).encode("utf-8")
+    req = urllib.request.Request(api_url, data=payload, headers=headers, method="POST")
 
     try:
-        r = requests.post(api_url, headers=headers, json=data, timeout=10)
-        if r.status_code not in (200, 201):
-            print(f"[WARN] Failed to send commit status: HTTP {r.status_code} -> {r.text}")
-            if r.status_code == 401:
-                print("[INFO] Token unauthorized, skipping further requests.")
-        else:
-            print(f"[INFO] Commit status sent successfully ({data['context']}): {target_state}")
-            if state == "release" and release_url:
-                print(f"[INFO] Target URL: {target_url}")
+        with urllib.request.urlopen(req, timeout=10) as response:
+            status_code = response.status
+            response_body = response.read().decode("utf-8")
+
+            if status_code not in (200, 201):
+                print(f"[WARN] Failed to send commit status: HTTP {status_code} -> {response_body}")
+            else:
+                print(
+                    f"[INFO] Commit status sent successfully ({data['context']}): {target_state}"
+                )
+                if state == "release" and release_url:
+                    print(f"[INFO] Target URL: {target_url}")
+
+    except urllib.error.HTTPError as e:
+        body = e.read().decode("utf-8")
+        print(f"[WARN] Failed to send commit status: HTTP {e.code} -> {body}")
+        if e.code == 401:
+            print("[INFO] Token unauthorized, skipping further requests.")
     except Exception as e:
         print(f"[ERROR] Exception while sending commit status: {e}")
 
