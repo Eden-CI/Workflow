@@ -3,6 +3,7 @@
 # SPDX-FileCopyrightText: Copyright 2025 Eden Emulator Project
 # SPDX-License-Identifier: GPL-3.0-or-later
 
+brew update
 brew install --formula --quiet \
   autoconf \
   automake \
