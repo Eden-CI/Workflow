@@ -18,7 +18,7 @@ brew install --formula --quiet \
   hidapi \
   libtool \
   libusb \
-  lld \
+  lld@22 \
   llvm@22 \
   lz4 \
   molten-vk \
@@ -35,5 +35,3 @@ brew install --formula --quiet \
   vulkan-utility-libraries \
   zlib \
   zstd
-
-brew uninstall llvm@23
