@@ -11,7 +11,7 @@ if [ "$COMPILER" = "clang" ]; then
 		CLANGPP=clang++
 		;;
 	macos)
-		prefix="$(brew --prefix llvm@22)/bin"
+		prefix="$(brew --prefix llvm)/bin"
 		CLANG="${prefix}/clang"
 		CLANGPP="${prefix}/clang++"
 		# maybe not needed

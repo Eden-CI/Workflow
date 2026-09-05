@@ -18,8 +18,8 @@ brew install --formula --quiet \
   hidapi \
   libtool \
   libusb \
-  lld@22 \
-  llvm@22 \
+  lld \
+  llvm \
   lz4 \
   molten-vk \
   ninja \
@@ -35,6 +35,3 @@ brew install --formula --quiet \
   vulkan-utility-libraries \
   zlib \
   zstd
-
-brew link --overwrite llvm@22
-brew link --overwrite lld@22
