@@ -19,7 +19,7 @@ brew install --formula --quiet \
   libtool \
   libusb \
   lld \
-  llvm \
+  llvm@22 \
   lz4 \
   mbedtls@3 \
   molten-vk \
