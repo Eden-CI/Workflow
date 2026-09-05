@@ -21,7 +21,6 @@ brew install --formula --quiet \
   lld \
   llvm@22 \
   lz4 \
-  mbedtls@3 \
   molten-vk \
   ninja \
   nlohmann-json \
@@ -36,3 +35,5 @@ brew install --formula --quiet \
   vulkan-utility-libraries \
   zlib \
   zstd
+
+brew uninstall llvm@23
