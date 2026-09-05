@@ -35,3 +35,6 @@ brew install --formula --quiet \
   vulkan-utility-libraries \
   zlib \
   zstd
+
+brew link --overwrite llvm@22
+brew link --overwrite lld@22
