@@ -87,7 +87,7 @@ android() {
 
 	printf " | "
 	if pgo; then
-		file_link "$type APK (PGO)" "Android-${ARTIFACT_REF}-${flavor}.apk"
+		file_link "$type APK (PGO)" "Android-${ARTIFACT_REF}-${flavor}-pgo.apk"
 	fi
 
 	echo " | $notes |"
