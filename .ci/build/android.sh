@@ -119,7 +119,7 @@ if [ "$PGO_TARGET" = "pgo" ]; then
 	curl -sSfLO "https://$RELEASE_PGO_HOST/$RELEASE_PGO_REPO/releases/latest/download/${PROFDATA}"
 	command -v cygpath >/dev/null 2>&1 && PROFDATA="$(cygpath -m "$PROFDATA")"
 
-	PGO_FLAGS="-fprofile-use=$PROFDATA -Wno-backend-plugin -Wno-profile-instr-unprofiled -Wno-profile-instr-out-of-date"
+	PGO_FLAGS="-fprofile-use=$PWD/$PROFDATA -Wno-backend-plugin -Wno-profile-instr-unprofiled -Wno-profile-instr-out-of-date"
 	set -- "$@" -DCMAKE_C_FLAGS="$PGO_FLAGS" -DCMAKE_CXX_FLAGS="$PGO_FLAGS"
 fi
 
