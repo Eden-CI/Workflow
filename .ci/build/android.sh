@@ -113,7 +113,7 @@ if [ "$PGO_TARGET" = "pgo" ]; then
 
 	CCACHE=OFF
 
-	PROFDATA="${PROJECT_REPO}.profdata"
+	PROFDATA="eden.profdata"
 	rm -f "$PROFDATA"
 
 	curl -sSfLO "https://$RELEASE_PGO_HOST/$RELEASE_PGO_REPO/releases/latest/download/${PROFDATA}"
