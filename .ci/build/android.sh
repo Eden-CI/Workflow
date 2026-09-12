@@ -24,7 +24,7 @@ bool values are "true" or "false"
 Options:
     -r, --release        	Enable update checker. If set, sets the DEVEL bool variable to false.
                          	By default, DEVEL is true.
-    -t, --target <FLAVOR> 	Build flavor (variable: TARGET)
+    -t, --target <FLAVOR> 	Build flavor (variable: FLAVOR)
                           	Valid values are: legacy, optimized, standard, chromeos
                           	Default: standard
     -b, --build-type <TYPE>	Build type (variable: TYPE)
@@ -33,6 +33,7 @@ Options:
 
 Extra arguments are passed to CMake (e.g. -DCMAKE_OPTION_NAME=VALUE)
 Set the CCACHE variable to "true" to enable build caching.
+Set PGO_TARGET to "pgo" to make a PGO build (incompatible with ccache)
 The APK will be output into "$ARTIFACTS_DIR".
 
 EOF
@@ -45,10 +46,10 @@ die() {
 	RETURN=1 usage
 }
 
-target() {
-    [ -z "$1" ] && die "You must specify a valid target."
+flavor() {
+    [ -z "$1" ] && die "You must specify a valid flavor."
 
-    TARGET="$1"
+    FLAVOR="$1"
 }
 
 type() {
@@ -60,7 +61,7 @@ type() {
 while true; do
 	case "$1" in
 		-r|--release) DEVEL=false ;;
-		-t|--target) target "$2"; shift ;;
+		-t|--target) flavor "$2"; shift ;;
 		-b|--build-type) type "$2"; shift ;;
 		-h|--help) usage ;;
 		*) break ;;
@@ -69,18 +70,19 @@ while true; do
 	shift
 done
 
-: "${TARGET:=standard}"
+: "${FLAVOR:=standard}"
+: "${PGO_TARGET:=standard}"
 : "${TYPE:=Release}"
 : "${DEVEL:=true}"
 
-TARGET_LOWER=$(echo "$TARGET" | tr '[:upper:]' '[:lower:]')
+FLAVOR_LOWER=$(echo "$FLAVOR" | tr '[:upper:]' '[:lower:]')
 
-case "$TARGET_LOWER" in
-	legacy) FLAVOR=Legacy ;;
-	optimized) FLAVOR=GenshinSpoof ;;
-	standard) FLAVOR=Mainline ;;
-    chromeos) FLAVOR=ChromeOS ;;
-	*) die "Invalid build flavor $TARGET."
+case "$FLAVOR_LOWER" in
+	legacy) APK_FLAVOR=Legacy ;;
+	optimized) APK_FLAVOR=GenshinSpoof ;;
+	standard) APK_FLAVOR=Mainline ;;
+    chromeos) APK_FLAVOR=ChromeOS ;;
+	*) die "Invalid build flavor $FLAVOR."
 esac
 
 case "$TYPE" in
@@ -106,9 +108,24 @@ else
 	NIGHTLY=false
 fi
 
+if [ "$PGO_TARGET" = "pgo" ]; then
+	echo "Creating PGO build"
+
+	CCACHE=OFF
+
+	PROFDATA="${PROJECT_REPO}.profdata"
+	rm -f "$PROFDATA"
+
+	curl -sSfLO "https://$RELEASE_PGO_HOST/$RELEASE_PGO_REPO/releases/latest/download/${PROFDATA}"
+	command -v cygpath >/dev/null 2>&1 && PROFDATA="$(cygpath -m "$PROFDATA")"
+
+	PGO_FLAGS="-fprofile-use=$PROFDATA -Wno-backend-plugin -Wno-profile-instr-unprofiled -Wno-profile-instr-out-of-date"
+	set -- "$@" -DCMAKE_C_FLAGS="$PGO_FLAGS" -DCMAKE_CXX_FLAGS="$PGO_FLAGS"
+fi
+
 echo "-- building..."
 
-./gradlew "copy${FLAVOR}${TYPE}Outputs" \
+./gradlew "copy${APK_FLAVOR}${TYPE}Outputs" \
     -Dorg.gradle.caching="${CCACHE}" \
     -Dorg.gradle.parallel="${CCACHE}" \
     -Dorg.gradle.workers.max="${NUM_JOBS}" \
@@ -121,7 +138,13 @@ fi
 
 cd "$ARTIFACTS_DIR"
 
-mv ./*.apk "${PROJECT_PRETTYNAME}-Android-${ARTIFACT_REF}-${TARGET_LOWER}.apk"
+name="${PROJECT_PRETTYNAME}-Android-${ARTIFACT_REF}-${FLAVOR_LOWER}"
+
+if [ "$PGO_TARGET" = "pgo" ]; then
+	name="$name-pgo"
+fi
+
+mv ./*.apk "$name.apk"
 
 cd "$ROOTDIR"
 

@@ -12,6 +12,10 @@ opts() {
 	falsy "$DISABLE_OPTS"
 }
 
+pgo() {
+	(opts && tagged) || truthy "$FORCE_PGO"
+}
+
 devel=true
 
 # FIXME(crueter)
@@ -78,9 +82,25 @@ android() {
 	flavor="$2"
 	notes="$3"
 
-	printf "| "
-	file_link "$type" "Android-${ARTIFACT_REF}-${flavor}.apk"
+	printf "| %s | " "$type"
+	file_link "$type APK" "Android-${ARTIFACT_REF}-${flavor}.apk"
+
+	printf " | "
+	if pgo; then
+		file_link "$type APK (PGO)" "Android-${ARTIFACT_REF}-${flavor}.apk"
+	fi
+
 	echo " | $notes |"
+}
+
+android_matrix() {
+	android "Standard" "standard" "The standard build. Most users should use this."
+
+	if pgo; then
+		android "Genshin Spoof" "optimized" "Spoofs Eden as Genshin Impact, which may enable optimizations/frame generation on some flagship devices."
+		android "Legacy" "legacy" "For Snapdragon 865 and other unsupported chipsets"
+	fi
+
 }
 
 linux_field() {
@@ -91,7 +111,7 @@ linux_field() {
 	printf "| %s | " "$pretty_arch"
 	file_link "Standard AppImage" "Linux-${ARTIFACT_REF}-${arch}-gcc-standard.AppImage"
 
-	if tagged; then
+	if tagged || pgo; then
 		printf " ("
 		file_link "zsync" "Linux-${arch}-gcc-standard.AppImage.zsync"
 		printf ") | "
@@ -127,7 +147,7 @@ room_matrix() {
 msvc_field() {
 	printf "| amd64/x86_64 (MSVC) | "
 	file_link "MSVC zip" "Windows-${ARTIFACT_REF}-amd64-msvc-standard.zip"
-	if tagged && opts; then
+	if pgo; then
 		printf " | "
 	fi
 
@@ -149,7 +169,7 @@ win_field() {
 	file_link "Standard zip" "Windows-${ARTIFACT_REF}-${arch}-${compiler}-standard.zip"
 	printf " | "
 
-	if tagged && opts; then
+	if pgo; then
 		file_link "PGO zip" "Windows-${ARTIFACT_REF}-${arch}-clang-pgo.zip"
 	fi
 
@@ -160,7 +180,7 @@ win_matrix() {
 	msvc_field
 	win_field amd64 "amd64/x86_64 v3" "Built with MinGW. Requires Ryzen, 4th gen Intel, or newer"
 
-	if tagged || truthy "${FORCE_PGO}"; then
+	if pgo; then
 		win_field rog-ally "Zen 4" "Requires Zen 4 or newer (e.g. ROG Ally X, Legion Go S). Incompatible with Intel"
 	fi
 
@@ -193,7 +213,7 @@ cat <<EOF
 Linux packages are distributed via AppImage.
 EOF
 
-if opts && tagged; then
+if pgo; then
 	cat <<-EOF
 		[zsync](https://zsync.moria.org.uk/) files are provided for easier updating, such as via
 		[AM](https://github.com/ivan-hc/AM).
@@ -232,7 +252,7 @@ Windows packages are in-place zip files. Setup files are soon to come.
 
 EOF
 
-if opts && tagged; then
+if pgo; then
 	cat <<-EOF
 		| Build Type | Standard | PGO (Recommended) | Notes |
 		|------------|----------|-------------------|-------|
@@ -247,21 +267,27 @@ fi
 
 win_matrix
 
+cat <<-EOF
+
+	## Android
+
+EOF
+
 if falsy "$DISABLE_ANDROID"; then
-	cat <<-EOF
+	if pgo; then
+		cat <<-EOF
+			| Build Type | Standard | PGO (Recommended) | Notes |
+			|------------|----------|-------------------|-------|
+		EOF
+	else
+		cat <<-EOF
 
-		## Android
-
-		| Build  | Notes |
-		|--------|-------|
-	EOF
-
-	android "Standard APK" "standard" "The standard build. Most users should use this."
-
-	if tagged; then
-		android "Genshin Spoof APK" "optimized" "Spoofs Eden as Genshin Impact, which may enable optimizations/frame generation on some flagship devices."
-		android "Legacy APK" "legacy" "For Snapdragon 865 and other unsupported chipsets"
+			| Build Type |  | Notes |
+			|------------|--|-------|
+		EOF
 	fi
+
+	android_matrix
 fi
 
 cat <<EOF
