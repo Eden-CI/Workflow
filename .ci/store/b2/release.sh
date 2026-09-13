@@ -35,36 +35,61 @@ case "$BUILD_ID" in
 esac
 
 ## URLS ##
-_header "Creating urls.txt"
+_header "Creating assets.json"
 
 # get the URLs and put them in a file
 # TODO(crueter): Move these off of Forgejo and onto some static page.
 find "$_local" -type f | while read -r artifact; do
+	case "$artifact" in
+		*.json) continue ;;
+	esac
+
 	_name="$(basename "$artifact")"
-	echo "https://$B2_PUBLIC_URL/${GITHUB_TAG}/${_name}"
-done > "$ROOTDIR"/urls.txt
+	_url="https://$B2_PUBLIC_URL/${GITHUB_TAG}/${_name}"
+	_size="$(stat -c "%s" "$artifact")"
+	_date="$(date -Iseconds)"
+	_digest="sha256:$(sha256sum "$artifact" | cut -d' ' -f1)"
+
+	jq -c -n \
+		--arg name "$_name" \
+		--arg date "$_date" \
+		--arg size "$_size" \
+		--arg url "$_url" \
+		--arg digest "$_digest" \
+		'$url, {
+			name: $name,
+			size: ($size | tonumber),
+			digest: $digest,
+			created_at: $date,
+			browser_download_url: $url
+		}'
+done | jq -s '.' > "$ROOTDIR"/assets.json
 
 echo
-cat "$ROOTDIR"/urls.txt
-cp "$ROOTDIR"/urls.txt "$_local"
+cat "$ROOTDIR"/assets.json | jq -r '.'
+cp "$ROOTDIR"/assets.json "$_local"
 
 # passed to release.json
-_assets=$(jq -R -s -c 'split("\n") | map(select(length > 0))' "$ROOTDIR/urls.txt")
+_assets=$(cat "$ROOTDIR"/assets.json)
 
 ## RELEASE.JSON ##
 _header "Creating release.json"
 
+_date="$(date -Iseconds)"
 jq -c -n \
     --arg title "$GITHUB_TITLE" \
     --arg tag "$GITHUB_TAG" \
     --arg body "$(cat "$_body")" \
     --arg base "https://$B2_PUBLIC_URL" \
+	--arg date "$_date" \
     --argjson assets "$_assets" \
     '{
         tag_name: $tag,
         name: $title,
         body: $body,
         base: $base,
+		created_at: $date,
+		published_at: $date,
         assets: $assets
     }' > "$_local/release.json"
 
