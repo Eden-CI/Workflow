@@ -56,7 +56,7 @@ find "$_local" -type f | while read -r artifact; do
 		--arg size "$_size" \
 		--arg url "$_url" \
 		--arg digest "$_digest" \
-		'$url, {
+		'{
 			name: $name,
 			size: ($size | tonumber),
 			digest: $digest,
@@ -80,20 +80,20 @@ jq -c -n \
     --arg title "$GITHUB_TITLE" \
     --arg tag "$GITHUB_TAG" \
     --arg body "$(cat "$_body")" \
-    --arg base "https://$B2_PUBLIC_URL" \
 	--arg date "$_date" \
     --argjson assets "$_assets" \
     '{
         tag_name: $tag,
         name: $title,
         body: $body,
-        base: $base,
 		created_at: $date,
 		published_at: $date,
         assets: $assets
     }' > "$_local/release.json"
 
 cat "$_local"/release.json
+
+exit 0
 
 ## UPLOAD ##
 _header "Uploading versioned artifacts"
