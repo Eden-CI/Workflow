@@ -75,23 +75,25 @@ _assets=$(cat "$ROOTDIR"/assets.json)
 ## RELEASE.JSON ##
 _header "Creating release.json"
 
+_date="$(date -Iseconds)"
 jq -c -n \
     --arg title "$GITHUB_TITLE" \
     --arg tag "$GITHUB_TAG" \
     --arg body "$(cat "$_body")" \
     --arg base "https://$B2_PUBLIC_URL" \
+	--arg date "$_date" \
     --argjson assets "$_assets" \
     '{
         tag_name: $tag,
         name: $title,
         body: $body,
         base: $base,
+		created_at: $date,
+		published_at: $date,
         assets: $assets
     }' > "$_local/release.json"
 
 cat "$_local"/release.json
-
-exit 0
 
 ## UPLOAD ##
 _header "Uploading versioned artifacts"
