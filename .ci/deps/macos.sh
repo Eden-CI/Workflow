@@ -11,7 +11,6 @@ brew install --formula --quiet \
   Catch2 \
   cmake \
   create-dmg \
-  cubeb \
   enet \
   fmt \
   glslang \
