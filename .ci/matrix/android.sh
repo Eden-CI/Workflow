@@ -17,7 +17,7 @@ pgo="standard"
 
 if use_extra; then
 	flavors="standard legacy optimized"
-	pgo="standard pgo"
+	# pgo="standard pgo"
 fi
 
 printf '['
