@@ -12,7 +12,6 @@ brew install --formula --quiet \
   cmake \
   create-dmg \
   enet \
-  fmt \
   glslang \
   hidapi \
   libtool \
