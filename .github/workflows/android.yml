@@ -15,6 +15,10 @@ on:
         description: 'Development mode (disables update checker)'
         type: string
         required: true
+      force_pgo:
+        description: "Force PGO builds"
+        type: string
+        required: true
 
 env:
   ANDROID_KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
@@ -25,19 +29,20 @@ env:
   FORGEJO_TOKEN: ${{ secrets.FORGEJO_TOKEN }}
   DEVEL: ${{ inputs.devel }}
   BUILD_ID: ${{ inputs.build-id }}
+  FORCE_PGO: ${{ inputs.force_pgo }}
 
 jobs:
   and-matrix:
-    name: "Generate Android targets"
+    name: "Generate Android Matrix"
     runs-on: ubuntu-slim
     outputs:
-      targets: ${{ steps.set.outputs.targets }}
+      matrix: ${{ steps.set.outputs.matrix }}
     steps:
       - name: Checkout
         uses: actions/checkout@v7
 
       - id: set
-        run: ./.ci/matrix/android.sh
+        run: echo "matrix=$(./.ci/matrix/android.sh)" >> "$GITHUB_OUTPUT"
 
   android:
     name: "Android"
@@ -47,9 +52,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        target: ${{ fromJson(needs.and-matrix.outputs.targets) }}
+        include: ${{ fromJson(needs.and-matrix.outputs.matrix) }}
     env:
-      TARGET: "${{ matrix.target.flavor }}"
+      FLAVOR: "${{ matrix.flavor }}"
+      PGO_TARGET: "${{ matrix.target }}"
+
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -60,6 +67,12 @@ jobs:
           key: ${{ runner.os }}-amd64-universal
           version: ${{ inputs.cpm-cache-version }}
 
+      - name: Install NDK r30
+        uses: nttld/setup-ndk@v1
+        with:
+          ndk-version: r30
+          link-to-sdk: true
+
       - name: Install dependencies
         run: ./.ci/deps/android.sh
 
@@ -69,6 +82,6 @@ jobs:
       - name: Upload APK
         uses: actions/upload-artifact@v7
         with:
-          name: android-${{ matrix.target.flavor }}
+          name: android-${{ matrix.flavor }}-${{ matrix.target }}
           archive: false
           path: artifacts/*.apk

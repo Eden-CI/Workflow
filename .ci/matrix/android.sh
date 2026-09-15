@@ -1,27 +1,31 @@
 #!/bin/sh -e
 
-flavor() {
-	cat <<-EOF
-		{"flavor": "$1"}
-	EOF
+# TODO: refactor all existing matrix scripts to this style
+
+use_extra() {
+	[ "$DEVEL" != "true" ] || [ "$FORCE_PGO" = "true" ]
 }
 
-standard=$(flavor standard)
-chromeos=$(flavor chromeos)
-optimized=$(flavor optimized)
-legacy=$(flavor legacy)
+first=1
+flavor() {
+	[ "$first" -eq 1 ] && first=0 || printf ','
+	printf '{"flavor": "%s", "target": "%s"}' "$1" "$2"
+}
 
-# TODO: rename force_pgo to force_tag or something
-# and have it build the extras here too
-targets="[$standard"
+flavors="standard"
+pgo="standard"
 
-if [ "$DEVEL" = "false" ]; then
-	targets="$targets, $legacy, $optimized, $chromeos"
-elif [ "$BUILD_ID" = "pull_request" ]; then
-	targets="$targets, $chromeos"
+if use_extra; then
+	flavors="standard legacy optimized"
+	# pgo="standard pgo"
 fi
 
-targets="$targets]"
+printf '['
 
-echo "Android Targets: $targets"
-echo "targets=${targets}" >>"$GITHUB_OUTPUT"
+for flv in $flavors; do
+	for tgt in $pgo; do
+		flavor "$flv" "$tgt"
+	done
+done
+
+echo ']'
