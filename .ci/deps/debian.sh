@@ -12,18 +12,9 @@ set -- autoconf glslang-tools cmake git gcc g++ ninja-build \
     liblz4-dev libzstd-dev libssl-dev libavfilter-dev libavcodec-dev \
     libswscale-dev zlib1g-dev libva-dev libvdpau-dev \
     libcubeb-dev libvulkan-dev spirv-tools libusb-1.0-0-dev \
-    libqt6core5compat6 libquazip1-qt6-dev libopus-dev qt6-charts-dev
-
-# Awesome
-if [ "$DEBIAN_VERSION" -eq 12 ]; then
-    set -- "$@" libboost-context1.81-dev libboost-fiber1.81-dev
-fi
-
-# trixie
-if [ "$DEBIAN_VERSION" -ge 13 ]; then
-    set -- "$@" libfrozen-dev libvulkan-memory-allocator-dev libsdl3-dev \
-        libasound2t64 libboost-context-dev libboost-fiber-dev libcpp-httplib-dev
-fi
+    libqt6core5compat6 libquazip1-qt6-dev libopus-dev qt6-charts-dev \
+	libfrozen-dev libvulkan-memory-allocator-dev libsdl3-dev \
+	libasound2t64 libboost-context-dev libboost-fiber-dev libcpp-httplib-dev
 
 apt update
 apt install -y "$@"

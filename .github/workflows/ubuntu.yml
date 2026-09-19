@@ -1,0 +1,68 @@
+name: "Debian"
+
+on:
+  workflow_call:
+    inputs:
+      build-id:
+        description: 'Identifier for workflows and caching'
+        type: string
+        required: true
+      cpm-cache-version:
+        description: 'CPM Cache Version'
+        type: string
+        required: true
+      devel:
+        description: 'Development mode (disables update checker)'
+        type: string
+        required: true
+      ubuntu-version:
+        description: 'Ubuntu version (26.04, ...)'
+        type: string
+        required: true
+
+env:
+  DISABLE_ARM: ${{ vars.DISABLE_ARM }}
+  SCCACHE_GHA_ENABLED: "true"
+  CCACHE: "true"
+  FORGEJO_TOKEN: ${{ secrets.FORGEJO_TOKEN }}
+  DEVEL: ${{ inputs.devel }}
+  BUILD_ID: ${{ inputs.build-id }}
+
+jobs:
+  debian:
+    name: "Ubuntu ${{ inputs.ubuntu-version }} (${{ matrix.arch }})"
+    runs-on: ${{ matrix.runs-on }}
+    container: ubuntu:${{ inputs.ubuntu-version }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runs-on: ubuntu-24.04
+            arch: amd64
+
+          - runs-on: ubuntu-24.04-arm
+            arch: aarch64
+
+    env:
+      TARGET: package-${{ matrix.arch }}
+      ubuntu_VERSION: ${{ inputs.ubuntu-version }}
+      COMPILER: gcc
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup
+        uses: ./.github/workflows/setup
+        with:
+          key: ubuntu-${{ matrix.arch }}
+          version: ${{ inputs.cpm-cache-version }}
+
+      - name: Install dependencies
+        run: ./.ci/deps/debian.sh
+
+      - name: Configure
+        run:  ./.ci/build/configure.sh -DCCACHE_PATH=${SCCACHE_PATH}
+
+      - name: Build
+        run: cmake --build build

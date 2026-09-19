@@ -131,16 +131,29 @@ jobs:
       - name: Build
         run: ./.ci/build/source.sh
 
-  deb:
+  # Uncomment when GCC 16 gets too old and Debian 14 is out
+  # deb:
+  #   if: ${{ inputs.build-id == 'pull_request' || inputs.build-id == 'test' }}
+  #   name: Debian
+  #   needs: [clone]
+  #   uses: ./.github/workflows/debian.yml
+  #   with:
+  #     build-id: '${{ inputs.build-id }}'
+  #     cpm-cache-version: '${{ needs.clone.outputs.cachever }}'
+  #     devel: ${{ inputs.devel }}
+  #     debian-version: 13
+  #   secrets: inherit
+
+  ubuntu:
     if: ${{ inputs.build-id == 'pull_request' || inputs.build-id == 'test' }}
-    name: Debian
+    name: Ubuntu
     needs: [clone]
-    uses: ./.github/workflows/debian.yml
+    uses: ./.github/workflows/ubuntu.yml
     with:
       build-id: '${{ inputs.build-id }}'
       cpm-cache-version: '${{ needs.clone.outputs.cachever }}'
       devel: ${{ inputs.devel }}
-      debian-version: 13
+      ubuntu-version: 26.04
     secrets: inherit
 
   linux:
