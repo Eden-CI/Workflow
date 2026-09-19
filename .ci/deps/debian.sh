@@ -14,7 +14,8 @@ set -- autoconf glslang-tools cmake git gcc g++ ninja-build \
     libcubeb-dev libvulkan-dev spirv-tools libusb-1.0-0-dev \
     libqt6core5compat6 libquazip1-qt6-dev libopus-dev qt6-charts-dev \
 	libfrozen-dev libvulkan-memory-allocator-dev libsdl3-dev \
-	libasound2t64 libboost-context-dev libboost-fiber-dev libcpp-httplib-dev
+	libasound2t64 libboost-context-dev libboost-fiber-dev libcpp-httplib-dev \
+	vulkan-utility-libraries-dev
 
 apt update
 apt install -y "$@"
