@@ -69,7 +69,7 @@ echo "Installing debloated packages..."
 echo "---------------------------------------------------------------"
 wget --retry-connrefused --tries=30 "$EXTRA_PACKAGES"
 chmod +x get-debloated-pkgs.sh
-./get-debloated-pkgs.sh --add-mesa qt6-base-mini libxml2-mini opus-nano intel-media-driver
+./get-debloated-pkgs.sh --add-mesa qt6-base-mini libxml2-mini opus-mini intel-media-driver
 
 echo "All done!"
 echo "---------------------------------------------------------------"
