@@ -107,6 +107,11 @@ COMMON_FLAGS=(
 	-DNIGHTLY_BUILD="${NIGHTLY:-OFF}"
 )
 
+# force static opus
+if [ "$OPUS" = "true" ]; then
+	COMMON_FLAGS+=(-DOpus_FORCE_BUNDLED=ON)
+fi
+
 # cmd line stuff
 EXTRA_ARGS=("$@")
 
