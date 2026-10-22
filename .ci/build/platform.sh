@@ -8,6 +8,9 @@
 QT=OFF
 STATIC=OFF
 
+# set to ON to force a static opus
+OPUS=OFF
+
 uname -s
 
 # special case for Windows (FU microsoft)
@@ -31,6 +34,7 @@ else
 		OPENSSL=ON
 		SIRIT=ON
 		SUPPORTS_TARGETS=ON
+		OPUS=ON
 		;;
 	Darwin*)
 		PLATFORM=macos
@@ -81,5 +85,6 @@ export SUPPORTS_TARGETS
 export SIRIT
 export STATIC
 export QT
+export OPUS
 
 # TODO(crueter): document outputs n such
