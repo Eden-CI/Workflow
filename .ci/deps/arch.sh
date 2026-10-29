@@ -7,7 +7,7 @@ EXTRA_PACKAGES="https://raw.githubusercontent.com/pkgforge-dev/Anylinux-AppImage
 
 echo "Installing build dependencies..."
 echo "---------------------------------------------------------------"
-pacman -Syu --noconfirm --overwrite "*" \
+set -- \
 	base-devel \
 	boost-libs \
 	boost \
@@ -62,8 +62,13 @@ pacman -Syu --noconfirm --overwrite "*" \
 	zsync
 
 if [ "$(uname -m)" = 'x86_64' ]; then
-	pacman -Syu --noconfirm --overwrite "*" haskell-gnutls svt-av1
+	set -- "$@" haskell-gnutls svt-av1
 fi
+
+# pacman moment
+for _ in 1 2 3; do
+	if pacman -Syu --noconfirm --overwrite "*" "$@"; then break; fi
+done
 
 echo "Installing debloated packages..."
 echo "---------------------------------------------------------------"
