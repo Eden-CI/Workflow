@@ -153,7 +153,7 @@ jobs:
       build-id: '${{ inputs.build-id }}'
       cpm-cache-version: '${{ needs.clone.outputs.cachever }}'
       devel: ${{ inputs.devel }}
-      ubuntu-version: 26.04
+      ubuntu-version: 26.10
     secrets: inherit
 
   linux:

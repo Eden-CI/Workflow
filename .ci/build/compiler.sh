@@ -28,6 +28,9 @@ if [ "$COMPILER" = "clang" ]; then
 elif [ "$COMPILER" = "msvc" ]; then
 	# bruh
 	COMPILER_FLAGS+=(-DCMAKE_C_COMPILER=clang-cl -DCMAKE_CXX_COMPILER=clang-cl)
+elif [ "$COMPILER" = "gcc-16" ]; then
+	# KILL YOURSELF
+	COMPILER_FLAGS+=(-DCMAKE_C_COMPILER=gcc-16 -DCMAKE_CXX_COMPILER=g++-16)
 fi
 
 export COMPILER_FLAGS

@@ -3,7 +3,7 @@
 # TODO(crueter): surely there's *some* way to dedupe this... right???
 
 # all versions...?
-set -- autoconf glslang-tools cmake git gcc g++ ninja-build \
+set -- autoconf glslang-tools cmake git gcc-16 g++-16 ninja-build \
     qt6-tools-dev libtool nasm pkg-config nlohmann-json3-dev spirv-headers \
     libglu1-mesa-dev libhidapi-dev libpulse-dev libudev-dev \
     libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-render-util0 \
