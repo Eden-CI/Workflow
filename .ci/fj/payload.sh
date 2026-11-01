@@ -147,12 +147,14 @@ parse_payload() {
 
 		FORGEJO_PR_NUMBER=$(jq -r '.number' $PAYLOAD_JSON)
 		FORGEJO_PR_URL=$(jq -r '.url' $PAYLOAD_JSON)
+		FORGEJO_LABEL=$(jq -r '.label' $PAYLOAD_JSON)
 		FORGEJO_PR_TITLE=$(python3 "$ROOTDIR/.ci/field.py" field="title" default_msg="No title provided" pull_request_number="$FORGEJO_PR_NUMBER")
 
 		{
 			echo "FORGEJO_PR_NUMBER=$FORGEJO_PR_NUMBER"
 			echo "FORGEJO_PR_URL=$FORGEJO_PR_URL"
 			echo "FORGEJO_PR_TITLE=$FORGEJO_PR_TITLE"
+			echo "FORGEJO_LABEL=$FORGEJO_LABEL"
 		} >>"$FORGEJO_LENV"
 
 		_tag="${FORGEJO_PR_NUMBER}-${FORGEJO_REF}"
@@ -262,6 +264,11 @@ clone_repository() {
 	done
 
 	cd "$PROJECT_REPO"
+
+	# This is an AGit PR, fetch that first
+	if [ -n "$FORGEJO_LABEL" ] && [ "$FORGEJO_LABEL" != "$FORGEJO_BRANCH" ]; then
+		git fetch origin "+${FORGEJO_BRANCH}:${FORGEJO_LABEL}"
+	fi
 
 	if ! git checkout "$FORGEJO_REF"; then
 		echo "Ref $FORGEJO_REF not found locally, trying to fetch..."
