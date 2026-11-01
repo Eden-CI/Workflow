@@ -123,7 +123,12 @@ if [ "$PGO_TARGET" = "pgo" ]; then
 	set -- "$@" -DCMAKE_C_FLAGS="$PGO_FLAGS" -DCMAKE_CXX_FLAGS="$PGO_FLAGS"
 fi
 
-echo "-- building..."
+echo "-- Installing CMake"
+
+# gha has 3.31.6 for the host, but only 3.31.5 for Android
+"$ANDROID_SDK_ROOT"/cmdline-tools/latest/bin/sdkmanager "cmake;3.31.6"
+
+echo "-- Building"
 
 ./gradlew "copy${APK_FLAVOR}${TYPE}Outputs" \
     -Dorg.gradle.caching="${CCACHE}" \
