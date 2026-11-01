@@ -46,7 +46,7 @@ jobs:
     env:
       TARGET: package-${{ matrix.arch }}
       ubuntu_VERSION: ${{ inputs.ubuntu-version }}
-      COMPILER: gcc
+      COMPILER: gcc-16
 
     steps:
       - name: Checkout
