@@ -26,6 +26,7 @@ These are not hard and fast rules, but you are very strongly encouraged to follo
 - Absolutely no AI-generated or assisted code is allowed.
 - Packages are only to be produced for platforms or targets with a significant and measurable user base.
 - Distribution channels are only to be added if they have a significant and measurable impact or benefit.
+  - Also consider that additional distribution methods may induce additional costs to me or the team. Please be mindful of this. If you are hosting an alternative distribution site and pay for it yourself, that's fine.
 
 ## Okay, so how do I contribute?
 

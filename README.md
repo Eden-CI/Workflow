@@ -8,4 +8,4 @@ For info on setup, how it works (WIP), etc. see the [docs](./docs)
 
 ## Licensing
 
-This is licensed under the GPLv3. This means that any forks of the workflow that distribute builds or binaries MUST also have their source code available under the GPLv3.
+This is licensed under the GPLv3. This means that any forks of the workflow that distribute builds or binaries MUST also have their source code available under the GPLv3. However, the built application itself does not necessarily have to be GPLv3.

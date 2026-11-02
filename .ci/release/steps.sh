@@ -53,20 +53,20 @@ if status; then
 	echo "SEND_STATUS=1"
 fi
 
-if [ "$BUILD_ID" = pull_request ] && release; then
-	echo "RELEASE_PR=1"
-fi
-
-if [ "$BUILD_ID" = "nightly" ] && dc && release; then
-	echo "RELEASE_DISCORD=1"
-fi
-
 if release; then
 	echo "RELEASE_FJ=1"
-fi
 
-if [ "$BUILD_ID" = tag ] && release; then
-    echo "RELEASE_TAG=1"
+	if [ "$BUILD_ID" = pull_request ]; then
+		echo "RELEASE_PR=1"
+	fi
+
+	if [ "$BUILD_ID" = "nightly" ] && dc; then
+		echo "RELEASE_DISCORD=1"
+	fi
+
+	if [ "$BUILD_ID" = tag ]; then
+		echo "RELEASE_TAG=1"
+	fi
 fi
 
 # if release && [ "$BUILD_ID" != 'tag' ]; then
