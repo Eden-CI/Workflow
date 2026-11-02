@@ -86,7 +86,7 @@ android() {
 	file_link "$type APK" "Android-${ARTIFACT_REF}-${flavor}.apk"
 
 	printf " | "
-	if pgo; then
+	if pgo && false; then
 		file_link "$type APK (PGO)" "Android-${ARTIFACT_REF}-${flavor}-pgo.apk"
 	fi
 
@@ -231,7 +231,7 @@ fi
 
 linux_matrix
 
-if [ "$1" = "tag" ]; then
+if false && [ "$1" = "tag" ]; then
 	cat <<-EOF
 
 		### Room Executables
@@ -274,7 +274,7 @@ cat <<-EOF
 EOF
 
 if falsy "$DISABLE_ANDROID"; then
-	if pgo; then
+	if pgo && false; then
 		cat <<-EOF
 			| Build Type | Standard | PGO (Recommended) | Notes |
 			|------------|----------|-------------------|-------|

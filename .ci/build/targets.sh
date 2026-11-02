@@ -43,6 +43,7 @@ elif [ -n "$SUPPORTS_TARGETS" ]; then
 			ARCH_FLAGS="-march=armv8-a -mtune=generic"
 			ARCH=aarch64
 			OPENSSL=bundled
+			LTO=OFF
 			;;
 		armv9)
 			echo "Making armv9-a build of ${PROJECT_PRETTYNAME}"

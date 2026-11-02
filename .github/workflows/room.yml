@@ -40,9 +40,12 @@ jobs:
             -e GITHUB_REF_NAME \
             -e GITHUB_SHA \
             -e ARCH \
-            alpine:3.23 sh -c '
-              apk add --no-cache bash cmake g++ gcc git ninja patch boost1.84-dev boost1.84-static \
-                mbedtls-dev mbedtls-static openssl-libs-static openssl-dev
+            alpine:3.24 sh -c '
+              apk update
+              apk add --no-cache cmake g++ gcc git ninja-build ninja-is-really-ninja \
+              patch openssl-libs-static openssl-dev
+
+              ninja --version
               cmake -S . -B build -GNinja -DYUZU_STATIC_ROOM=ON
               cmake --build build
 
