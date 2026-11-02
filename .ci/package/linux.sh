@@ -22,9 +22,9 @@ export DEPLOY_OPENGL=1
 export DEPLOY_VULKAN=1
 export VERSION="${GITHUB_TAG}"
 
-ADD_HOOKS="wayland-is-broken.hook"
+ADD_HOOKS=""
 if [ "$DEVEL" != "true" ]; then
-	ADD_HOOKS="$ADD_HOOKS:self-updater.hook"
+	ADD_HOOKS="self-updater.hook"
 fi
 
 export ADD_HOOKS
