@@ -99,15 +99,44 @@ cat "$_local"/release.json
 
 ## UPLOAD ##
 _header "Uploading versioned artifacts"
-tools/dir.sh "$_bucket" "$_remote" "$_local"
+
+# retry 3x
+for _ in 1 2 3; do
+	if ! tools/dir.sh "$_bucket" "$_remote" "$_local"; then
+		echo "Upload failed, trying again in 5 seconds"
+		sleep 5
+	else
+		break
+	fi
+done
 
 ## RM OLD LATEST (except release.json) ##
 _header "Deleting old latest"
-tools/rm.sh "$_bucket" "latest" --exclude "*.json"
+
+# retry 3x
+for _ in 1 2 3; do
+	if ! tools/rm.sh "$_bucket" "latest" --exclude "*.json"; then
+		echo "Remove failed, trying again in 5 seconds"
+		sleep 5
+	else
+		break
+	fi
+
+done
 
 ## UPLOAD NEW LATEST ##
 _header "Uploading latest artifacts"
-tools/dir.sh "$_bucket" "latest" "$_local"
+
+# retry 3x
+for _ in 1 2 3; do
+	if ! tools/dir.sh "$_bucket" "latest" "$_local"; then
+		echo "Upload failed, trying again in 5 seconds"
+		sleep 5
+	else
+		break
+	fi
+
+done
 
 cd "$ROOTDIR"
 
