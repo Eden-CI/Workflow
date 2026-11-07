@@ -129,8 +129,9 @@ linux_field() {
 
 linux_matrix() {
 	linux_field amd64 "amd64"
+	linux_field legacy "Legacy amd64" "Pre-Ryzen or Haswell CPUs (expect sadness)"
+
 	if tagged && opts; then
-		linux_field legacy "Legacy amd64" "Pre-Ryzen or Haswell CPUs (expect sadness)"
 		linux_field steamdeck "Steam Deck" "Zen 2"
 		linux_field rog-ally "Zen 4" "Zen 4 (AMD Z1/Z2, ROG Ally X, Legion Go S)"
 	fi

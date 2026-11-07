@@ -18,9 +18,9 @@ legacy=$(arch ubuntu-latest legacy)
 steam=$(arch ubuntu-latest steamdeck)
 ally=$(arch ubuntu-latest rog-ally)
 
-arches="[$amd, $arm"
+arches="[$amd, $arm, $legacy"
 if use_extra; then
-	arches="$arches, $legacy, $steam, $ally"
+	arches="$arches, $steam, $ally"
 fi
 arches="$arches]"
 
