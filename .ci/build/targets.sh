@@ -89,6 +89,12 @@ elif [ -n "$SUPPORTS_TARGETS" ]; then
 	ARCH_FLAGS="${ARCH_FLAGS} -O3"
 	[ "$PLATFORM" = "linux" ] && ARCH_FLAGS="${ARCH_FLAGS} -pipe"
 
+	# GCC 16 introduces new module TU-local diagnostics that break current module units
+	# with the project's -Werror defaults. Keep them as warnings for GCC builds.
+	if [ "$COMPILER" = "gcc" ]; then
+		ARCH_FLAGS="${ARCH_FLAGS} -Wno-error=template-names-tu-local -Wno-error=expose-global-module-tu-local"
+	fi
+
 	# For PGO, we fetch profdata and add it to our flags
 	if [ "$PGO_TARGET" = "pgo" ]; then
 		echo "Creating PGO build"
