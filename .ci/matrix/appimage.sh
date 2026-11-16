@@ -36,9 +36,10 @@ compiler() {
 }
 
 gcc=$(compiler gcc standard)
+clang=$(compiler clang standard)
 pgo=$(compiler clang pgo)
 
-compilers="[$gcc"
+compilers="[$clang"
 
 if use_extra; then
 	compilers="$compilers, $pgo"

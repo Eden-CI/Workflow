@@ -26,13 +26,14 @@ target() {
 
 # TODO(crueter): dedupe in some way?
 amd_gcc="$(target "$AMD64" "$GCC")"
+amd_clang="$(target "$AMD64" "$CLANG")"
 amd_pgo="$(target "$AMD64" "$PGO")"
 ally_gcc="$(target "$ALLY" "$GCC")"
 ally_pgo="$(target "$ALLY" "$PGO")"
 arm_clang="$(target "$ARM64" "$CLANG")"
 arm_pgo="$(target "$ARM64" "$PGO")"
 
-MATRIX="[${amd_gcc}, ${arm_clang}"
+MATRIX="[${amd_clang}, ${arm_clang}"
 if [ "$DEVEL" != "true" ] || [ "${FORCE_PGO}" = "true" ]; then
 	MATRIX="$MATRIX, ${amd_pgo}, ${ally_gcc}, ${ally_pgo}, ${arm_pgo}"
 fi

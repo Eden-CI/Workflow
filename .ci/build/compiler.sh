@@ -3,6 +3,11 @@
 # SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 # SPDX-License-Identifier: GPL-3.0-or-later
 
+# scarletnx only works on clang (android is also clang)
+if [ "$COMPILER" = clang ] || [ "$PLATFORM" = android ]; then
+	COMPILER_FLAGS+=(-DENABLE_SCARLETNX=ON)
+fi
+
 # compiler handling
 if [ "$COMPILER" = "clang" ]; then
 	case "$PLATFORM" in
@@ -16,10 +21,6 @@ if [ "$COMPILER" = "clang" ]; then
 		CLANGPP="${prefix}/clang++"
 		# maybe not needed
 		COMPILER_FLAGS+=(-DCMAKE_OSX_SYSROOT="$(xcrun --show-sdk-path)")
-		;;
-	win)
-		CLANG=clang-cl
-		CLANGPP=clang-cl
 		;;
 	*) ;;
 	esac
