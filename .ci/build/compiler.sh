@@ -5,6 +5,13 @@
 
 # scarletnx only works on clang (android is also clang)
 if [ "$COMPILER" = clang ] || [ "$PLATFORM" = android ]; then
+	if [ "$PLATFORM" = msys ]; then
+		llvm-config --libs
+		llvm-config --prefix
+
+		ls -l /$MYSTEM/lib/libLLVM*
+	fi
+
 	COMPILER_FLAGS+=(-DENABLE_SCARLETNX=ON)
 fi
 
@@ -21,7 +28,7 @@ if [ "$COMPILER" = "clang" ]; then
 		CLANGPP="${prefix}/clang++"
 		# maybe not needed
 		COMPILER_FLAGS+=(-DCMAKE_OSX_SYSROOT="$(xcrun --show-sdk-path)")
-		COMPILER_FLAGS+=("$(brew --prefix llvm)/bin/llvm-config")
+		COMPILER_FLAGS+=(-DSNX_LLVM_CONFIG="$(brew --prefix llvm)/bin/llvm-config")
 		;;
 	*) ;;
 	esac
