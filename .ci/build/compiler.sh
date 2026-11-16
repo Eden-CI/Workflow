@@ -21,6 +21,7 @@ if [ "$COMPILER" = "clang" ]; then
 		CLANGPP="${prefix}/clang++"
 		# maybe not needed
 		COMPILER_FLAGS+=(-DCMAKE_OSX_SYSROOT="$(xcrun --show-sdk-path)")
+		COMPILER_FLAGS+=("$(brew --prefix llvm)/bin/llvm-config")
 		;;
 	*) ;;
 	esac
