@@ -102,6 +102,11 @@ elif [ -n "$SUPPORTS_TARGETS" ]; then
 		command -v cygpath >/dev/null 2>&1 && PROFDATA="$(cygpath -m "$PROFDATA")"
 		ARCH_FLAGS="${ARCH_FLAGS} -fprofile-use=$PROFDATA -Wno-backend-plugin -Wno-profile-instr-unprofiled -Wno-profile-instr-out-of-date"
 	fi
+
+	# kill yourself
+	if [ "$TARGET" = aarch64 ] && [ "$COMPILER" = clang ] && [ "$PLATFORM" = linux ]; then
+		ARCH_CMAKE+=(-DCMAKE_CXX_STDLIB_MODULES_JSON=/usr/lib/libstdc++.modules.json)
+	fi
 fi
 
 if [ "$STEAMDECK" = "true" ]; then
