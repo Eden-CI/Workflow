@@ -3,13 +3,13 @@
 # SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-# scarletnx only works on clang (android is also clang)
-if [ "$COMPILER" = clang ] || [ "$PLATFORM" = android ]; then
+# scarletnx only works on clang
+if [ "$COMPILER" = clang ]; then
 	if [ "$PLATFORM" = msys ]; then
 		llvm-config --libs
 		llvm-config --prefix
 
-		ls -l /$MYSTEM/lib/libLLVM*
+		ls -l /"$MSYSTEM"/lib/libLLVM*
 	fi
 
 	COMPILER_FLAGS+=(-DENABLE_SCARLETNX=ON)
